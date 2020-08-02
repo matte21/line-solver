@@ -225,10 +225,10 @@ while samples_collected < options.samples && cur_time <= options.timespan(2)
     stateCell = newStateCell{enabled_sync{firing_ctr}};
     if options.verbose
         if samples_collected == 1e2
-            fprintf(1,sprintf('\nSSA samples: %6d',samples_collected));
+            fprintf(1,sprintf('SSA samples: %6d',samples_collected));
         elseif options.verbose == 2
             if samples_collected == 0
-                fprintf(1,sprintf('\nSSA samples: %6d',samples_collected));
+                fprintf(1,sprintf('SSA samples: %6d',samples_collected));
             else
                 fprintf(1,sprintf('\b\b\b\b\b\b%6d',samples_collected));
             end
@@ -276,5 +276,8 @@ for ind=1:qn.nnodes
     end
 end
 pi = pi/sum(pi);
+if options.verbose
+    fprintf(1,'\n');
+end
 %qn.nservers = init_nserver; % restore Inf at delay nodes
 end

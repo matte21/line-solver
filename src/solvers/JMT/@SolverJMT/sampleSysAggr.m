@@ -37,7 +37,7 @@ modelCopy.linkAndLog(Plinked, isNodeLogged, logpath);
 options = self.getOptions; options.samples = numEvents;
 solverjmt = SolverJMT(modelCopy, options);
 solverjmt.maxEvents = numEvents;
-solverjmt.runAnalysis(); % log data
+solverjmt.run(); % log data
 logData = SolverJMT.parseLogs(modelCopy, isNodeLogged, Metric.QLen);
 
 % from here convert from nodes in logData to stations

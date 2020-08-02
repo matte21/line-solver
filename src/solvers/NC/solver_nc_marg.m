@@ -173,7 +173,7 @@ runtime = toc(Tstart);
 Pr(isnan(Pr))=0;
 lG = log(G);
 if options.verbose > 0
-    fprintf(1,'\nNormalizing constant (NC) analysis completed in %f sec\n',runtime);
+    fprintf(1,'Normalizing constant (NC) analysis completed in %f sec\n',runtime);
 end
 return
 end

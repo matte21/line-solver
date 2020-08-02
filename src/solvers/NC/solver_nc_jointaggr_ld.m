@@ -1,4 +1,4 @@
-tinfunction [Pr,G,runtime] = solver_nc_jointaggr_ld(qn, options)
+function [Pr,G,runtime] = solver_nc_jointaggr_ld(qn, options)
 % [PR,G,RUNTIME] = SOLVER_NC_JOINTAGGR(QN, OPTIONS)
 
 % Copyright (c) 2012-2020, Imperial College London
@@ -95,7 +95,7 @@ runtime = toc(Tstart);
 
 lG = log(G);
 if options.verbose > 0
-    fprintf(1,'\nNormalizing constant (NC) analysis completed in %f sec\n',runtime);
+    fprintf(1,'Normalizing constant (NC) analysis completed in %f sec\n',runtime);
 end
 return
 end

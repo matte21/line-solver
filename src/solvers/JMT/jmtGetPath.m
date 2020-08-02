@@ -10,21 +10,21 @@ if isempty(jmtPath)
     jmtSolverFolder = fileparts(mfilename('fullpath'));
     m = input('Do you want to continue (download approx. 30MB), Y/N [N]: ','s');
     if m=='Y'
-        fprintf(1,'\nDownload started, please be patient this may take several minutes.')
+        fprintf(1,'Download started, please be patient this may take several minutes.\n')
         if exist('websave')==2
             if ispc
                 outfilename = websave([jmtSolverFolder,'\JMT.jar'],'http://jmt.sourceforge.net/latest/JMT.jar');
             else
                 outfilename = websave([jmtSolverFolder,'/JMT.jar'],'http://jmt.sourceforge.net/latest/JMT.jar');
             end
-            fprintf(1,'\nDownload completed. JMT jar now located at: %s',outfilename);
+            fprintf(1,'Download completed. JMT jar now located at: %s\n',outfilename);
         elseif isoctave
             if ispc
                 outfilename = urlwrite('http://jmt.sourceforge.net/latest/JMT.jar', [jmtSolverFolder,'\JMT.jar']);
             else
                 outfilename = urlwrite('http://jmt.sourceforge.net/latest/JMT.jar', [jmtSolverFolder,'/JMT.jar']);
             end
-            fprintf(1,'\nDownload completed. JMT jar now located at: %s',outfilename);
+            fprintf(1,'Download completed. JMT jar now located at: %s\n',outfilename);
         else
             error('The MATLAB version is too old and JMT cannot be downloaded automatically. Please download http://jmt.sourceforge.net/latest/JMT.jar and put it under "bin\solvers\JMT\".\n');
         end

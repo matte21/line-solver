@@ -81,11 +81,7 @@ classdef MMPP2 < MarkovModulated
             id = 1 + 2*(lambda0-lambda1)^2*sigma0*sigma1/(sigma0+sigma1)^2/(lambda0*sigma1+lambda1*sigma0);
         end
         
-        function MAP = getRepresentation(self)
-            MAP = self.getProcess();
-        end
-        
-        function PH = getPH(self)
+        function PH = getRepresentation(self)
             % PH = GETREPRESENTATION()
             PH = self.getProcess();
         end

@@ -145,8 +145,8 @@ end
 
 runtime = toc(Tstart);
 
-if options.verbose > 0
-    fprintf(1,'\nNC analysis completed in %f sec\n',runtime);
-end
+%if options.verbose > 0
+%    fprintf(1,'Normalizing constant (NC) analysis completed in %f sec\n',runtime);
+%end
 return
 end

@@ -93,7 +93,7 @@ for i = 1:qn.nstations
                                 Tfull_t{i,k} = Tfull_t{i,k} + ymean_t(:,idx+f)*Lambda{i,k}(f)*Pi{i,k}(f);
                                 Xservice{i,k}(f) = Qfull(idx+f)*Lambda{i,k}(f);
                             end
-                        case {SchedStrategy.INF, SchedStrategy.PS, SchedStrategy.DPS}                        
+                        case {SchedStrategy.INF, SchedStrategy.PS, SchedStrategy.DPS}
                             Tfull(i,k) = Tfull(i,k) + Qfull(idx+f)*Lambda{i,k}(f)*Pi{i,k}(f)/xi*min(xi,qn.nservers(i));
                             Tfull_t{i,k} = Tfull_t{i,k} + ymean_t(:,idx+f)*Lambda{i,k}(f)*Pi{i,k}(f)./xi_t.*min(xi_t,qn.nservers(i));
                             Xservice{i,k}(f) = Qfull(idx+f)*Lambda{i,k}(f)/xi*min(xi,qn.nservers(i));
@@ -180,7 +180,7 @@ for i =1:M
         switch qn.sched(i)
             case SchedStrategy.FCFS
                 switch options.method
-                    case 'statedep'                    
+                    case 'statedep'
                         Tfull(i,k) = sum(Xservice{i,k}(idx));
                 end
         end

@@ -7,7 +7,7 @@ function self = link(self, P)
 isReset = false;
 if ~isempty(self.qn)
     isReset = true;
-    self.resetNetwork; % remove artificial class switch nodes
+    self.resetNetwork;
 end
 R = self.getNumberOfClasses;
 M = self.getNumberOfNodes;
@@ -231,10 +231,8 @@ for i=1:M
             % re-route
             for r=1:R
                 for s=1:R
-                    if P{r,s}(i,j)>0
-                        P{r,r}(i,csid(i,j)) = P{r,r}(i,csid(i,j)) + P{r,s}(i,j);
-                        P{r,s}(i,j) = 0;
-                    end
+                    P{r,r}(i,csid(i,j)) = P{r,r}(i,csid(i,j))+ P{r,s}(i,j);
+                    P{r,s}(i,j) = 0;
                     P{s,s}(csid(i,j),j) = 1;
                 end
             end
@@ -272,6 +270,13 @@ if any(isAboveOne)
 end
 
 if isReset
+    %%re-instate all of this if re-instating refreshChains
+    %nodetypes = self.getNodeTypes();
+    %wantVisits = true;
+    %if any(nodetypes == NodeType.Cache)
+    %    wantVisits = false;
+    %end
+    %self.refreshChains(wantVisits);
     self.refreshStruct; % without this exception with linkAndLog
 end
 

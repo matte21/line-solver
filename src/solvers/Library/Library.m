@@ -22,7 +22,7 @@ classdef Library < NetworkSolver
             T0=tic;
             options = self.getOptions;
             
-            if self.enableChecks && ~self.supports(self.model)
+            if ~self.supports(self.model)
                 %                if options.verbose
                 error('Line:FeatureNotSupportedBySolver','This model contains features not supported by the solver.');
                 %                end

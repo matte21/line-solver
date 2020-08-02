@@ -3,7 +3,7 @@ function lNormConst = getProbNormConstAggr(self)
 
 switch self.options.method
     case {'jmva','jmva.recal','jmva.comom','jmva.ls'}
-        self.runAnalysis();
+        self.run();
         lNormConst = self.result.Prob.logNormConstAggr;
     otherwise
         lNormConst = NaN; %#ok<NASGU>

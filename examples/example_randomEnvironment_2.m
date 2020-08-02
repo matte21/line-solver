@@ -4,7 +4,7 @@ M = 3;
 E = 4;
 envModel = Env('MyEnv');
 envName = {'Stage1', 'Stage2', 'Stage3', 'Stage4'};
-envType = {'UP', 'DOWN', 'FAST' 'SLOW'};
+envType = {Semantics.UP, Semantics.DOWN, Semantics.FAST, Semantics.SLOW};
 
 rate = ones(M,E); rate(M,1:E)=(1:E); rate(1,1:E)=(E:-1:1);
 
@@ -31,7 +31,6 @@ end
 fprintf(1,'The metasolver considers an environment with 4 stages and a queueing network with 3 stations.\n')
 fprintf(1,'Every time the stage changes, the queueing network will modify the service rates of the stations.\n')
 
-envModel.getStageTable
 
 options = Solver.defaultOptions;
 options.timespan = [0,Inf];
@@ -45,4 +44,3 @@ soptions.verbose = 0;
 envSolver = SolverEnv(envModel, @(model) SolverFluid(model, soptions), options);
 [QN,UN,TN] = envSolver.getAvg();
 AvgTable = envSolver.getAvgTable()
-AvgTables = envSolver.getEnsembleAvgTables()

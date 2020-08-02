@@ -129,8 +129,8 @@ classdef EnsembleSolver < Solver
             E = length(self.ensemble);
         end
         
-        function [runtime, sruntime, results] = iterate(self, options)
-            % [RUNTIME, SRUNTIME, RESULTS] = ITERATE()
+        function [runtime, sruntime, results] = run(self)
+            % [RUNTIME, SRUNTIME, RESULTS] = RUN()
             T0 = tic;
             it = 0;
             options = self.options;
@@ -143,7 +143,7 @@ classdef EnsembleSolver < Solver
                 it = it + 1;
                 self.pre(it);
                 sruntime(it,1:E) = 0;
-                T1=tic;
+                T0=tic;
                 switch options.method
                     case {'default','serial'}
                         for e = self.list(it)
@@ -158,35 +158,25 @@ classdef EnsembleSolver < Solver
                 end
                 self.results = results;
                 if options.verbose
-                    Tsolve(it)=toc(T1);
-                    Ttot=toc(T0);
-                    if it==1
-                        fprintf('Iter %2d. ',it);
+                    Tpproc=toc(T0);
+                    if it>1
+                        fprintf('\nIter %d. ',it);
                     else
-                        fprintf('\nIter %2d. ',it);
+                        fprintf('Iter %d. ',it);
                     end
+                    fprintf('Runtime: %f seconds.',Tpproc);
+                    T0=tic;
+                    fprintf(' Postprocessing: ');
                 end
-                T2=tic;
                 self.post(it);
-                Tsynch(it)=toc(T2);
+                Tpproc=toc(T0);
                 if options.verbose
-                    fprintf('\nAnalyze: %.3fs. Postprocessing: %.3fs. Runtime: %.3fs. ',Tsolve(it),Tsynch(it),Ttot);
+                    fprintf('%f seconds. ',Tpproc);
                 end
             end
             self.finish();
             runtime = toc(T0);
-            if options.verbose
-                fprintf('\nSummary: Analyze avg: %.3fs. Postprocessing avg: %.3fs. Cumtime: %.3fs. ',mean(Tsolve),mean(Tsynch),runtime);
-            end
-        end
-        
-        function AvgTables = getEnsembleAvgTables(self)
-            E = self.getNumberOfModels();
-            AvgTables = cell(1,E);
-            for e=1:E
-                AvgTables{1,e} = self.solvers{e}.getAvgTable();
-            end
-        end
+        end       
     end
     
     methods (Static)

@@ -57,9 +57,7 @@ switch solverName
         options = EnsembleSolver.defaultOptions();
         options.timespan = [Inf,Inf];
         options.keep = false;
-        options.verbose = true;
-        options.iter_tol = 5e-2;
-        options.iter_max = 100;
+        options.verbose = 2;
     case 'LQNS'
         options = EnsembleSolver.defaultOptions();
         options.timespan = [Inf,Inf];
@@ -67,7 +65,7 @@ switch solverName
     case 'MAM'
         options.timespan = [Inf,Inf];
     case 'NC'        
-        options.samples = 1e5;
+        options.samples = 1e6;
         options.timespan = [Inf,Inf];
     case 'SSA'
         options.timespan = [0,Inf];

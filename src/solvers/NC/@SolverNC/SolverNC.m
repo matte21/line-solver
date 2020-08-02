@@ -10,14 +10,9 @@ classdef SolverNC < NetworkSolver
             
             self@NetworkSolver(model, mfilename);
             self.setOptions(Solver.parseOptions(varargin, self.defaultOptions));
-            persistent isNCLibLoaded;
-            if isempty(isNCLibLoaded)
-                javaaddpath(which('pfqn_nclib.jar'));
-                isNCLibLoaded = true;
-            end
         end
         
-        runtime = runAnalysis(self, options)
+        runtime = run(self, options)
         Pnir = getProb(self, node, state)
         Pnir = getProbAggr(self, node, state_a)
         Pn   = getProbSys(self)        
@@ -62,7 +57,8 @@ classdef SolverNC < NetworkSolver
         
         function options = defaultOptions()
             % OPTIONS = DEFAULTOPTIONS()
-            options = lineDefaults('NC');            
+            options = lineDefaults('NC');
+            options.samples = 1e5;
         end
     end
 end

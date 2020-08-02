@@ -110,6 +110,7 @@ classdef Queue < Station
             if ~exist('weight','var')
                 weight=1.0;
             end
+            
             resetInitState = false;
             if length(self.server.serviceProcess) >= class.index
                 if length(self.server.serviceProcess{1,class.index})>= 3
@@ -118,7 +119,7 @@ classdef Queue < Station
             end
             
             self.serviceProcess{class.index} = distribution;
-            self.server.serviceProcess{1, class.index}{2} = ServiceStrategy.LI;                        
+            self.server.serviceProcess{1, class.index}{2} = ServiceStrategy.LI;
             if distribution.isImmediate()
                 self.server.serviceProcess{1, class.index}{3} = Immediate();
             else

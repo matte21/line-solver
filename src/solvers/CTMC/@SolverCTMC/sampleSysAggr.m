@@ -3,7 +3,7 @@ function tranSysState = sampleSysAggr(self, numSamples)
 options = self.getOptions;
 options.force = true;
 if isempty(self.result) || ~isfield(self.result,'infGen')
-    self.runAnalysis();
+    self.run();
 end
 [infGen, eventFilt] = self.getGenerator();
 stateSpace = self.getStateSpace();

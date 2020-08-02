@@ -42,7 +42,7 @@ end
 if options.keep
     fname = tempname;
     save([fname,'.mat'],'InfGen','StateSpace','StateSpaceAggr','EventFiltration')
-    fprintf(1,'\nCTMC infinitesimal generator and state space saved in: ');
+    fprintf(1,'CTMC infinitesimal generator and state space saved in: ');
     disp([fname, '.mat'])
 end
 
@@ -121,6 +121,6 @@ end
 runtime = toc(Tstart);
 
 if options.verbose > 0
-    fprintf(1,'\nCTMC analysis completed in %f sec\n',runtime);
+    fprintf(1,'CTMC analysis completed in %f sec\n',runtime);
 end
 end

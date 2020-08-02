@@ -25,7 +25,7 @@ classdef NetworkSolver < Solver
             self.handles.U = [];
             self.handles.W = [];
             self.handles.T = [];
-            if ~model.hasStruct()
+            if model.hasStruct()
                 %self.model.sanitize;
                 self.model.refreshStruct(); % force model to refresh
             end
@@ -232,7 +232,7 @@ classdef NetworkSolver < Solver
                 catch
                     solvername = self.result.solver(7:end);
                 end
-                fprintf(1,'\n%s analysis (method: %s) completed in %f sec\n',solvername,self.result.Avg.method,runtime);
+                fprintf(1,'%s analysis (method: %s) completed in %f seconds.\n',solvername,self.result.Avg.method,runtime);
             end
         end
         

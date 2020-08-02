@@ -57,7 +57,7 @@ while (isfinite(timespan(2)) && T < timespan(2)) || (goon && iter < iter_max)
             [t_iter, ymean_t_iter] = solveode(ode_h, trange, y0, odeopt, options);
         end
     catch me
-        fprintf(1,'\nThe initial point is invalid, Fluid solver switching to default initialization.');
+        fprintf(1,'The initial point is invalid, Fluid solver switching to default initialization.\n');
         odeopt = odeset('AbsTol', tol, 'RelTol', tol, 'NonNegative', 1:length(ydefault));
         [t_iter, ymean_t_iter] = solveode(ode_h, trange, ydefault, odeopt, options);
     end

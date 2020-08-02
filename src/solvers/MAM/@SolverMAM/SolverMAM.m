@@ -12,7 +12,7 @@ classdef SolverMAM < NetworkSolver
             self.setOptions(Solver.parseOptions(varargin, self.defaultOptions));
         end
         
-        runtime = runAnalysis(self, options);
+        runtime = run(self, options);
         RD = getCdfRespT(self, R);
     end
     

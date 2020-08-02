@@ -17,7 +17,7 @@ end
 [SS,SSh,qnc] = State.spaceGenerator(qn.copy, options.cutoff, options);
 qn.space = qnc.space;
 if options.verbose
-    fprintf(1,'\nCTMC state space size: %d states. ',size(SS,1));
+    fprintf(1,'State space size: %d states.\n',size(SS,1));
 end
 if ~isfield(options, 'hide_immediate')
     options.hide_immediate = true;

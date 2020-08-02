@@ -21,7 +21,6 @@ for r=1:qn.nclasses
 end
 cdfmodel = self.model.copy;
 cdfmodel.resetNetwork;
-cdfmodel.reset;
 cdfmodel.initFromMarginal(n);
 isNodeClassLogged = false(cdfmodel.getNumberOfNodes, cdfmodel.getNumberOfClasses);
 for i= 1:cdfmodel.getNumberOfStations

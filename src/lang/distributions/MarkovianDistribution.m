@@ -16,8 +16,7 @@ classdef MarkovianDistribution < ContinuousDistrib
     end
     
     properties (Hidden)
-        invSubgenerator;
-        representation;
+        invSubgenerator; 
     end
     
     methods
@@ -38,17 +37,12 @@ classdef MarkovianDistribution < ContinuousDistrib
         end
         
         function MEAN = getMean(self)
-            % MEAN = GETMEAN()
-            if ~isempty(self.mean)
-                MEAN = self.mean;
+            % MEAN = GETMEAN()            
+            if isnan(self.getRepresentation{1})
+                MEAN = NaN;
             else
-                if isnan(self.getRepresentation{1})
-                    MEAN = NaN;
-                else
-                    MEAN = map_mean(self.getRepresentation);
-                end
-                self.mean = MEAN;
-            end
+                MEAN = map_mean(self.getRepresentation);
+            end                
         end
         
         function SCV = getSCV(self)
@@ -80,29 +74,29 @@ classdef MarkovianDistribution < ContinuousDistrib
         end
         
         function alpha = getInitProb(self)
-            % ALPHA = GETINITPROB()
+            % ALPHA = GETINITPROB()            
             aph = self.getRepresentation;
             alpha = map_pie(aph);
         end
         
         function T = getSubgenerator(self)
-            % T = GETSUBGENERATOR()
+            % T = GETSUBGENERATOR()            
             
             % Get generator
             aph = self.getRepresentation;
             T = aph{1};
-        end
+        end        
         
         function invT = getInverseSubgenerator(self)
-            % T = GETINVERSESUBGENERATOR()
-            
+            % T = GETINVERSESUBGENERATOR()            
+           
             if isempty(self.invSubgenerator)
                 % Get subgenerator
                 T = self.getSubgenerator;
                 self.invSubgenerator = inv(T);
             end
             
-            invT = self.invSubgenerator;
+            invT = self.invSubgenerator;            
         end
         
         
@@ -182,18 +176,8 @@ classdef MarkovianDistribution < ContinuousDistrib
         function PH = getRepresentation(self)
             % PH = GETREPRESENTATION()
             
-            if ~isempty(self.representation)
-                PH = self.representation;
-            else
-                try
-                    % Call subclass method
-                    PH = self.getPH;
-                    self.representation = PH;
-                catch
-                    % Return the renewal process associated to the distribution
-                    error('Line:AbstractMethodCall','An abstract method was called. The function needs to be overridden by a subclass.');                    
-                end
-            end
+            % Return the renewal process associated to the distribution
+            error('Line:AbstractMethodCall','An abstract method was called. The function needs to be overridden by a subclass.');           
         end
         
         function L = evalLST(self, s)

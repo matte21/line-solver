@@ -55,7 +55,7 @@ classdef Erlang < MarkovianDistribution
             end
         end
         
-        function PH = getPH(self)
+        function PH = getRepresentation(self)
             % PH = GETREPRESENTATION()
             
             % Return the renewal process associated to the distribution

@@ -76,7 +76,7 @@ for i = 1:qn.nstations
                             [t_iter, ymean_t_iter] = solveode(ode_h_c, trange, y0_c, odeopt, options);
                         end
                     catch me
-                        fprintf(1,'\nODE solver failed. Fluid solver switching to default initialization.');
+                        fprintf(1,'ODE solver failed. Fluid solver switching to default initialization.\n');
                         odeopt = odeset('AbsTol', tol, 'RelTol', tol, 'NonNegative', 1:length(y0_c));
                         try
                             [t_iter, ymean_t_iter] = solveode(ode_h_c, trange, y0_c, odeopt, options);

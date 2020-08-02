@@ -172,7 +172,7 @@
 
 %             %            try
 %                 options = self.getOptions;
-%             runtime = self.runAnalysis();
+%             runtime = self.run();
 %             results = self.getResults();
 %             %            catch me
 %             %                error(getReport(me));

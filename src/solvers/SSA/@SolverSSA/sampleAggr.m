@@ -13,7 +13,7 @@ switch options.method
     case {'default','serial'}
         options.samples = numSamples;
         options.force = true;
-        [~, tranSystemState, event] = self.runAnalysis(options);
+        [~, tranSystemState, event] = self.run(options);
         qn = self.model.getStruct;
         isf = self.model.getStatefulNodeIndex(node);
         [~,nir]=State.toMarginal(qn,qn.statefulToNode(isf),tranSystemState{1+isf});

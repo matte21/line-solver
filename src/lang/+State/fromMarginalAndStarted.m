@@ -10,15 +10,15 @@ end
 if isa(qn,'Network')
     qn = qn.getStruct();
 end
+% ind: node index
+ist = qn.nodeToStation(ind);
+isf = qn.nodeToStateful(ind);			 					
 % generate one initial state such that the marginal queue-lengths are as in vector n
 % n(r): number of jobs at the station in class r
 % s(r): jobs of class r that are running
 R = qn.nclasses;
 S = qn.nservers;
 
-% ind: node index
-ist = qn.nodeToStation(ind);
-%isf = qn.nodeToStateful(ind);
 
 K = zeros(1,R);
 for r=1:R
@@ -30,13 +30,13 @@ for r=1:R
 end
 state = [];
 space = [];
-if any(n>qn.classcap(ist,:))
-    exceeded = n>qn.classcap(ist,:);
+if any(n>qn.classcap(isf,:))
+    exceeded = n>qn.classcap(isf,:);
     for r=find(exceeded)
-        if ~isempty(qn.proc) && ~isempty(qn.proc{ist,r}) && any(any(isnan(qn.proc{ist,r}{1})))
-            warning('State vector at station %d (n=%s) exceeds the class capacity (classcap=%s). Some service classes are disabled.\n',ist,mat2str(n(ist,:)),mat2str(qn.classcap(ist,:)));
+        if ~isempty(qn.proc) && ~isempty(qn.proc{isf,r}) && any(any(isnan(qn.proc{isf,r}{1})))
+            warning('State vector at station %d (n=%s) exceeds the class capacity (classcap=%s). Some service classes are disabled.\n',ist,mat2str(n(isf,:)),mat2str(qn.classcap(isf,:)));
         else
-            warning('State vector at station %d (n=%s) exceeds the class capacity (classcap=%s).\n',ist,mat2str(n(ist,:)),mat2str(qn.classcap(ist,:)));
+            warning('State vector at station %d (n=%s) exceeds the class capacity (classcap=%s).\n',ist,mat2str(n(isf,:)),mat2str(qn.classcap(isf,:)));
         end
     end
     return
@@ -117,8 +117,14 @@ switch qn.nodetype(ind)
                 vi = [];
                 for r=1:R
                     if n(r)>0
-                        vi=[vi, r*ones(1,n(r))];
+                        vi=[vi, r*ones(1,n(r)-s(r))];
                     end
+                end
+                
+                % mi_srv: class of jobs running in the server of i
+                mi_srv = [];
+                for r=1:R
+                    mi_srv = [mi_srv, r*ones(1,s(r))];
                 end
                 
                 % gen permutation of their positions in the fcfs buffer
@@ -135,11 +141,7 @@ switch qn.nodetype(ind)
                         mi_buf = 0;
                     end
                 end
-                % mi_srv: class of jobs running in the server of i
-                mi_srv = [];
-                for r=1:R
-                    mi_srv = [mi_srv, r*ones(1,s(r))];
-                end
+                
                 % si: number of class r jobs that are running
                 si = s;
                 %si = unique(si,'rows');
@@ -174,7 +176,7 @@ switch qn.nodetype(ind)
                 % IS
                 
                 % called to initial models with SJF and LJF
-                warning('The scheduling policy does not admit a discrete state space.\n');
+                error('The scheduling policy does not admit a discrete state space.\n');
         end
     case NodeType.Cache
         switch qn.sched(ist)

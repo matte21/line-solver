@@ -43,8 +43,8 @@ R = ch.accost;
 pij = [];
 gamma = mucache_gamma_lp(lambda,R);
 switch options.method
-    case 'exact'giulre
-        [pij] = mucache_prob_erec(gamma, m);
+    case 'exact'
+        [pij] = mucache_prob_erec(gamma, m)
         %         [pij,~] = mucache_sim_rr(lambda,m,R,options.samples);
         missRate = zeros(1,u);
         for v=1:u
@@ -57,7 +57,7 @@ switch options.method
 end
 
 for r = 1:qn.nclasses
-    if length(ch.hitclass)>=r && ch.missclass(r)>0 && ch.hitclass(r)>0
+    if length(ch.hitclass)>=r & ch.missclass(r)>0 & ch.hitclass(r)>0
         XN(ch.missclass(r)) = XN(ch.missclass(r)) + missRate(r);
         XN(ch.hitclass(r)) = XN(ch.hitclass(r)) + (sourceRate(r) - missRate(r));
     end

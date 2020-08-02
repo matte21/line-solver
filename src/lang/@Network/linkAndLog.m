@@ -5,8 +5,6 @@ function [loggerBefore,loggerAfter] = linkAndLog(self, P, isNodeLogged, logPath)
 % Copyright (c) 2012-2020, Imperial College London
 % All rights reserved.
 
-self.resetStruct; % important to regenerate the qn with the loggers
-
 if ~isempty(self.links)
     warning('Network topology already instantiated. Calling resetNetwork automatically before adding loggers.');
     self.resetNetwork;

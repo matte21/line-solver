@@ -107,7 +107,7 @@ classdef Network < Model
     methods (Access=public)
         
         function bool = hasStruct(self)
-            bool = ~isempty(self.qn);
+            bool = isempty(self.qn);
         end
         
         %Constructor
@@ -212,10 +212,6 @@ classdef Network < Model
             end
         end
         
-        function resetStruct(self)
-            self.qn = [];
-        end
-        
         function resetModel(self, resetState)
             % RESETMODEL(RESETSTATE)
             %
@@ -231,7 +227,6 @@ classdef Network < Model
                 self.nodes{ind}.reset();
             end
             self.stationidxs = [];
-            % self.resetNetwork;
             %            self.sourceidx = [];
             %            self.sinkidx = [];
         end
@@ -311,15 +306,15 @@ classdef Network < Model
             
             % The commented block causes issues with Logger nodes
             % see e.g., getting_started_ex7
-            if ~isempty(self.qn)
-                nodeNames = self.qn.nodenames;
-            else
+            %if ~isempty(self.qn)
+            %    nodeNames = self.qn.nodenames;
+            %else
                 M = getNumberOfNodes(self);
                 nodeNames = cell(M,1);
                 for i=1:M
                     nodeNames{i,1} = self.nodes{i}.name;
                 end
-            end
+            %end
         end
         
         function nodeTypes = getNodeTypes(self)
@@ -426,13 +421,9 @@ classdef Network < Model
         function stationnames = getStationNames(self)
             % STATIONNAMES = GETSTATIONNAMES()
             
-            if self.hasStruct
-                stationnames = {self.qn.nodenames{self.qn.isstation}}';
-            else
-                stationnames = {};
-                for i=self.getIndexStations
-                    stationnames{end+1,1} = self.nodes{i}.name;
-                end
+            stationnames = {};
+            for i=self.getIndexStations
+                stationnames{end+1,1} = self.nodes{i}.name;
             end
         end
         
@@ -514,10 +505,6 @@ classdef Network < Model
             for i=1:self.getNumberOfNodes
                 self.nodes{i}.summary();
             end
-        end
-        
-        function [D,Z] = getDemands(self)
-            [~,D,~,Z,~,~]=self.getProductFormParameters;
         end
         
         function [lambda,D,N,Z,mu,S]= getProductFormParameters(self)
@@ -1095,7 +1082,7 @@ classdef Network < Model
                                 else
                                     pr = num2str(Pnodes((i-1)*K+r,(j-1)*K+s),'%f');
                                 end
-                                fprintf('\n%s [%s] => %s [%s] : Pr=%s',node_names{i}, classnames{r}, node_names{j}, classnames{s}, pr);
+                                fprintf('%s [%s] => %s [%s] : Pr=%s\n',node_names{i}, classnames{r}, node_names{j}, classnames{s}, pr);
                             end
                         end
                     end
@@ -1219,7 +1206,9 @@ classdef Network < Model
         function bool = hasFCFS(self)
             % BOOL = HASFCFS()
             
-            bool = any(self.getStruct.sched==SchedStrategy.FCFS);
+            bool = false;
+            i = findstring(self.getStruct.sched,SchedStrategy.FCFS);
+            if i > 0, bool = true; end
         end
         
         function bool = hasHomogeneousScheduling(self, strategy)
@@ -1231,73 +1220,95 @@ classdef Network < Model
         function bool = hasDPS(self)
             % BOOL = HASDPS()
             
-            bool = any(self.getStruct.sched==SchedStrategy.DPS);
+            bool = false;
+            i = findstring(self.getStruct.sched,SchedStrategy.DPS);
+            if i > 0, bool = true; end
         end
         
         function bool = hasGPS(self)
             % BOOL = HASGPS()
             
-            bool = any(self.getStruct.sched==SchedStrategy.GPS);
+            bool = false;
+            i = findstring(self.getStruct.sched,SchedStrategy.GPS);
+            if i > 0, bool = true; end
         end
         
         function bool = hasINF(self)
             % BOOL = HASINF()
             
-            bool = any(self.getStruct.sched==SchedStrategy.INF);
+            bool = false;
+            i = findstring(self.getStruct.sched,SchedStrategy.INF);
+            if i > 0, bool = true; end
         end
         
         function bool = hasPS(self)
             % BOOL = HASPS()
             
-            bool = any(self.getStruct.sched==SchedStrategy.PS);
+            bool = false;
+            i = findstring(self.getStruct.sched,SchedStrategy.PS);
+            if i > 0, bool = true; end
         end
         
         function bool = hasRAND(self)
             % BOOL = HASRAND()
             
-            bool = any(self.getStruct.sched==SchedStrategy.SIRO);
+            bool = false;
+            i = findstring(self.getStruct.sched,SchedStrategy.SIRO);
+            if i > 0, bool = true; end
         end
         
         function bool = hasHOL(self)
             % BOOL = HASHOL()
             
-            bool = any(self.getStruct.sched==SchedStrategy.HOL);
+            bool = false;
+            i = findstring(self.getStruct.sched,SchedStrategy.HOL);
+            if i > 0, bool = true; end
         end
         
         function bool = hasLCFS(self)
             % BOOL = HASLCFS()
             
-            bool = any(self.getStruct.sched==SchedStrategy.LCFS);
+            bool = false;
+            i = findstring(self.getStruct.sched,SchedStrategy.LCFS);
+            if i > 0, bool = true; end
         end
         
         function bool = hasSEPT(self)
             % BOOL = HASSEPT()
             
-            bool = any(self.getStruct.sched==SchedStrategy.SEPT);
+            bool = false;
+            i = findstring(self.getStruct.sched,SchedStrategy.SEPT);
+            if i > 0, bool = true; end
         end
         
         function bool = hasLEPT(self)
             % BOOL = HASLEPT()
             
-            bool = any(self.getStruct.sched==SchedStrategy.LEPT);
+            bool = false;
+            i = findstring(self.getStruct.sched,SchedStrategy.LEPT);
+            if i > 0, bool = true; end
         end
         
         function bool = hasSJF(self)
             % BOOL = HASSJF()
             
-            bool = any(self.getStruct.sched==SchedStrategy.SJF);
+            bool = false;
+            i = findstring(self.getStruct.sched,SchedStrategy.SJF);
+            if i > 0, bool = true; end
         end
         
         function bool = hasLJF(self)
             % BOOL = HASLJF()
             
-            bool = any(self.getStruct.sched==SchedStrategy.LJF);
+            bool = false;
+            i = findstring(self.getStruct.sched,SchedStrategy.LJF);
+            if i > 0, bool = true; end
         end
         
         function bool = hasMultiClassFCFS(self)
             % BOOL = HASMULTICLASSFCFS()
             
-            i = find(self.getStruct.sched == SchedStrategy.FCFS);
+            i = findstring(self.getStruct.sched,SchedStrategy.FCFS);
             if i > 0
                 bool = range([self.getStruct.rates(i,:)])>0;
             else
@@ -1374,12 +1385,6 @@ classdef Network < Model
             self.items{end+1,1} = itemSet;
             self.setUsedFeatures(class(itemSet));
         end
-        
-        
-        function print(self)
-            LINE2SCRIPT(self)
-        end
-        
     end
     
     methods (Static)

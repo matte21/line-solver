@@ -40,4 +40,7 @@ TN(isnan(TN))=0;
 
 runtime = toc(Tstart);
 
+%if options.verbose
+%    fprintf(1,'MAM analysis completed in %f sec.\n',runtime);
+%end
 end

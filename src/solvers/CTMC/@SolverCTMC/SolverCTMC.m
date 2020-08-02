@@ -11,7 +11,7 @@ classdef SolverCTMC < NetworkSolver
             self.setOptions(Solver.parseOptions(varargin, self.defaultOptions));
         end
         
-        runtime = runAnalysis(self, options)
+        runtime = run(self, options)
         Pnir = getProb(self, node, state)
         Pn = getProbSys(self)
         Pnir = getProbAggr(self, ist)
@@ -154,7 +154,7 @@ classdef SolverCTMC < NetworkSolver
             for s=1:size(SS,1)
                 for sp=1:size(SS,1)
                     if Q(s,sp)>0
-                        fprintf(1,'\n%s->%s: %f',mat2str(SS(s,:)),mat2str(SS(sp,:)),double(Q(s,sp)));
+                        fprintf(1,'%s->%s: %f\n',mat2str(SS(s,:)),mat2str(SS(sp,:)),double(Q(s,sp)));
                     end
                 end
             end
@@ -172,7 +172,7 @@ classdef SolverCTMC < NetworkSolver
                 for s=1:size(SS,1)
                     for sp=1:size(SS,1)
                         if D{e}(s,sp)>0
-                            fprintf(1,'\n%s-- %d: (%d,%d) => (%d,%d) -->%s: %f',mat2str(SS(s,:)),e,sync{e}.active{1}.node,sync{e}.active{1}.class,sync{e}.passive{1}.node,sync{e}.passive{1}.class,mat2str(SS(sp,:)),double(D{e}(s,sp)));
+                            fprintf(1,'%s-- %d: (%d,%d) => (%d,%d) -->%s: %f\n',mat2str(SS(s,:)),e,sync{e}.active{1}.node,sync{e}.active{1}.class,sync{e}.passive{1}.node,sync{e}.passive{1}.class,mat2str(SS(sp,:)),double(D{e}(s,sp)));
                         end
                     end
                 end

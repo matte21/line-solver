@@ -4,7 +4,7 @@ function jsimwView(self, options)
 % Copyright (c) 2012-2020, Imperial College London
 % All rights reserved.
 
-if self.enableChecks && ~self.supports(self.model)
+if ~self.supports(self.model)
     error('Line:FeatureNotSupportedBySolver','This model contains features not supported by the solver.');
     %    runtime = toc(T0);
     %    return
@@ -21,6 +21,6 @@ self.maxSamples = options.samples;
 writeJSIM(self);
 %            if options.verbose
 fileName = [self.getFilePath(),'jsimg',filesep, self.getFileName(), '.jsimg'];
-fprintf(1,'\nJMT Model: %s',fileName);
+fprintf(1,'JMT Model: %s\n',fileName);
 jsimwView(fileName);
 end

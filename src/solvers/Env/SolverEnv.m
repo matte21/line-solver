@@ -196,9 +196,9 @@ classdef SolverEnv < EnsembleSolver
             self.result.Avg.T = Tval;
             %    self.result.Avg.C = C;
             %self.result.runtime = runtime;            
-                %if self.options.verbose
-                %    fprintf(1,'\n');
-                %end
+                if self.options.verbose
+                    fprintf(1,'\n');
+                end
         end
         
         function name = getName(self)
@@ -219,7 +219,7 @@ classdef SolverEnv < EnsembleSolver
             % [QNCLASS, UNCLASS, TNCLASS] = GETAVG()
             
             if isempty(self.result) || (isfield(self.options,'force') && self.options.force)
-                self.iterate();
+                self.run();
                 if isempty(self.result)
                     QNclass=[];
                     UNclass=[];

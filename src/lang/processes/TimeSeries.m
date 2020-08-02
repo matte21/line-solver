@@ -74,7 +74,7 @@ classdef TimeSeries < PointProcess
             TAILS1PERC = [prctile(self.data,95),prctile(self.data,(1-1e-6)*100)];
             MINMAX = [min(self.data),max(self.data)];
             MAD = mad(self.data,1); %median based mad
-            fprintf(1,'\nReplayer: length=%d NaNs=%d\nMoments: mean=%f scv=%f cv=%f skew=%f\nPercentiles: p25=%f p50=%f p75=%f p95=%f\nOrder: min=%f max=%f median=%f mad=%f',length(self.data),sum(isnan(self.data)),MEAN,SCV,sqrt(SCV),SKEW,QUART(1),QUART(2),QUART(3),TAILS1PERC(1),MINMAX(1),MINMAX(2),MED,MAD);
+            fprintf(1,'Replayer: length=%d NaNs=%d\nMoments: mean=%f scv=%f cv=%f skew=%f\nPercentiles: p25=%f p50=%f p75=%f p95=%f\nOrder: min=%f max=%f median=%f mad=%f\n',length(self.data),sum(isnan(self.data)),MEAN,SCV,sqrt(SCV),SKEW,QUART(1),QUART(2),QUART(3),TAILS1PERC(1),MINMAX(1),MINMAX(2),MED,MAD);
         end
     end
 end

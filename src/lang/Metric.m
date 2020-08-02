@@ -154,7 +154,11 @@ classdef Metric < Copyable
             r = self.classIndex;
             
             switch results.solver
-                case 'SolverJMT'                    
+                case 'SolverJMT'
+                    
+                    if ~exist('model','var')
+                        error('Wrong syntax, use Metric.get(results,model).\n');
+                    end
                     switch self.type
                         case Metric.TranTput
                             %results.Tran.Avg.T{i,r}.Name = sprintf('Throughput (station %d, class %d)',i,r);

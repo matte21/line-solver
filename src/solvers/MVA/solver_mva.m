@@ -1,4 +1,4 @@
-function [Q,U,R,T,C,X,lG] = solver_mva(ST,V,N,S,~,sched,refstat)
+function [Q,U,R,T,C,X,lG] = solver_mva(ST,V,N,S,options,sched,refstat)
 % [Q,U,R,T,C,X,LG] = SOLVER_MVA(ST,V,N,S,OPTIONS,SCHED,REFSTAT)
 
 % Copyright (c) 2012-2020, Imperial College London
@@ -16,11 +16,14 @@ if ~exist('sched','var')
     end
 end
 
+extSET = find(sched==SchedStrategy.EXT);
 infSET = find(sched==SchedStrategy.INF);
+dpsSET = find(sched==SchedStrategy.DPS);
+fcfsSET = find(sched==SchedStrategy.FCFS);
 if K==1
-    pfSET = find(sched==SchedStrategy.SIRO | sched==SchedStrategy.PS | sched==SchedStrategy.FCFS);
+    pfSET = union(find(fcfsSET,sched==SchedStrategy.SIRO),find(sched==SchedStrategy.PS));
 else
-    pfSET = find(sched==SchedStrategy.SIRO | sched==SchedStrategy.PS);
+    pfSET = union(find(sched==SchedStrategy.SIRO),find(sched==SchedStrategy.PS));
 end
 
 U = zeros(M,K);
@@ -39,6 +42,7 @@ if any(isinf(N))
 end
 rset = setdiff(1:K,find(N==0));
 
+%% inner iteration
 [X,Qpf,U,~,lG] = pfqn_mvams(lambda,ST(pfSET,:).*V(pfSET,:),N,ST(infSET,:).*V(infSET,:),ones(length(pfSET),1),S(pfSET));
 Q(pfSET,:) = Qpf;
 Q(infSET,:) = repmat(X,numel(infSET),1) .* ST(infSET,:) .* V(infSET,:);
