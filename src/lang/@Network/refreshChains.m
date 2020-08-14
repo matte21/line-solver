@@ -10,7 +10,7 @@ end
 
 if nargin == 1
     if isempty(self.qn)
-        error('refreshRoutingMatrix cannot retrieve station rates, please pass them as an input parameters.');
+        line_error(mfilename,'refreshRoutingMatrix cannot retrieve station rates, please pass them as an input parameters.');
     end
 end
 
@@ -50,7 +50,7 @@ end
 for c=1:size(chains,1)
     if sum(refstat(inchain{c}) == refstat(inchain{c}(1))) ~= length(inchain{c})
         refstat(inchain{c}) = refstat(inchain{c}(1));
-        %        error(sprintf('Classes in chain %d have different reference stations. Chain %d classes: %s', c, c, int2str(inchain{c})));
+        %        line_error(sprintf('Classes in chain %d have different reference stations. Chain %d classes: %s', c, c, int2str(inchain{c})));
     end
 end
 
@@ -68,13 +68,13 @@ if wantVisits
         visited = sum(Pchain,2) > 0;
         %                Pchain(visited,visited)
         %                if ~dtmc_isfeasible(Pchain(visited,visited))
-        %                    error(sprintf('The routing matrix in chain %d is not stochastic. Chain %d classes: %s',c, c, int2str(inchain{c})));
+        %                    line_error(sprintf('The routing matrix in chain %d is not stochastic. Chain %d classes: %s',c, c, int2str(inchain{c})));
         %                end
         alpha_visited = dtmc_solve(Pchain(visited,visited));
         alpha = zeros(1,M*K); alpha(visited) = alpha_visited;
         if max(alpha)>=1-1e-10
             %disabled because a self-looping customer is an absorbing chain
-            %error('Line:ChainAbsorbingState','One chain has an absorbing state.');
+            %line_error(mfilename,'Line:ChainAbsorbingState','One chain has an absorbing state.');
         end
         visits{c} = zeros(M,K);
         for i=1:M
@@ -132,7 +132,7 @@ end
 
 for r=1:self.qn.nclasses
     if all(self.qn.routing(:,r) == -1)
-        error(sprintf('Routing strategy in class %d is unspecified at all nodes.',r));
+        line_error(sprintf('Routing strategy in class %d is unspecified at all nodes.',r));
     end
 end
 

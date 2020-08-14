@@ -15,7 +15,7 @@ isf = qn.nodeToStateful(ind);
 
 inspace = [zeros(size(inspace,1),size(qn.space{isf},2)-size(inspace,2)), inspace];
 if isempty(qn.space{isf})
-    error('Station state space is not initialized. Use setStateSpace method.\n');
+    line_error(mfilename,'Station state space is not initialized. Use setStateSpace method.\n');
 end
 hashid=zeros(size(inspace,1),1);
 for j=1:size(inspace,1)

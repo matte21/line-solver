@@ -16,10 +16,10 @@ classdef OpenClass < JobClass
                 prio = 0;
             end
             if isempty(model.getSource)
-                error('The model requires a Source prior to instantiating open classes.');
+                line_error(mfilename,'The model requires a Source prior to instantiating open classes.');
             end
             if isempty(model.getSink)
-                error('The model requires a Sink prior to instantiating open classes.');
+                line_error(mfilename,'The model requires a Sink prior to instantiating open classes.');
             end
             
             self.type = JobClassType.OPEN;
@@ -51,7 +51,7 @@ classdef OpenClass < JobClass
             % SETREFERENCESTATION(CLASS, SOURCE)
             
             if ~isa(source,'Source')
-                error('The reference station for an open class must be a Source.');
+                line_error(mfilename,'The reference station for an open class must be a Source.');
             end
             setReferenceStation@JobClass(class, source);
         end

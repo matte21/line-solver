@@ -44,7 +44,7 @@ for ind=1:qn.nnodes
                     end
                 end
             otherwise
-                error('Unsupported scheduling policy at station %d',ist);
+                line_error(mfilename,'Unsupported scheduling policy at station %d',ist);
                 return
         end
         init_sol = [init_sol, init_sol_i];

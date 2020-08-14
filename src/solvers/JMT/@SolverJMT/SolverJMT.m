@@ -33,10 +33,10 @@ classdef SolverJMT < NetworkSolver
             self@NetworkSolver(model, mfilename);
             self.setOptions(Solver.parseOptions(varargin, self.defaultOptions));
             if ~Solver.isJavaAvailable
-                error('SolverJMT requires the java command to be available on the system path.');
+                line_error(mfilename,'SolverJMT requires the java command to be available on the system path.');
             end
             if ~Solver.isAvailable
-                error('SolverJMT cannot located JMT.jar in the MATLAB path.');
+                line_error(mfilename,'SolverJMT cannot located JMT.jar in the MATLAB path.');
             end
             
             self.maxEvents = -1;
@@ -258,7 +258,7 @@ classdef SolverJMT < NetworkSolver
             
             solverName = mfilename;
             %             if isfield(options,'timespan')  && isfinite(options.timespan(2))
-            %                 error('Finite timespan not supported in %s',solverName);
+            %                 line_error(mfilename,'Finite timespan not supported in %s',solverName);
             %             end
         end
         

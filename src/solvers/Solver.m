@@ -44,15 +44,14 @@ classdef Solver < handle
         function bool = supports(self,model)
             % BOOL = SUPPORTS(SELF,MODEL)
             % True if the input model is supported by the solver
-            error('Line:AbstractMethodCall','An abstract method was called. The function needs to be overridden by a subclass.');
-            
+            line_error(mfilename,'Line:AbstractMethodCall','An abstract method was called. The function needs to be overridden by a subclass.');            
         end
         
-        function runtime = runAnalysis(self, options) % generic method to run the solver
+        function runtime = runAnalysis(self, options, config) % generic method to run the solver
             % RUNTIME = RUN()
             % Run the solver % GENERIC METHOD TO RUN THE SOLVER
             % Solve the model
-            error('Line:AbstractMethodCall','An abstract method was called. The function needs to be overridden by a subclass.');                        
+            line_error(mfilename,'Line:AbstractMethodCall','An abstract method was called. The function needs to be overridden by a subclass.');                        
         end
         
         function self = setChecks(self, bool)
@@ -82,7 +81,7 @@ classdef Solver < handle
             % Check if input option data structure is valid for the given model
             if strcmp(self.options.method,'exact')
                 if ~self.model.hasProductFormSolution
-                    error('The model does not have a product-form solution, hence exact solution is not possible.');
+                    line_error(mfilename,'The model does not have a product-form solution, hence exact solution is not possible.');
                 end
             end
         end
@@ -141,6 +140,7 @@ classdef Solver < handle
                 warning('off','MATLAB:RandStream:ReadingInactiveLegacyGeneratorState');
             end
             rand('seed',seed);
+            %rng(seed,'twister');            
         end
         
         function bool = isAvailable()
@@ -265,12 +265,12 @@ classdef Solver < handle
                                 varargin(1) = [];                                
                         end
                     else
-                        warning('Option "%s" does not exist. Ignoring.',varargin{1});
+                        line_warning(mfilename,'Option "%s" does not exist. Ignoring.',varargin{1});
                         varargin(1) = [];
                     end
                 end
             else
-                error('Invalid parameter.');
+                line_error(mfilename,'Invalid parameter.');
             end
         end
         

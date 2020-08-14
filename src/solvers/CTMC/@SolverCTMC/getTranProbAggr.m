@@ -9,6 +9,6 @@ if isfield(options,'timespan')  && isfinite(options.timespan(2))
     SSnode_a = SSa(:,(jnd-1)*qn.nclasses+1:jnd*qn.nclasses);
     Pi_t = [t, pi_t];
 else
-    error('getTranProbAggr in SolverCTMC requires to specify a finite timespan T, e.g., SolverCTMC(model,''timespan'',[0,T]).');
+    line_error(mfilename,'getTranProbAggr in SolverCTMC requires to specify a finite timespan T, e.g., SolverCTMC(model,''timespan'',[0,T]).');
 end
 end

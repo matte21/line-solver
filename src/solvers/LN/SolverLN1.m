@@ -76,11 +76,11 @@ classdef SolverLN1 < LayeredNetworkSolver & EnsembleSolver
                     end
                 end
                 if self.options.verbose == 2
-                    fprintf(1, sprintf('SolverLN error is: %f',maxIterErr));
+                    line_printf( sprintf('SolverLN error is: %f',maxIterErr));
                 end
                 if maxIterErr < self.options.iter_tol
                     if self.options.verbose
-                        fprintf(1, sprintf('\nSolverLN completed in %d iterations.',size(self.results,1)));
+                        line_printf( sprintf('\nSolverLN completed in %d iterations.',size(self.results,1)));
                     end
                     bool = true;
                 end
@@ -124,7 +124,7 @@ classdef SolverLN1 < LayeredNetworkSolver & EnsembleSolver
         function finish(self) % operations after iterations are completed
             % FINISH() % OPERATIONS AFTER INTERATIONS ARE COMPLETED
             if self.options.verbose
-                fprintf('\n');
+                line_printf('\n');
             end            
         end
         

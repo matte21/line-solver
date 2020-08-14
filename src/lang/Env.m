@@ -36,7 +36,7 @@ classdef Env < Ensemble
             E = height(self.envGraph.Nodes);
             if E>1
                 if self.envGraph.Nodes.Model{1}.getNumberOfStatefulNodes ~= model.getNumberOfStatefulNodes
-                    error('Unsupported feature. Random environment stages must map to networks with identical number of stateful nodes.');
+                    line_error(mfilename,'Unsupported feature. Random environment stages must map to networks with identical number of stateful nodes.');
                 end
             end
             for e=E
@@ -151,7 +151,7 @@ classdef Env < Ensemble
             elseif iscategorical(stageCategory)
                 self.stageTypes(stageId) = stageCategory;
             else
-                error('Stage type must be of type categorical, e.g., categorical("My Semantics").');
+                line_error(mfilename,'Stage type must be of type categorical, e.g., categorical("My Semantics").');
             end
         end
         

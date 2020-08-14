@@ -6,7 +6,7 @@ function node = getSink(self)
 
 idx = self.getIndexSinkNode;
 if isempty(idx)
-    %    warning('The model does not have a Sink station.');
+    %    line_warning(mfilename,'The model does not have a Sink station.');
     node = [];
     return;
 end

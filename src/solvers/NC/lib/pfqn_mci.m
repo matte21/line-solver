@@ -89,7 +89,7 @@ try
     
     lG = logmeanexp(lZ); % return average    
     if isinf(lG)
-        %    warning('Floating-point range exception, Monte Carlo integration will return an approximation.');
+        %    line_warning(mfilename,'Floating-point range exception, Monte Carlo integration will return an approximation.');
         lG = max(lZ);
     end
     G=exp(lG);    

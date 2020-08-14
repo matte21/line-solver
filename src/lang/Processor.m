@@ -12,7 +12,7 @@ classdef Processor  < Host
         function self = Processor(model, name, multiplicity, scheduling, quantum, speedFactor)
             % OBJ = PROCESSOR(MODEL, NAME, MULTIPLICITY, SCHEDULING, QUANTUM, SPEEDFACTOR)
             if ~exist('name','var')
-                error('Constructor requires to specify at least a name.');
+                line_error(mfilename,'Constructor requires to specify at least a name.');
             end
             
             if ~exist('multiplicity','var')

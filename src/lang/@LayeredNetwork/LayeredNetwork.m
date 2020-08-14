@@ -48,9 +48,9 @@ classdef LayeredNetwork < Model & Ensemble
         %public methods, including constructor
         
         function self = reset(self)
-%                         self.lqnGraph = [];
-%                         self.taskGraph = [];
-%                         self.ensemble = {};
+%             self.lqnGraph = [];
+%             self.taskGraph = [];
+%             self.ensemble = {};
 %             self.aux = struct();
 %             self.hosts = {};
 %             self.tasks = {};

@@ -58,7 +58,7 @@ for c=1:qn.nchains
     Nchain(c) = sum(NK(inchain));
     refstatchain(c) = qn.refstat(inchain(1));
     if any((qn.refstat(inchain(1))-refstatchain(c))~=0)
-        error(sprintf('Classes in chain %d have different reference station.',c));
+        line_error(sprintf('Classes in chain %d have different reference station.',c));
     end
 end
 STchain(~isfinite(STchain))=0;
@@ -95,7 +95,7 @@ runtime = toc(Tstart);
 
 lG = log(G);
 if options.verbose > 0
-    fprintf(1,'\nNormalizing constant (NC) analysis completed in %f sec\n',runtime);
+    line_printf('\nNormalizing constant (NC) analysis completed. Runtime: %f seconds.\n',runtime);
 end
 return
 end

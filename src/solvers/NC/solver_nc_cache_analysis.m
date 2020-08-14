@@ -22,7 +22,7 @@ m = ch.cap;
 n = ch.nitems;
 
 if n<m+2
-    error('NC requires the number of items to exceed the cache capacity at least by 2.');
+    line_error(mfilename,'NC requires the number of items to exceed the cache capacity at least by 2.');
 end
 
 h = length(m);

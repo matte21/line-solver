@@ -6,7 +6,7 @@ function [rt, rtfun, csmask, rtnodes] = refreshRoutingMatrix(self, rates)
 
 if nargin == 1
     if isempty(self.qn)
-        error('refreshRoutingMatrix cannot retrieve station rates, pass them as an input parameters.');
+        line_error(mfilename,'refreshRoutingMatrix cannot retrieve station rates, pass them as an input parameters.');
     else
         rates = self.qn.rates;
     end

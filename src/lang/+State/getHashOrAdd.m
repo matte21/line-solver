@@ -14,7 +14,7 @@ end
 isf = qn.nodeToStateful(ind);
 
 if isempty(qn.space{isf})
-    error('Station state space is not initialized. Use setStateSpace method.\n');
+    line_error(mfilename,'Station state space is not initialized. Use setStateSpace method.\n');
 end
 
 % resize

@@ -69,7 +69,7 @@ for c=1:qn.nchains
     Nchain(c) = sum(NK(inchain));
     refstatchain(c) = qn.refstat(inchain(1));
     if any((qn.refstat(inchain(1))-refstatchain(c))~=0)
-        error(sprintf('Classes in chain %d have different reference station.',c));
+        line_error(sprintf('Classes in chain %d have different reference station.',c));
     end
 end
 STchain(~isfinite(STchain))=0;
@@ -113,10 +113,10 @@ for ist=1:qn.nstations
                     if ~isempty(PHr)
                         kir = kirvec(1,r,:); kir=kir(:)';
                         if length(kir)>1
-                            error('Cannot return state probability because the product-form solution requires exponential service times at FCFS nodes.');
+                            line_error(mfilename,'Cannot return state probability because the product-form solution requires exponential service times at FCFS nodes.');
                         end
                         if ST(ist,r)~=max(ST(ist,:))
-                            error('Cannot return state probability because the product-form solution requires identical service times at FCFS nodes.');
+                            line_error(mfilename,'Cannot return state probability because the product-form solution requires identical service times at FCFS nodes.');
                         end
                     end
                 end
@@ -132,10 +132,10 @@ for ist=1:qn.nstations
                     if ~isempty(PHr)
                         kir = kirvec(1,r,:); kir=kir(:)';
                         if length(kir)>1
-                            error('Cannot return state probability because the product-form solution requires exponential service times at RAND nodes.');
+                            line_error(mfilename,'Cannot return state probability because the product-form solution requires exponential service times at RAND nodes.');
                         end
                         if ST(ist,r)~=max(ST(ist,:))
-                            error('Cannot return state probability because the product-form solution requires identical service times at RAND nodes.');
+                            line_error(mfilename,'Cannot return state probability because the product-form solution requires identical service times at RAND nodes.');
                         end
                     end
                 end
@@ -173,7 +173,7 @@ runtime = toc(Tstart);
 Pr(isnan(Pr))=0;
 lG = log(G);
 if options.verbose > 0
-    fprintf(1,'\nNormalizing constant (NC) analysis completed in %f sec\n',runtime);
+    line_printf('\nNormalizing constant (NC) analysis completed. Runtime: %f seconds.\n',runtime);
 end
 return
 end

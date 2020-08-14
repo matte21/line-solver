@@ -23,7 +23,7 @@ classdef ClosedClass < JobClass
             end
             model.addJobClass(self);
             if ~isa(refstat, 'Station')
-                error('The reference station for class %s needs to be a station, not a node.', name);
+                line_error(mfilename,'The reference station for class %s needs to be a station, not a node.', name);
             end
             setReferenceStation(self, refstat);
             

@@ -19,7 +19,7 @@ classdef SolverFluid < NetworkSolver
         RD = getCdfRespT(self, R);
                 
         % solve method is supplied by Solver superclass
-        runtime = runAnalysis(self, options);
+        runtime = runAnalysis(self, options, config);
     end
     
     methods (Static)

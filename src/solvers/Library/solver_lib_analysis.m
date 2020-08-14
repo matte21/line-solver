@@ -18,6 +18,6 @@ TN(isnan(TN))=0;
 runtime = toc(Tstart);
 
 if options.verbose > 0
-    fprintf(1,'\nSolver LIB analysis completed in %f sec\n',runtime);
+    line_printf('\nSolver LIB analysis completed. Runtime: %f seconds.\n',runtime);
 end
 end

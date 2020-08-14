@@ -56,7 +56,7 @@ for c=1:qn.nchains
     Nchain(c) = sum(NK(inchain));
     refstatchain(c) = qn.refstat(inchain(1));
     if any((qn.refstat(inchain(1))-refstatchain(c))~=0)
-        error(sprintf('Classes in chain %d have different reference station.',c));
+        line_error(sprintf('Classes in chain %d have different reference station.',c));
     end
 end
 STchain(~isfinite(STchain))=0;
@@ -76,7 +76,7 @@ switch options.method
         [~,Uchain,Rchain,Tchain,~, Xchain] = solver_amva(STchain, Vchain, Nchain, S, SCVchain, options, qn.sched, qn.schedparam, refstatchain);
         lG = - log(prod(1-sum(Uchain,2))); % approximation
     otherwise
-        error('Unsupported SolverMVA method.');
+        line_error(mfilename,'Unsupported SolverMVA method.');
 end
 
 for c=1:qn.nchains

@@ -26,7 +26,7 @@ for p=1:length(self.hosts)
         case SchedStrategy.HOL
             fprintf(fid,['p ',curProc.name,' h m ',num2str(curProc.multiplicity),'\n']);
         otherwise
-            error('Unsupported scheduling policy.');
+            line_error(mfilename,'Unsupported scheduling policy.');
     end
 end
 
@@ -60,7 +60,7 @@ for p=1:length(self.hosts)
             case SchedStrategy.HOL
                 fprintf(fid,['t ',curTask.name,' h ',entryNameList,' -1 ',curProc.name,' m ',num2str(curTask.multiplicity),'\n']);
             otherwise
-                error('Unsupported scheduling policy.');
+                line_error(mfilename,'Unsupported scheduling policy.');
         end
     end
 end
@@ -139,7 +139,7 @@ for p=1:length(self.hosts)
                 case ActivityPrecedence.PRE_OR
                     preActDelim = ' + ';
                 otherwise
-                    error('Unsupported activity precedence.');
+                    line_error(mfilename,'Unsupported activity precedence.');
             end
             postActFields = curActPrec.postActs;
             switch curActPrec.postType
@@ -158,7 +158,7 @@ for p=1:length(self.hosts)
                     end
                     postActDelim = ', ';
                 otherwise
-                    error('Unsupported activity precedence.');
+                    line_error(mfilename,'Unsupported activity precedence.');
             end
             prePrecSeg = join(preActFields,preActDelim);
             prePrecSeg = prePrecSeg{1};

@@ -1,56 +1,61 @@
-classdef PointProcess < Copyable
+classdef PointProcess < Process
     % An abstract class for stochastic point processes
     %
     % Copyright (c) 2012-2020, Imperial College London
     % All rights reserved.
     
     properties
-        name
-        params
     end
     
     methods %(Abstract) % implemented with errors for Octave compatibility
-        function X = sample(self)
-            % X = SAMPLE()
-            
-            % Sample a value from the inter-arrival time distribution
-            error('Line:AbstractMethodCall','An abstract method was called. The function needs to be overridden by a subclass.');
-        end
+
         function ex = getMean(self)
             % EX = GETMEAN()
             
             % Returns the mean of the inter-arrival times
-            error('Line:AbstractMethodCall','An abstract method was called. The function needs to be overridden by a subclass.');
+            line_error(mfilename,'Line:AbstractMethodCall','An abstract method was called. The function needs to be overridden by a subclass.');
         end
+        
         function SCV = getSCV(self)
             % SCV = GETSCV()
             
             % Get squared coefficient of variation of the interarrival times (SCV = variance / mean^2)
-            error('Line:AbstractMethodCall','An abstract method was called. The function needs to be overridden by a subclass.');
+            line_error(mfilename,'Line:AbstractMethodCall','An abstract method was called. The function needs to be overridden by a subclass.');
         end
+        
         function SKEW = getSkewness(self)
             % SKEW = GETSKEWNESS()
             
             % Get skewness of the interarrival times
-            error('Line:AbstractMethodCall','An abstract method was called. The function needs to be overridden by a subclass.');
+            line_error(mfilename,'Line:AbstractMethodCall','An abstract method was called. The function needs to be overridden by a subclass.');
         end
-        function ID = getID(self)
-            % ID = GETID()
+        
+        function IDC = getIDC(self)
+            % IDC = GETIDC()
             
-            % Return the asymptotic index of dispersion
-            error('Line:AbstractMethodCall','An abstract method was called. The function needs to be overridden by a subclass.');
+            % Return the asymptotic index of dispersion for counts
+            line_error(mfilename,'Line:AbstractMethodCall','An abstract method was called. The function needs to be overridden by a subclass.');
         end
+        
+        function IDI = getIDI(self)
+            % IDI = GETIDI()
+            
+            % Return the asymptotic index of dispersion for intervals
+            line_error(mfilename,'Line:AbstractMethodCall','An abstract method was called. The function needs to be overridden by a subclass.');
+        end
+        
         function lambda = getRate(self)
             % LAMBDA = GETRATE()
             
             % Return the inter-arrival rate
-            error('Line:AbstractMethodCall','An abstract method was called. The function needs to be overridden by a subclass.');
+            line_error(mfilename,'Line:AbstractMethodCall','An abstract method was called. The function needs to be overridden by a subclass.');
         end
+        
         function vart = evalVarT(self,t)
             % VART = EVALVART(SELF,T)
             
             % Evaluate the variance-time curve at t
-            error('Line:AbstractMethodCall','An abstract method was called. The function needs to be overridden by a subclass.');
+            line_error(mfilename,'Line:AbstractMethodCall','An abstract method was called. The function needs to be overridden by a subclass.');
         end
     end
     
@@ -58,28 +63,9 @@ classdef PointProcess < Copyable
         %Constructor
         function self = PointProcess(name, numParam)
             % SELF = POINTPROCESS(NAME, NUMPARAM)
-            
-            self.name = name;
-            self.params = cell(1,numParam);
-            for i=1:numParam
-                self.params{i}=struct('paramName','','paramValue',-1,'paramClass','');
-            end
+            self@Process('PointProcess', numParam);
         end
-        
-        function nParam = getNumParams(self)
-            % NPARAM = GETNUMPARAMS()
-            
-            nParam = length(self.params);
-        end
-        
-        function setParam(self, id, name, value,typeClass)
-            % SETPARAM(ID, NAME, VALUE,TYPECLASS)
-            
-            self.params{id}.paramName=name;
-            self.params{id}.paramValue=value;
-            self.params{id}.paramClass=typeClass;
-        end
-        
+               
         function bool = isDisabled(self)
             % BOOL = ISDISABLED()
             
@@ -92,11 +78,6 @@ classdef PointProcess < Copyable
             bool = self.getMean() == 0;
         end
         
-        function param = getParam(self,id)
-            % PARAM = GETPARAM(SELF,ID)
-            
-            param = self.params{id};
-        end
     end
     
 end

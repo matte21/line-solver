@@ -93,10 +93,20 @@ for i = 1:qn.nstations
                                 Tfull_t{i,k} = Tfull_t{i,k} + ymean_t(:,idx+f)*Lambda{i,k}(f)*Pi{i,k}(f);
                                 Xservice{i,k}(f) = Qfull(idx+f)*Lambda{i,k}(f);
                             end
-                        case {SchedStrategy.INF, SchedStrategy.PS, SchedStrategy.DPS}                        
+                        case {SchedStrategy.INF, SchedStrategy.PS}
                             Tfull(i,k) = Tfull(i,k) + Qfull(idx+f)*Lambda{i,k}(f)*Pi{i,k}(f)/xi*min(xi,qn.nservers(i));
                             Tfull_t{i,k} = Tfull_t{i,k} + ymean_t(:,idx+f)*Lambda{i,k}(f)*Pi{i,k}(f)./xi_t.*min(xi_t,qn.nservers(i));
                             Xservice{i,k}(f) = Qfull(idx+f)*Lambda{i,k}(f)/xi*min(xi,qn.nservers(i));
+                        case SchedStrategy.DPS
+                            w = qn.schedparam(i,:);
+                            wxi = w*Q(i,:)'; %number of jobs in the station
+                            wxi_t = w(1)*Qfull_t{i,1};
+                            for r=2:size(Qfull_t,2)
+                                wxi_t = wxi_t + w(r)*Qfull_t{i,r};
+                            end
+                            Tfull(i,k) = Tfull(i,k) + Qfull(idx+f)*Lambda{i,k}(f)*Pi{i,k}(f)*w(k)/wxi*min(xi,qn.nservers(i));
+                            Tfull_t{i,k} = Tfull_t{i,k} + ymean_t(:,idx+f)*Lambda{i,k}(f)*Pi{i,k}(f)*w(k)./wxi_t.*min(xi_t,qn.nservers(i));
+                            Xservice{i,k}(f) = Qfull(idx+f)*Lambda{i,k}(f)*w(k)/wxi*min(xi,qn.nservers(i));
                         case SchedStrategy.FCFS
                             switch options.method
                                 case {'default','stateindep'}
@@ -117,7 +127,7 @@ for i = 1:qn.nstations
                                     %                                    Xservice{i,k}(f) = Qfull(idx+f)*Lambda{i,k}(f)*min(xi,qn.nservers(i))*wi(k)/wni;
                             end
                         otherwise
-                            error('Unsupported scheduling policy');
+                            line_error(mfilename,'Unsupported scheduling policy');
                     end
                 end
             end

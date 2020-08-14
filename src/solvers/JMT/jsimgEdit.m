@@ -6,6 +6,6 @@ try
     model = JMT2LINE(fname);
     delete(fname);
 catch
-    error('Error: JMT2LINE failed. JMT model stored at: %s',fname)
+    line_error(mfilename,'Error: JMT2LINE failed. JMT model stored at: %s',fname)
 end
 end

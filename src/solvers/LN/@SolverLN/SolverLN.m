@@ -85,6 +85,7 @@ classdef SolverLN < LayeredNetworkSolver & EnsembleSolver
                 self.callresptproc{cidx} = lqn.hostdem{lqn.callpair(cidx,2)};
             end
             
+            % build layering
             self.buildLoose();
             
             self.routereset = unique(self.idxhash(self.routeupdmap(:,1)))';
@@ -100,11 +101,11 @@ classdef SolverLN < LayeredNetworkSolver & EnsembleSolver
         end
         
         function initFromRawAvgTables(self, NodeAvgTable, CallAvgTable)
-            error('initFromRawAvgTables not yet available');
+            line_error(mfilename,'initFromRawAvgTables not yet available');
         end
         
         function paramFromRawAvgTables(self, NodeAvgTable, CallAvgTable)
-            error('paramFromRawAvgTables not yet available');
+            line_error(mfilename,'paramFromRawAvgTables not yet available');
         end
         
         function bool = converged(self, it) % convergence test at iteration it
@@ -140,16 +141,16 @@ classdef SolverLN < LayeredNetworkSolver & EnsembleSolver
                     end
                 end
                 if self.options.verbose
-                    fprintf(1, sprintf('SolverLN error is: %f',self.maxIterErr(it)/E));
+                    line_printf(sprintf('\bSolverLN error is: %f',self.maxIterErr(it)/E));
                     if it==30
                         if self.options.verbose
-                            fprintf(1, ' Starting moving window to help convergence.');
+                            line_printf( ' Starting moving window to help convergence.');
                         end
                     end
                 end
                 if it>2 && self.maxIterErr(it) < self.options.iter_tol && self.maxIterErr(it-1) < self.options.iter_tol
                     %if self.options.verbose
-                    %fprintf(1, sprintf('\nSolverLN completed in %d iterations.\n',size(self.results,1)));
+                    %line_printf( sprintf('\nSolverLN completed in %d iterations.\n',size(self.results,1)));
                     %end
                     bool = true;
                 end
@@ -199,11 +200,14 @@ classdef SolverLN < LayeredNetworkSolver & EnsembleSolver
             
             % recompute think times
             self.updateThinkTimes(it);
+            
+            
             % update the model parameters
             self.updateLayers(it);
             
             % update entry routing probabilities
             self.updateRoutingProbabilities(it);
+            
             
             if it==1
                 % now disable all solver support checks for future iterations
@@ -214,7 +218,6 @@ classdef SolverLN < LayeredNetworkSolver & EnsembleSolver
             
             for e=1:length(self.ensemble)
                 self.ensemble{e}.reset();
-                %self.solvers{e} = SolverNC(self.ensemble{e},'method','comom','verbose',false);
             end
             
         end
@@ -226,7 +229,7 @@ classdef SolverLN < LayeredNetworkSolver & EnsembleSolver
         function finish(self) % operations after iterations are completed
             % FINISH() % OPERATIONS AFTER INTERATIONS ARE COMPLETED
             if self.options.verbose
-                fprintf('\n');
+                line_printf('\n');
             end
             self.model.ensemble = self.ensemble;
         end
@@ -288,41 +291,27 @@ classdef SolverLN < LayeredNetworkSolver & EnsembleSolver
                     switch type
                         case LayeredNetworkElement.TASK
                             tidx = self.ensemble{e}.classes{c}.attribute(2);
-                            if self.lqn.sched(tidx) == SchedStrategy.REF
-                                if self.ensemble{e}.stations{serverIdx}.attribute.ishost
-                                    if isnan(TN(tidx))
-                                        % store the result in the processor
-                                        % model
-                                        TN(tidx) = self.results{end,e}.TN(clientIdx,c);
-                                    end
-                                else
-                                    % nop
+                            if self.ensemble{e}.stations{serverIdx}.attribute.ishost
+                                if isnan(TN(tidx))
+                                    % store the result in the processor
+                                    % model
+                                    TN(tidx) = self.results{end,e}.TN(clientIdx,c);
                                 end
-                            else % non-ref task
-                                if self.ensemble{e}.stations{serverIdx}.attribute.idx == tidx
-                                    if isnan(TN(tidx)), TN(tidx)=0; end
-                                    TN(tidx) = TN(tidx) + self.results{end,e}.TN(serverIdx,c);
-                                end
+                            else
+                                % nop
                             end
                         case LayeredNetworkElement.ENTRY
                             eidx = self.ensemble{e}.classes{c}.attribute(2);
                             tidx = self.lqn.parent(eidx);
                             SN(eidx) = self.svct(eidx);
-                            if self.lqn.sched(tidx) == SchedStrategy.REF
-                                if self.ensemble{e}.stations{serverIdx}.attribute.ishost
-                                    if isnan(TN(eidx))
-                                        % store the result in the processor model
-                                        if isnan(TN(eidx)), TN(eidx)=0; end
-                                        TN(eidx) = self.results{end,e}.TN(clientIdx,c);
-                                    end
-                                else
-                                    % nop
-                                end
-                            else % non-ref task
-                                if self.ensemble{e}.stations{serverIdx}.attribute.idx == tidx
+                            if self.ensemble{e}.stations{serverIdx}.attribute.ishost
+                                if isnan(TN(eidx))
+                                    % store the result in the processor model
                                     if isnan(TN(eidx)), TN(eidx)=0; end
-                                    TN(eidx) = TN(eidx) + self.results{end,e}.TN(clientIdx,c);
+                                    TN(eidx) = self.results{end,e}.TN(clientIdx,c);
                                 end
+                            else
+                                % nop
                             end
                         case LayeredNetworkElement.CALL
                             cidx = self.ensemble{e}.classes{c}.attribute(2);
@@ -465,7 +454,7 @@ classdef SolverLN < LayeredNetworkSolver & EnsembleSolver
         %         end
         
         %        function [NodeAvgTable, CallAvgTable] = getRawAvgTables(self)
-        %            error('paramFromRawAvgTables not yet available');
+        %            line_error(mfilename,'paramFromRawAvgTables not yet available');
         %        end
         
     end

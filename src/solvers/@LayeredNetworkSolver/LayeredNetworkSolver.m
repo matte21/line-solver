@@ -13,7 +13,7 @@ classdef LayeredNetworkSolver < Solver
             self@Solver(model,name);
             if exist('options','var'), self.setOptions(options); end
             if ~isa(model,'LayeredNetwork')
-                error('Model is not a LayeredNetwork.');
+                line_error(mfilename,'Model is not a LayeredNetwork.');
             end
         end
     end
@@ -21,11 +21,11 @@ classdef LayeredNetworkSolver < Solver
     methods %(Abstract) % implemented with errors for Octave compatibility
         function bool = supports(self, model) % true if model is supported by the solver
             % BOOL = SUPPORTS(MODEL) % TRUE IF MODEL IS SUPPORTED BY THE SOLVER
-            error('Line:AbstractMethodCall','An abstract method was called. The function needs to be overridden by a subclass.');
+            line_error(mfilename,'Line:AbstractMethodCall','An abstract method was called. The function needs to be overridden by a subclass.');
         end
         function [QN,UN,RN,TN] = getAvg(self)
             % [QN,UN,RN,TN] = GETAVG()
-            error('Line:AbstractMethodCall','An abstract method was called. The function needs to be overridden by a subclass.');
+            line_error(mfilename,'Line:AbstractMethodCall','An abstract method was called. The function needs to be overridden by a subclass.');
         end
     end
     

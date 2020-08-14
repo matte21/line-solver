@@ -11,7 +11,7 @@ classdef Library < NetworkSolver
             self@NetworkSolver(model, mfilename);
             self.setOptions(Solver.parseOptions(varargin, self.defaultOptions));
             if strcmp(self.getOptions.method,'default')
-                error('Line:UnsupportedMethod','This solver does not have a default solution method. Used the method option to choose a solution technique.');
+                line_error(mfilename,'Line:UnsupportedMethod','This solver does not have a default solution method. Used the method option to choose a solution technique.');
             end
         end
         
@@ -24,7 +24,9 @@ classdef Library < NetworkSolver
             
             if self.enableChecks && ~self.supports(self.model)
                 %                if options.verbose
-                error('Line:FeatureNotSupportedBySolver','This model contains features not supported by the solver.');
+               %line_warning(mfilename,'This model contains features not supported by the solver.'); 
+ME = MException('Line:FeatureNotSupportedBySolver', 'This model contains features not supported by the solver.'); 
+throw(ME);
                 %                end
                 %                runtime = toc(T0);
                 %                return

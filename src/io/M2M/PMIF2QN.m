@@ -153,7 +153,7 @@ if ~isempty(parsed)
     end
     qn.rates = rates;
 else
-    disp('Error: XML file empty or nonexistent');
+    line_printf('Error: XML file empty or nonexistent');
     parsed = [];
 end
 

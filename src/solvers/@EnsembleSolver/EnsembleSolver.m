@@ -29,55 +29,55 @@ classdef EnsembleSolver < Solver
         function bool = supports(self, model) % true if model is supported by the solver
             % BOOL = SUPPORTS(MODEL) % TRUE IF MODEL IS SUPPORTED BY THE SOLVER
             
-            error('Line:AbstractMethodCall','An abstract method was called. The function needs to be overridden by a subclass.');
+            line_error(mfilename,'Line:AbstractMethodCall','An abstract method was called. The function needs to be overridden by a subclass.');
             
         end
         
         function [QN,UN,RT,TT] = getAvg(self)
             % [QN,UN,RT,TT] = GETAVG()
             
-            error('Line:AbstractMethodCall','An abstract method was called. The function needs to be overridden by a subclass.');
+            line_error(mfilename,'Line:AbstractMethodCall','An abstract method was called. The function needs to be overridden by a subclass.');
             
         end
         
         function init(self) % operations before starting to iterate
             % INIT() % OPERATIONS BEFORE STARTING TO ITERATE
             
-            error('Line:AbstractMethodCall','An abstract method was called. The function needs to be overridden by a subclass.');
+            line_error(mfilename,'Line:AbstractMethodCall','An abstract method was called. The function needs to be overridden by a subclass.');
             
         end
         
         function pre(self, it) % operations before an iteration
             % PRE(IT) % OPERATIONS BEFORE AN ITERATION
             
-            error('Line:AbstractMethodCall','An abstract method was called. The function needs to be overridden by a subclass.');
+            line_error(mfilename,'Line:AbstractMethodCall','An abstract method was called. The function needs to be overridden by a subclass.');
             
         end
         
         function [results, runtime] = analyze(self, e) % operations within an iteration
             % [RESULTS, RUNTIME] = ANALYZE(E) % OPERATIONS WITHIN AN ITERATION
             
-            error('Line:AbstractMethodCall','An abstract method was called. The function needs to be overridden by a subclass.');
+            line_error(mfilename,'Line:AbstractMethodCall','An abstract method was called. The function needs to be overridden by a subclass.');
             
         end
         
         function post(self, it) % operations after an iteration
             % POST(IT) % OPERATIONS AFTER AN ITERATION
             
-            error('Line:AbstractMethodCall','An abstract method was called. The function needs to be overridden by a subclass.');
+            line_error(mfilename,'Line:AbstractMethodCall','An abstract method was called. The function needs to be overridden by a subclass.');
             
         end
         
         function finish(self) % operations after interations are completed
             % FINISH() % OPERATIONS AFTER INTERATIONS ARE COMPLETED
-            error('Line:AbstractMethodCall','An abstract method was called. The function needs to be overridden by a subclass.');
+            line_error(mfilename,'Line:AbstractMethodCall','An abstract method was called. The function needs to be overridden by a subclass.');
             
         end
         
         function bool = converged(self, it) % convergence test at iteration it
             % BOOL = CONVERGED(IT) % CONVERGENCE TEST AT ITERATION IT
             
-            error('Line:AbstractMethodCall','An abstract method was called. The function needs to be overridden by a subclass.');
+            line_error(mfilename,'Line:AbstractMethodCall','An abstract method was called. The function needs to be overridden by a subclass.');
             
         end
     end
@@ -161,22 +161,22 @@ classdef EnsembleSolver < Solver
                     Tsolve(it)=toc(T1);
                     Ttot=toc(T0);
                     if it==1
-                        fprintf('Iter %2d. ',it);
+                        line_printf('Iter %2d. ',it);
                     else
-                        fprintf('\nIter %2d. ',it);
+                        line_printf('\nIter %2d. ',it);
                     end
                 end
                 T2=tic;
                 self.post(it);
                 Tsynch(it)=toc(T2);
                 if options.verbose
-                    fprintf('\nAnalyze: %.3fs. Postprocessing: %.3fs. Runtime: %.3fs. ',Tsolve(it),Tsynch(it),Ttot);
+                    line_printf('\nAnalyze: %.3fs. Update: %.3fs. Runtime: %.3fs. ',Tsolve(it),Tsynch(it),Ttot);
                 end
             end
             self.finish();
             runtime = toc(T0);
             if options.verbose
-                fprintf('\nSummary: Analyze avg: %.3fs. Postprocessing avg: %.3fs. Cumtime: %.3fs. ',mean(Tsolve),mean(Tsynch),runtime);
+                line_printf('\nSummary: Analyze avg: %.3fs. Update avg: %.3fs. Cumtime: %.3fs. ',mean(Tsolve),mean(Tsynch),runtime);
             end
         end
         

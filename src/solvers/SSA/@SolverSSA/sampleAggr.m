@@ -1,11 +1,11 @@
 function stationStateAggr = sampleAggr(self, node, numSamples)
 % SAMPLE = SAMPLEAGGR(NODE, NUMSAMPLES)
 if ~exist('node','var')
-    error('sampleAggr requires to specify a station.');
+    line_error(mfilename,'sampleAggr requires to specify a station.');
 end
 
 %if exist('numsamples','var')
-    %warning('SolveSSA does not support the numsamples parameter, use instead the samples option upon instantiating the solver.');
+    %line_warning(mfilename,'SolveSSA does not support the numsamples parameter, use instead the samples option upon instantiating the solver.');
 %end
 
 options = self.getOptions;
@@ -35,7 +35,7 @@ switch options.method
         end       
         stationStateAggr.isaggregate = true;
     otherwise
-        error('sampleAggr is not available in SolverSSA with the chosen method.');
+        line_error(mfilename,'sampleAggr is not available in SolverSSA with the chosen method.');
 end
 stationStateAggr.t = [0; stationStateAggr.t(2:end)];
 end

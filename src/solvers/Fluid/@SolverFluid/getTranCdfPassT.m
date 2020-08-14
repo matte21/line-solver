@@ -11,7 +11,7 @@ for ind=1:qn.nnodes
     if qn.isstateful(ind)
         isf = QN.nodeToStateful(ind);
         if nnz(s0prior{isf})>1
-            error('getTranCdfPassT: multiple initial states have non-zero prior - unsupported.');
+            line_error(mfilename,'getTranCdfPassT: multiple initial states have non-zero prior - unsupported.');
         end
         qn.state{isf} = s0{isf}(1,:); % assign initial state to network
     end

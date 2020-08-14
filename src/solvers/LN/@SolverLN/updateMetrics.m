@@ -1,5 +1,6 @@
 function updateMetrics(self, it)
 lqn = self.lqn;
+
 % first obtain svct of activities at hostlayers
 self.svct = zeros(self.lqn.nidx,1);
 for r=1:size(self.svctmap,1)
@@ -8,9 +9,10 @@ for r=1:size(self.svctmap,1)
     nodeidx = self.svctmap(r,3);
     classidx = self.svctmap(r,4);
     self.svct(aidx) = self.results{end,self.idxhash(idx)}.RN(nodeidx,classidx);
-    self.tput(aidx) = self.results{end,self.idxhash(idx)}.TN(nodeidx,classidx);
-    self.svctproc{aidx} = Exp.fitMean(self.svct(aidx));
-    self.tputproc{aidx} = Exp.fitRate(self.tput(aidx));
+    self.tput(aidx) = self.results{end,self.idxhash(idx)}.TN(nodeidx,classidx);    
+    self.svctproc{aidx} = APH.fitMeanAndSCV(self.svct(aidx),3/5);
+    %self.svctproc{aidx} = Exp.fitMean(self.svct(aidx));
+    %self.tputproc{aidx} = Exp.fitRate(self.tput(aidx));
 end
 
 % estimate call response times at hostlayers

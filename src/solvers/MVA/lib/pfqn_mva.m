@@ -22,12 +22,12 @@ if isempty(Z)
     Z = zeros(1,R);
 end
 if (~any(N))
-    %warning('closed populations are empty');
+    %line_warning(mfilename,'closed populations are empty');
     return
 end
 NR=length(N);
 if (R~=NR)
-    error('demand matrix and population vector have different number of classes');
+    line_error(mfilename,'demand matrix and population vector have different number of classes');
 end
 
 XN=zeros(1,R);

@@ -89,11 +89,11 @@ switch qn.nodetype(ind)
                     end
                 end
             case {SchedStrategy.FCFS, SchedStrategy.HOL, SchedStrategy.LCFS}
-                sizeEstimator = multinomialln(n);
+                sizeEstimator = multinomialln(n) - gammaln(sum(n)) + gammaln(1+qn.cap(ist));
                 sizeEstimator = round(sizeEstimator/log(10));
                 if sizeEstimator > 2
                     if ~isfield(options,'force') || options.force == false
-                        %warning(sprintf('fromMarginal(): Marginal state space size is very large: 1e%d states. Set options.force=true to bypass this control.\n',sizeEstimator));
+                        %line_warning(mfilename,sprintf('fromMarginal(): Marginal state space size is very large: 1e%d states. Set options.force=true to bypass this control.\n',sizeEstimator));
                     end
                 end
                 
@@ -118,9 +118,11 @@ switch qn.nodetype(ind)
                     mi_buf = zeros(1,max(0,sum(n)-S(ist)));
                     state = zeros(1,R);
                     state = State.decorate(state,[mi_buf,state]);
-                else
+                else                    
+                    mi = mi(:,(end-min(sum(n),qn.cap(ist))+1):end); % n(r) may count more than once elements within the same chain
+                    mi = unique(mi,'rows');
                     % mi_buf: class of job in buffer position i (0=empty)
-                    mi_buf = [zeros(size(mi,1),sum(n)-S(ist)-size(mi(:,1:end-S(ist)),2)), mi(:,1:end-S(ist))];
+                    mi_buf = [zeros(size(mi,1),min(sum(n),qn.cap(ist))-S(ist)-size(mi(:,1:end-S(ist)),2)), mi(:,1:end-S(ist))];
                     if isempty(mi_buf)
                         mi_buf = zeros(size(mi,1),1);
                     end
@@ -147,7 +149,7 @@ switch qn.nodetype(ind)
             case {SchedStrategy.SJF, SchedStrategy.LJF}
                 % in these policies the state space includes continuous
                 % random variables for the service times
-                error('The scheduling policy does not admit a discrete state space.\n');
+                line_error(mfilename,'The scheduling policy does not admit a discrete state space.\n');
         end
         switch qn.routing(ind)
             case RoutingStrategy.ID_RRB

@@ -19,7 +19,7 @@ if isempty(lb), lb=0*ub; end
 R = qn.nclasses;
 if length(lb) == 1, isVectorLB =0; else, isVectorLB = 1; end
 if length(ub) == 1, isVectorUB =0; else, isVectorUB = 1; end
-if isVectorLB~=isVectorUB, error('Bounds must either be both vectors or both scalars'); end
+if isVectorLB~=isVectorUB, line_error(mfilename,'Bounds must either be both vectors or both scalars'); end
 
 if isVectorUB && isVectorLB
     nmax = State.fromMarginal(qn, ind, ub, options);

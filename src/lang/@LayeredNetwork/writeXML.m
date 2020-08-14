@@ -34,7 +34,9 @@ for p = 1:length(self.hosts)
     rootElement.appendChild(procElement);
     procElement.setAttribute('name', curProc.name);        
     procElement.setAttribute('scheduling', SchedStrategy.toText(curProc.scheduling));    
-    procElement.setAttribute('replication', num2str(curProc.replication));
+    if curProc.replication>1
+        procElement.setAttribute('replication', num2str(curProc.replication));
+    end
     if curProc.scheduling ~= SchedStrategy.INF
         mult = num2str(curProc.multiplicity);
         if isinf(mult), mult=1; end
@@ -50,7 +52,9 @@ for p = 1:length(self.hosts)
         procElement.appendChild(taskElement);
         taskElement.setAttribute('name', curTask.name);
         taskElement.setAttribute('scheduling', SchedStrategy.toText(curTask.scheduling));
+        if curTask.replication>1
         taskElement.setAttribute('replication',  num2str(curTask.replication));
+        end
         if curTask.scheduling ~= SchedStrategy.INF
             taskElement.setAttribute('multiplicity', num2str(curTask.multiplicity));
         end

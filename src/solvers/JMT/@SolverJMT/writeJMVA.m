@@ -5,11 +5,11 @@ function [outputFileName] = writeJMVA(self, outputFileName)
 % All rights reserved.
 
 if ~self.model.hasProductFormSolution
-    error('JMVA requires the model to have a product-form solution.');
+    line_error(mfilename,'JMVA requires the model to have a product-form solution.');
 end
 
 if self.model.hasClassSwitch
-    %    error('JMVA does not support class switching.');
+    %    line_error(mfilename,'JMVA does not support class switching.');
 end
 
 if isoctave
@@ -33,37 +33,37 @@ algTypeElement = mvaDoc.createElement('algType');
 switch self.options.method
     case {'jmva.recal'}
         if max(qn.nservers(isfinite(qn.nservers))) > 1
-            error(sprintf('%s does not support multi-server stations.',self.options.method));
+            line_error(sprintf('%s does not support multi-server stations.',self.options.method));
         end
         algTypeElement.setAttribute('name','RECAL');
     case {'jmva.comom'}
         if max(qn.nservers(isfinite(qn.nservers))) > 1
-            error(sprintf('%s does not support multi-server stations.',self.options.method));
+            line_error(sprintf('%s does not support multi-server stations.',self.options.method));
         end
         algTypeElement.setAttribute('name','CoMoM');
     case {'jmva.chow'}
         if max(qn.nservers(isfinite(qn.nservers))) > 1
-            error(sprintf('%s does not support multi-server stations.',self.options.method));
+            line_error(sprintf('%s does not support multi-server stations.',self.options.method));
         end
         algTypeElement.setAttribute('name','Chow');
     case {'jmva.bs','jmva.amva'}
         if max(qn.nservers(isfinite(qn.nservers))) > 1
-            error(sprintf('%s does not support multi-server stations.',self.options.method));
+            line_error(sprintf('%s does not support multi-server stations.',self.options.method));
         end
         algTypeElement.setAttribute('name','Bard-Schweitzer');
     case {'jmva.aql'}
         if max(qn.nservers(isfinite(qn.nservers))) > 1
-            error(sprintf('%s does not support multi-server stations.',self.options.method));
+            line_error(sprintf('%s does not support multi-server stations.',self.options.method));
         end
         algTypeElement.setAttribute('name','AQL');
     case {'jmva.lin'}
         if max(qn.nservers(isfinite(qn.nservers))) > 1
-            error(sprintf('%s does not support multi-server stations.',self.options.method));
+            line_error(sprintf('%s does not support multi-server stations.',self.options.method));
         end
         algTypeElement.setAttribute('name','Linearizer');
     case {'jmva.dmlin'}
         if max(qn.nservers(isfinite(qn.nservers))) > 1
-            error(sprintf('%s does not support multi-server stations.',self.options.method));
+            line_error(sprintf('%s does not support multi-server stations.',self.options.method));
         end
         algTypeElement.setAttribute('name','De Souza-Muntz Linearizer');
     case {'jmva.ls'}
@@ -123,7 +123,7 @@ for c=1:qn.nchains
     Nchain(c) = sum(NK(inchain));
     refstatchain(c) = qn.refstat(inchain(1));
     if any((qn.refstat(inchain(1))-refstatchain(c))~=0)
-        error(sprintf('Classes in chain %d have different reference station.',c));
+        line_error(sprintf('Classes in chain %d have different reference station.',c));
     end
 end
 STchain(~isfinite(STchain))=0;
@@ -180,7 +180,7 @@ for i=1:qn.nstations
             statSrvTimeElem.setAttribute('customerclass',sprintf('Chain%02d',c));
             ldSrvString = num2str(STchain(i,c));
             if any(isinf(NK))
-                error('JMVA does not support open classes in load-dependent models;');
+                line_error(mfilename,'JMVA does not support open classes in load-dependent models;');
             end
             
             for n=2:sum(NK)

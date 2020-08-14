@@ -55,7 +55,7 @@ while it <= MAXITER
     for k=1:M
         MAXERR = max([ MAXERR , norm(pi{k} - piprev{k}, 1) ]);
         if MAXERR < TOL
-            %fprintf(1,'requested tolerance reached\n');
+            %line_printf('requested tolerance reached\n');
             if decideC3()
                 return
             end
@@ -63,7 +63,7 @@ while it <= MAXITER
     end
     it = it + 1;
 end
-%fprintf(1,'maximum number of iterations reached\n');
+%line_printf('maximum number of iterations reached\n');
 if nargout == 6
     rcatC3 = decideC3;
 end

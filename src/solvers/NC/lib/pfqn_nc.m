@@ -32,7 +32,7 @@ demStations = find((Lmax./Lsum)>Distrib.Zero);
 noDemStations = setdiff(1:size(L,1), demStations);
 L = L(demStations,:);
 if any(N((sum(L,1) + sum(Z,1)) == 0)>0) % if there is a class with jobs but L and Z all zero
-    warning('The model has no positive demands in any class.');
+    line_warning(mfilename,'The model has no positive demands in any class.');
     if isempty(Z) || sum(Z(:))<options.tol
         lGn = 0;
     else
@@ -80,6 +80,7 @@ Z = Z(:,nonzeroDemandClasses);
 scalevecz = scalevec(nonzeroDemandClasses);
 % compute G for classes No with non-zero demand
 [lGnnzdem,Xnnzdem,Qnnzdem] = sub_method(L, N, Z, options);
+
 if isempty(Xnnzdem)
     X = [];
 else
@@ -151,18 +152,18 @@ switch options.method
         end
     case {'mmint','pnc2'}
         if size(L,1)>1
-            error('The %s method requires a model with a delay and a single queueing station.',options.method);
+            line_error(mfilename,'The %s method requires a model with a delay and a single queueing station.',options.method);
         end
         [~,lG] = pfqn_mmint2(L,N,sum(Z,1));
     case {'grm'}
         if size(L,1)>1
-            error('The %s method requires a model with a delay and a single queueing station.',options.method);
+            line_error(mfilename,'The %s method requires a model with a delay and a single queueing station.',options.method);
         end
         [~,lG] = pfqn_grm(L,N,sum(Z,1),options.samples);
     case {'pana','panacea','pnc'}
         [~,lG] = pfqn_panacea(L,N,sum(Z,1));
         if isnan(lG)
-            warning('Model is not in normal usage, panacea cannot continue.');
+            line_warning(mfilename,'Model is not in normal usage, panacea cannot continue.');
         end
     case 'le'
         [~,lG] = pfqn_le(L,N,sum(Z,1));
@@ -180,7 +181,7 @@ switch options.method
                 [~,lG,X,Q] = pfqn_mom(L,N,Z);
             catch
                 % java exception, probably singular linear system
-                warning('Numerical problems.');
+                line_warning(mfilename,'Numerical problems.');
                 lG = NaN;
             end
         else
@@ -192,7 +193,7 @@ switch options.method
                 [~,lG,X,Q] = pfqn_comombtf(L,N,Z);
             catch
                 % java exception, probably singular linear system
-                warning('Numerical problems.');
+                line_warning(mfilename,'Numerical problems.');
                 lG = NaN;
             end
         else
@@ -202,11 +203,16 @@ switch options.method
         [~,lG] = pfqn_propfair(L,N,sum(Z,1));
     case {'recal'}
         if sum(Z)>0
-            error('RECAL is currently available only for models with non-zero think times.');
+            line_error(mfilename,'RECAL is currently available only for models with non-zero think times.');
         end
         [~,lG] = pfqn_recal(L,N,sum(Z,1));
+    case 'rgf'
+        if sum(Z)>0
+            line_error(mfilename,'RGF is defined only for models with non-zero think times.');
+        end
+        [~,lG] = pfqn_rgf(L,N);
     otherwise
-        error('Unrecognized method: %s',options.method);
+        line_error(mfilename,'Unrecognized method: %s',options.method);
 end
 return
 end

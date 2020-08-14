@@ -160,7 +160,7 @@ while samples_collected < options.samples
                             % simulate also self-loops as we need to log them
                             %if any(new_state ~= state)
                             if node_p{act} < local && ~csmask(class_a{act}, class_p{act}) && qn.nodetype(node_p{act})~=NodeType.Source && (rate_a{act}(ia) * prob_sync_p{act} >0)
-                                error('Fatal error: state-dependent routing at node %d violates class switching mask (node %d -> node %d, class %d -> class %d).', node_a{act}, node_a{act}, node_p{act}, class_a{act}, class_p{act});
+                                line_error(mfilename,'Fatal error: state-dependent routing at node %d violates class switching mask (node %d -> node %d, class %d -> class %d).', node_a{act}, node_a{act}, node_p{act}, class_a{act}, class_p{act});
                             end
                             enabled_rates(ctr) = rate_a{act}(ia) * prob_sync_p{act};
                             enabled_sync{ctr} = act;
@@ -186,15 +186,15 @@ while samples_collected < options.samples
     state = next_state;
     if options.verbose
         if samples_collected == 1e2
-            fprintf(1,sprintf('\nSSA samples: %6d',samples_collected));
+            line_printf(sprintf('\b\nSSA samples: %6d',samples_collected));
         elseif options.verbose == 2
             if samples_collected == 0
-                fprintf(1,sprintf('\nSSA samples: %6d',samples_collected));
+                line_printf(sprintf('\b\nSSA samples: %6d',samples_collected));
             else
-                fprintf(1,sprintf('\b\b\b\b\b\b%6d',samples_collected));
+                line_printf(sprintf('\b\b\b\b\b\b\b%6d',samples_collected));
             end
         elseif mod(samples_collected,1e2)==0 || options.verbose == 2
-            fprintf(1,sprintf('\b\b\b\b\b\b%6d',samples_collected));
+            line_printf(sprintf('\b\b\b\b\b\b\b%6d',samples_collected));
         end
     end
 end

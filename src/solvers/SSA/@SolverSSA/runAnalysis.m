@@ -8,7 +8,9 @@ end
 
 if self.enableChecks && ~self.supports(self.model)
     %                if options.verbose
-    error('Line:FeatureNotSupportedBySolver','This model contains features not supported by the solver.');
+   %line_warning(mfilename,'This model contains features not supported by the solver.'); 
+ME = MException('Line:FeatureNotSupportedBySolver', 'This model contains features not supported by the solver.'); 
+throw(ME);
     %                end
     %                runtime = toc(T0);
     %                return

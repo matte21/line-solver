@@ -31,7 +31,7 @@ classdef Logger < Node
             [~,fileName,fileExt] = fileparts(logFileName);
             self.fileName = sprintf('%s%s',fileName,fileExt);
             if isempty(model.getLogPath)
-                error('To instantiate a Logger, first use setLogPath method on the Network object to define the global path to save logs.');
+                line_error(mfilename,'To instantiate a Logger, first use setLogPath method on the Network object to define the global path to save logs.');
             else
                 self.filePath = model.getLogPath;
             end

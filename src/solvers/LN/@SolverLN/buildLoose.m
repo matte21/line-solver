@@ -2,10 +2,11 @@ function buildLoose(self)
 lqn = self.lqn;
 refnode = find(lqn.sched == SchedStrategy.REF);
 %if length(refnode)>1
-%    error('This solver supports a single reference node.');
+%    line_error(mfilename,'This solver supports a single reference node.');
 %end
 self.ensemble = cell(lqn.ntasks,1);
 lqn = self.lqn;
+
 %% build one subnetwork for every processor
 self.svctmap = cell(lqn.nhosts+lqn.ntasks,1);
 self.callresptmap = cell(lqn.nhosts+lqn.ntasks,1);

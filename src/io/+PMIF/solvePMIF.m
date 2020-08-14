@@ -27,7 +27,7 @@ elseif exist(PMIFfilepath, 'dir') % it is a directory
         end
     end
 else
-    disp(['Error: Input file path ', PMIFfilepath,' not found']);
+    line_printf(['Error: Input file path ', PMIFfilepath,' not found']);
     return;
 end
 

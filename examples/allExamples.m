@@ -50,6 +50,9 @@ fprintf(1,'\n\nExample: <strong>example_openModel_3</strong>\n');
 clear; example_openModel_3; fprintf(1,'Pausing...'); pause(3.0);
 fprintf(1,'\n\nExample: <strong>example_openModel_4</strong>\n');
 clear; example_openModel_4; fprintf(1,'Pausing...'); pause(3.0);
+fprintf(1,'\n\nExample: <strong>example_openModel_5</strong>\n');
+fprintf(1,' This model examplifies how to specify models with multiple sinks (virtual sinks).\n');
+clear; example_openModel_5; fprintf(1,'Pausing...'); pause(3.0);
 
 %%
 fprintf(1,'\n<strong>RUNNING: example_mixedModel_*</strong>');
@@ -70,8 +73,14 @@ fprintf(1,'\n\nExample: <strong>example_forkJoin_3</strong>\n');
 fprintf(1,'This example shows the simulation of nested forks and joins.\n');
 clear; example_forkJoin_3; fprintf(1,'Pausing...'); pause(3.0);
 fprintf(1,'\n\nExample: <strong>example_forkJoin_4</strong>\n');
-fprintf(1,'This example shows a model with a fork but without a sink.\n');
+fprintf(1,'This example shows a model with a fork but without a join.\n');
 clear; example_forkJoin_4; fprintf(1,'Pausing...'); pause(3.0);
+
+%%
+fprintf(1,'\n<strong>RUNNING: example_sdRouting_*</strong>');
+fprintf(1,'This example analyzes round-robin scheduling.\n');
+fprintf(1,'\n\nExample: <strong>example_sdRouting_1</strong>\n');
+clear; example_sdRouting_1; fprintf(1,'Pausing...'); pause(3.0);
 
 %%
 fprintf(1,'\n<strong>RUNNING: example_stateProbabilities</strong>');
@@ -81,6 +90,10 @@ fprintf(1,'\n\nExample: <strong>example_stateProbabilities_2</strong>\n');
 clear; example_stateProbabilities_2; fprintf(1,'Pausing...'); pause(3.0);
 fprintf(1,'\n\nExample: <strong>example_stateProbabilities_3</strong>\n');
 clear; example_stateProbabilities_3; fprintf(1,'Pausing...'); pause(3.0);
+fprintf(1,'\n\nExample: <strong>example_stateProbabilities_4</strong>\n');
+clear; example_stateProbabilities_4; fprintf(1,'Pausing...'); pause(3.0);
+fprintf(1,'\n\nExample: <strong>example_stateProbabilities_5</strong>\n');
+clear; example_stateProbabilities_5; fprintf(1,'Pausing...'); pause(3.0);
 
 %%
 fprintf(1,'\n<strong>RUNNING: example_cdfRespT_*</strong>');

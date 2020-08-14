@@ -45,7 +45,7 @@ while n~=-1
         p0 = 1-sum(pi(i,(1:sum(n))+1,hashpop(n,N)));
         if p0<eps 
             if warn
-                warning('MVA-LD is numerically unstable on this model, forcing all probabilities to be non-negative.'); 
+                line_warning(mfilename,'MVA-LD is numerically unstable on this model, forcing all probabilities to be non-negative.'); 
 %                N
                 warn=false;
                 isNumStable = false;

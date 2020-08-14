@@ -16,7 +16,7 @@ classdef Replayer < TimeSeries
                 dirStruct = dir(fileName); 
                 fileName = [dirStruct.folder,filesep,dirStruct.name];
             else 
-                error('The file cannot be located, use the full file path.');
+                line_error(mfilename,'The file cannot be located, use the full file path.');
             end
             self@TimeSeries('Replayer',1);
             setParam(self, 1, 'fileName', fileName, 'java.lang.String');

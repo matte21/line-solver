@@ -12,7 +12,7 @@ classdef Pareto < ContinuousDistrib
             % parameters
             self@ContinuousDistrib('Pareto',2,[0,Inf]);
             if shape < 2
-                error('shape parameter must be >= 2.0');
+                line_error(mfilename,'shape parameter must be >= 2.0');
             end
             setParam(self, 1, 'alpha', shape, 'java.lang.Double');
             setParam(self, 2, 'k', scale, 'java.lang.Double');

@@ -6,7 +6,7 @@ function node = getSource(self)
 
 idx = self.getIndexSourceNode;
 if isempty(idx)
-    %    warning('The model does not have a Source station.');
+    %    line_warning(mfilename,'The model does not have a Source station.');
     node = [];
     return
 end

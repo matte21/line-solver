@@ -16,7 +16,7 @@ rows = findrows(TSS(:,2:end), nir(:)');
 if ~isempty(rows)
     probSysStateAggr = sum(TSS(rows,1))/sum(TSS(:,1));
 else
-    warning('The state was not seen during the simulation.');
+    line_warning(mfilename,'The state was not seen during the simulation.');
     probSysStateAggr = 0;
 end
 end

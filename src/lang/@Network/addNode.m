@@ -6,7 +6,7 @@ function addNode(self, node)
 
 %
 if sum(cellfun(@(x) strcmp(x.name,node.name), {self.nodes{1:end}}))>0
-    error('A node with an identical name already exists.');
+    line_error(mfilename,'A node with an identical name already exists.');
 end
 self.nodes{end+1,1} = node;
 if isa(node,'Station')

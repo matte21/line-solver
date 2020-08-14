@@ -11,7 +11,7 @@ classdef SolverCTMC < NetworkSolver
             self.setOptions(Solver.parseOptions(varargin, self.defaultOptions));
         end
         
-        runtime = runAnalysis(self, options)
+        runtime = runAnalysis(self, options, config)
         Pnir = getProb(self, node, state)
         Pn = getProbSys(self)
         Pnir = getProbAggr(self, ist)
@@ -27,10 +27,10 @@ classdef SolverCTMC < NetworkSolver
             
             options = self.getOptions;
             if options.force
-                self.run;
+                self.runAnalysis;
             end
             if isempty(self.result) || ~isfield(self.result,'space')
-                warning('The model solution is not available yet or has not been cached. Either solve it or use the ''force'' option to require this is done automatically, e.g., SolverCTMC(model,''force'',true).getStateSpace()');
+                line_warning(mfilename,'The model solution is not available yet or has not been cached. Either solve it or use the ''force'' option to require this is done automatically, e.g., SolverCTMC(model,''force'',true).getStateSpace()');
                 stateSpace = [];
                 nodeStateSpace = [];
             else
@@ -51,7 +51,7 @@ classdef SolverCTMC < NetworkSolver
                 self.run;
             end
             if isempty(self.result) || ~isfield(self.result,'spaceAggr')
-                warning('The model has not been cached. Either solve it or use the ''force'' option to require this is done automatically, e.g., SolverCTMC(model,''force'',true).getStateSpaceAggr()');
+                line_warning(mfilename,'The model has not been cached. Either solve it or use the ''force'' option to require this is done automatically, e.g., SolverCTMC(model,''force'',true).getStateSpaceAggr()');
                 stateSpaceAggr = [];
             else
                 stateSpaceAggr = self.result.spaceAggr;
@@ -81,6 +81,10 @@ classdef SolverCTMC < NetworkSolver
             end
         end
         
+        function [infGen, eventFilt, ev] = getInfGen(self)
+            [infGen, eventFilt, ev] = getGenerator(self);
+        end
+        
         function [infGen, eventFilt, ev] = getGenerator(self)
             % [INFGEN, EVENTFILT] = GETGENERATOR()
             
@@ -89,10 +93,10 @@ classdef SolverCTMC < NetworkSolver
             % associated filtration for each event
             options = self.getOptions;
             if options.force
-                self.run;
+                self.runAnalysis;
             end
             if isempty(self.result) || ~isfield(self.result,'infGen')
-                warning('The model has not been cached. Either solve it or use the ''force'' option to require this is done automatically, e.g., SolverCTMC(model,''force'',true).getGenerator()');
+                line_warning(mfilename,'The model has not been cached. Either solve it or use the ''force'' option to require this is done automatically, e.g., SolverCTMC(model,''force'',true).getGenerator()');
                 infGen = [];
                 eventFilt = [];
             else
@@ -123,6 +127,7 @@ classdef SolverCTMC < NetworkSolver
                 'SchedStrategy_RAND','SchedStrategy_SEPT',...
                 'SchedStrategy_LEPT','SchedStrategy_FCFS',...
                 'SchedStrategy_HOL','SchedStrategy_LCFS',...
+                'RoutingStrategy_RRB',...
                 'RoutingStrategy_PROB','RoutingStrategy_RAND',...
                 'ClosedClass','OpenClass','Replayer'});
         end
@@ -154,7 +159,7 @@ classdef SolverCTMC < NetworkSolver
             for s=1:size(SS,1)
                 for sp=1:size(SS,1)
                     if Q(s,sp)>0
-                        fprintf(1,'\n%s->%s: %f',mat2str(SS(s,:)),mat2str(SS(sp,:)),double(Q(s,sp)));
+                        line_printf('\n%s->%s: %f',mat2str(SS(s,:)),mat2str(SS(sp,:)),double(Q(s,sp)));
                     end
                 end
             end
@@ -172,7 +177,7 @@ classdef SolverCTMC < NetworkSolver
                 for s=1:size(SS,1)
                     for sp=1:size(SS,1)
                         if D{e}(s,sp)>0
-                            fprintf(1,'\n%s-- %d: (%d,%d) => (%d,%d) -->%s: %f',mat2str(SS(s,:)),e,sync{e}.active{1}.node,sync{e}.active{1}.class,sync{e}.passive{1}.node,sync{e}.passive{1}.class,mat2str(SS(sp,:)),double(D{e}(s,sp)));
+                            line_printf('\n%s-- %d: (%d,%d) => (%d,%d) -->%s: %f',mat2str(SS(s,:)),e,sync{e}.active{1}.node,sync{e}.active{1}.class,sync{e}.passive{1}.node,sync{e}.passive{1}.class,mat2str(SS(sp,:)),double(D{e}(s,sp)));
                         end
                     end
                 end

@@ -227,7 +227,7 @@ for i=1:length(node_name)
                         par={xarv_sec{i}{r}.subParameter}; par=par{2};
                         node{i}.setArrival(jobclass{r}, Replayer(par.value));
                     otherwise
-						error('The model includes an arrival distribution not supported by the model-to-model transformation from JMT.')
+						line_error(mfilename,'The model includes an arrival distribution not supported by the model-to-model transformation from JMT.')
                         xarv_statdistrib{i}{r}{1}.name
                         node{i}.setArrival(jobclass{r}, Exp(1)); %TODO
                 end
@@ -294,7 +294,7 @@ for i=1:length(node_name)
                         T = [T; pars{c}.value];
                     end
                     if any(any(tril(T,-1))>0) % not APH
-                        warning('The input model uses a general PH distribution, which is not yet supported in LINE. Fitting the first three moments into an APH distribution.');
+                        line_warning(mfilename,'The input model uses a general PH distribution, which is not yet supported in LINE. Fitting the first three moments into an APH distribution.');
                         PH = {T,-T*ones(size(T,1),1)*alpha};
                         ax = APH.fitCentral(map_mean(PH), map_var(PH), map_skew(PH));
                     else % APH
@@ -370,6 +370,6 @@ for from=1:length(node_name)
 end
 %model.link(P);
 Ttot=toc(T0);
-%fprintf(1,['JMT2LINE parsing time: ',num2str(Ttot),' s\n']);
+%line_printf(['JMT2LINE parsing time: ',num2str(Ttot),' s\n']);
 
 end

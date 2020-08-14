@@ -48,7 +48,7 @@
 %             for e=1:length(self.models)
 %                 if ~options.force && ~self.supports(self.models{e})
 %                     if options.verbose
-%                         fprintf(1,'The model in the random environment stage %d is not supported by the %s solver.',e,self.getName);
+%                         line_printf('The model in the random environment stage %d is not supported by the %s solver.',e,self.getName);
 %                     end
 %                     runtime = toc(T0);
 %                     return
@@ -175,7 +175,7 @@
 %             runtime = self.runAnalysis();
 %             results = self.getResults();
 %             %            catch me
-%             %                error(getReport(me));
+%             %                line_error(getReport(me));
 %             %            end
 %         end
 %

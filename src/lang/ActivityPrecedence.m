@@ -39,7 +39,7 @@ classdef ActivityPrecedence
             % OBJ = ACTIVITYPRECEDENCE(PREACTS, POSTACTS, PRETYPE, POSTTYPE, PREPARAMS, POSTPARAMS)
             
             if ~exist('preActs','var') || ~exist('postActs','var')
-                error('Constructor requires to specify at least pre and post activities.');
+                line_error(mfilename,'Constructor requires to specify at least pre and post activities.');
             end
             
             if ~exist('preType','var')
@@ -94,7 +94,7 @@ classdef ActivityPrecedence
                 case ActivityPrecedence.POST_LOOP
                     typeId = ActivityPrecedence.ID_POST_LOOP;
                 otherwise
-                    error('Unrecognized precedence type.');
+                    line_error(mfilename,'Unrecognized precedence type.');
             end
         end        
         

@@ -139,7 +139,7 @@ classdef Node < NetworkElement
         function summary(self)
             % SUMMARY()
             
-            fprintf('\nNode: <strong>%s</strong>',self.getName);
+            line_printf('\nNode: <strong>%s</strong>',self.getName);
             %            self.input.summary;
             %            self.server.summary;
             %            self.output.summary;

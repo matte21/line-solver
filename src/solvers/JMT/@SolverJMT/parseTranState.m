@@ -12,7 +12,7 @@ nClasses = length(nodePreload);
 state = [jobArvTS,zeros(length(jobArvTS),nClasses);
     jobDepTS,zeros(length(jobDepTS),nClasses)];
 
-evtype = zeros(size(state,1),1);
+evtype = categorical(size(state,1),1);
 evclass = zeros(size(state,1),1);
 
 for i=1:size(jobArvTS,1)
@@ -31,7 +31,7 @@ state = [0,nodePreload;state];
 for j=2:(nClasses+1)
     state(:,j) = cumsum(state(:,j));%+nodePreload(j-1);
 end
-evtype = [EventType.INIT;evtype(I)];
-evclass = [EventType.INIT;evclass(I)];
+evtype = [EventType.INIT;evtype(I)']; % categorical requires transpose
+evclass = [NaN;evclass(I)];
 
 end

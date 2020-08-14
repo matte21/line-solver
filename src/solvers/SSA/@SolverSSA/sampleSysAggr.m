@@ -42,6 +42,6 @@ switch options.method
         end
         tranSysState.isaggregate = true;
     otherwise
-        error('sampleSys is not available in SolverSSA with the chosen method.');
+        line_error(mfilename,'sampleSys is not available in SolverSSA with the chosen method.');
 end
 end

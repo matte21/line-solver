@@ -36,7 +36,7 @@ classdef Cache < StatefulNode
             self.accessProb = {};
             self.itemLevelCap = itemLevelCap; % item capacity
             if sum(itemLevelCap) > nitems
-                error('The number of items is smaller than the capacity of %s.',name);
+                line_error(mfilename,'The number of items is smaller than the capacity of %s.',name);
             end
             self.replacementPolicy = ReplacementStrategy.toId(replPolicy);
             self.server =  CacheClassSwitcher(classes, levels, itemLevelCap); % replace Server created by Queue
@@ -99,7 +99,7 @@ classdef Cache < StatefulNode
             if distribution.isDiscrete
                 self.popularity{itemclass.index, jobclass.index} = distribution.copy;
                 if self.popularity{itemclass.index, jobclass.index}.support(2) ~= itemclass.nitems
-                    error('The reference model is defined on a number of items different from the ones used to instantiate %s.',self.name);
+                    line_error(mfilename,'The reference model is defined on a number of items different from the ones used to instantiate %s.',self.name);
                 end
                 switch class(distribution)
                     case 'Zipf'
@@ -107,7 +107,7 @@ classdef Cache < StatefulNode
                 end
                 %                self.probselect(itemclass.index, jobclass.index) = probselect;
             else
-                error('A discrete popularity distribution is required.');
+                line_error(mfilename,'A discrete popularity distribution is required.');
             end
         end
         

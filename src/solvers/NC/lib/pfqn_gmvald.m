@@ -87,7 +87,7 @@ function G=pfqn_gmvaldsingle(L,N,mu)
 
 [M,R]=size(L);
 if R>1
-    error('multiclass model detected. gmvaldsingle is for single class models.');
+    line_error(mfilename,'multiclass model detected. gmvaldsingle is for single class models.');
 end
 g=L(1,1)*0;
 for n=1:N

@@ -1,38 +1,41 @@
-function runtime = runAnalysis(self, options)
+function runtime = runAnalysis(self, options, config)
 % RUNTIME = RUN()
 % Run the solver
 
 T0=tic;
-if ~exist('options','var')
+if nargin<2
     options = self.getOptions;
+end
+if nargin<3
+    config = [];
 end
 
 switch options.method
     case {'default','stateindep','statedep'}
         % do nothing
     otherwise
-    warning('This solver does not support the specified method. Setting to default.');
+    line_warning(mfilename,'This solver does not support the specified method. Setting to default.');
     options.method  = 'default';
 end
 
 if isinf(options.timespan(1))
     if options.verbose  == 2
-        warning('%s requires options.timespan(1) to be finite. Setting it to 0.',mfilename);
+        line_warning(mfilename,'%s requires options.timespan(1) to be finite. Setting it to 0.',mfilename);
     end
     options.timespan(1) = 0;
 end
 
 if options.timespan(1) == options.timespan(2)
-    warning('%s: timespan is a single point, unsupported. Setting options.timespace(1) to 0.\n',mfilename);
+    line_warning(mfilename,'%s: timespan is a single point, unsupported. Setting options.timespace(1) to 0.\n',mfilename);
     options.timespan(1) = 0;
 end
 
 if self.enableChecks && ~self.supports(self.model)
     %                if options.verbose
-    error('Line:FeatureNotSupportedBySolver','This model contains features not supported by the solver.');
+    %line_warning(mfilename,'This model contains features not supported by the solver.'); ME = MException('Line:FeatureNotSupportedBySolver', 'This model contains features not supported by the solver.'); throw(ME);
     %                end
-    %                runtime = toc(T0);
-    %                return
+    %runtime = toc(T0);
+    %return
 end
 
 qn = self.model.getStruct().copy; % this gets modified later on so pass by copy
@@ -56,8 +59,7 @@ while s0_id>=0 % for all possible initial states
             qn.state{isf} = s0{isf}(1+s0_id(isf),:); % assign initial state to network
         end
     end
-    if s0prior_val > 0
-        
+    if s0prior_val > 0        
         [Qfull, Ufull, Rfull, Tfull, Cfull, Xfull, t, Qfull_t, Ufull_t, Tfull_t, lastSol] = solver_fluid_analysis(qn, options);
         [t,uniqueIdx] = unique(t);
         if isempty(lastSol) % if solution fails

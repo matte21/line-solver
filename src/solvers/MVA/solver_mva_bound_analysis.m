@@ -14,7 +14,7 @@ switch options.method
     case 'aba.upper'
         if qn.nclasses==1 && qn.nclosedjobs >0 % closed single-class queueing network
             if any(qn.nservers(qn.schedid ~= SchedStrategy.ID_INF)>1)
-                error('Line:UnsupportedMethod','Unsupported method for a model with multi-server stations.');
+                line_error(mfilename,'Line:UnsupportedMethod','Unsupported method for a model with multi-server stations.');
             end
             V = qn.visits{1}(:);
             Z = sum(V(qn.schedid == SchedStrategy.ID_INF) ./ qn.rates(qn.schedid == SchedStrategy.ID_INF));
@@ -35,7 +35,7 @@ switch options.method
     case 'aba.lower'
         if qn.nclasses==1 && qn.nclosedjobs >0 % closed single-class queueing network
             if any(qn.nservers(qn.schedid ~= SchedStrategy.ID_INF)>1)
-                error('Line:UnsupportedMethod','Unsupported method for a model with multi-server stations.');
+                line_error(mfilename,'Line:UnsupportedMethod','Unsupported method for a model with multi-server stations.');
             end
             V = qn.visits{1}(:);
             Z = sum(V(qn.schedid == SchedStrategy.ID_INF) ./ qn.rates(qn.schedid == SchedStrategy.ID_INF));
@@ -54,7 +54,7 @@ switch options.method
     case 'bjb.upper'
         if qn.nclasses==1 && qn.nclosedjobs >0 % closed single-class queueing network
             if any(qn.nservers(qn.schedid ~= SchedStrategy.ID_INF)>1)
-                error('Line:UnsupportedMethod','Unsupported method for a model with multi-server stations.');
+                line_error(mfilename,'Line:UnsupportedMethod','Unsupported method for a model with multi-server stations.');
             end
             V = qn.visits{1}(:);
             Z = sum(V(qn.schedid == SchedStrategy.ID_INF) ./ qn.rates(qn.schedid == SchedStrategy.ID_INF));
@@ -80,7 +80,7 @@ switch options.method
     case 'bjb.lower'
         if qn.nclasses==1 && qn.nclosedjobs >0 % closed single-class queueing network
             if any(qn.nservers(qn.schedid ~= SchedStrategy.ID_INF)>1)
-                error('Line:UnsupportedMethod','Unsupported method for a model with multi-server stations.');
+                line_error(mfilename,'Line:UnsupportedMethod','Unsupported method for a model with multi-server stations.');
             end
             V = qn.visits{1}(:);
             Z = sum(V(qn.schedid == SchedStrategy.ID_INF) ./ qn.rates(qn.schedid == SchedStrategy.ID_INF));
@@ -106,7 +106,7 @@ switch options.method
     case 'pb.upper'
         if qn.nclasses==1 && qn.nclosedjobs >0 % closed single-class queueing network
             if any(qn.nservers(qn.schedid ~= SchedStrategy.ID_INF)>1)
-                error('Line:UnsupportedMethod','Unsupported method for a model with multi-server stations.');
+                line_error(mfilename,'Line:UnsupportedMethod','Unsupported method for a model with multi-server stations.');
             end
             V = qn.visits{1}(:);
             Z = sum(V(qn.schedid == SchedStrategy.ID_INF) ./ qn.rates(qn.schedid == SchedStrategy.ID_INF));
@@ -134,7 +134,7 @@ switch options.method
     case 'pb.lower'
         if qn.nclasses==1 && qn.nclosedjobs >0 % closed single-class queueing network
             if any(qn.nservers(qn.schedid ~= SchedStrategy.ID_INF)>1)
-                error('Line:UnsupportedMethod','Unsupported method for a model with multi-server stations.');
+                line_error(mfilename,'Line:UnsupportedMethod','Unsupported method for a model with multi-server stations.');
             end
             V = qn.visits{1}(:);
             Z = sum(V(qn.schedid == SchedStrategy.ID_INF) ./ qn.rates(qn.schedid == SchedStrategy.ID_INF));
@@ -162,7 +162,7 @@ switch options.method
     case 'gb.upper'
         if qn.nclasses==1 && qn.nclosedjobs >0 % closed single-class queueing network
             if any(qn.nservers(qn.schedid ~= SchedStrategy.ID_INF)>1)
-                error('Line:UnsupportedMethod','Unsupported method for a model with multi-server stations.');
+                line_error(mfilename,'Line:UnsupportedMethod','Unsupported method for a model with multi-server stations.');
             end
             V = qn.visits{1}(:);
             Z = sum(V(qn.schedid == SchedStrategy.ID_INF) ./ qn.rates(qn.schedid == SchedStrategy.ID_INF));
@@ -193,7 +193,7 @@ switch options.method
     case 'gb.lower'
         if qn.nclasses==1 && qn.nclosedjobs >0 % closed single-class queueing network
             if any(qn.nservers(qn.schedid ~= SchedStrategy.ID_INF)>1)
-                error('Line:UnsupportedMethod','Unsupported method for a model with multi-server stations.');
+                line_error(mfilename,'Line:UnsupportedMethod','Unsupported method for a model with multi-server stations.');
             end
             V = qn.visits{1}(:);
             Z = sum(V(qn.schedid == SchedStrategy.ID_INF) ./ qn.rates(qn.schedid == SchedStrategy.ID_INF));

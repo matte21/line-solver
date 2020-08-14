@@ -17,12 +17,13 @@ classdef SolverNC < NetworkSolver
             end
         end
         
-        runtime = runAnalysis(self, options)
+        runtime = runAnalysis(self, options, config)
         Pnir = getProb(self, node, state)
         Pnir = getProbAggr(self, node, state_a)
         Pn   = getProbSys(self)        
         Pn   = getProbSysAggr(self)
-        
+        RD = getCdfRespT(self, R);
+
         [lNormConst] = getProbNormConstAggr(self)
     end
     
@@ -56,7 +57,7 @@ classdef SolverNC < NetworkSolver
             % CHECKOPTIONS(OPTIONS)            
             solverName = mfilename;
             if isfield(options,'timespan') && isfinite(options.timespan(2))
-                error('Finite timespan not supported in %s',solverName);
+                line_error(mfilename,'Finite timespan not supported in %s',solverName);
             end
         end
         

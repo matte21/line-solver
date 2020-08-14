@@ -10,7 +10,7 @@ N = qn.njobs;
 if all(isfinite(N))
     switch options.method
         case 'exact'
-            error('Exact joint state probabilities not available yet in SolverMVA.');
+            line_error(mfilename,'Exact joint state probabilities not available yet in SolverMVA.');
         otherwise
             state = self.model.getState;
             % Binomial approximation with mean fitted to queue-lengths.
@@ -29,6 +29,6 @@ if all(isfinite(N))
             Pnir = real(exp(logPn));
     end
 else
-    error('getProbAggr not yet implemented for models with open classes.');
+    line_error(mfilename,'getProbAggr not yet implemented for models with open classes.');
 end
 end

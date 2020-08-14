@@ -10,7 +10,7 @@ nir = zeros(qn.nstateful,qn.nclasses);
 for isf=1:qn.nstateful
     ind = qn.statefulToNode(isf);
     if size(state{isf},1) > 1
-        warning('Some states at node %d will be ignored. Please assign the node with a specific state.', ind);
+        line_warning(mfilename,'Some states at node %d will be ignored. Please assign the node with a specific state.', ind);
     end
     [~,nir(isf,:)] = State.toMarginal(qn, ind, state{isf}(1,:));
 end
@@ -19,7 +19,7 @@ rows = findrows(TSS(:,2:end), nir(:)');
 if ~isempty(rows)
     ProbSysAggr = sum(TSS(rows,1))/sum(TSS(:,1));
 else
-    warning('The state was not seen during the simulation.');
+    line_warning(mfilename,'The state was not seen during the simulation.');
     ProbSysAggr = 0;
 end
 end

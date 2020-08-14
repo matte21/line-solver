@@ -88,7 +88,7 @@ classdef Erlang < MarkovianDistribution
             % ER = FITRATE(RATE)
             
             % Fit distribution with given rate
-            warning('The Erlang distribution is underspecified by the rate, setting the number of phases to 2.');
+            line_warning(mfilename,'The Erlang distribution is underspecified by the rate, setting the number of phases to 2.');
             er = Erlang.fitMeanAndOrder(1/RATE, 2);
         end
         
@@ -96,14 +96,14 @@ classdef Erlang < MarkovianDistribution
             % ER = FITMEAN(MEAN)
             
             % Fit distribution with given mean
-            warning('The Erlang distribution is underspecified by the mean, setting the number of phases to 2.');
+            line_warning(mfilename,'The Erlang distribution is underspecified by the mean, setting the number of phases to 2.');
             er = Erlang.fitMeanAndOrder(MEAN, 2);
         end
         
         function er = fitMeanAndSCV(MEAN, SCV)
             % ER = FITMEANANDSCV(MEAN, SCV)
             if SCV>1
-                error('The Erlang distribution requires squared coefficient of vairation <= 1.');
+                line_error(mfilename,'The Erlang distribution requires squared coefficient of vairation <= 1.');
             end
             % Fit distribution with given mean and squared coefficient of variation (SCV=variance/mean^2)
             r = ceil(1/SCV);

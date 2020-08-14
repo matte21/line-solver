@@ -1,4 +1,4 @@
-function t = Table(varargin)
+function t = Table(varargin) 
 % T = TABLE(VARARGIN)
 
 if isoctave

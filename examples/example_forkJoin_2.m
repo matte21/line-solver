@@ -16,7 +16,7 @@ queue1.setService(jobclass1, Exp(1.0));
 queue2.setService(jobclass1, Exp(0.75));
 
 source.setArrival(jobclass2, Exp(0.25));
-queue1.setService(jobclass2, Exp(2.0));
+queue1.setService(jobclass2, Immediate());
 queue2.setService(jobclass2, Exp(2.0));
 
 P = cellzeros(2,2,6,6);

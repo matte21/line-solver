@@ -1,16 +1,21 @@
-function runtime = runAnalysis(self, options)
+function runtime = runAnalysis(self, options, config)
 % RUNTIME = RUN()
 % Run the solver
 
 T0=tic;
-if ~exist('options','var')
+if nargin<2
     options = self.getOptions;
+end
+if nargin<3
+    config = [];
 end
 
 
 if self.enableChecks && ~self.supports(self.model)
     %                if options.verbose
-    error('Line:FeatureNotSupportedBySolver','This model contains features not supported by the solver.');
+    line_warning(mfilename,'This model contains features not supported by the solver.');
+    ME = MException('Line:FeatureNotSupportedBySolver', 'This model contains features not supported by the solver.');
+    throw(ME);
     %                end
     %                runtime = toc(T0);
     %                return

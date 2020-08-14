@@ -71,14 +71,20 @@ classdef MMPP2 < MarkovModulated
             scv = (2*lambda0^2*sigma0*sigma1 + lambda0*lambda1*sigma0^2 - 2*lambda0*lambda1*sigma0*sigma1 + lambda0*lambda1*sigma1^2 + lambda0*sigma0^2*sigma1 + 2*lambda0*sigma0*sigma1^2 + lambda0*sigma1^3 + 2*lambda1^2*sigma0*sigma1 + lambda1*sigma0^3 + 2*lambda1*sigma0^2*sigma1 + lambda1*sigma0*sigma1^2)/((sigma0 + sigma1)^2*(lambda0*lambda1 + lambda0*sigma1 + lambda1*sigma0));
         end
         
-        function id = getID(self) % asymptotic index of dispersion
-            % ID = GETID() % ASYMPTOTIC INDEX OF DISPERSION
+        function id = getIDC(self)
+            % IDC = GETIDC() % INDEX OF DISPERSION FOR COUNTS
             
             lambda0 =  self.getParam(1).paramValue;
             lambda1 =  self.getParam(2).paramValue;
             sigma0 =  self.getParam(3).paramValue;
             sigma1 =  self.getParam(4).paramValue;
             id = 1 + 2*(lambda0-lambda1)^2*sigma0*sigma1/(sigma0+sigma1)^2/(lambda0*sigma1+lambda1*sigma0);
+        end
+        
+        function id = getIDI(self)
+            % IDI = GETIDI() % INDEX OF DISPERSION FOR INTERVALS
+            
+            id = self.getIDC(self); % only asymptotic for now
         end
         
         function MAP = getRepresentation(self)

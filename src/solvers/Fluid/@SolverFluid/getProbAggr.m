@@ -2,10 +2,10 @@ function [Pnir,logPnir] = getProbAggr(self, ist)
 % [PNIR,LOGPNIR] = GETPROBSTATEAGGR(IST)
 
 if ~exist('ist','var')
-    error('getProbAggr requires to pass a parameter the station of interest.');
+    line_error(mfilename,'getProbAggr requires to pass a parameter the station of interest.');
 end
 if ist > self.model.getNumberOfStations
-    error('Station number exceeds the number of stations in the model.');
+    line_error(mfilename,'Station number exceeds the number of stations in the model.');
 end
 if isempty(self.result)
     self.run;
@@ -26,6 +26,6 @@ if all(isfinite(N))
     end
     Pnir = real(exp(logPnir));
 else
-    error('getProbAggr not yet implemented for models with open classes.');
+    line_error(mfilename,'getProbAggr not yet implemented for models with open classes.');
 end
 end

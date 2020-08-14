@@ -61,8 +61,8 @@ qnc = qn;
 if options.keep
     fname = tempname;
     save([fname,'.mat'],'InfGen','StateSpace','StateSpaceAggr','EventFiltration')
-    fprintf(1,'\nCTMC infinitesimal generator and state space saved in: ');
-    disp([fname, '.mat'])
+    line_printf('\nCTMC infinitesimal generator and state space saved in: ');
+    line_printf([fname, '.mat'])
 else
     fname = '';
 end

@@ -74,7 +74,7 @@ try
     doc = dBuilder.parse(filename);
 catch exception %java.io.FileNotFoundException
     if ~exist(filename, 'file')
-        disp(['Error: Input XML file ', filename, ' not found']);
+        line_printf(['Error: Input XML file ', filename, ' not found']);
         hosts = [];
         tasks = [];
         entries = [];
@@ -92,8 +92,8 @@ end
 
 doc.getDocumentElement().normalize();
 if verbose > 0
-    disp(['Parsing LQN file: ', filename] );
-    disp(['Root element :', char(doc.getDocumentElement().getNodeName()) ] );
+    line_printf(['Parsing LQN file: ', filename] );
+    line_printf(['Root element :', char(doc.getDocumentElement().getNodeName()) ] );
 end
 
 %NodeList

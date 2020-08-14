@@ -2,7 +2,7 @@ function Pnir = getProb(self, node, state)
 % PNIR = GETPROB(NODE, STATE)
 
 if ~exist('node','var')
-    error('getProb requires to pass a parameter the station of interest.');
+    line_error(mfilename,'getProb requires to pass a parameter the station of interest.');
 end
 if ~isfield(self.options,'keep')
     self.options.keep = false;

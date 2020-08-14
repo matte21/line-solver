@@ -7,6 +7,6 @@ switch self.options.method
         lNormConst = self.result.Prob.logNormConstAggr;
     otherwise
         lNormConst = NaN; %#ok<NASGU>
-        error('Selected solver method does not compute normalizing constants. Choose either jmva.recal, jmva.comom, or jmva.ls.');
+        line_error(mfilename,'Selected solver method does not compute normalizing constants. Choose either jmva.recal, jmva.comom, or jmva.ls.');
 end
 end

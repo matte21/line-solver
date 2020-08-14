@@ -13,7 +13,7 @@ rows = findrows(TSS(:,2:end), state);
 if ~isempty(rows)
     ProbAggr = sum(TSS(rows,1))/sum(TSS(:,1));
 else
-    warning('The state was not seen during the simulation.');
+    line_warning(mfilename,'The state was not seen during the simulation.');
     ProbAggr = 0;
 end
 end

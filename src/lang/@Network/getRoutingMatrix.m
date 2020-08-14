@@ -21,7 +21,7 @@ rtNodesByStation = {};
 hasOpenClasses = self.hasOpenClasses();
 if ~exist('arvRates','var')
     if hasOpenClasses
-        error('getRoutingMatrix requires arrival rates for open classes.');
+        line_error(mfilename,'getRoutingMatrix requires arrival rates for open classes.');
     end
 end
 
@@ -41,11 +41,11 @@ for i=1:M
                         switch self.nodes{i}.output.outputStrategy{k}{2}
                             case RoutingStrategy.PROB
                                 if length(self.nodes{i}.output.outputStrategy{k}{end}) ~= sum(connMatrix(i,:))
-                                    error('Fork must have 1.0 routing probability towards all outgoing links.');
+                                    line_error(mfilename,'Fork must have 1.0 routing probability towards all outgoing links.');
                                 end
                                 for t=1:length(self.nodes{i}.output.outputStrategy{k}{end}) % for all outgoing links
                                     if self.nodes{i}.output.outputStrategy{k}{end}{t}{2} ~= 1.0
-                                        error('Fork must have 1.0 routing probability towards all outgoing links, but a routing probability is at %f.',self.nodes{i}.output.outputStrategy{k}{end}{t}{2});
+                                        line_error(mfilename,'Fork must have 1.0 routing probability towards all outgoing links, but a routing probability is at %f.',self.nodes{i}.output.outputStrategy{k}{end}{t}{2});
                                     end
                                 end
                         end
@@ -95,7 +95,7 @@ for i=1:M
                                 rtNodes((i-1)*K+k,(j-1)*K+k) = Distrib.Zero;
                             end
                         end
-                        %error([self.nodes{i}.output.outputStrategy{k}{2},' routing policy is not yet supported.']);
+                        %line_error([self.nodes{i}.output.outputStrategy{k}{2},' routing policy is not yet supported.']);
                 end
             end
     end

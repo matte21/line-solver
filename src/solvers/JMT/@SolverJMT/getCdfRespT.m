@@ -43,7 +43,7 @@ for i= 1:cdfmodel.getNumberOfStations
     ni = cdfmodel.getNodeIndex(cdfmodel.getStationNames{i});
     for r=1:cdfmodel.getNumberOfClasses
         if isNodeClassLogged(ni,r)
-            if ~isempty(logData{ni,r})
+            if ~isempty(logData{ni,r}) && ~isempty(logData{ni,r}.RespT)
                 [F,X] = ecdf(logData{ni,r}.RespT);
                 RD{i,r} = [F,X];
             end

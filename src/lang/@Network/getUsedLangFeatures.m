@@ -5,12 +5,19 @@ function used = getUsedLangFeatures(self)
 % All rights reserved.
 
 self.initUsedFeatures;
+if ~isempty(self.getIndexClosedClasses)
+    self.setUsedFeatures('ClosedClass');
+end
+if ~isempty(self.getIndexOpenClasses)
+    self.setUsedFeatures('OpenClass');
+end
+
 % Get attributes
 for i=1:self.getNumberOfNodes()
     for r=1:self.getNumberOfClasses()
         try % not all nodes have all classes
             switch class(self.nodes{i})
-                case {'Queue','DelayStation'}
+                case {'Queue','QueueingStation','DelayStation','Delay'}
                     if ~isempty(self.nodes{i}.server.serviceProcess{r})
                         self.setUsedFeatures(self.nodes{i}.server.serviceProcess{r}{3}.name);
                         if self.nodes{i}.numberOfServers > 1
@@ -23,7 +30,7 @@ for i=1:self.getNumberOfNodes()
                     self.setUsedFeatures(RoutingStrategy.toFeature(self.nodes{i}.output.outputStrategy{r}{2}));
                 case 'Source'
                     self.setUsedFeatures(self.nodes{i}.input.sourceClasses{r}{3}.name);
-                    self.setUsedFeatures('OpenClass');
+                    self.setUsedFeatures('Source');
                 case 'CacheNode'
                     self.setUsedFeatures('Cache');
                     self.setUsedFeatures('CacheNode');
@@ -36,6 +43,8 @@ for i=1:self.getNumberOfNodes()
                 case 'Join'
                     self.setUsedFeatures('Join');
                     self.setUsedFeatures('Joiner');
+                case 'Sink'
+                    self.setUsedFeatures('Sink');
                 case 'Cache'
                     self.setUsedFeatures('CacheClassSwitcher');
                     self.setUsedFeatures('Cache');

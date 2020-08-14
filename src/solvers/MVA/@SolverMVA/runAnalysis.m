@@ -1,25 +1,31 @@
-function runtime = runAnalysis(self, options)
+function runtime = runAnalysis(self, options, config)
 % RUNTIME = RUN()
 % Run the solver
 
 T0=tic;
-if ~exist('options','var')
+if nargin<2
     options = self.getOptions;
 end
+if nargin<3
+    config = [];
+end
+
 QN = []; UN = [];
 RN = []; TN = [];
 CN = []; XN = [];
 lG = NaN;
 
 if self.enableChecks && ~self.supports(self.model)
-    error('Line:FeatureNotSupportedBySolver','This model contains features not supported by the solver.');
+   %line_warning(mfilename,'This model contains features not supported by the solver.'); 
+ME = MException('Line:FeatureNotSupportedBySolver', 'This model contains features not supported by the solver.'); 
+throw(ME);
 end
 Solver.resetRandomGeneratorSeed(options.seed);
 
 qn = self.model.getStruct();
 
 if (strcmp(options.method,'exact')||strcmp(options.method,'mva')) && ~self.model.hasProductFormSolution
-    error('The exact method requires the model to have a product-form solution. This model does not have one. You can use Network.hasProductFormSolution() to check before running the solver.');
+    line_error(mfilename,'The exact method requires the model to have a product-form solution. This model does not have one. You can use Network.hasProductFormSolution() to check before running the solver.');
 end
 
 method = options.method;
@@ -60,7 +66,7 @@ elseif qn.nclosedjobs == 0 && length(qn.nodetype)==3 && all(sort(qn.nodetype)' =
     end
 else % queueing network
     if any(qn.nodetype == NodeType.Cache)
-        error('Caching analysis not supported yet by MVA in general networks.');
+        line_error(mfilename,'Caching analysis not supported yet by MVA in general networks.');
     end
     switch method
         case {'aba.upper', 'aba.lower', 'bjb.upper', 'bjb.lower', 'pb.upper', 'pb.lower', 'gb.upper', 'gb.lower'}

@@ -135,7 +135,7 @@ classdef MarkovianDistribution < ContinuousDistrib
             % UPDATE(SELF,VARARGIN)
             
             % Update parameters to match given moments
-            error('Line:AbstractMethodCall','An abstract method was called. The function needs to be overridden by a subclass.');
+            line_error(mfilename,'Line:AbstractMethodCall','An abstract method was called. The function needs to be overridden by a subclass.');
             
         end
         
@@ -143,7 +143,7 @@ classdef MarkovianDistribution < ContinuousDistrib
             % UPDATEMEAN(SELF,MEAN)
             
             % Update parameters to match a given mean
-            error('Line:AbstractMethodCall','An abstract method was called. The function needs to be overridden by a subclass.');
+            line_error(mfilename,'Line:AbstractMethodCall','An abstract method was called. The function needs to be overridden by a subclass.');
             
         end
         
@@ -167,7 +167,7 @@ classdef MarkovianDistribution < ContinuousDistrib
             
             % Update distribution with given mean and squared coefficient of
             % variation (SCV=variance/mean^2)
-            error('Line:AbstractMethodCall','An abstract method was called. The function needs to be overridden by a subclass.');
+            line_error(mfilename,'Line:AbstractMethodCall','An abstract method was called. The function needs to be overridden by a subclass.');
             
         end
         
@@ -191,7 +191,7 @@ classdef MarkovianDistribution < ContinuousDistrib
                     self.representation = PH;
                 catch
                     % Return the renewal process associated to the distribution
-                    error('Line:AbstractMethodCall','An abstract method was called. The function needs to be overridden by a subclass.');                    
+                    line_error(mfilename,'Line:AbstractMethodCall','An abstract method was called. The function needs to be overridden by a subclass.');                    
                 end
             end
         end

@@ -76,7 +76,6 @@ if nargout > 2
             QN(i,r) = QNbig(i,r).approximateAsDouble;
         end
     end
-    QN(I)=QN;
-    XN(I)=XN;    
+    QN(:,I)=QN;
 end
 end

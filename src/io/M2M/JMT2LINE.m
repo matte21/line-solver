@@ -7,7 +7,7 @@ function model = JMT2LINE(filename,modelName)
 [~,~,fext] = fileparts(filename);
 switch fext
     case '.jmva'
-        error('JMVA files not yet supported.');
+        line_error(mfilename,'JMVA files not yet supported.');
         if nargin<2
             model = JMVA2LINE(filename);
         else
@@ -21,7 +21,7 @@ switch fext
             model = JSIM2LINE(filename, modelName);
         end
     otherwise
-        warning('The file has unknown extension, trying to parse as a JSIMG file.');
+        line_warning(mfilename,'The file has unknown extension, trying to parse as a JSIMG file.');
         if nargin<2
             model = JSIM2LINE(filename);
         else

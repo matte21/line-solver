@@ -13,7 +13,7 @@ prop = java.util.Properties();
 try
     prop.load(java.io.FileInputStream(filename));
 catch e
-    disp(e.message);
+    line_printf(e.message);
     ex = e.ExceptionObject;
     ex.printStackTrace();
     e.rethrow();

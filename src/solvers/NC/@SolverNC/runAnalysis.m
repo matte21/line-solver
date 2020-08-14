@@ -1,21 +1,25 @@
-function runtime = runAnalysis(self, options)
+function runtime = runAnalysis(self, options, config)
 % RUNTIME = RUN()
 % Run the solver
 
 T0=tic;
-if ~exist('options','var')
+if nargin<2
     options = self.getOptions;
+end
+if nargin<3
+    config = [];
 end
 
 if self.enableChecks && ~self.supports(self.model)
     %                if options.verbose
-    error('Line:FeatureNotSupportedBySolver','This model contains features not supported by the solver.');
+    %line_warning(mfilename,'This model contains features not supported by the solver.');
+    ME = MException('Line:FeatureNotSupportedBySolver', 'This model contains features not supported by the solver.');
+    throw(ME);
     %                end
     %                runtime = toc(T0);
     %                return
 end
 Solver.resetRandomGeneratorSeed(options.seed);
-
 [qn] = self.model.getStruct();
 
 if qn.nclosedjobs == 0 && length(qn.nodetype)==3 && all(sort(qn.nodetype)' == sort([NodeType.Source,NodeType.Cache,NodeType.Sink])) % is a non-rentrant cache
@@ -52,7 +56,7 @@ if qn.nclosedjobs == 0 && length(qn.nodetype)==3 && all(sort(qn.nodetype)' == so
     self.model.refreshChains;
 else % queueing network
     if any(qn.nodetype == NodeType.Cache)
-        error('Caching analysis not supported yet by NC in general networks.');
+        line_error(mfilename,'Caching analysis not supported yet by NC in general networks.');
     end
     [QN,UN,RN,TN,CN,XN,lG,runtime] = solver_nc_analysis(qn, options);
 end

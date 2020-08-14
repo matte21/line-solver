@@ -43,6 +43,6 @@ function parent = par(R, j)
 % finds the parent of j according to the access probabilities in R
     parent = find(R(1:(j-1),j));
     if length(parent) > 1
-        error('A cache has a list with more than one parent, but the structure must be a tree.');
+        line_error(mfilename,'A cache has a list with more than one parent, but the structure must be a tree.');
     end
 end

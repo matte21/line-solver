@@ -1,15 +1,18 @@
-function runtime = runAnalysis(self, options)
+function runtime = runAnalysis(self, options, config)
 % RUNTIME = RUN()
 % Run the solver
 
 T0=tic;
 
-if ~exist('options','var')
+if nargin<2
     options = self.getOptions;
+end
+if nargin<3
+    config = [];
 end
 
 if ~isinf(options.timespan(1)) && (options.timespan(1) == options.timespan(2))
-    warning('%s: timespan is a single point, spacing by options.tol (%e).\n',mfilename, options.tol);
+    line_warning(mfilename,'%s: timespan is a single point, spacing by options.tol (%e).\n',mfilename, options.tol);
     options.timespan(2) = options.timespan(1) + options.tol;
 end
 
@@ -17,7 +20,9 @@ Solver.resetRandomGeneratorSeed(options.seed);
 
 if self.enableChecks && ~self.supports(self.model)
     %                if options.verbose
-    error('Line:FeatureNotSupportedBySolver','This model contains features not supported by the solver.');
+   %line_warning(mfilename,'This model contains features not supported by the solver.'); 
+ME = MException('Line:FeatureNotSupportedBySolver', 'This model contains features not supported by the solver.'); 
+throw(ME);
     %                end
     %                runtime = toc(T0);
     %                return
@@ -27,7 +32,7 @@ qn = self.getStruct();
 
 if any(isinf(qn.njobs))
     if isinf(options.cutoff)
-        error('Line:NoCutoff','The model has open chains, it is mandatory to specify a finite cutoff value, e.g., SolverCTMC(model,''cutoff'',1).');
+        line_error(mfilename,'Line:NoCutoff','The model has open chains, it is mandatory to specify a finite cutoff value, e.g., SolverCTMC(model,''cutoff'',1).');
     end
 end
 
@@ -40,8 +45,9 @@ for k=1:K
 end
 if sizeEstimator > 6
     if ~isfield(options,'force') || options.force == false
-        error('Line:ModelTooLargeToSolve','CTMC size may be too large to solve. Stopping SolverCTMC. Set options.force=true to bypass this control.\n');
-        runtime=toc(T0);
+%        line_error(mfilename,'Line:ModelTooLargeToSolve','CTMC size may be too large to solve. Stopping SolverCTMC. Set options.force=true to bypass this control.\n');
+        ME = MException('Line:ModelTooLargeToSolve', 'CTMC size may be too large to solve. Stopping SolverCTMC. Set options.force=true to bypass this control.\n');
+        throw(ME);
         return
     end
 end
@@ -49,6 +55,13 @@ end
 % we compute all metrics anyway because CTMC has essentially
 % the same cost
 if isinf(options.timespan(1))
+    [s0, s0prior] = self.model.getState;
+    for ind=1:qn.nnodes
+        if qn.isstateful(ind)
+            isf = qn.nodeToStateful(ind);
+            qn.state{isf} = s0{isf}(maxpos(s0prior{1}),:); % pick one particular initial state
+        end
+    end
     [QN,UN,RN,TN,CN,XN,Q,SS,SSq,Dfilt,~,~,qn] = solver_ctmc_analysis(qn, options);
     % update initial state if this has been corrected by the state space
     % generator

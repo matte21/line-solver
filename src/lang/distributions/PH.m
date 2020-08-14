@@ -50,7 +50,7 @@ classdef PH < MarkovianDistribution
             SCV = varargin{2};
             SKEW = varargin{3};
             if length(varargin) > 3
-                warning('Warning: update in %s distributions can only handle 3 moments, ignoring higher-order moments.',class(self));
+                line_warning(mfilename,'Warning: update in %s distributions can only handle 3 moments, ignoring higher-order moments.',class(self));
             end
             e1 = MEAN;
             e2 = (1+SCV)*e1^2;

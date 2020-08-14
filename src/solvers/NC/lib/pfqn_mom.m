@@ -17,7 +17,7 @@ Din=Din(sum(Din,2)>Distrib.Zero,:);
 numdigits = max(arrayfun(@(e) numel(num2str(e)), [Din(:);Zin(:)]));
 scaleexp = min(numdigits,8);  % java.lang.Integer takes max 10 digits
 scale = 10^(scaleexp);
-Din = round(Din*scale); 
+Din = round(Din*scale);
 Zin = round(sum(Zin*scale,1));
 
 [M,R]=size(Din);
@@ -67,7 +67,7 @@ if nargout > 2
     for r=1:length(XNbig)
         XN(r) = XNbig(r).approximateAsDouble;
     end
-    XN = XN * scale;    
+    XN = XN * scale;
     QNbig = qnm.getMeanQueueLengths();
     QN = zeros(M,R);
     for i=1:M
@@ -75,7 +75,6 @@ if nargout > 2
             QN(i,r) = QNbig(i,r).approximateAsDouble;
         end
     end
-    QN(I)=QN;
-    XN(I)=XN;        
+    QN(:,I)=QN;
 end
 end

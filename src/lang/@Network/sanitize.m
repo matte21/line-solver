@@ -49,7 +49,7 @@ if isempty(self.qn)
                             svcTime(k) = self.nodes{i}.serviceProcess{k}.getMean;
                         end
                         if length(unique(svcTime)) ~= K
-                            error('SEPT does not support identical service time means.');
+                            line_error(mfilename,'SEPT does not support identical service time means.');
                         end
                         [svcTimeSorted] = sort(unique(svcTime));
                         self.nodes{i}.schedStrategyPar = zeros(1,K);
@@ -66,7 +66,7 @@ if isempty(self.qn)
                             svcTime(k) = self.nodes{i}.serviceProcess{k}.getMean;
                         end
                         if length(unique(svcTime)) ~= K
-                            error('LEPT does not support identical service time means.');
+                            line_error(mfilename,'LEPT does not support identical service time means.');
                         end                        
                         [svcTimeSorted] = sort(unique(svcTime),'descend');
                         self.nodes{i}.schedStrategyPar = zeros(1,K);

@@ -43,7 +43,7 @@ classdef CacheClassSwitcher < StatefulClassSwitcher
                 state = []; %local server state
                 statep = []; %local server state
             end
-            if isempty(state) % get csMask
+            if isempty(state) % get csMask (B matrix)
                 if (r==s  ... % hit and miss in the cache can depart in the same class
                         || ((r <= length(self.hitClass) && r <= length(self.missClass)) ... % since hitClass and missClass are sparse, check entry for r exists
                         && (s == self.hitClass(r) || s == self.missClass(r)))) ... % route out hit or miss classes

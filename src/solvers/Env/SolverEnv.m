@@ -34,14 +34,14 @@ classdef SolverEnv < EnsembleSolver
                     if isa(self.env{e,h},'Disabled')
                         self.env{e,h} = Exp(0);
                     elseif ~isa(self.env{e,h},'MarkovianDistribution')
-                        error('The distribution of the environment transition from stage %d to %d is not supported by the %s solver.',e,h,self.getName);
+                        line_error(mfilename,'The distribution of the environment transition from stage %d to %d is not supported by the %s solver.',e,h,self.getName);
                     end
                 end
             end
             
             for e=1:length(self.ensemble)
                 if ~self.solvers{e}.supports(self.ensemble{e})
-                    error('Model in the environment stage %d is not supported by the %s solver.',e,self.getName);
+                    line_error(mfilename,'Model in the environment stage %d is not supported by the %s solver.',e,self.getName);
                 end
             end
         end
@@ -197,7 +197,7 @@ classdef SolverEnv < EnsembleSolver
             %    self.result.Avg.C = C;
             %self.result.runtime = runtime;            
                 %if self.options.verbose
-                %    fprintf(1,'\n');
+                %    line_printf('\n');
                 %end
         end
         

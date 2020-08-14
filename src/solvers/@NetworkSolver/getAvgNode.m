@@ -38,7 +38,7 @@ for ist=1:M
 end
 
 %if any(qn.isstatedep(:,3)) || any(qn.nodetype == NodeType.Cache)
-%    warning('Node-level metrics not available in models with state-dependent routing. Returning station-level metrics only.');
+%    line_warning(mfilename,'Node-level metrics not available in models with state-dependent routing. Returning station-level metrics only.');
 %    return
 %end
 

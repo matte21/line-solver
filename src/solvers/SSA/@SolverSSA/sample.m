@@ -32,7 +32,7 @@ switch options.method
         sampleNodeState.isaggregate = false;
 
     otherwise
-        error('sample is not available in SolverSSA with the chosen method.');
+        line_error(mfilename,'sample is not available in SolverSSA with the chosen method.');
 end
 sampleNodeState.t = [0; sampleNodeState.t(2:end)];
 end

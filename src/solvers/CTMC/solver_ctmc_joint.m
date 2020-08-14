@@ -32,8 +32,8 @@ end
 if options.keep
     fname = tempname;
     save([fname,'.mat'],'Q','SSq')
-    fprintf(1,'\nCTMC generator and state space saved in: ');
-    disp([fname, '.mat'])
+    line_printf('\nCTMC generator and state space saved in: ');
+    line_printf([fname, '.mat'])
 end
 pi = ctmc_solve(Q);
 pi(pi<1e-14)=0;
@@ -52,6 +52,6 @@ Pnir = pi(findrows(SS, statevec));
 runtime = toc(Tstart);
 
 if options.verbose > 0
-    fprintf(1,'CTMC analysis completed in %f sec\n',runtime);
+    line_printf('CTMC analysis completed. Runtime: %f seconds.\n',runtime);
 end
 end

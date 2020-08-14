@@ -22,9 +22,9 @@ classdef Model < Copyable
             persistent lineSplashScreenShown
             if isempty(lineSplashScreenShown)
                 lineSplashScreenShown = true;
-                fprintf('LINE solver 2.0 initializing. Copyright (c) 2012-2020, Imperial College London.',lineVersion);
+                line_printf('LINE solver 2.0 initializing.');
             %else
-                %fprintf('\b');
+                %line_printf('\b');
             end
             lineVersion = strip(lineVersion);
             self.setVersion(lineVersion);

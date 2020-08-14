@@ -41,9 +41,9 @@ classdef Event
             % PRINT()
             
             if isnan(self.t)
-                fprintf(1,'\n(%s: node: %d, class: %d)',EventType.toText(self.event),self.node,self.class);
+                line_printf('\n(%s: node: %d, class: %d)',EventType.toText(self.event),self.node,self.class);
             else
-                fprintf(1,'\n(%s: node: %d, class: %d, time: %d)',EventType.toText(self.event),self.node,self.class,self.t);
+                line_printf('\n(%s: node: %d, class: %d, time: %d)',EventType.toText(self.event),self.node,self.class,self.t);
             end
         end
     end

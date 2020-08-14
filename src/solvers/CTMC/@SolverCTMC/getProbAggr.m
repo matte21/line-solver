@@ -2,10 +2,10 @@ function Pnir = getProbAggr(self, ist)
 % PNIR = GETPROBSTATEAGGR(IST)
 
 if ~exist('ist','var')
-    error('getProb requires to pass a parameter the station of interest.');
+    line_error(mfilename,'getProb requires to pass a parameter the station of interest.');
 end
 if ist > self.model.getNumberOfStations
-    error('Station number exceeds the number of stations in the model.');
+    line_error(mfilename,'Station number exceeds the number of stations in the model.');
 end
 if ~isfield(self.options,'keep')
     self.options.keep = false;

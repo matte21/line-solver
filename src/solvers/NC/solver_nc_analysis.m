@@ -63,7 +63,7 @@ while max(abs(1-eta./eta_1)) > options.iter_tol && it < options.iter_max
         Nchain(c) = sum(NK(inchain));
         refstatchain(c) = qn.refstat(inchain(1));
         if any((qn.refstat(inchain(1))-refstatchain(c))~=0)
-            error('Classes in chain %d have different reference station.',c);
+            line_error(mfilename,'Classes in chain %d have different reference station.',c);
         end
     end
     STchain(~isfinite(STchain))=0;
@@ -85,7 +85,7 @@ while max(abs(1-eta./eta_1)) > options.iter_tol && it < options.iter_max
         else
             if strcmpi(options.method,'exact') && nservers(i)>1
                 %options.method = 'default';
-                warning('%s does not support exact multiserver yet. Switching to approximate method.', mfilename);
+                line_warning(mfilename,'%s does not support exact multiserver yet. Switching to approximate method.', mfilename);
             end
             Lms(i,:) = Lchain(i,:) / nservers(i);
             Z(i,:) = 0;
@@ -158,7 +158,7 @@ while max(abs(1-eta./eta_1)) > options.iter_tol && it < options.iter_max
         %        lG
         %        lGr
         %        lGar
-        warning('Normalizing constant computations produced a floating-point range exception. Model is likely too large.');
+        line_warning(mfilename,'Normalizing constant computations produced a floating-point range exception. Model is likely too large.');
         %Demands=Lcorr
         %PopulationVector=oner(Nchain,r)
         %ThinkTimes=sum(Z,1)+sum(Zcorr,1)
@@ -247,10 +247,10 @@ while max(abs(1-eta./eta_1)) > options.iter_tol && it < options.iter_max
 %                         end
 %                     end
                     ca(i) = 1;
-                    cs(i) = (SCV(i,sd)*T(i,sd)')/sum(T(i,sd));
+                    cs(i) = (SCV(i,sd)*T(i,sd)')/sum(T(i,sd));                    
+                    gamma(i) = (rho(i)^nservers(i)+rho(i))/2; % multi-server                    
                     % asymptotic decay rate (diffusion approximation, Kobayashi JACM)
                     eta(i) = exp(-2*(1-rho(i))/(cs(i)+ca(i)*rho(i)));
-                    gamma(i) = (rho(i)^nservers(i)+rho(i))/2; % multi-server
                     %eta(i) = rho(i);
                 end
         end
@@ -264,7 +264,7 @@ while max(abs(1-eta./eta_1)) > options.iter_tol && it < options.iter_max
                 if range(ST0(i,sd))>0 && (max(SCV(i,sd))>1 - Distrib.Zero || min(SCV(i,sd))<1 + Distrib.Zero) % check if non-product-form
                     for k=1:K
                         if qn.rates(i,k)>0                            
-                            ST(i,k) = (1-rho(i)^4)*ST0(i,k) + rho(i)^4*((1-rho(i)^4) * gamma(i)*nservers(i)/sum(T(i,sd)) +  rho(i)^4* eta(i)*nservers(i)/sum(T(i,sd)) );
+                            ST(i,k) = (1-rho(i)^4)*ST0(i,k) + rho(i)^4*((1-rho(i)^4) * gamma(i)*nservers(i)/sum(T(i,sd)) +  rho(i)^4* eta(i)*nservers(i)/sum(T(i,sd)) );                            
                         end
                     end
                 end

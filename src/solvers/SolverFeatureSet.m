@@ -141,7 +141,7 @@ classdef SolverFeatureSet < handle
                     end
                 end
                 str = sprintf('%s).',str);
-                warning(str);
+                line_warning(mfilename,str);
             end
         end
     end

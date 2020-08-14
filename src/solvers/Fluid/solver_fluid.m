@@ -95,9 +95,9 @@ end
 runtime = toc(Tstart);
 % if options.verbose >= 2
 %     if iters==1
-%         fprintf(1,'Fluid analysis iteration completed in %0.6f sec [%d iteration]\n',runtime,iters);
+%         line_printf('Fluid analysis iteration completed in %0.6f sec [%d iteration]\n',runtime,iters);
 %     else
-%         fprintf(1,'Fluid analysis iteration completed in %0.6f sec [%d iterations]\n',runtime,iters);
+%         line_printf('Fluid analysis iteration completed in %0.6f sec [%d iterations]\n',runtime,iters);
 %     end
 % end
 
