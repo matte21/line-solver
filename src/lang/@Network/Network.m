@@ -1465,6 +1465,13 @@ classdef Network < Model
             model.link(P);
         end
         
+        function model = productForm(N,D,Z)
+            if nargin<3
+                Z = [];
+            end
+            model = Network.cyclicPsInf(N,D,Z);
+        end
+        
         function model = cyclicPs(N,D)
             % MODEL = CYCLICPS(N,D)
             
@@ -1472,9 +1479,8 @@ classdef Network < Model
         end
         
         function model = cyclicPsInf(N,D,Z)
-            % MODEL = CYCLICPSINF(N,D,Z)
-            
-            if ~exist('Z','var')
+            % MODEL = CYCLICPSINF(N,D,Z)            
+            if nargin<3
                 Z = [];
             end
             M  = size(D,1);

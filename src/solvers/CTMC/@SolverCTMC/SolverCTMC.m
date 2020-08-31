@@ -21,6 +21,7 @@ classdef SolverCTMC < NetworkSolver
         [Pi_t, SSnode_a] = getTranProbAggr(self, node)
         [Pi_t, SSsys] = getTranProbSys(self)     
         [Pi_t, SSnode] = getTranProb(self, node)
+        %RD = getCdfRespT(self, R)
         
         function [stateSpace,nodeStateSpace] = getStateSpace(self)
             % [STATESPACE, MARGSTATESPACE] = GETSTATESPACE()
@@ -85,18 +86,22 @@ classdef SolverCTMC < NetworkSolver
             [infGen, eventFilt, ev] = getGenerator(self);
         end
         
-        function [infGen, eventFilt, ev] = getGenerator(self)
+        function [infGen, eventFilt, ev] = getGenerator(self, force)
             % [INFGEN, EVENTFILT] = GETGENERATOR()
-            
+                        
             % [infGen, eventFilt] = getGenerator(self)
             % returns the infinitesimal generator of the CTMC and the
             % associated filtration for each event
+            
+            if nargin==1
+                force=false;
+            end
             options = self.getOptions;
-            if options.force
+            if options.force || force
                 self.runAnalysis;
             end
             if isempty(self.result) || ~isfield(self.result,'infGen')
-                line_warning(mfilename,'The model has not been cached. Either solve it or use the ''force'' option to require this is done automatically, e.g., SolverCTMC(model,''force'',true).getGenerator()');
+                line_warning(mfilename,'The model has not been cached. Either solve it, set options.force=true or call getGenerator(true).');
                 infGen = [];
                 eventFilt = [];
             else

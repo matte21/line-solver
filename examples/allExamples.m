@@ -114,6 +114,8 @@ fprintf(1,'\n\nExample: <strong>example_randomEnvironment_1</strong>\n');
 clear; example_randomEnvironment_1; fprintf(1,'Pausing...'); pause(3.0);
 fprintf(1,'\n\nExample: <strong>example_randomEnvironment_2</strong>\n');
 clear; example_randomEnvironment_2; fprintf(1,'Pausing...'); pause(3.0);
+fprintf(1,'\n\nExample: <strong>example_randomEnvironment_3</strong>\n');
+clear; example_randomEnvironment_3; fprintf(1,'Pausing...'); pause(3.0);
 
 %%
 %try % LQNS must be available on the system path
@@ -149,6 +151,18 @@ clear; example_cacheModel_1; fprintf(1,'Pausing...'); pause(3.0);
 fprintf(1,'\n\nExample: <strong>example_cacheModel_2</strong>\n');
 fprintf('This example shows a small cache model with a closed arrival process.\n')
 clear; example_cacheModel_2; fprintf(1,'Pausing...'); pause(3.0);
+
+%%
+fprintf(1,'\n<strong>RUNNING: example_svcEstimation_*</strong>');
+fprintf(1,'\n\nExample: <strong>example_svcEstimation_1</strong>\n');
+fprintf('This example shows service demand estimation in a single class model using the utilization-based regression (UBR) method.\n')
+clear; example_svcEstimation_1; fprintf(1,'Pausing...'); pause(3.0);
+fprintf('This example shows service demand estimation in a multiclass model using the ERPS method.\n')
+clear; example_svcEstimation_2; fprintf(1,'Pausing...'); pause(3.0);
+fprintf('This example shows service demand estimation in a multiclass model using the utilization-based regression (UBR) method.\n')
+clear; example_svcEstimation_3; fprintf(1,'Pausing...'); pause(3.0);
+fprintf('This example shows service demand estimation in a multiclass model using the utilization-based optimization (UBO) method.\n')
+clear; example_svcEstimation_4; fprintf(1,'Pausing...'); pause(3.0);
 
 %%
 fprintf(1,'\nExamples completed.\n')

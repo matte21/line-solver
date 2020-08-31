@@ -130,15 +130,3 @@ while 1
     T(d)=toc(T0);
 end
 end
-
-function mln=multinomialln(n)
-% MLN=MULTINOMIALLN(N)
-
-mln = factln(sum(n))- sum(factln(n));
-end
-
-function lf=factln(n)
-% LF=FACTLN(N)
-
-lf = gammaln(1+n);
-end

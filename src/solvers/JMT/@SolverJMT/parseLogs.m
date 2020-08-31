@@ -78,6 +78,8 @@ for ind=1:qn.nnodes
                             end
                         end
                         logData{ind,r}.QLen = nodeState{ind}(:,1+r);
+                        logData{ind,r}.arvID = jobArvID;
+                        logData{ind,r}.depID = jobDepID;                        
                     end
                 case Metric.RespT
                     [classResT, jobRespT, jobResTArvTS] = SolverJMT.parseTranRespT(logFileArvMat, logFileDepMat);

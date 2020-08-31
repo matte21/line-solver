@@ -20,6 +20,7 @@ function [kpcMAP,subMAPs,error]=kpcfit_sub_compose(E1j,SCVj,E3j,G2j,varargin)
 %   Comment:
 %       The first map is a mmpp2 while the other J-1 maps are HMAPs
 %
+
 J=length(G2j);
 
 verbose=0;

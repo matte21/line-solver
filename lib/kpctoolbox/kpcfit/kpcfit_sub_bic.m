@@ -1,4 +1,4 @@
-function Nstar =  map_kpcfit_bic(SA,orders,varargin)
+function Nstar =  kpcfit_sub_bic(SA,orders,varargin)
 % function order = map_kpcfit_bic(SA,orders,...) returns the possible order for
 % a trace for the purpose of KPCfitting
 %
@@ -156,9 +156,5 @@ if (rssrho > 0.05)
     
 end
 
-
-
 % a small example for the order 16 case
-
-
 end

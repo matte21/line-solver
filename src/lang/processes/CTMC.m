@@ -15,13 +15,26 @@ classdef CTMC < Process
             % SELF = CTMC(InfGen, isInfinite)
             self@Process('CTMC', 1);
             
-            self.infGen = InfGen;
+            self.infGen = ctmc_makeinfgen(InfGen);
             self.stateSpace = [];
             if nargin < 2
                 self.isfinite = true;
             else
                 self.isfinite = isFinite;
             end
+        end
+        
+        function A=toDTMC(self, q)
+            if nargin==1
+                q=(max(max(abs(self.infGen))))+rand;
+            end
+            P=self.infGen/q + eye(size(self.infGen));
+            A=DTMC(P);
+            A.setStateSpace(self.stateSpace);
+        end
+        
+        function Qp = toTimeReverse(self)
+            Qp = CTMC(ctmc_timereverse(self.infGen));
         end
         
         function setStateSpace(self,stateSpace)
@@ -56,15 +69,25 @@ classdef CTMC < Process
                 end
             end
             if length(nodeLbl) <= 6
-                colors = {}; for i=1:length(nodeLbl), colors{i}='w'; end
+                colors = cell(1,length(nodeLbl)); for i=1:length(nodeLbl), colors{i}='w'; end
                 graphViz4Matlab('-adjMat',Q0,'-nodeColors',colors,'-nodeLabels',nodeLbl,'-edgeLabels',edgeLbl,'-layout',Circularlayout);
             else
                 graphViz4Matlab('-adjMat',Q0,'-nodeLabels',nodeLbl,'-edgeLabels',edgeLbl,'-layout',Springlayout);
             end
         end
+        
+        function Q = getGenerator(self)
+            % Q = GETGENERATOR()
+            
+            % Get generator
+            Q = self.infGen;
+        end
+
     end
     
-    methods
-        
+    methods (Static)
+        function ctmcObj=rand(nStates) % creates a random CTMC            
+            ctmcObj = CTMC(ctmc_rand(nStates));
+        end        
     end
 end

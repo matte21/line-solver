@@ -45,6 +45,7 @@ isf = qn.nodeToStateful(ind);
 t = [];
 nir = cell(1,qn.nclasses);
 event = cell(1,qn.nclasses);
+%ids = cell(1,qn.nclasses);
 
 for r=1:qn.nclasses
     if isempty(logData{ind,r})
@@ -57,6 +58,7 @@ for r=1:qn.nclasses
                 t = [t(2:end);t(end)];
                 nir{r} = logData{ind,r}.QLen(uniqTS);
                 event{r} = logData{ind,r}.event;
+                %ids{r} = logData{ind,r}.
             end
         end
     end
@@ -82,6 +84,7 @@ stationStateAggr.t = stationStateAggr.t(1:min(length(t),1+numEvents),:);
 stationStateAggr.t = [0; stationStateAggr.t(1:end-1)];
 stationStateAggr.state = cell2mat(nir);
 stationStateAggr.state = stationStateAggr.state(1:min(length(t),1+numEvents),:);
+%stationStateAggr.job_id = 
 
 event = cellmerge(event);
 event = {event{cellisa(event,'Event')}}';

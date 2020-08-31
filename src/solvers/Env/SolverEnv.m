@@ -207,12 +207,85 @@ classdef SolverEnv < EnsembleSolver
             name = mfilename;
         end
         
-        function [infGen, eventFilt] = getGenerator(self)
-            % [infGen, eventFilt] = getGenerator(self)
+            function [renvInfGen, stageInfGen, renvEventFilt, stageEventFilt, renvEvents, stageEvents] = getGenerator(self)
+            % [renvInfGen, stageInfGen, stageEventFilt, stageEvents] = getGenerator(self)
+            
             E = self.getNumberOfModels;
+            stageInfGen = cell(1,E);
+            stageEventFilt = cell(1,E);
+            stageEvents = cell(1,E);
             for e=1:E
-                [infGen{e}, eventFilt{e}] = self.solvers{e}.getGenerator();
+                if isa(self.solvers{e},'SolverCTMC')
+                    [stageInfGen{e}, stageEventFilt{e}, stageEvents{e}] = self.solvers{e}.getGenerator(true);
+                else
+                    line_error(mfilename,'This method requires SolverENV to be instantiated with the CTMC solver.');
+                end
             end
+            
+            nstates = cellfun(@length, stageInfGen);
+            nphases = cellfun(@(p) p.getNumberOfPhases, self.env);           
+            nphases = nphases - eye(length(nphases));
+
+            renvInfGen = cell(E,E);
+
+            for e=1:E
+                renvInfGen{e,e} = (stageInfGen{e});
+                for h=1:E
+                    if h~=e
+                        resetMatrix_eh = eye(nstates(e), nstates(h));
+                        renvInfGen{e,h} = resetMatrix_eh;
+                    end
+                end
+            end
+            
+            renvEvents = cell(1,0);
+            for e=1:E
+                for h=1:E
+                    if h~=e                        
+                        renvInfGen{e,e} = krons(renvInfGen{e,e}, (self.env{e,h}.getPH{1}));
+                        pie = map_pie(self.env{h,e}.getPH);
+                        if isnan(pie)
+                            pie=ones(size(pie)); % kron so 1 means ignore
+                        end
+                        renvInfGen{e,h} = kron(renvInfGen{e,h}, sparse((self.env{e,h}.getPH{2}) * ones(nphases(e,h),1) * pie));
+                        for i=1:self.ensemble{e}.getNumberOfNodes
+                            renvEvents{1,end+1} = Event(EventType.STAGE, i, NaN, NaN, [e,h]);  %#ok<AGROW>
+                        end
+                        for f=1:E
+                            if f~=h && f~=e
+                                pie = map_pie(self.env{f,h}.getPH);
+                                if isnan(pie)
+                                    pie=ones(size(pie)); % kron so 1 means ignore
+                                end
+                                renvInfGen{e,f} = kron(renvInfGen{e,f}, ones(nphases(e,h),1) * pie);
+                            end
+                        end
+                    end
+                end
+            end
+            
+            if nargout>2
+                line_warning(mfilename, 'Some of the requested output parameters are not implemented yet.');
+            end
+            
+            renvEventFilt = cell(E,E);
+            for e=1:E
+                for h=1:E
+                    tmpCell = renvInfGen;
+                    for e1=1:E
+                        tmpCell{e1,e1} = tmpCell{e1,e1} * 0;
+                        for h1=1:E
+                            if e~= e1 && h~=h1
+                                tmpCell{e1,h1} = tmpCell{e1,h1} * 0; 
+                            end
+                        end
+                    end
+                    renvEventFilt{e,h} = cell2mat(tmpCell);
+                end
+            end
+            
+            renvInfGen = cell2mat(renvInfGen);
+            renvInfGen = ctmc_makeinfgen(renvInfGen);
         end
         
         function [QNclass, UNclass, TNclass] = getAvg(self)

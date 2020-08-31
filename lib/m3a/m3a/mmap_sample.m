@@ -46,7 +46,7 @@ if M==1
     for c = 1:C
        crate(c) = MMAP{c+2}; 
     end
-    A=randp(crate,nSamples,1);
+    A=randrelp(crate,nSamples,1);
     LAST=1;
     FIRST=1;
     return
@@ -99,7 +99,7 @@ while h <= nSamples
     if (h == 1 || batchCounter(s) > batchSize(s))
         batchSize(s)=min(100,nSamples-h+1);
         timeBatch{s}=exprnd(1/rates(s),batchSize(s),1);
-        tranBatch{s}=randp(targets(s,:),batchSize(s),1);
+        tranBatch{s}=randrelp(targets(s,:),batchSize(s),1);
         batchCounter(s)=1;
     end
     % pick from batch random values

@@ -165,6 +165,8 @@ switch options.method
         if isnan(lG)
             line_warning(mfilename,'Model is not in normal usage, panacea cannot continue.');
         end
+    case 'gm'
+        [~,lG] = pfqn_gm(L,N,sum(Z,1));        
     case 'le'
         [~,lG] = pfqn_le(L,N,sum(Z,1));
     case 'kt'

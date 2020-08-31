@@ -43,7 +43,7 @@ R = ch.accost;
 pij = [];
 gamma = mucache_gamma_lp(lambda,R);
 switch options.method
-    case 'exact'giulre
+    case 'exact'
         [pij] = mucache_prob_erec(gamma, m);
         %         [pij,~] = mucache_sim_rr(lambda,m,R,options.samples);
         missRate = zeros(1,u);
