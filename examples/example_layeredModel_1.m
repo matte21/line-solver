@@ -11,15 +11,16 @@ options = SolverLQNS.defaultOptions;
 options.keep = true; % uncomment to keep the intermediate XML files generates while translating the model to LQNS
 
 solver{1} = SolverLQNS(model);
-AvgTable = solver{1}.getAvgTable();
-AvgTable
+AvgTable{1} = solver{1}.getAvgTable();
+AvgTable{1}
 
 useLQNSnaming = true;
-AvgTable = solver{1}.getAvgTable(useLQNSnaming);
-AvgTable
+AvgTable{2} = solver{1}.getAvgTable(useLQNSnaming);
+AvgTable{2}
 
 
 useLQNSnaming = true;
-[AvgTable, CallAvgTable] = solver{1}.getRawAvgTables();
-AvgTable
-CallAvgTable
+[AvgTable{3}, CallAvgTable{3}] = solver{1}.getRawAvgTables();
+AvgTable{3}
+CallAvgTable{3}
+

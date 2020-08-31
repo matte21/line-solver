@@ -6,37 +6,29 @@ function jmtPath = jmtGetPath
 
 jmtPath = fileparts(which('JMT.jar'));
 if isempty(jmtPath)
-    line_printf('\nJava Modelling Tools cannot be found.\nLINE will try to download the latest JMT version.\n')
+    line_printf('\nJava Modelling Tools cannot be found. LINE will try to download the latest JMT version.\n')
     jmtSolverFolder = fileparts(mfilename('fullpath'));
-    m = input('Do you want to continue (download approx. 30MB), Y/N [N]: ','s');
+    if isdeployed
+        m='Y';
+    else
+        m = input('Do you want to continue (download approx. 30MB), Y/N [N]: ','s');
+    end
     if m=='Y'
-<<<<<<< HEAD
-        fprintf(1,'Download started, please be patient this may take several minutes.\n')
-=======
         line_printf('\nDownload started, please be patient this may take several minutes.')
->>>>>>> refs/remotes/origin/master
         if exist('websave')==2
             if ispc
                 outfilename = websave([jmtSolverFolder,'\JMT.jar'],'http://jmt.sourceforge.net/latest/JMT.jar');
             else
                 outfilename = websave([jmtSolverFolder,'/JMT.jar'],'http://jmt.sourceforge.net/latest/JMT.jar');
             end
-<<<<<<< HEAD
-            fprintf(1,'Download completed. JMT jar now located at: %s\n',outfilename);
-=======
             line_printf('\nDownload completed. JMT jar now located at: %s',outfilename);
->>>>>>> refs/remotes/origin/master
         elseif isoctave
             if ispc
                 outfilename = urlwrite('http://jmt.sourceforge.net/latest/JMT.jar', [jmtSolverFolder,'\JMT.jar']);
             else
                 outfilename = urlwrite('http://jmt.sourceforge.net/latest/JMT.jar', [jmtSolverFolder,'/JMT.jar']);
             end
-<<<<<<< HEAD
-            fprintf(1,'Download completed. JMT jar now located at: %s\n',outfilename);
-=======
             line_printf('\nDownload completed. JMT jar now located at: %s',outfilename);
->>>>>>> refs/remotes/origin/master
         else
             line_error(mfilename,'The MATLAB version is too old and JMT cannot be downloaded automatically. Please download http://jmt.sourceforge.net/latest/JMT.jar and put it under "bin\solvers\JMT\".\n');
         end

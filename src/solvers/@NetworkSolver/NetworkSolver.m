@@ -25,7 +25,7 @@ classdef NetworkSolver < Solver
             self.handles.U = [];
             self.handles.W = [];
             self.handles.T = [];
-            if model.hasStruct()
+            if ~model.hasStruct()
                 %self.model.sanitize;
                 self.model.refreshStruct(); % force model to refresh
             end
@@ -232,11 +232,7 @@ classdef NetworkSolver < Solver
                 catch
                     solvername = self.result.solver(7:end);
                 end
-<<<<<<< HEAD
-                fprintf(1,'%s analysis (method: %s) completed in %f seconds.\n',solvername,self.result.Avg.method,runtime);
-=======
                 line_printf('\n%s analysis (method: %s) completed. Runtime: %f seconds.\n',solvername,self.result.Avg.method,runtime);
->>>>>>> refs/remotes/origin/master
             end
         end
         
@@ -350,7 +346,7 @@ classdef NetworkSolver < Solver
             % RD = GETCDFRESPT(R)
             
             % Return cumulative distribution of response times at steady-state
-            line_error(mfilename,'getCdfRespT is not supported by this solver.');
+            line_error(mfilename,'getCdfRespT is not supported by this solver.');            
         end
         
         function RD = getTranCdfRespT(self, R)
@@ -360,10 +356,17 @@ classdef NetworkSolver < Solver
             line_error(mfilename,'getTranCdfRespT is not supported by this solver.');
         end
         
+        function RD = getCdfPassT(self, R)
+            % RD = GETCDFPASST(R)
+            
+            % Return cumulative distribution of passage times at steady-state
+            line_error(mfilename,'getCdfPassT is not supported by this solver.');
+        end        
+        
         function RD = getTranCdfPassT(self, R)
             % RD = GETTRANCDFPASST(R)
             
-            % Return cumulative distribution of passage times at steady-state
+            % Return cumulative distribution of passage times during transient
             line_error(mfilename,'getTranCdfPassT is not supported by this solver.');
         end        
        

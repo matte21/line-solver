@@ -38,7 +38,7 @@ classdef Exp < MarkovianDistribution
             Ft = 1-exp(-lambda*t);
         end
         
-        function PH = getRepresentation(self)
+        function PH = getPH(self)
             % PH = GETREPRESENTATION()            
             % Return the renewal process associated to the distribution
             lambda = self.getParam(1).paramValue;

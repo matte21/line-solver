@@ -61,13 +61,8 @@ qnc = qn;
 if options.keep
     fname = tempname;
     save([fname,'.mat'],'InfGen','StateSpace','StateSpaceAggr','EventFiltration')
-<<<<<<< HEAD
-    fprintf(1,'CTMC infinitesimal generator and state space saved in: ');
-    disp([fname, '.mat'])
-=======
     line_printf('\nCTMC infinitesimal generator and state space saved in: ');
     line_printf([fname, '.mat'])
->>>>>>> refs/remotes/origin/master
 else
     fname = '';
 end
@@ -160,8 +155,4 @@ for k=1:K
         end
     end
 end
-
-%if options.verbose > 0
-%    fprintf(1,'CTMC analysis completed in %f sec\n',runtime);
-%end
 end

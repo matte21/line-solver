@@ -75,9 +75,17 @@ classdef Immediate < Distrib
             L = 1; % as in Det(0)
         end        
         
-        function PH = getRepresentation(self)
+        function PH = getPH(self)
             PH = {[-Distrib.InfRate] ,[Distrib.InfRate]};
         end
+        
+        function bool = isImmediate(self)
+            % BOOL = ISIMMEDIATE()
+            % Check if the distribution is equivalent to an Immediate
+            % distribution
+            % Overrides Distrib.isImmediate(self)
+            bool = true;
+        end        
     end
     
 end

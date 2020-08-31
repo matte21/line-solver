@@ -12,6 +12,7 @@ classdef EventType < Copyable
         ID_DEP = 2; % job departure
         ID_PHASE = 3; % service advances to next phase, without departure
         ID_READ = 4; % read cache item
+        ID_STAGE = 5; % random environment stage change
         
         INIT = categorical("INIT"); 
         LOCAL = categorical("LOCAL");
@@ -19,6 +20,7 @@ classdef EventType < Copyable
         DEP = categorical("DEP");
         PHASE = categorical("PHASE");
         READ = categorical("READ");
+        STAGE = categorical("STAGE");
     end
     
     methods(Static)
@@ -34,6 +36,8 @@ classdef EventType < Copyable
                     text = 'PHASE';
                 case EventType.READ
                     text = 'READ';
+                case EventType.STAGE
+                    text = 'STAGE';
             end
         end
     end

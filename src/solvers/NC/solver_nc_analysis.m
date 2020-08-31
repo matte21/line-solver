@@ -32,10 +32,9 @@ alpha(alpha<1e-12)=0;
 eta_1 = zeros(1,M);
 eta = ones(1,M);
 ca_1 = ones(1,M);
-if findstring(sched,SchedStrategy.FCFS) == -1, options.iter_max=1; end
-
+if all(sched~=SchedStrategy.FCFS) options.iter_max=1; end
 it = 0;
-while max(abs(1-eta./eta_1)) > options.iter_tol && it <= options.iter_max
+while max(abs(1-eta./eta_1)) > options.iter_tol && it < options.iter_max
     it = it + 1;
     eta_1 = eta;
     M = qn.nstations;    %number of stations
@@ -72,36 +71,37 @@ while max(abs(1-eta./eta_1)) > options.iter_tol && it <= options.iter_max
     Tstart = tic;
     Nt = sum(Nchain(isfinite(Nchain)));
     
-    Lcorr = zeros(M,C);
+    Lms = zeros(M,C);
     Z = zeros(M,C);
-    Zcorr = zeros(M,C);
+    Zms = zeros(M,C);
     infServers = [];
     for i=1:M
         if isinf(nservers(i)) % infinite server
             %mu_chain(i,1:sum(Nchain)) = 1:sum(Nchain);
             infServers(end+1) = i;
-            Lcorr(i,:) = 0;
+            Lms(i,:) = 0;
             Z(i,:) = Lchain(i,:);
-            Zcorr(i,:) = 0;
+            Zms(i,:) = 0;
         else
             if strcmpi(options.method,'exact') && nservers(i)>1
-<<<<<<< HEAD
-                options.method = 'default';
-                warning('%s does not support exact multiserver yet. Switching to approximate method.', mfilename);
-=======
                 %options.method = 'default';
                 line_warning(mfilename,'%s does not support exact multiserver yet. Switching to approximate method.', mfilename);
->>>>>>> refs/remotes/origin/master
             end
-            Lcorr(i,:) = Lchain(i,:) / nservers(i);
+            Lms(i,:) = Lchain(i,:) / nservers(i);
             Z(i,:) = 0;
-            Zcorr(i,:) = Lchain(i,:) * (nservers(i)-1)/nservers(i);
+            Zms(i,:) = Lchain(i,:) * (nservers(i)-1)/nservers(i);
         end
     end
     Qchain = zeros(M,C);
-    
     % step 1
-    lG = pfqn_nc(Lcorr,Nchain,sum(Z,1)+sum(Zcorr,1), options);
+    
+    [lG,Xchain, Qchain] = pfqn_nc(Lms,Nchain,sum(Z,1)+sum(Zms,1), options);
+    
+    if sum(Zms,1) > Distrib.Zero
+        % in this case, we need to use the iterative approximation below
+        Xchain=[];
+        Qchain=[];
+    end
     
     % commented out, poor performance on bench_CQN_FCFS_rm_multiserver_hicv_midload
     % model 7 as it does not guarantee that the closed population is
@@ -122,16 +122,30 @@ while max(abs(1-eta./eta_1)) > options.iter_tol && it <= options.iter_max
     %         lG = pfqn_nc(Lcorr,Nchain,sum(Z,1)+sum(Zcorr,1), options); % update lG
     %     end
     
-    for r=1:C
-        lGr(r) = pfqn_nc(Lcorr,oner(Nchain,r),sum(Z,1)+sum(Zcorr,1), options);
-        Xchain(r) = exp(lGr(r) - lG);
-        for i=1:M
-            if Lchain(i,r)>0
-                if isinf(nservers(i)) % infinite server
-                    Qchain(i,r) = Lchain(i,r) * Xchain(r);
-                else
-                    lGar(i,r) = pfqn_nc([Lcorr(setdiff(1:size(Lcorr,1),i),:),zeros(size(Lcorr,1)-1,1); Lcorr(i,:),1], [oner(Nchain,r),1], [sum(Z,1)+sum(Zcorr,1),0], options);
-                    Qchain(i,r) = Zcorr(i,r) * Xchain(r) + Lcorr(i,r) * exp(lGar(i,r) - lG);
+    if isempty(Xchain)
+        for r=1:C
+            lGr(r) = pfqn_nc(Lms,oner(Nchain,r),sum(Z,1)+sum(Zms,1), options);
+            Xchain(r) = exp(lGr(r) - lG);
+            for i=1:M
+                if Lchain(i,r)>0
+                    if isinf(nservers(i)) % infinite server
+                        Qchain(i,r) = Lchain(i,r) * Xchain(r);
+                    else
+                        lGar(i,r) = pfqn_nc([Lms(setdiff(1:size(Lms,1),i),:),zeros(size(Lms,1)-1,1); Lms(i,:),1], [oner(Nchain,r),1], [sum(Z,1)+sum(Zms,1),0], options);
+                        dlG = lGar(i,r) - lG;
+                        Qchain(i,r) = Zms(i,r) * Xchain(r) + Lms(i,r) * exp(dlG);
+                    end
+                end
+            end
+        end
+    else
+        % just fill the delay servers
+        for r=1:C
+            for i=1:M
+                if Lchain(i,r)>0
+                    if isinf(nservers(i)) % infinite server
+                        Qchain(i,r) = Lchain(i,r) * Xchain(r);
+                    end
                 end
             end
         end
@@ -144,14 +158,10 @@ while max(abs(1-eta./eta_1)) > options.iter_tol && it <= options.iter_max
         %        lG
         %        lGr
         %        lGar
-<<<<<<< HEAD
-        warning('Normalizing constant computations produced a floating-point range exception. Model is likely too large.');
-=======
         line_warning(mfilename,'Normalizing constant computations produced a floating-point range exception. Model is likely too large.');
         %Demands=Lcorr
         %PopulationVector=oner(Nchain,r)
         %ThinkTimes=sum(Z,1)+sum(Zcorr,1)
->>>>>>> refs/remotes/origin/master
     end
     
     Z = sum(Z(1:M,:),1);
@@ -203,34 +213,22 @@ while max(abs(1-eta./eta_1)) > options.iter_tol && it <= options.iter_max
     end
     
     if it==1
+        ca= zeros(M,1);
         ca_1 = ones(M,1);
+        cs_1 = ones(M,1);
+        for i=1:M
+            sd = qn.rates(i,:)>0;
+            cs_1(i) = mean(SCV(i,sd));
+        end
+    else
+        ca_1 = ca;
+        cs_1 = cs;
     end
     
     for i=1:M
-        sd = ST0(i,:)>0;
+        sd = qn.rates(i,:)>0;
         switch sched(i)
             case SchedStrategy.FCFS
-<<<<<<< HEAD
-                if range(ST0(i,sd))>0 && (max(SCV(i,sd))>1 - Distrib.Zero || min(SCV(i,sd))<1 + Distrib.Zero) % check if non-product-form                    
-                    ca(i) = 0;
-                    for j=1:M
-                        for r=1:K
-                            if ST0(j,r)>0
-                                for s=1:K
-                                    if ST0(i,s)>0
-                                        pji_rs = qn.rt((j-1)*qn.nclasses + r, (i-1)*qn.nclasses + s);
-                                        ca(i) = ca(i) + (T(j,r)*pji_rs/sum(T(i,sd)))*(1 - pji_rs + pji_rs*((1-rho(j)^2)*ca_1(j) + rho(j)^2*SCV(j,r)));
-                                    end
-                                end
-                            end
-                        end
-                    end
-                    
-                    %ca(i) = 1;
-                    cs(i) = (SCV(i,sd)*T(i,sd)')/sum(T(i,sd));
-                    % asymptotic decay rate (diffusion approximation, Kobayashi JACM)
-                    eta(i) = exp(-2*(1-rho(i))/(cs(i)+ca(i)*rho(i)));
-=======
                 if range(ST0(i,sd))>0 && (max(SCV(i,sd))>1 - Distrib.Zero || min(SCV(i,sd))<1 + Distrib.Zero) % check if non-product-form
 %                    if rho(i) <= 1
 %                     else
@@ -254,47 +252,29 @@ while max(abs(1-eta./eta_1)) > options.iter_tol && it <= options.iter_max
                     % asymptotic decay rate (diffusion approximation, Kobayashi JACM)
                     eta(i) = exp(-2*(1-rho(i))/(cs(i)+ca(i)*rho(i)));
                     %eta(i) = rho(i);
->>>>>>> refs/remotes/origin/master
                 end
-                %eta(i) = rho(i);
-                %eta(i) = (rho(i)^nservers(i)+rho(i))/2; % multi-server
         end
     end
     
+    
     for i=1:M
-        sd = ST0(i,:)>0;
+        sd = qn.rates(i,:)>0;
         switch sched(i)
             case SchedStrategy.FCFS
                 if range(ST0(i,sd))>0 && (max(SCV(i,sd))>1 - Distrib.Zero || min(SCV(i,sd))<1 + Distrib.Zero) % check if non-product-form
                     for k=1:K
-<<<<<<< HEAD
-                        if ST0(i,k)>0
-                            ST(i,k) = (1-rho(i)^2)*ST0(i,k) + rho(i)^2 * eta(i)*nservers(i)/sum(T(i,sd));
-                            %                             if sum(Q(i,ST(i,:)>0)) < nservers(i)
-                            %                                 if ST0(i,k)>0
-                            %                                     ST(i,k) = ST0(i,k);
-                            %                                 end
-                            %                             else % sum(Q(i,ST(i,:)>0)) >= S(i)
-                            %                                 if ST0(i,k)>0
-                            %                                     ST(i,k) = eta(i)*nservers(i)/sum(T(i,sd));
-                            %                                 end
-=======
                         if qn.rates(i,k)>0                            
                             ST(i,k) = (1-rho(i)^4)*ST0(i,k) + rho(i)^4*((1-rho(i)^4) * gamma(i)*nservers(i)/sum(T(i,sd)) +  rho(i)^4* eta(i)*nservers(i)/sum(T(i,sd)) );                            
->>>>>>> refs/remotes/origin/master
                         end
                     end
                 end
         end
     end
+    
 end
+
 runtime = toc(Tstart);
 Q=abs(Q); R=abs(R); X=abs(X); U=abs(U);
-
-
 X(~isfinite(X))=0; U(~isfinite(U))=0; Q(~isfinite(Q))=0; R(~isfinite(R))=0;
-%if options.verbose > 0
-%    fprintf(1,'NC analysis completed in %f sec\n',runtime);
-%end
 return
 end

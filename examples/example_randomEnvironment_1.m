@@ -5,7 +5,7 @@ M = 2;
 E = 2;
 envModel = Env('MyEnv');
 envName = {'Stage1', 'Stage2'};
-envType = {Semantics.UP, Semantics.DOWN};
+envType = {'UP', 'DOWN'};
 
 rate = zeros(M,E); rate(M,1:E)=(1:E); rate(1,1:E)=(E:-1:1);
 envSubModel = {example_randomEnvironment_genqn(rate(:,1),N), example_randomEnvironment_genqn(rate(:,2),N)};

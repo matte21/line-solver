@@ -2,7 +2,6 @@ function nodes = resetNetwork(self, deleteCSNodes) % resets network topology
 % NODES = RESETNETWORK(DELETECSNODES) % RESETS NETWORK TOPOLOGY
 
 M = self.getNumberOfStations;
-%R = self.getNumberOfClasses;
 if ~exist('deleteNodes','var')
     deleteCSNodes = true;
 end

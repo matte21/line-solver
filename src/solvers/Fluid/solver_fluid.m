@@ -62,7 +62,7 @@ for i = 1:M
     for k = 1:K
         if match(i,k) > 0 % indicates whether a class is served at a station
             if isinf(NK(k))
-                if strcmpi(sched(i),SchedStrategy.EXT)
+                if sched(i)==SchedStrategy.EXT
                     toAssign = 1; % open job pool
                 else
                     toAssign = 0; % set to zero open jobs everywhere

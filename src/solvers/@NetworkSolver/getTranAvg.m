@@ -37,7 +37,7 @@ if ~self.hasTranResults()
         self.options.timespan(2) = 30/minrate;
         line_warning(mfilename,'End time of transient analysis unspecified, setting the timespan option to [%d,%d]. Use %s(model,''timespan'',[0,T]) to customize.',self.options.timespan(1),self.options.timespan(2),class(self));
     end
-    self.run();
+    self.runAnalysis();
 end
 
 M = self.model.getNumberOfStations();

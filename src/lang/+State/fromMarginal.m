@@ -93,11 +93,7 @@ switch qn.nodetype(ind)
                 sizeEstimator = round(sizeEstimator/log(10));
                 if sizeEstimator > 2
                     if ~isfield(options,'force') || options.force == false
-<<<<<<< HEAD
-                        error(sprintf('State space size is very large: 1e%d states. Stopping execution. Set options.force=true to bypass this control.\n',sizeEstimator));
-=======
                         %line_warning(mfilename,sprintf('fromMarginal(): Marginal state space size is very large: 1e%d states. Set options.force=true to bypass this control.\n',sizeEstimator));
->>>>>>> refs/remotes/origin/master
                     end
                 end
                 

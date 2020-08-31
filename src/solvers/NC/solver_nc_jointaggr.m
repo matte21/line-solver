@@ -35,7 +35,7 @@ eta_1 = zeros(1,M);
 eta = ones(1,M);
 ca = ones(1,M);
 
-if findstring(sched,SchedStrategy.FCFS) == -1, options.iter_max=1; end
+if ~any(sched==SchedStrategy.FCFS) options.iter_max=1; end
 
 it = 0;
 while max(abs(1-eta./eta_1)) > options.iter_tol && it <= options.iter_max

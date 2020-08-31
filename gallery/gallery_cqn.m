@@ -11,7 +11,7 @@ if useDelay
     node{M+1} = DelayStation(model, 'Delay 1');
 end
 %% Block 2: classes
-jobclass{1} = ClosedClass(model, 'Class1', 5, node{1}, 0);
+jobclass{1} = ClosedClass(model, 'Class1', M+3, node{1}, 0);
 
 for i=1:M
     node{i}.setService(jobclass{1}, Exp.fitMean(1.000000+i)); % (Queue 1,Class1)

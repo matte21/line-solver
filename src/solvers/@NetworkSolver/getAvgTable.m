@@ -9,7 +9,7 @@ qn = self.getStruct();
 
 if ~exist('keepDisabled','var')
     keepDisabled = false;
-end  
+end
 M = self.model.getNumberOfStations();
 K = self.model.getNumberOfClasses();
 if nargin == 2
@@ -40,7 +40,7 @@ elseif ~keepDisabled
     V = cellsum(qn.visits);
     if isempty(V) % SSA
         for i=1:M
-            for c=1:qn.nchains                
+            for c=1:qn.nchains
                 chain_classes = find(qn.chains(c,:));
                 k = chain_classes(1);
                 Tchain=sum(TN(qn.refstat(k),chain_classes));
@@ -59,12 +59,17 @@ elseif ~keepDisabled
     for i=1:M
         for k=1:K
             if any(sum([QN(i,k),UN(i,k),RN(i,k),TN(i,k)])>0)
+                c = find(qn.chains(:,k));
                 JobClass{end+1,1} = Q{i,k}.class.name;
                 Station{end+1,1} = Q{i,k}.station.name;
                 Qval(end+1) = QN(i,k);
                 Uval(end+1) = UN(i,k);
                 Rval(end+1) = RN(i,k);
-                Residval(end+1) = RN(i,k)*V(i,k);
+                if RN(i,k)<Distrib.Zero
+                    Residval(end+1) = RN(i,k);
+                else
+                    Residval(end+1) = RN(i,k)*V(i,k)/sum(V(qn.refstat(k),qn.chains(c,:)));
+                end
                 Tval(end+1) = TN(i,k);
             end
         end
@@ -86,7 +91,7 @@ else
     V = cellsum(qn.visits);
     if isempty(V) % SSA
         for i=1:M
-            for c=1:qn.nchains                
+            for c=1:qn.nchains
                 chain_classes = find(qn.chains(c,:));
                 k = chain_classes(1);
                 Tchain=sum(TN(qn.refstat(k),chain_classes));
@@ -103,12 +108,17 @@ else
     Station = cell(K*M,1);
     for i=1:M
         for k=1:K
+            c = find(qn.chains(:,k));
             JobClass{(i-1)*K+k} = Q{i,k}.class.name;
             Station{(i-1)*K+k} = Q{i,k}.station.name;
             Qval((i-1)*K+k) = QN(i,k);
             Uval((i-1)*K+k) = UN(i,k);
             Rval((i-1)*K+k) = RN(i,k);
-            Residval((i-1)*K+k) = RN(i,k)*V(i,k);
+            if RN(i,k)<Distrib.Zero
+                Residval((i-1)*K+k) = RN(i,k);
+            else
+                Residval((i-1)*K+k) = RN(i,k)*V(i,k)/sum(V(qn.refstat(k),qn.chains(c,:)));
+            end
             Tval((i-1)*K+k) = TN(i,k);
         end
     end

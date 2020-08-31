@@ -37,7 +37,7 @@ modelCopy.linkAndLog(Plinked, isNodeLogged, logpath);
 options = self.getOptions; options.samples = numEvents;
 solverjmt = SolverJMT(modelCopy, options);
 solverjmt.maxEvents = numEvents;
-solverjmt.run(); % log data
+solverjmt.runAnalysis(); % log data
 logData = SolverJMT.parseLogs(modelCopy, isNodeLogged, Metric.QLen);
 
 % from here convert from nodes in logData to stations
@@ -84,6 +84,8 @@ for ist= 1:qn.nstations
     statStateAggr{ist}.state = cell2mat(nir);
     statStateAggr{ist}.event = {event{isf,:}};
     statStateAggr{ist}.isaggregate = true;
+    sysStateAggr.arv_job_id = logData{2}.arvID;
+    sysStateAggr.dep_job_id = logData{2}.depID;
 end
 
 tranSysStateAggr = cell(1,1+self.model.getNumberOfStations);
@@ -165,4 +167,6 @@ event_t = cellfun(@(c) c.t, event);
 sysStateAggr.event = {event{I}};
 sysStateAggr.event = sysStateAggr.event';
 sysStateAggr.isaggregate = true;
+sysStateAggr.arv_job_id = logData{2}.arvID;
+sysStateAggr.dep_job_id = logData{2}.depID;
 end

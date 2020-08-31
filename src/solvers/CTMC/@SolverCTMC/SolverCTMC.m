@@ -11,11 +11,7 @@ classdef SolverCTMC < NetworkSolver
             self.setOptions(Solver.parseOptions(varargin, self.defaultOptions));
         end
         
-<<<<<<< HEAD
-        runtime = run(self, options)
-=======
         runtime = runAnalysis(self, options, config)
->>>>>>> refs/remotes/origin/master
         Pnir = getProb(self, node, state)
         Pn = getProbSys(self)
         Pnir = getProbAggr(self, ist)
@@ -25,6 +21,7 @@ classdef SolverCTMC < NetworkSolver
         [Pi_t, SSnode_a] = getTranProbAggr(self, node)
         [Pi_t, SSsys] = getTranProbSys(self)     
         [Pi_t, SSnode] = getTranProb(self, node)
+        %RD = getCdfRespT(self, R)
         
         function [stateSpace,nodeStateSpace] = getStateSpace(self)
             % [STATESPACE, MARGSTATESPACE] = GETSTATESPACE()
@@ -89,18 +86,22 @@ classdef SolverCTMC < NetworkSolver
             [infGen, eventFilt, ev] = getGenerator(self);
         end
         
-        function [infGen, eventFilt, ev] = getGenerator(self)
+        function [infGen, eventFilt, ev] = getGenerator(self, force)
             % [INFGEN, EVENTFILT] = GETGENERATOR()
-            
+                        
             % [infGen, eventFilt] = getGenerator(self)
             % returns the infinitesimal generator of the CTMC and the
             % associated filtration for each event
+            
+            if nargin==1
+                force=false;
+            end
             options = self.getOptions;
-            if options.force
+            if options.force || force
                 self.runAnalysis;
             end
             if isempty(self.result) || ~isfield(self.result,'infGen')
-                line_warning(mfilename,'The model has not been cached. Either solve it or use the ''force'' option to require this is done automatically, e.g., SolverCTMC(model,''force'',true).getGenerator()');
+                line_warning(mfilename,'The model has not been cached. Either solve it, set options.force=true or call getGenerator(true).');
                 infGen = [];
                 eventFilt = [];
             else
@@ -163,11 +164,7 @@ classdef SolverCTMC < NetworkSolver
             for s=1:size(SS,1)
                 for sp=1:size(SS,1)
                     if Q(s,sp)>0
-<<<<<<< HEAD
-                        fprintf(1,'%s->%s: %f\n',mat2str(SS(s,:)),mat2str(SS(sp,:)),double(Q(s,sp)));
-=======
                         line_printf('\n%s->%s: %f',mat2str(SS(s,:)),mat2str(SS(sp,:)),double(Q(s,sp)));
->>>>>>> refs/remotes/origin/master
                     end
                 end
             end
@@ -185,11 +182,7 @@ classdef SolverCTMC < NetworkSolver
                 for s=1:size(SS,1)
                     for sp=1:size(SS,1)
                         if D{e}(s,sp)>0
-<<<<<<< HEAD
-                            fprintf(1,'%s-- %d: (%d,%d) => (%d,%d) -->%s: %f\n',mat2str(SS(s,:)),e,sync{e}.active{1}.node,sync{e}.active{1}.class,sync{e}.passive{1}.node,sync{e}.passive{1}.class,mat2str(SS(sp,:)),double(D{e}(s,sp)));
-=======
                             line_printf('\n%s-- %d: (%d,%d) => (%d,%d) -->%s: %f',mat2str(SS(s,:)),e,sync{e}.active{1}.node,sync{e}.active{1}.class,sync{e}.passive{1}.node,sync{e}.passive{1}.class,mat2str(SS(sp,:)),double(D{e}(s,sp)));
->>>>>>> refs/remotes/origin/master
                         end
                     end
                 end

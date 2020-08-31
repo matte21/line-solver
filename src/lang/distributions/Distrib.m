@@ -4,6 +4,10 @@ classdef Distrib < Copyable
     % Copyright (c) 2012-2020, Imperial College London
     % All rights reserved.
     
+    properties (Hidden)
+        mean; % cached mean
+    end
+    
     properties
         name
         params
@@ -13,11 +17,11 @@ classdef Distrib < Copyable
     end
     
     properties (Constant)
-        Zero = 1e-10; % Right neighborhood of zero
+        Zero = 1e-8; % Right neighborhood of zero
         Tol = 1e-3; % Tolerance for distribution fitting
-        Inf = 1e10; % Generic representation of infinity
-        InfTime = 1e10; % Representation of an infinite time
-        InfRate = 1e10; % Representation of an infinite rate
+        Inf = 1e8; % Generic representation of infinity
+        InfTime = 1e8; % Representation of an infinite time
+        InfRate = 1e8; % Representation of an infinite rate
     end
     
     methods %(Abstract)
@@ -126,7 +130,7 @@ classdef Distrib < Copyable
             % BOOL = ISIMMEDIATE()
             % Check if the distribution is equivalent to an Immediate
             % distribution
-            bool = self.getMean() == 0 || isa(self,'Immediate');
+            bool = self.getMean() < Distrib.Zero;% || isa(self,'Immediate');
         end
         
         function bool = isContinuous(self)

@@ -37,7 +37,7 @@ if ~isempty(parsed)
     P = zeros(M*K,M*K);
     numservers = zeros(M,1);
     rates = zeros(M,K);
-    sched = cell(M,1);
+    sched = categorical(M,1);
     njobs = zeros(K,1);
     chains = eye(K);
     refstat = zeros(K,1);
@@ -63,8 +63,8 @@ if ~isempty(parsed)
     
     % extract information from servers
     for i = 1:Ms
-        sched(i) = schedTranslate{findstring(schedTranslate(:,1),parsed.servers(i).scheduling), 2 };
-        if strcmp(sched(i), SchedStrategy.INF)
+        sched(i,1) = schedTranslate{findstring(schedTranslate(:,1),parsed.servers(i).scheduling), 2 };
+        if sched(i) == SchedStrategy.INF
             numservers(i) = Inf;
         else
             numservers(i) = parsed.servers(i).quantity;
@@ -72,8 +72,8 @@ if ~isempty(parsed)
     end
     
     for i = 1:Mw
-        sched(Ms+i) = schedTranslate{findstring(schedTranslate(:,1),parsed.workUnitServers(i).scheduling), 2 };
-        if strcmp(sched(Ms+i), SchedStrategy.INF)
+        sched(Ms+i,1) = schedTranslate{findstring(schedTranslate(:,1),parsed.workUnitServers(i).scheduling), 2 };
+        if sched(Ms+i) == SchedStrategy.INF
             numservers(Ms+i) = Inf;
         else
             numservers(Ms+i) = parsed.workUnitServers(i).quantity;

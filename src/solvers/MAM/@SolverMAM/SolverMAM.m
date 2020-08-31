@@ -12,11 +12,7 @@ classdef SolverMAM < NetworkSolver
             self.setOptions(Solver.parseOptions(varargin, self.defaultOptions));
         end
         
-<<<<<<< HEAD
-        runtime = run(self, options);
-=======
         runtime = runAnalysis(self, options, config);
->>>>>>> refs/remotes/origin/master
         RD = getCdfRespT(self, R);
     end
     

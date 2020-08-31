@@ -29,22 +29,15 @@ for r=1:R
 end
 state = [];
 space = [];
-if any(n>qn.classcap(isf,:))
-    exceeded = n>qn.classcap(isf,:);
+if any(n>qn.classcap(ist,:))
+    exceeded = n>qn.classcap(ist,:);
     for r=find(exceeded)
-<<<<<<< HEAD
-        if ~isempty(qn.proc) && ~isempty(qn.proc{isf,r}) && any(any(isnan(qn.proc{isf,r}{1})))
-            warning('State vector at station %d (n=%s) exceeds the class capacity (classcap=%s). Some service classes are disabled.\n',ist,mat2str(n(isf,:)),mat2str(qn.classcap(isf,:)));
-        else
-            warning('State vector at station %d (n=%s) exceeds the class capacity (classcap=%s).\n',ist,mat2str(n(isf,:)),mat2str(qn.classcap(isf,:)));
-=======
         if ~isempty(qn.proc) && ~isempty(qn.proc{ist,r}) && any(any(isnan(qn.proc{ist,r}{1})))
             line_warning(mfilename,'State vector at station %d (n=%s) exceeds the class capacity (classcap=%s). Some service classes are disabled.\n',ist,mat2str(n(ist,:)),mat2str(qn.classcap(ist,:)));
         else
             line_warning(mfilename,'State vector at station %d (n=%s) exceeds the class capacity (classcap=%s).\n',ist,mat2str(n(ist,:)),mat2str(qn.classcap(ist,:)));
->>>>>>> refs/remotes/origin/master
         end
-    end															
+    end
     return
 end
 if (qn.nservers(ist)>0 && sum(s) > qn.nservers(ist))
@@ -158,11 +151,7 @@ switch qn.nodetype(ind)
             case {SchedStrategy.SJF, SchedStrategy.LJF}
                 % in these policies the state space includes continuous
                 % random variables for the service times
-<<<<<<< HEAD
-                error('The scheduling policy does not admit a discrete state space.\n');
-=======
                 line_warning(mfilename,'The scheduling policy does not admit a discrete state space.');
->>>>>>> refs/remotes/origin/master
         end
     case NodeType.Cache
         switch qn.sched(ist)

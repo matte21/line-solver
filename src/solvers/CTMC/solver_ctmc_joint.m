@@ -32,13 +32,8 @@ end
 if options.keep
     fname = tempname;
     save([fname,'.mat'],'Q','SSq')
-<<<<<<< HEAD
-    fprintf(1,'CTMC generator and state space saved in: ');
-    disp([fname, '.mat'])
-=======
     line_printf('\nCTMC generator and state space saved in: ');
     line_printf([fname, '.mat'])
->>>>>>> refs/remotes/origin/master
 end
 pi = ctmc_solve(Q);
 pi(pi<1e-14)=0;

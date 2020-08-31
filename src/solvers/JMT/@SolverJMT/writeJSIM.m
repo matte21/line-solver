@@ -77,7 +77,7 @@ for i=1:numOfStations
     if (~isa(self.model.stations{i},'Source') && ~isa(self.model.stations{i},'Join'))
         [~, nir] = State.toMarginal(self.model,qn.stationToNode(i),s0{qn.stationToStateful(i)});
         stationPopulationsNode = simXMLDoc.createElement('stationPopulations');
-        stationPopulationsNode.setAttribute('stationName', currentNode.name);
+        stationPopulationsNode.setAttribute('stationName', currentNode.name);        
         for r=1:(numOfClasses)
             currentClass = self.model.classes{r,1};
             %        if currentClass.isReferenceStation(currentNode)
@@ -90,7 +90,7 @@ for i=1:numOfStations
                     stationPopulationsNode.appendChild(classPopulationNode);                    
                 case 'closed'
                     isReferenceNode = 1;
-                    %                    classPopulationNode.setAttribute('population', sprintf('%d',currentClass.population));
+                    %                    classPopulationNode.setAttribute('population', sprintf('%d',currentClass.population));                                        
                     classPopulationNode.setAttribute('population', sprintf('%d',round(nir(r))));
                     classPopulationNode.setAttribute('refClass', currentClass.name);
                     stationPopulationsNode.appendChild(classPopulationNode);

@@ -145,14 +145,8 @@ end
 
 runtime = toc(Tstart);
 
-<<<<<<< HEAD
-%if options.verbose > 0
-%    fprintf(1,'Normalizing constant (NC) analysis completed in %f sec\n',runtime);
-%end
-=======
 if options.verbose > 0
     line_printf('\nNC analysis completed. Runtime: %f seconds.\n',runtime);
 end
->>>>>>> refs/remotes/origin/master
 return
 end

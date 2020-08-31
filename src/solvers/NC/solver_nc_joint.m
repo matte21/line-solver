@@ -96,11 +96,7 @@ runtime = toc(Tstart);
 
 lG = log(G);
 if options.verbose > 0
-<<<<<<< HEAD
-    fprintf(1,'Normalizing constant (NC) analysis completed in %f sec\n',runtime);
-=======
     line_printf('\nNormalizing constant (NC) analysis completed. Runtime: %f seconds.\n',runtime);
->>>>>>> refs/remotes/origin/master
 end
 return
 end

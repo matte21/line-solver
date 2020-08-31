@@ -192,7 +192,7 @@ classdef Station < StatefulNode
                     mu{r}  = NaN;
                     phi{r}  = NaN;
                 elseif self.server.serviceProcess{r}{end}.isImmediate()
-                    map{r}  = {[Distrib.InfRate],[1]};
+                    map{r}  = {[-Distrib.InfRate],[Distrib.InfRate]};
                     mu{r}  = [Distrib.InfRate];
                     phi{r}  = [1];
                 elseif ~self.server.serviceProcess{r}{end}.isDisabled()

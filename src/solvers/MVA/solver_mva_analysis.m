@@ -15,7 +15,7 @@ SCV = qn.scv;
 % determine service times
 ST = 1./qn.rates;
 ST(isnan(qn.rates))=0;
-SCV(isnan(SCV))=1;
+SCV(isnan(SCV))=0;
 
 alpha = zeros(qn.nstations,qn.nclasses);
 Vchain = zeros(qn.nstations,qn.nchains);
@@ -39,7 +39,7 @@ SCVchain = zeros(M,C);
 Nchain = zeros(1,C);
 refstatchain = zeros(C,1);
 for c=1:qn.nchains
-    inchain = find(qn.chains(c,:));
+    inchain = find(qn.chains(c,:)); %classes in chain
     isOpenChain = any(isinf(qn.njobs(inchain)));
     for i=1:qn.nstations
         % we assume that the visits in L(i,inchain) are equal to 1
@@ -50,7 +50,8 @@ for c=1:qn.nchains
         else
             STchain(i,c) = ST(i,inchain) * alpha(i,inchain)';
         end
-        SCVchain(i,c) = SCV(i,inchain) * alpha(i,inchain)';
+        % renormalize to ignore NaN
+        SCVchain(i,c) = SCV(i,inchain) * alpha(i,inchain)' / sum(alpha(i,inchain(isfinite(SCV(i,inchain))))');
     end
     Nchain(c) = sum(NK(inchain));
     refstatchain(c) = qn.refstat(inchain(1));
@@ -103,7 +104,6 @@ for c=1:qn.nchains
     end
 end
 runtime = toc(Tstart);
-
 Q=abs(Q); R=abs(R); X=abs(X); U=abs(U); T=abs(T); C=abs(C);
 T(~isfinite(T))=0; U(~isfinite(U))=0; Q(~isfinite(Q))=0; R(~isfinite(R))=0; X(~isfinite(X))=0; C(~isfinite(C))=0;
 return

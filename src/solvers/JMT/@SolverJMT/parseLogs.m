@@ -4,11 +4,7 @@ function logData = parseLogs(model,isNodeLogged, metric)
 % Copyright (c) 2012-2020, Imperial College London
 % All rights reserved.
 
-<<<<<<< HEAD
-fprintf(1,'JMT log parsing... ');
-=======
 line_printf('\nJMT log parsing...');
->>>>>>> refs/remotes/origin/master
 T0=tic;
 qn = model.getStruct;
 nclasses = qn.nclasses;
@@ -82,6 +78,8 @@ for ind=1:qn.nnodes
                             end
                         end
                         logData{ind,r}.QLen = nodeState{ind}(:,1+r);
+                        logData{ind,r}.arvID = jobArvID;
+                        logData{ind,r}.depID = jobDepID;                        
                     end
                 case Metric.RespT
                     [classResT, jobRespT, jobResTArvTS] = SolverJMT.parseTranRespT(logFileArvMat, logFileDepMat);
@@ -103,10 +101,6 @@ for ind=1:qn.nnodes
     end
 end
 runtime=toc(T0);
-<<<<<<< HEAD
-fprintf(' completed in %f seconds.\n',runtime);
-=======
 line_printf(' completed. Runtime: %f seconds.\n',runtime);
->>>>>>> refs/remotes/origin/master
 end
 

@@ -129,8 +129,8 @@ classdef EnsembleSolver < Solver
             E = length(self.ensemble);
         end
         
-        function [runtime, sruntime, results] = run(self)
-            % [RUNTIME, SRUNTIME, RESULTS] = RUN()
+        function [runtime, sruntime, results] = iterate(self, options)
+            % [RUNTIME, SRUNTIME, RESULTS] = ITERATE()
             T0 = tic;
             it = 0;
             options = self.options;
@@ -143,7 +143,7 @@ classdef EnsembleSolver < Solver
                 it = it + 1;
                 self.pre(it);
                 sruntime(it,1:E) = 0;
-                T0=tic;
+                T1=tic;
                 switch options.method
                     case {'default','serial'}
                         for e = self.list(it)
@@ -158,40 +158,23 @@ classdef EnsembleSolver < Solver
                 end
                 self.results = results;
                 if options.verbose
-<<<<<<< HEAD
-                    Tpproc=toc(T0);
-                    if it>1
-                        fprintf('\nIter %d. ',it);
-                    else
-                        fprintf('Iter %d. ',it);
-=======
                     Tsolve(it)=toc(T1);
                     Ttot=toc(T0);
                     if it==1
                         line_printf('Iter %2d. ',it);
                     else
                         line_printf('\nIter %2d. ',it);
->>>>>>> refs/remotes/origin/master
                     end
-                    fprintf('Runtime: %f seconds.',Tpproc);
-                    T0=tic;
-                    fprintf(' Postprocessing: ');
                 end
+                T2=tic;
                 self.post(it);
-                Tpproc=toc(T0);
+                Tsynch(it)=toc(T2);
                 if options.verbose
-<<<<<<< HEAD
-                    fprintf('%f seconds. ',Tpproc);
-=======
                     line_printf('\nAnalyze: %.3fs. Update: %.3fs. Runtime: %.3fs. ',Tsolve(it),Tsynch(it),Ttot);
->>>>>>> refs/remotes/origin/master
                 end
             end
             self.finish();
             runtime = toc(T0);
-<<<<<<< HEAD
-        end       
-=======
             if options.verbose
                 line_printf('\nSummary: Analyze avg: %.3fs. Update avg: %.3fs. Cumtime: %.3fs. ',mean(Tsolve),mean(Tsynch),runtime);
             end
@@ -204,7 +187,6 @@ classdef EnsembleSolver < Solver
                 AvgTables{1,e} = self.solvers{e}.getAvgTable();
             end
         end
->>>>>>> refs/remotes/origin/master
     end
     
     methods (Static)

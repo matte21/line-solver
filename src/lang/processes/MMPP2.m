@@ -81,9 +81,6 @@ classdef MMPP2 < MarkovModulated
             id = 1 + 2*(lambda0-lambda1)^2*sigma0*sigma1/(sigma0+sigma1)^2/(lambda0*sigma1+lambda1*sigma0);
         end
         
-<<<<<<< HEAD
-        function PH = getRepresentation(self)
-=======
         function id = getIDI(self)
             % IDI = GETIDI() % INDEX OF DISPERSION FOR INTERVALS
             
@@ -95,7 +92,6 @@ classdef MMPP2 < MarkovModulated
         end
         
         function PH = getPH(self)
->>>>>>> refs/remotes/origin/master
             % PH = GETREPRESENTATION()
             PH = self.getProcess();
         end

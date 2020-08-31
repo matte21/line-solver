@@ -21,5 +21,4 @@ self.refreshChains(wantVisits);
 self.refreshLocalVars(); % depends on chains (rtnodes)
 self.refreshSync(); % this assumes that refreshChain is called before
 %self.qn.forks = self.getForks(self.qn.rt);
-
 end

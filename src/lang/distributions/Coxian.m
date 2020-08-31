@@ -81,7 +81,7 @@ classdef Coxian < MarkovianDistribution
             end
         end
         
-        function PH = getRepresentation(self)
+        function PH = getPH(self)
             % PH = GETREPRESENTATION()
             % Return the renewal process associated to the distribution
             if length(self.params) == 2

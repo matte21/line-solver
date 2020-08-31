@@ -10,7 +10,7 @@ M = qn.nstations;
 K = qn.nclasses;
 S = qn.nservers;
 SCV = qn.scv;
-
+sched = qn.sched;
 phases = qn.phases;
 rates0 = qn.rates;
 
@@ -33,7 +33,7 @@ useSCV = false;
 switch options.method
     case {'default','stateindep'}
         % approximate FCFS nodes as state-independent stations
-        if findstring(qn.sched, SchedStrategy.FCFS) ~= -1 % if there are FCFS stations
+		if any(sched==SchedStrategy.FCFS) 
             rates = rates0;
             iter = 0;
             eta_1 = zeros(1,M);
@@ -226,7 +226,4 @@ end
 
 lastSolution.odeStateVec = ymean{end};
 lastSolution.qn = qn;
-%if options.verbose
-%    fprintf(1,'Fluid analysis completed in %0.6f sec [%d iterations]\n',outer_runtime,outer_iters);
-%end
 end

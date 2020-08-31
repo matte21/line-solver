@@ -9,7 +9,11 @@ classdef Solver < handle
         VERBOSE_STD = 1;
         VERBOSE_DEBUG = 2;
     end
-    
+
+    properties (Hidden, Access = public)
+        enableChecks;
+    end
+        
     properties (Access = public)
         options; % Data structure with solver options
         name; % Solver name
@@ -27,6 +31,7 @@ classdef Solver < handle
             self.model = model;
             self.name = name;
             self.options = options;
+            self.enableChecks = true;
         end
     end
     
@@ -42,13 +47,6 @@ classdef Solver < handle
             line_error(mfilename,'Line:AbstractMethodCall','An abstract method was called. The function needs to be overridden by a subclass.');            
         end
         
-<<<<<<< HEAD
-        function runtime = run(self, options) % generic method to run the solver
-            % RUNTIME = RUN()
-            % Run the solver % GENERIC METHOD TO RUN THE SOLVER
-            % Solve the model
-            error('Line:AbstractMethodCall','An abstract method was called. The function needs to be overridden by a subclass.');            
-=======
         function runtime = runAnalysis(self, options, config) % generic method to run the solver
             % RUNTIME = RUN()
             % Run the solver % GENERIC METHOD TO RUN THE SOLVER
@@ -58,7 +56,6 @@ classdef Solver < handle
         
         function self = setChecks(self, bool)
             self.enableChecks = bool;
->>>>>>> refs/remotes/origin/master
         end
     end
     
@@ -223,9 +220,10 @@ classdef Solver < handle
                 'default','exact','auto','ctmc','ctmc.gpu','gpu','mva','mva.exact','amva','mva.amva',...
                 'ssa','ssa.serial.hash','ssa.para.hash','ssa.parallel.hash','ssa.serial','ssa.para',...
                 'ssa.parallel','serial.hash','serial','para','parallel','para.hash','parallel.hash',...
-                'jmt','jsim','jmva','jmva.mva','jmva.recal','jmva.comom','jmva.chow','jmva.bs','jmva.aql','jmva.lin','jmva.dmlin','jmva.ls',...
+                'jmt','jsim','jmva','jmva.mva','jmva.recal','jmva.mom','jmva.comom','jmva.chow','jmva.bs','jmva.aql','jmva.lin','jmva.dmlin','jmva.ls',...
                 'jmt.jsim','jmt.jmva','jmt.jmva.mva','jmt.jmva.amva','jmt.jmva.recal','jmt.jmva.comom','jmt.jmva.chow','jmt.jmva.bs','jmt.jmva.aql','jmt.jmva.lin','jmt.jmva.dmlin','jmt.jmva.ls',...
-                'fluid','nc','nc.exact','nc.imci','nc.ls','nc.le','nc.panacea','nc.mmint','mam','dec.source','dec.mmap',...
+                'ca','comom','mom','propfair','recal','kt', 'nc.comom','nc.gm','nc.mom','nc.propfair','nc.recal','nc.kt', 'nc.ca', ...
+                'fluid','nc','nc.exact','nc.imci','nc.ls','nc.le','nc.panacea','panacea','nc.mmint2','mmint2','mam','dec.source','dec.mmap',...
                 'mmk','gigk', 'gigk.kingman_approx', ...
                 'mm1','mg1','gm1','gig1','gim1','gig1.kingman','gig1.gelenbe','gig1.heyman','gig1.kimura','gig1.allen','gig1.kobayashi','gig1.klb','gig1.marchal','gig1.myskja','gig1.myskja.b',...
                 'aba.upper','aba.lower','gb.upper','gb.lower','bjb.upper','bjb.lower','pb.upper','pb.lower'};
@@ -253,18 +251,12 @@ classdef Solver < handle
                 options = varargin{1};
             elseif ischar(varargin{1})
                 options = defaultOptions;
+                [optList, allOpt] = Solver.listValidOptions();
+                allMethodsList = setdiff(allOpt, optList);
                 while ~isempty(varargin)
-                    if Solver.isValidOption(varargin{1})
+                    if Solver.isValidOption(varargin{1})                        
                         switch varargin{1}
-                            case {'default','exact','auto','ctmc','ctmc.gpu','gpu','mva','mva.exact','amva','mva.amva',...
-                                    'aba.upper', 'aba.lower', 'bjb.upper', 'bjb.lower', 'pb.upper','pb.lower','gb.upper', 'gb.lower', ...
-                                    'ssa','ssa.serial.hash','ssa.para.hash','ssa.parallel.hash','ssa.serial','ssa.para','ssa.parallel','serial.hash','serial','para','parallel','para.hash','parallel.hash',...
-                                    'jmt','jsim','jmva','jmva.mva','jmva.recal','jmva.comom','jmva.chow','jmva.bs','jmva.aql','jmva.lin','jmva.dmlin','jmva.ls',...
-                                    'jmt.jsim','jmt.jmva','jmt.jmva.mva','jmt.jmva.amva','jmt.jmva.recal','jmt.jmva.comom','jmt.jmva.chow','jmt.jmva.bs','jmt.jmva.aql','jmt.jmva.lin','jmt.jmva.dmlin','jmt.jmva.ls',...
-                                    'fluid','nc','nc.exact','nc.imci','nc.ls','nc.le','nc.panacea','nc.mmint','mam','dec.source','dec.mmap',...
-                                    'mm1','mg1','gig1','gm1','gim1','gig1.kingman','gig1.gelenbe','gig1.heyman','gig1.kimura','gig1.allen','gig1.kobayashi','gig1.klb','gig1.marchal','gig1.myskja','gig1.myskja.b',...
-                                    'mmk','gigk', 'gigk.kingman_approx', ...
-                                    'dec.poisson'}
+                            case allMethodsList
                                 options.method = varargin{1};
                                 varargin(1) = [];
                             otherwise
@@ -316,7 +308,7 @@ classdef Solver < handle
                     if strcmp(options.method,'fluid'), options.method='default'; end
                     options.method = erase(options.method,'fluid.');
                     solver = SolverFluid(model, options);
-                case {'nc','nc.exact','nc.imci','nc.ls','nc.le','nc.panacea','nc.pana','nc.mmint','nc.kt','nc.deterministic','nc.sampling','nc.propfair'}
+                case {'nc','nc.exact','nc.imci','nc.ls','nc.le','nc.panacea','nc.pana','nc.mmint2','nc.kt','nc.deterministic','nc.sampling','nc.propfair','nc.comom','nc.mom','nc.gm'}
                     if strcmp(options.method,'nc'), options.method='default'; end
                     options.method = erase(options.method,'nc.');
                     solver = SolverNC(model, options);

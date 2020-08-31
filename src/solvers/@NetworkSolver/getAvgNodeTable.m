@@ -41,7 +41,7 @@ elseif ~keepDisabled
             end
         end
     end
-    Station = categorical(Station);
+    Node = categorical(Node);
     JobClass = categorical(JobClass);    
     QLen = Qval(:); % we need to save first in a variable named like the column
     QT = Table(Node,JobClass,QLen);
@@ -70,7 +70,7 @@ else
             Aval((i-1)*K+k) = AN(i,k);
         end
     end
-    Station = categorical(Station);
+    Node = categorical(Node);
     JobClass = categorical(JobClass);    
     QLen = Qval(:); % we need to save first in a variable named like the column
     QT = Table(Node,JobClass,QLen);
