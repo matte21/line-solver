@@ -36,11 +36,11 @@ Then run
 ```
 docker run -it linemcr/cli-ubuntu
 ```
-Examples are given in the README file. For example
+Examples are given in the README file. For instance
 ```
 line example-oqn.jsimg mva all
 ```
-gives results on screen and stored them in csv files in the same folder.
+gives results on screen and stores them in csv files under /home/line.
 
 ### Documentation
 Getting started examples and detailed instructions on how to use LINE are provided in the [User Manual](https://github.com/line-solver/line/raw/master/doc/LINE.pdf) and on the [Wiki](https://github.com/line-solver/line/wiki).
