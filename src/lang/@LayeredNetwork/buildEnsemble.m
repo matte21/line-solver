@@ -153,7 +153,7 @@ for net=1:length(graphLayer)
                         utilUpperLayerEntry = 1;
                     else
                         utilUpperLayerEntry = 1;
-                        warning('Invalid utilization of the upper layer. Setting value to 1.0.');
+                        line_warning(mfilename,'Invalid utilization of the upper layer. Setting value to 1.0.');
                     end
                 end
                 if tputUpperLayerEntry == 0

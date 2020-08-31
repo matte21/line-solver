@@ -12,6 +12,9 @@ end
 if ~exist('mi','var')
     mi = ones(M,1);
 end
+if isempty(Z)
+    Z = zeros(1,R);
+end
 for i=1:M
     mu(i,:) = min(1:Ntot,S(i)*ones(1,Ntot));
 end
@@ -27,7 +30,7 @@ else % if the model has multi-server nodes
             lG = NaN; % NC not available in this case
             [XN,QN,UN,CN] = pfqn_mvaldms(lambda,L,N,Z,S);
         else
-            error('Queue replicas not available in exact MVA for mixed models.');
+            line_error(mfilename,'Queue replicas not available in exact MVA for mixed models.');
         end
     else
         [XN,QN,UN,CN,lG] = pfqn_mvald(L,N,Z,mu);

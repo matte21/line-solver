@@ -157,7 +157,7 @@ classdef Network < Model
         function P = getLinkedRoutingMatrix(self)
             % P = GETLINKEDROUTINGMATRIX()
             if isempty(self.linkedRoutingTable)
-                warning('Unsupported: getLinkedRoutingMatrix() reqyires that the model topology has been instantiated with the link() method. Attempting auto-recovery.');
+                line_warning(mfilename,'Unsupported: getLinkedRoutingMatrix() reqyires that the model topology has been instantiated with the link() method. Attempting auto-recovery.');
                 fname = tempname;
                 QN2SCRIPT(self,self.name,fname);
                 run(fname);
@@ -222,7 +222,7 @@ classdef Network < Model
             self.ag = [];
             if nargin == 2 && resetState
                 self.isInitialized = false;
-            end
+            end            
             for ind = 1:length(self.getNodes)
                 self.nodes{ind}.reset();
             end
@@ -344,7 +344,7 @@ classdef Network < Model
                     case 'Source'
                         nodeTypes(i) = NodeType.Source;
                     otherwise
-                        error('Unknown node type.');
+                        line_error(mfilename,'Unknown node type.');
                 end
             end
         end
@@ -486,13 +486,13 @@ classdef Network < Model
         
         
         function [stateSpace,nodeStateSpace] = getStateSpace(self, varargin)
-            error('This method is no longer supported. Use SolverCTMC(model,...).getStateSpace(...) instead.');
+            line_error(mfilename,'This method is no longer supported. Use SolverCTMC(model,...).getStateSpace(...) instead.');
             %             try
             %                 [stateSpace,nodeStateSpace] = SolverCTMC(self,'force',true,'verbose',false,varargin{:}).getStateSpace;
             %             catch ME
             %                 switch ME.identifier
             %                     case 'Line:NoCutoff'
-            %                         error('Line:NoCutoff','The model has open chains, it is mandatory to specify a finite cutoff value, e.g., model.getStateSpace(''cutoff'',1).');
+            %                         line_error(mfilename,'Line:NoCutoff','The model has open chains, it is mandatory to specify a finite cutoff value, e.g., model.getStateSpace(''cutoff'',1).');
             %                     otherwise
             %                         rethrow ME
             %                 end
@@ -650,7 +650,7 @@ classdef Network < Model
                 end
                 refstatchain(c) = qn.refstat(inchain(1));
                 if any((qn.refstat(inchain(1))-refstatchain(c))~=0)
-                    error(sprintf('Classes in chain %d have different reference station.',c));
+                    line_error(sprintf('Classes in chain %d have different reference station.',c));
                 end
             end
             Dchain(~isfinite(Dchain))=0;
@@ -704,21 +704,21 @@ classdef Network < Model
         %         function listAvailableSolvers(self)
         % LISTAVAILABLESOLVERS()
         
-        %             fprintf(1,'This model can be analyzed by the following solvers:\n');
+        %             line_printf('This model can be analyzed by the following solvers:\n');
         %             if SolverMVA.supports(self)
-        %                 fprintf(1,'SolverMVA\n');
+        %                 line_printf('SolverMVA\n');
         %             end
         %             if SolverCTMC.supports(self)
-        %                 fprintf(1,'SolverCTMC\n');
+        %                 line_printf('SolverCTMC\n');
         %             end
         %             if SolverFluid.supports(self)
-        %                 fprintf(1,'SolverFluid\n');
+        %                 line_printf('SolverFluid\n');
         %             end
         %             if SolverJMT.supports(self)
-        %                 fprintf(1,'SolverJMT\n');
+        %                 line_printf('SolverJMT\n');
         %             end
         %             if SolverSSA.supports(self)
-        %                 fprintf(1,'SolverSSA\n');
+        %                 line_printf('SolverSSA\n');
         %             end
         %         end
         
@@ -756,17 +756,17 @@ classdef Network < Model
         end
         
         function [isvalid] = isStateValid(self)
-            % [ISVALID] = ISSTATEVALID()
-            
+            % [ISVALID] = ISSTATEVALID()            
             qn = self.getStruct;
             nir = [];
             sir = [];
             for ist=1:qn.nstations
                 isf = qn.stationToStateful(ist);
                 if size(qn.state{isf},1)>1
-                    warning('isStateValid will ignore some node %d states, define a single initial state to resolve this problem.',qn.stationToNode(ist));
+                    line_warning(mfilename,'isStateValid will ignore some node %d states, define a unique initial state to address this problem.',ist);
+                    qn.state{isf} = qn.state{isf}(1,:);
                 end
-                [~, nir(ist,:), sir(ist,:), ~] = State.toMarginal(qn, qn.stationToNode(ist), qn.state{isf}(1,:));
+                [~, nir(ist,:), sir(ist,:), ~] = State.toMarginal(qn, qn.stationToNode(ist), qn.state{isf});
             end
             isvalid = State.isValid(qn, nir, sir);
         end
@@ -837,9 +837,9 @@ classdef Network < Model
             qn = self.getStruct(false);
             N = qn.njobs';
             if nargin < 2
-                nodes = 1:self.getNumberOfNodes;
-                
+                nodes = 1:self.getNumberOfNodes;               
             end
+            
             for i=nodes
                 if qn.isstation(i)
                     n0 = zeros(1,length(N));
@@ -863,8 +863,9 @@ classdef Network < Model
                             state_i = [state_i, find(qn.rt(i,:),1)];
                     end
                     if isempty(state_i)
-                        error('Default initialization failed on station %d.',i);
+                        line_error(mfilename,'Default initialization failed on station %d.',i);
                     else
+                        %state_i = state_i(1,:); % to change: this effectively disables priors
                         self.nodes{i}.setState(state_i);
                         prior_state_i = zeros(1,size(state_i,1)); prior_state_i(1) = 1;
                         self.nodes{i}.setStatePrior(prior_state_i);
@@ -880,14 +881,15 @@ classdef Network < Model
                         otherwise
                             self.nodes{i}.setState([]);
                     end
-                    %error('Default initialization not available on stateful node %d.',i);
+                    %line_error(mfilename,'Default initialization not available on stateful node %d.',i);
                 end
             end
-            %if self.isStateValid % problem with example_initState_2
+            
+            if self.isStateValid % problem with example_initState_2
             self.isInitialized = true;
-            %else
-            %    error('Default initialization failed.');
-            %end
+            else
+                line_error(mfilename,'Default initialization failed.');
+            end
         end
         
         function initFromMarginal(self, n, options) % n(i,r) : number of jobs of class r in node i
@@ -899,12 +901,12 @@ classdef Network < Model
             end
             [isvalidn] = State.isValid(qn, n, [], options);
             if ~isvalidn
-                %         error('The specified state does not have the correct number of jobs.');
-                warning('Initial state not contained in the state space. Trying to recover.');
+                %         line_error(mfilename,'The specified state does not have the correct number of jobs.');
+                line_warning(mfilename,'Initial state not contained in the state space. Trying to recover.');
                 n = round(n);
                 [isvalidn] = State.isValid(qn, n, [], options);
                 if ~isvalidn
-                    error('Cannot recover - stopping.');
+                    line_error(mfilename,'Cannot recover - stopping.');
                 end
             end
             for ind=1:qn.nnodes
@@ -912,7 +914,7 @@ classdef Network < Model
                     ist = qn.nodeToStation(ind);
                     self.nodes{ind}.setState(State.fromMarginal(qn,ind,n(ist,:)));
                     if isempty(self.nodes{ind}.getState)
-                        error(sprintf('Invalid state assignment for station %d.',ind));
+                        line_error(sprintf('Invalid state assignment for station %d.',ind));
                     end
                 end
             end
@@ -925,13 +927,13 @@ classdef Network < Model
             qn = self.getStruct();
             [isvalidn] = State.isValid(qn, n, s);
             if ~isvalidn
-                error('Initial state is not valid.');
+                line_error(mfilename,'Initial state is not valid.');
             end
             for i=1:self.getNumberOfNodes
                 if self.nodes{i}.isStateful
                     self.nodes{i}.setState(State.fromMarginalAndRunning(qn,i,n(i,:),s(i,:)));
                     if isempty(self.nodes{i}.getState)
-                        error(sprintf('Invalid state assignment for station %d\n',i));
+                        line_error(sprintf('Invalid state assignment for station %d\n',i));
                     end
                 end
             end
@@ -944,14 +946,14 @@ classdef Network < Model
             qn = self.getStruct();
             [isvalidn] = State.isValid(qn, n, s);
             if ~isvalidn
-                error('Initial state is not valid.');
+                line_error(mfilename,'Initial state is not valid.');
             end
             for ind=1:self.getNumberOfNodes
                 if self.nodes{ind}.isStateful
                     ist = qn.nodeToStation(ind);
                     self.nodes{ind}.setState(State.fromMarginalAndStarted(qn,ind,n(ist,:),s(ist,:)));
                     if isempty(self.nodes{ind}.getState)
-                        error(sprintf('Invalid state assignment for station %d\n',ind));
+                        line_error(sprintf('Invalid state assignment for station %d\n',ind));
                     end
                 end
             end
@@ -964,7 +966,7 @@ classdef Network < Model
         %                     ist = qn.nodeToStation(ind);
         %                     self.nodes{ind}.setState(state{ind});
         %                     if isempty(self.nodes{ind}.getState)
-        %                         error(sprintf('Invalid state assignment for station %d\n',ind));
+        %                         line_error(sprintf('Invalid state assignment for station %d\n',ind));
         %                     end
         %                 end
         %             end
@@ -1005,7 +1007,7 @@ classdef Network < Model
             end
             H = digraph(); TH = Table();
             I = self.getNumberOfStations;
-            name = {}; sched = {}; type = {}; jobs = zeros(I,1); nservers = [];
+            name = {}; sched = categorical([]); type = {}; jobs = zeros(I,1); nservers = [];
             for i=1:I
                 name{end+1} = self.stations{i}.name;
                 type{end+1} = class(self.stations{i});
@@ -1082,7 +1084,11 @@ classdef Network < Model
                                 else
                                     pr = num2str(Pnodes((i-1)*K+r,(j-1)*K+s),'%f');
                                 end
+<<<<<<< HEAD
                                 fprintf('%s [%s] => %s [%s] : Pr=%s\n',node_names{i}, classnames{r}, node_names{j}, classnames{s}, pr);
+=======
+                                line_printf('\n%s [%s] => %s [%s] : Pr=%s',node_names{i}, classnames{r}, node_names{j}, classnames{s}, pr);
+>>>>>>> refs/remotes/origin/master
                             end
                         end
                     end
@@ -1098,7 +1104,7 @@ classdef Network < Model
             
             if self.hasSingleClass()
                 if self.classes{1}.name == jobclass.name
-                    error('The network has a single class, it cannot be removed from the model.');
+                    line_error(mfilename,'The network has a single class, it cannot be removed from the model.');
                 else
                     % no changes
                 end
@@ -1126,7 +1132,7 @@ classdef Network < Model
                                 self.nodes{i}.server.updateClassSwitch(self.nodes{i}.server.csFun(remaining,remaining));
                                 self.nodes{i}.output.outputStrategy = self.nodes{i}.output.outputStrategy(remaining);
                             case 'Cache'
-                                error('Cannot dynamically remove classes in models with caches. You need to re-instantiate the model.');
+                                line_error(mfilename,'Cannot dynamically remove classes in models with caches. You need to re-instantiate the model.');
                             case 'Source'
                                 self.nodes{i}.arrivalProcess = self.nodes{i}.arrivalProcess(remaining);
                                 self.nodes{i}.classCap = self.nodes{i}.classCap(remaining);
@@ -1345,7 +1351,7 @@ classdef Network < Model
             
             bool = self.getNumberOfClasses > 1;
         end
-        
+                
         function bool = hasProductFormSolution(self)
             % BOOL = HASPRODUCTFORMSOLUTION()
             
@@ -1378,7 +1384,7 @@ classdef Network < Model
             % ADDITEMSET(ITEMSET)
             
             if sum(cellfun(@(x) strcmp(x.name, itemSet.name), self.items))>0
-                error('An item type with name %s already exists.\n', itemSet.name);
+                line_error(mfilename,'An item type with name %s already exists.\n', itemSet.name);
             end
             nItemSet = size(self.items,1);
             itemSet.index = nItemSet+1;

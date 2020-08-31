@@ -183,6 +183,15 @@ for i=1:M
                 Ufull_t{i,k} = Qfull_t{i,k};
                 Tfull_t{i,k}  = Ufull_t{i,k}*qn.rates(i,k);
             end
+        case SchedStrategy.DPS
+            w = qn.schedparam(i,:);
+            wcorr = w(:)*Qfull(i,:)/(w(sd)*Qfull(i,sd)');
+            for k=sd
+                % correct for the real rates, instead of the diffusion
+                % approximation rates
+                Ufull(i,k) = min([1,Qfull(i,k)/S(i),sum(Ufull0(i,sd)) * (Tfull(i,k)./(rates0(i,k)))/sum(Tfull(i,sd)./(rates0(i,sd)))]);
+                Tfull_t{i,k}  = Ufull_t{i,k}*qn.rates(i,k)*qn.nservers(i); % not sure if this is needed
+            end            
         otherwise
             for k=sd
                 % correct for the real rates, instead of the diffusion
@@ -202,11 +211,6 @@ for i=1:M
             case SchedStrategy.INF
                 % no-op
             otherwise
-                %mu = rates0(i,k);
-                %lambda = Tfull(i,k);
-                %rho = lambda/mu;
-                %Rfull(i,k) = Qfull(i,k) * 1/mu * (1+SCV(i,k))/2 / S(i) + 1/mu;
-                %Rfull(i,k) = qsys_gig1_approx_klb(sum(rates0(i,sd)),sum(rates0(i,sd))/rho(i),sqrt(ca(i)),sqrt(cs(i)));
                 Rfull(i,k) = Qfull(i,k) / Tfull(i,k);
         end
     end

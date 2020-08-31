@@ -201,7 +201,7 @@ if qn.isstation(ind)
                                 case SchedStrategy.ID_DPS
                                     space_srv(en,Ks(class)+k) = space_srv(en,Ks(class)+k) - 1; % record departure
                                     if S(ist) > 1
-                                        error('Multi-server DPS stations are not supported yet.');
+                                        line_error(mfilename,'Multi-server DPS stations are not supported yet.');
                                     end
                                     % in GPS, the scheduling parameter are the weights
                                     w_i = qn.schedparam(ist,:);
@@ -214,7 +214,7 @@ if qn.isstation(ind)
                                 case SchedStrategy.ID_GPS
                                     space_srv(en,Ks(class)+k) = space_srv(en,Ks(class)+k) - 1; % record departure
                                     if S(ist) > 1
-                                        error('Multi-server GPS stations are not supported yet.');
+                                        line_error(mfilename,'Multi-server GPS stations are not supported yet.');
                                     end
                                     % in GPS, the scheduling parameter are the weights
                                     w_i = qn.schedparam(ist,:);
@@ -371,7 +371,7 @@ if qn.isstation(ind)
                                         space_srv(en_wbuf,Ks(sept_class)+kentry) = space_srv(en_wbuf,Ks(sept_class)+kentry) - 1; % bring job in service
                                     end
                                 otherwise
-                                    error('Scheduling strategy %s is not supported.', qn.sched(ist));
+                                    line_error(mfilename,'Scheduling strategy %s is not supported.', qn.sched(ist));
                             end
                         end
                     end
@@ -412,14 +412,14 @@ if qn.isstation(ind)
                                     rate = ph{ist,class}{1}(k,kdest)*kir(:,class,k)./ni(:).*min(ni(:),S(ist)); % assume active
                                 case SchedStrategy.ID_DPS
                                     if S(ist) > 1
-                                        error('Multi-server DPS not supported yet');
+                                        line_error(mfilename,'Multi-server DPS not supported yet');
                                     end
                                     w_i = qn.schedparam(ist,:);
                                     w_i = w_i / sum(w_i);
                                     rate = ph{ist,class}{1}(k,kdest)*kir(:,class,k)*w_i(class)./(sum(repmat(w_i,size(nir,1),1)*nir',2)); % assume active
                                 case SchedStrategy.ID_GPS
                                     if S(ist) > 1
-                                        error('Multi-server GPS not supported yet');
+                                        line_error(mfilename,'Multi-server GPS not supported yet');
                                     end
                                     cir = min(nir,ones(size(nir)));
                                     w_i = qn.schedparam(ist,:); w_i = w_i / sum(w_i);

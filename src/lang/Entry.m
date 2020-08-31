@@ -18,7 +18,7 @@ classdef Entry < LayeredNetworkElement
             % SELF = ENTRY(MODEL, NAME)
             
             if ~exist('name','var')
-                error('Constructor requires to specify at least a name.');
+                line_error(mfilename,'Constructor requires to specify at least a name.');
             end
             self@LayeredNetworkElement(name);
             self.openArrivalRate = 0.0;

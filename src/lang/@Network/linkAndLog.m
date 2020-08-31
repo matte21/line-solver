@@ -6,7 +6,7 @@ function [loggerBefore,loggerAfter] = linkAndLog(self, P, isNodeLogged, logPath)
 % All rights reserved.
 
 if ~isempty(self.links)
-    warning('Network topology already instantiated. Calling resetNetwork automatically before adding loggers.');
+    line_warning(mfilename,'Network topology already instantiated. Calling resetNetwork automatically before adding loggers.');
     self.resetNetwork;
 end
 R = self.getNumberOfClasses;
@@ -14,21 +14,21 @@ Mnodes = self.getNumberOfNodes;
 Mstations = self.getNumberOfStations;
 
 if Mnodes ~= numel(isNodeLogged)
-    error('The size of the isNodeLogged vector does not match the number of nodes.');
+    line_error(mfilename,'The size of the isNodeLogged vector does not match the number of nodes.');
 end
 
 isNodeLogged = [isNodeLogged(:)'];
 if ~isempty(self.getSource)
     sinkIndex = self.getIndexSinkNode;
     if isNodeLogged(sinkIndex)
-        warning('Sink station cannot be logged, ignoring.');
+        line_warning(mfilename,'Sink station cannot be logged, ignoring.');
         isNodeLogged(sinkIndex) = false;
     end
 end
 if ~isempty(self.getSource)
     sourceIndex = self.getIndexSourceNode;
     if isNodeLogged(sourceIndex)
-        warning('Source station cannot be logged, ignoring.');
+        line_warning(mfilename,'Source station cannot be logged, ignoring.');
         isNodeLogged(sourceIndex) = false;
     end
 end

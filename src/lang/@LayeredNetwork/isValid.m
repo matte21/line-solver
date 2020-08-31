@@ -9,7 +9,7 @@ refTasks = findstring(lqnGraph.Nodes.Type, 'R');
 for r=refTasks(:)'
     numEntriesInRefTask = intersect(findstring(lqnGraph.Nodes.Type, 'E'), findstring(lqnGraph.Nodes.Task, lqnGraph.Nodes.Name{r}));
     if length(numEntriesInRefTask)>1
-        warning('Reference task %d should have a single entry, load balancing with equal probabilities across entries.', r);
+        line_warning(mfilename,'Reference task %d should have a single entry, load balancing with equal probabilities across entries.', r);
     end
 end
 end

@@ -21,7 +21,7 @@ end
 
 if isfield(self.options,'timespan')
     if isfinite(self.options.timespan(2))
-        error('The getAvg method does not support the timespan option, use the getTranAvg method instead.');
+        line_error(mfilename,'The getAvg method does not support the timespan option, use the getTranAvg method instead.');
     end
 else
     self.options.timespan = [0,Inf];
@@ -34,7 +34,11 @@ if ~self.hasAvgResults || ~self.options.cache
         switch ME.identifier
             case {'Line:FeatureNotSupportedBySolver', 'Line:ModelTooLargeToSolve', 'Line:UnspecifiedOption'}
                 if self.options.verbose
+<<<<<<< HEAD
                     fprintf(1,'%s\n',ME.message);
+=======
+                    line_printf('\n%s',ME.message);
+>>>>>>> refs/remotes/origin/master
                 end
                 QNclass=[];
                 UNclass=[];
@@ -47,12 +51,13 @@ if ~self.hasAvgResults || ~self.options.cache
         end
     end
     if ~self.hasAvgResults
-        error('Line is unable to return results for this model.');
+        line_error(mfilename,'Line is unable to return results for this model.');
     end
 end % else return cached value
 
 M = self.model.getNumberOfStations();
 K = self.model.getNumberOfClasses();
+
 QNclass = [];
 UNclass = [];
 RNclass = [];

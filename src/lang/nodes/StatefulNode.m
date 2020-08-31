@@ -33,7 +33,7 @@ classdef StatefulNode < Node
             % assumed independent of the priors for other stations
             self.statePrior = prior(:); % we do not normalize to allow the user to manually run a model for each point of an external prior
             if size(self.statePrior,1) ~= size(self.state,1)
-                error('The prior probability vector must have the same rows of the station state vector.');
+                line_error(mfilename,'The prior probability vector must have the same rows of the station state vector.');
             end
         end
         

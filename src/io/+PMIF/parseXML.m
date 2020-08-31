@@ -18,7 +18,7 @@ try
     doc = dBuilder.parse(filename);
 catch exception %java.io.FileNotFoundException
     if ~exist(filename, 'file')
-        disp(['Error: Input file ', filename,' not found']);
+        line_printf(['Error: Input file ', filename,' not found']);
         qn = [];
         return;
     else
@@ -29,12 +29,12 @@ end
 doc.getDocumentElement().normalize();
 rootElem = char(doc.getDocumentElement().getNodeName());
 if verbose > 0
-    disp(['Root element:', rootElem ] );
+    line_printf(['Root element:', rootElem ] );
 end
 
 if ~strcmp(rootElem, 'QueueingNetworkModel')
-    disp(['Error: Input file ', filename,' does not have a proper PMIF model']);
-    disp(['Root element:', rootElem ] );
+    line_printf(['Error: Input file ', filename,' does not have a proper PMIF model']);
+    line_printf(['Root element:', rootElem ] );
     qn = [];
     return;
 end

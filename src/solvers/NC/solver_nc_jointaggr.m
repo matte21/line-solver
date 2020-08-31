@@ -67,7 +67,7 @@ while max(abs(1-eta./eta_1)) > options.iter_tol && it <= options.iter_max
         Nchain(c) = sum(NK(inchain));
         refstatchain(c) = qn.refstat(inchain(1));
         if any((qn.refstat(inchain(1))-refstatchain(c))~=0)
-            error('Classes in chain %d have different reference station.',c);
+            line_error(mfilename,'Classes in chain %d have different reference station.',c);
         end
     end
     STchain(~isfinite(STchain))=0;
@@ -93,7 +93,7 @@ while max(abs(1-eta./eta_1)) > options.iter_tol && it <= options.iter_max
         else
             %if strcmpi(options.method,'exact') && nservers(i)>1
             %    options.method = 'default';
-            %    warning('%s does not support exact multiserver yet. Switching to approximate method.', mfilename);
+            %    line_warning(mfilename,'%s does not support exact multiserver yet. Switching to approximate method.', mfilename);
             %end
             Lcorr(i,:) = Lchain(i,:) / nservers(i);
             Z(i,:) = 0;
@@ -121,7 +121,7 @@ while max(abs(1-eta./eta_1)) > options.iter_tol && it <= options.iter_max
     end
     
     if isnan(Xchain)
-        warning('Normalizing constant computations produced a floating-point range exception. Model is likely too large.');
+        line_warning(mfilename,'Normalizing constant computations produced a floating-point range exception. Model is likely too large.');
     end
     
     Z = sum(Z(1:M,:),1);

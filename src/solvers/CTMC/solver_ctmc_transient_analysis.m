@@ -42,8 +42,13 @@ end
 if options.keep
     fname = tempname;
     save([fname,'.mat'],'InfGen','StateSpace','StateSpaceAggr','EventFiltration')
+<<<<<<< HEAD
     fprintf(1,'CTMC infinitesimal generator and state space saved in: ');
     disp([fname, '.mat'])
+=======
+    line_printf('\nCTMC infinitesimal generator and state space saved in: ');
+    line_printf([fname, '.mat'])
+>>>>>>> refs/remotes/origin/master
 end
 
 state = [];
@@ -57,11 +62,11 @@ pi0 = zeros(1,length(InfGen));
 
 state0 = matchrow(StateSpace, state);
 if state0 == -1
-    error('Initial state not contained in the state space.');   
+    line_error(mfilename,'Initial state not contained in the state space.');   
 %     state0 = matchrow(StateSpace, round(state));
 %     state = round(state);
 %     if state0 == -1
-%         error('Cannot recover - CTMC stopping');
+%         line_error(mfilename,'Cannot recover - CTMC stopping');
 %     end
 end
 pi0(state0) = 1; % find initial state and set it to probability 1
@@ -112,7 +117,7 @@ for k=1:K
             otherwise
                 if ~isempty(PH{i,k})
                     ind = qn.stationToNode(i);
-                    warning('Transient utilization not support yet for station %s, returning an approximation.',qn.nodenames{ind});
+                    line_warning(mfilename,'Transient utilization not support yet for station %s, returning an approximation.',qn.nodenames{ind});
                     UNt{i,k} = occupancy_t*min(StateSpaceAggr(:,(i-1)*K+k),S(i))/S(i);
                 end
         end
@@ -121,6 +126,10 @@ end
 runtime = toc(Tstart);
 
 if options.verbose > 0
+<<<<<<< HEAD
     fprintf(1,'CTMC analysis completed in %f sec\n',runtime);
+=======
+    line_printf('\nCTMC analysis completed. Runtime: %f seconds.\n',runtime);
+>>>>>>> refs/remotes/origin/master
 end
 end

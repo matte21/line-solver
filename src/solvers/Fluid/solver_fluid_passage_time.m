@@ -76,7 +76,11 @@ for i = 1:qn.nstations
                             [t_iter, ymean_t_iter] = solveode(ode_h_c, trange, y0_c, odeopt, options);
                         end
                     catch me
+<<<<<<< HEAD
                         fprintf(1,'ODE solver failed. Fluid solver switching to default initialization.\n');
+=======
+                        line_printf('\nODE solver failed. Fluid solver switching to default initialization.');
+>>>>>>> refs/remotes/origin/master
                         odeopt = odeset('AbsTol', tol, 'RelTol', tol, 'NonNegative', 1:length(y0_c));
                         try
                             [t_iter, ymean_t_iter] = solveode(ode_h_c, trange, y0_c, odeopt, options);
@@ -103,7 +107,7 @@ for i = 1:qn.nstations
                     RT{i,c,2} = ones(size(fullt));
                 end
                 if iter > iter_max
-                    warning('Maximum number of iterations reached when computing the response time distribution. Response time distributions may be inaccurate. Increase option.iter_max (currently at %s).',num2str(iter_max));
+                    line_warning(mfilename,'Maximum number of iterations reached when computing the response time distribution. Response time distributions may be inaccurate. Increase option.iter_max (currently at %s).',num2str(iter_max));
                 end
             end
         end

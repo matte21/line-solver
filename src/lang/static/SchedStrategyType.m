@@ -36,7 +36,7 @@ classdef (Sealed) SchedStrategyType
                 case SchedStrategy.HOL
                     typeId = SchedStrategyType.ID_NPPrio;
                 otherwise
-                    error('Unrecognized scheduling strategy type.');
+                    line_error(mfilename,'Unrecognized scheduling strategy type.');
             end
         end
         

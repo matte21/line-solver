@@ -37,7 +37,7 @@ for ist=1:qn.nstations
         K(r) = qn.phases(ist,r);
         if ~isempty(qn.proc) && ~isempty(qn.proc{ist,r}) && any(any(isnan(qn.proc{ist,r}{1}))) && n(ist,r)>0 % if disabled
             isValid = false;
-            %            error('Chain %d is initialized with an incorrect number of jobs: %f instead of %d.', nc, statejobs_chain, njobs_chain);
+            %            line_error(mfilename,'Chain %d is initialized with an incorrect number of jobs: %f instead of %d.', nc, statejobs_chain, njobs_chain);
             return
         end
     end
@@ -80,7 +80,7 @@ for nc=1:qn.nchains
         %if ~options.force && abs(1-njobs_chain/statejobs_chain) > options.iter_tol
         if abs(1-njobs_chain/statejobs_chain) > 1e-4
             isValid = false;
-            error('Chain %d is initialized with an incorrect number of jobs: %f instead of %d.', nc, statejobs_chain, njobs_chain);
+            line_error(mfilename,'Chain %d is initialized with an incorrect number of jobs: %f instead of %d.', nc, statejobs_chain, njobs_chain);
             return
         end
         %end

@@ -34,7 +34,7 @@ for c=1:size(chains,1)
     inchain = find(chains(c,:));
     if sum(refstat(inchain) == refstat(inchain(1))) ~= length(inchain)
         refstat(inchain) = refstat(inchain(1));
-        %        error(sprintf('Classes in chain %d have different reference stations. Chain %d classes: %s', c, c, int2str(inchain)));
+        %        line_error(sprintf('Classes in chain %d have different reference stations. Chain %d classes: %s', c, c, int2str(inchain)));
     end
 end
 
@@ -52,12 +52,12 @@ for c=1:size(chains,1)
     
     %                Pchain(visited,visited)
     %                if ~dtmc_isfeasible(Pchain(visited,visited))
-    %                    error(sprintf('The routing matrix in chain %d is not stochastic. Chain %d classes: %s',c, c, int2str(inchain)));
+    %                    line_error(sprintf('The routing matrix in chain %d is not stochastic. Chain %d classes: %s',c, c, int2str(inchain)));
     %                end
     alpha_visited = dtmc_solve(Pchain(visited,visited));
     alpha = zeros(1,M*K); alpha(visited) = alpha_visited;
     if max(alpha)>=1-1e-10
-        error('One chain has an absorbing state.');
+        line_error(mfilename,'One chain has an absorbing state.');
     end
     
     visits{c} = zeros(M,K);

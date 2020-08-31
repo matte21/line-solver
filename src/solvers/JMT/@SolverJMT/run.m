@@ -21,9 +21,15 @@ if ~isfield(options,'keep')
     options.keep = false;
 end
 
+<<<<<<< HEAD:src/solvers/JMT/@SolverJMT/run.m
 if ~self.supports(self.model)
     %    if options.verbose
     error('Line:FeatureNotSupportedBySolver','This model contains features not supported by the JMT solver.');
+=======
+if self.enableChecks && ~self.supports(self.model)
+    %    if options.verbose
+    line_error(mfilename,'This model contains features not supported by the JMT solver.');
+>>>>>>> refs/remotes/origin/master:src/solvers/JMT/@SolverJMT/runAnalysis.m
     %    end
     %    runtime = toc(T0);
     %    return
@@ -33,7 +39,11 @@ if ~isfield(options,'samples')
     options.samples = 1e4; % default: this is the samples / measure, not the total number of simulation events, which can be much larger.
 elseif options.samples < 5e3
     if ~strcmpi(options.method,'jmva.ls')
+<<<<<<< HEAD:src/solvers/JMT/@SolverJMT/run.m
         warning('JMT requires at least 5000 samples for each metric, the current value is %d. Starting the simulation with 5000 samples.', options.samples);
+=======
+        line_warning(mfilename,'JMT requires at least 5000 samples for each metric, the current value is %d. Starting the simulation with 5000 samples.', options.samples);
+>>>>>>> refs/remotes/origin/master:src/solvers/JMT/@SolverJMT/runAnalysis.m
     end
     options.samples = 5e3;
 end
@@ -69,8 +79,13 @@ switch options.method
             self.writeJSIM;
             cmd = ['java -cp "',self.getJMTJarPath(),filesep,'JMT.jar" jmt.commandline.Jmt sim "',self.getFilePath(),'jsimg',filesep,self.getFileName(),'.jsimg" -seed ',num2str(options.seed),' --illegal-access=permit'];
             if options.verbose
+<<<<<<< HEAD:src/solvers/JMT/@SolverJMT/run.m
                 fprintf(1,'JMT model: %s\n',[self.getFilePath(),'jsimg',filesep,self.getFileName(),'.jsimg']);
                 fprintf(1,'JMT command: %s\n',cmd);
+=======
+                line_printf('\nJMT model: %s',[self.getFilePath(),'jsimg',filesep,self.getFileName(),'.jsimg']);                
+                line_printf('\nJMT command: %s',cmd);
+>>>>>>> refs/remotes/origin/master:src/solvers/JMT/@SolverJMT/runAnalysis.m
             end
             [~, result] = system(cmd);
             runtime = toc(Tstart);
@@ -163,8 +178,13 @@ switch options.method
         fname = self.writeJMVA([self.getFilePath(),'jmva',filesep,self.getFileName(),'.jmva']);
         cmd = ['java -cp "',self.getJMTJarPath(),filesep,'JMT.jar" jmt.commandline.Jmt mva "',fname,'" -seed ',num2str(options.seed),' --illegal-access=permit'];
         if options.verbose
+<<<<<<< HEAD:src/solvers/JMT/@SolverJMT/run.m
             fprintf(1,'JMT model: %s\n',[self.getFilePath(),'jmva',filesep,self.getFileName(),'.jmva']);
             fprintf(1,'JMT command: %s\n',cmd);
+=======
+            line_printf('\nJMT model: %s',[self.getFilePath(),'jmva',filesep,self.getFileName(),'.jmva']);
+            line_printf('\nJMT command: %s',cmd);
+>>>>>>> refs/remotes/origin/master:src/solvers/JMT/@SolverJMT/runAnalysis.m
         end
         [~, result] = system(cmd);
         runtime = toc(Tstart);
@@ -173,12 +193,20 @@ switch options.method
             delete([self.getFilePath(),'jmva',filesep,self.getFileName(),'*']);
         end
     otherwise
+<<<<<<< HEAD:src/solvers/JMT/@SolverJMT/run.m
         warning('This solver does not support the specified method. Setting to default.');
+=======
+        line_warning(mfilename,'This solver does not support the specified method. Setting to default.');
+>>>>>>> refs/remotes/origin/master:src/solvers/JMT/@SolverJMT/runAnalysis.m
         self.options.method  = 'default';
         runtime = run(self);
 end
 
 if options.verbose > 0
+<<<<<<< HEAD:src/solvers/JMT/@SolverJMT/run.m
     fprintf(1,'JMT analysis completed in %f sec\n',runtime);
+=======
+    line_printf('\nJMT analysis completed. Runtime: %f seconds.\n',runtime);
+>>>>>>> refs/remotes/origin/master:src/solvers/JMT/@SolverJMT/runAnalysis.m
 end
 end

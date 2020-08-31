@@ -128,7 +128,7 @@ if qn.isopen()
                         if length(uK) == length(qn.classprio) % if all priorities are different
                             [Qret{iK}] = MMAPPH1NPPR({aggrArrivalAtNode{[1;2+iK]}}, {pie{ist,iK}}, {D0{ist,iK}}, 'ncMoms', 1);
                         else
-                            error('Solver MAM requires either identical priorities or all distinct priorities');
+                            line_error(mfilename,'Solver MAM requires either identical priorities or all distinct priorities');
                         end
                     else
                         [Qret{1:K}] = MMAPPH1FCFS({aggrArrivalAtNode{[1,3:end]}}, {pie{ist,:}}, {D0{ist,:}}, 'ncMoms', 1);
@@ -152,7 +152,7 @@ if qn.isopen()
     end
     CN = sum(RN,1);
 else
-    warning('This model is not supported by SolverMAM yet. Returning with no result.');
+    line_warning(mfilename,'This model is not supported by SolverMAM yet. Returning with no result.');
 end
 
 end

@@ -18,5 +18,5 @@ TN = zeros(M,K);
 CN = zeros(1,K);
 XN = zeros(1,K);
 
-error('This model or method is not supported yet. Returning with no result.');
+line_error(mfilename,'This model or method is not supported yet. Returning with no result.');
 end

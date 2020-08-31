@@ -28,7 +28,7 @@ switch options.method
         config.space_max = 1;
         [QN,UN,RN,TN,CN,XN] = solver_mam_basic(qn, options, config);
     otherwise
-        error('Unknown method.');
+        line_error(mfilename,'Unknown method.');
 end
 
 QN(isnan(QN))=0;

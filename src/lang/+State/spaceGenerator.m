@@ -12,7 +12,7 @@ N = qn.njobs';
 Np = N;
 
 if ~exist('cutoff','var') & any(isinf(Np)) % if has open classes
-    error('Unspecified cutoff for open classes in state space generator.');
+    line_error(mfilename,'Unspecified cutoff for open classes in state space generator.');
 end
 
 if prod(size(cutoff))==1

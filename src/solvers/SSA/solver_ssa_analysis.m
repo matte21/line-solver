@@ -175,7 +175,7 @@ switch options.method
         qnc = qn;
     case {'para','parallel','para.hash','parallel.hash'}
         if isoctave
-            error('parallel SSA is available only under MATLAB.');
+            line_error(mfilename,'parallel SSA is available only under MATLAB.');
         end
         laboptions = options;
         [XN,UN,QN,RN,TN,CN,qnc] = solver_ssa_analysis_spmd(laboptions, qn, qnc, PH);

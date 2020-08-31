@@ -80,7 +80,7 @@ for c=1:qn.nchains
     %else % if this is an open chain
     if isinf(nJobsChain)
         if length(inchain) ~= length(completingclasses)
-            error('Edge-based chain definition not yet supported for open queueing networks.');
+            line_error(mfilename,'Edge-based chain definition not yet supported for open queueing networks.');
             %else
             % we use nan sum to disregard response at stations where
             % the class is not defined

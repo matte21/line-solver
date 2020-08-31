@@ -1,4 +1,4 @@
-function [XN,QN,UN,pqueue,R,eta]=qbd_mapmap1(MAPa,MAPs,util)
+function [XN,QN,UN,pqueue,R,eta,G,A_1,A0,A1]=qbd_mapmap1(MAPa,MAPs,util)
 % [XN,QN,UN,PQUEUE,R,ETA]=QBD_MAPMAP1(MAPA,MAPS,UTIL)
 
 %[XN,QN,UN,pqueue,R]=qbd_mapmap1(MAPa,MAPs,util)
@@ -23,6 +23,7 @@ A1dt = A1/alpha;
 [eta] = QBD_Caudal(A_1dt,A0dt,A1dt);
 %%warning off;
 pqueue = QBD_pi(A_1,A0bar,R);
+
 
 if na == 1 && ns == 1
     UN = 1 - pqueue(1);

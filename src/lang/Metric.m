@@ -217,7 +217,7 @@ classdef Metric < Copyable
                     end
                 otherwise % another LINE solver
                     if ~exist('model','var')
-                        error('Wrong syntax, use Metric.get(results,model).\n');
+                        line_error(mfilename,'Wrong syntax, use Metric.get(results,model).\n');
                     end
                     if isnan(self.stationIndex)
                         stationnames = model.getStationNames();

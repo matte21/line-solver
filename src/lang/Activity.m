@@ -26,7 +26,7 @@ classdef Activity < LayeredNetworkElement
             % OBJ = ACTIVITY(MODEL, NAME, HOSTDEMAND, BOUNDTOENTRY, CALLORDER)
             
             if ~exist('name','var')
-                error('Constructor requires to specify at least a name.');
+                line_error(mfilename,'Constructor requires to specify at least a name.');
             end
             obj@LayeredNetworkElement(name);
             
@@ -91,7 +91,7 @@ classdef Activity < LayeredNetworkElement
             if ~isempty(obj.parent)
                 switch obj.parent.scheduling
                     case SchedStrategy.REF
-                        error('Activities in reference tasks cannot reply.');
+                        line_error(mfilename,'Activities in reference tasks cannot reply.');
                     otherwise
                         entry.replyActivity{end+1} = obj.name;
                 end
@@ -108,7 +108,7 @@ classdef Activity < LayeredNetworkElement
             elseif ischar(entry)
                 obj.boundToEntry = entry;
             else
-                error('Wrong entry parameter for boundTo method.');
+                line_error(mfilename,'Wrong entry parameter for boundTo method.');
             end
         end
         

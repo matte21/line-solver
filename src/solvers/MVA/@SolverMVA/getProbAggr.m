@@ -2,10 +2,10 @@ function [Pnir,logPnir] = getProbAggr(self, ist)
 % [PNIR,LOGPNIR] = GETPROBSTATEAGGR(IST)
 
 if ~exist('ist','var')
-    error('getProbAggr requires to pass a parameter the station of interest.');
+    line_error(mfilename,'getProbAggr requires to pass a parameter the station of interest.');
 end
 if ist > self.model.getNumberOfStations
-    error('Station number exceeds the number of stations in the model.');
+    line_error(mfilename,'Station number exceeds the number of stations in the model.');
 end
 if isempty(self.result)
     self.run;
@@ -16,7 +16,7 @@ N = qn.njobs;
 if all(isfinite(N))
     switch options.method
         case 'exact'
-            error('Exact marginal state probabilities not available yet in SolverMVA.');
+            line_error(mfilename,'Exact marginal state probabilities not available yet in SolverMVA.');
         otherwise
             state = self.model.getState{qn.stationToStateful(ist)};
             [~, nir, ~, ~] = State.toMarginal(qn, ist, state, self.getOptions);
@@ -31,6 +31,6 @@ if all(isfinite(N))
             Pnir = real(exp(logPnir));
     end
 else
-    error('getProbAggr not yet implemented for models with open classes.');
+    line_error(mfilename,'getProbAggr not yet implemented for models with open classes.');
 end
 end

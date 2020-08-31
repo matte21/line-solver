@@ -6,12 +6,19 @@ classdef EventType < Copyable
     
     % event major classification
     properties (Constant)
-        INIT = -1; % model is initialized (t=0)
-        LOCAL = 0;
-        ARV = 1; % job arrival
-        DEP = 2; % job departure
-        PHASE = 3; % service advances to next phase, without departure
-        READ = 4; % read cache item
+        ID_INIT = -1; % model is initialized (t=0)
+        ID_LOCAL = 0;
+        ID_ARV = 1; % job arrival
+        ID_DEP = 2; % job departure
+        ID_PHASE = 3; % service advances to next phase, without departure
+        ID_READ = 4; % read cache item
+        
+        INIT = categorical("INIT"); 
+        LOCAL = categorical("LOCAL");
+        ARV = categorical("ARV");
+        DEP = categorical("DEP");
+        PHASE = categorical("PHASE");
+        READ = categorical("READ");
     end
     
     methods(Static)

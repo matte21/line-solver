@@ -12,10 +12,10 @@ if isempty(Z)
     Z = zeros(1,R);
 end
 %if size(mu,2) < sum(N(isfinite(N)))
-%    error('MVALDMX requires to specify the load-dependent rates with one job more than the maximum closed population.');
+%    line_error(mfilename,'MVALDMX requires to specify the load-dependent rates with one job more than the maximum closed population.');
 %end
 if any(N(find(lambda))>0 & isfinite(N(find(lambda))))
-    error('Arrival rate cannot be specified on closed classes.');
+    line_error(mfilename,'Arrival rate cannot be specified on closed classes.');
 end
 openClasses = find(isinf(N));
 closedClasses = setdiff(1:length(N), openClasses);

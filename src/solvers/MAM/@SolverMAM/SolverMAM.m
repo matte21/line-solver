@@ -12,7 +12,11 @@ classdef SolverMAM < NetworkSolver
             self.setOptions(Solver.parseOptions(varargin, self.defaultOptions));
         end
         
+<<<<<<< HEAD
         runtime = run(self, options);
+=======
+        runtime = runAnalysis(self, options, config);
+>>>>>>> refs/remotes/origin/master
         RD = getCdfRespT(self, R);
     end
     
@@ -51,7 +55,7 @@ classdef SolverMAM < NetworkSolver
             
             solverName = mfilename;
             if isfield(options,'timespan')  && isfinite(options.timespan(2))
-                error('Finite timespan not supported in %s',solverName);
+                line_error(mfilename,'Finite timespan not supported in %s',solverName);
             end
         end
         

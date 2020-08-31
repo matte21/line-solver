@@ -40,7 +40,7 @@ else
             end
             SMMAP = m3pp2m_interleave(FLOW);
         otherwise
-            error('Unsupported configuration for merge.');
+            line_error(mfilename,'Unsupported configuration for merge.');
     end
     
     switch config.compress

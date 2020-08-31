@@ -46,7 +46,7 @@ if M==2 && all(isinf(N))
                 end
                 idx_q = i;
             otherwise
-                error('Unsupported scheduling strategy');
+                line_error(mfilename,'Unsupported scheduling strategy');
         end
     end
     
@@ -54,9 +54,9 @@ if M==2 && all(isinf(N))
         [uK,iK] = unique(qn.classprio);
         if length(uK) == length(qn.classprio) % if all priorities are different
             %            [Ret{1:2*K}] = MMAPPH1NPPR({A{[1,3:end]}}, {pie{:}}, {S{:}}, 'stDistrPH');
-            error('Response time distribution in priority models not yet supported.');
+            line_error(mfilename,'Response time distribution in priority models not yet supported.');
         else
-            error('SolverMAM requires either identical priorities or all distinct priorities');
+            line_error(mfilename,'SolverMAM requires either identical priorities or all distinct priorities');
         end
     else
         RD = cell(K,1);
@@ -80,7 +80,7 @@ if M==2 && all(isinf(N))
         RD{idx_q,k} = [F(:),X(:)];
     end
 else
-    warning('This model is not supported by SolverMAM yet. Returning with no result.');
+    line_warning(mfilename,'This model is not supported by SolverMAM yet. Returning with no result.');
 end
 
 end

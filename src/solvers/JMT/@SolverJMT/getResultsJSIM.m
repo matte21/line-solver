@@ -10,11 +10,11 @@ if exist(fileName,'file')
     Pref.Str2Num = 'always';
     parsed = xml_read(fileName,Pref);
 else
-    error('JMT did not output a result file, the simulation has likely failed.');
+    line_error(mfilename,'JMT did not output a result file, the simulation has likely failed.');
 end
 %catch me
 %me.p
-%    error('Unknown error upon parsing JMT result file. ');
+%    line_error(mfilename,'Unknown error upon parsing JMT result file. ');
 %end
 self.result.('solver') = self.getName();
 self.result.('model') = parsed.ATTRIBUTE;

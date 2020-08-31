@@ -27,15 +27,15 @@ minrate = min(qn.rates(isfinite(qn.rates)));
 if ~self.hasTranResults()
     if isinf(self.options.timespan(1)) && isinf(self.options.timespan(2))
         self.options.timespan = [0,30/minrate];
-        warning('Timespan of transient analysis unspecified, setting the timespan option to [0, %d]. Use %s(model,''timespan'',[0,T]) to customize.',self.options.timespan(2),class(self));
+        line_warning(mfilename,'Timespan of transient analysis unspecified, setting the timespan option to [0, %d]. Use %s(model,''timespan'',[0,T]) to customize.',self.options.timespan(2),class(self));
     end
     if isinf(self.options.timespan(1))
-        warning('Start time of transient analysis unspecified, setting the timespan option to [0,%d].',self.options.timespan(2));
+        line_warning(mfilename,'Start time of transient analysis unspecified, setting the timespan option to [0,%d].',self.options.timespan(2));
         self.options.timespan(1) = 0;
     end
     if isinf(self.options.timespan(2))
         self.options.timespan(2) = 30/minrate;
-        warning('End time of transient analysis unspecified, setting the timespan option to [%d,%d]. Use %s(model,''timespan'',[0,T]) to customize.',self.options.timespan(1),self.options.timespan(2),class(self));
+        line_warning(mfilename,'End time of transient analysis unspecified, setting the timespan option to [%d,%d]. Use %s(model,''timespan'',[0,T]) to customize.',self.options.timespan(1),self.options.timespan(2),class(self));
     end
     self.run();
 end

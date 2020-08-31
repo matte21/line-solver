@@ -10,10 +10,10 @@ try
         Pref.Str2Num = 'always';
         parsed = xml_read(fileName,Pref);
     else
-        error('JMT did not output a result file, the analysis has likely failed.');
+        line_error(mfilename,'JMT did not output a result file, the analysis has likely failed.');
     end
 catch me
-    error('Unknown error upon parsing JMT result file. ');
+    line_error(mfilename,'Unknown error upon parsing JMT result file. ');
 end
 self.result.('solver') = self.getName();
 self.result.('model') = parsed.ATTRIBUTE;
@@ -81,7 +81,7 @@ for c=1:qn.nchains
     Nchain(c) = sum(NK(inchain));
     refstatchain(c) = qn.refstat(inchain(1));
     if any((qn.refstat(inchain(1))-refstatchain(c))~=0)
-        error(sprintf('Classes in chain %d have different reference station.',c));
+        line_error(sprintf('Classes in chain %d have different reference station.',c));
     end
 end
 STchain(~isfinite(STchain))=0;

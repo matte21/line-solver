@@ -22,7 +22,7 @@ classdef Section < NetworkElement
         function summary(self)
             % SUMMARY()
             
-            %            fprintf('\n%s',class(self));
+            %            line_printf('\n%s',class(self));
         end
     end
 end

@@ -25,7 +25,7 @@ classdef APH < MarkovianDistribution
         end
         
         function T = getSubgenerator(self)
-            % T = GETSUBGENERATOR()            
+            % T = GETSUBGENERATOR()
             
             % Get subgenerator
             T = self.getParam(2).paramValue;
@@ -50,7 +50,7 @@ classdef APH < MarkovianDistribution
             SCV = varargin{2};
             SKEW = varargin{3};
             if length(varargin) > 3
-                warning('Warning: update in %s distributions can only handle 3 moments, ignoring higher-order moments.',class(self));
+                line_warning(mfilename,'Warning: update in %s distributions can only handle 3 moments, ignoring higher-order moments.',class(self));
             end
             e1 = MEAN;
             e2 = (1+SCV)*e1^2;
@@ -89,7 +89,7 @@ classdef APH < MarkovianDistribution
             T = self.getSubgenerator;
             APH = {T,-T*ones(length(T),1)*self.getInitProb};
         end
-                
+        
     end
     
     methods (Static)
@@ -98,17 +98,25 @@ classdef APH < MarkovianDistribution
             
             % Fit the distribution from first three standard moments (mean,
             % SCV, skewness)
-            ex = APH(1.0, [1]);
-            ex.update(MEAN, SCV, SKEW);
-        end        
+            if MEAN <= Distrib.Zero
+                ex = Exp(Inf);
+            else                
+                ex = APH(1.0, [1]);
+                ex.update(MEAN, SCV, SKEW);
+            end
+        end
         
         function ex = fitCentral(MEAN, VAR, SKEW)
             % EX = FITCENTRAL(MEAN, VAR, SKEW)
             
             % Fit the distribution from first three central moments (mean,
             % variance, skewness)
-            ex = APH(1.0, [1]);
-            ex.update(MEAN, VAR/MEAN^2, SKEW);
+            if MEAN <= Distrib.Zero
+                ex = Exp(Inf);
+            else
+                ex = APH(1.0, [1]);
+                ex.update(MEAN, VAR/MEAN^2, SKEW);
+            end
         end
         
         function ex = fitMeanAndSCV(MEAN, SCV)
@@ -116,9 +124,15 @@ classdef APH < MarkovianDistribution
             
             % Fit the distribution from first three central moments (mean,
             % variance, skewness)
-            ex = APH(1.0, [1]);
-            ex.updateMeanAndSCV(MEAN, SCV);
-        end        
+            if MEAN <= Distrib.Zero
+                ex = Exp(Inf);
+            else
+                ex = APH(1.0, [1]);
+                ex.updateMeanAndSCV(MEAN, SCV);
+            end
+        end
     end
     
 end
+
+

@@ -105,7 +105,7 @@ while max(max(abs(Q-Q_1))) > tol
         
         for k=dpsSET(:)'
             if nservers(k)>1
-                error('Multi-server DPS not supported yet in AMVA solver.')
+                line_error(mfilename,'Multi-server DPS not supported yet in AMVA solver.')
             else
                 tss=Inf; % time-scale separation threshold, was 5 now unused
                 Uhi(k,r) = sum(U(k,schedparam(k,:)>tss*schedparam(k,r)));

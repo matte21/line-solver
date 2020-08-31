@@ -18,7 +18,18 @@ classdef Model < Copyable
         function self = Model(name)
             % SELF = MODEL(NAME)
             %[~,lineVersion] = system('git describe'); 
+<<<<<<< HEAD
             lineVersion = '2.0.7';
+=======
+            lineVersion = '2.0.8';
+            persistent lineSplashScreenShown
+            if isempty(lineSplashScreenShown)
+                lineSplashScreenShown = true;
+                line_printf('LINE solver 2.0 initializing.');
+            %else
+                %line_printf('\b');
+            end
+>>>>>>> refs/remotes/origin/master
             lineVersion = strip(lineVersion);
             self.setVersion(lineVersion);
             self.setName(name);            

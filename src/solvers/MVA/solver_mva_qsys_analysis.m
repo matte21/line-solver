@@ -28,7 +28,7 @@ if strcmpi(method,'exact')
     elseif cs == 1 && k==1
         method = 'gm1';
     else
-        error('Line:MethodNotAvailable','MVA exact method unavailable for this model.');
+        line_error(mfilename,'Line:MethodNotAvailable','MVA exact method unavailable for this model.');
     end
 end
 
@@ -74,7 +74,7 @@ switch method
         sigma = fzero(@(x) LA(mu-mu*x)-x,0.5);
         R = qsys_gm1(sigma,mu);
     otherwise
-        error('Line:UnsupportedMethod','Unsupported method for a model with 1 station and 1 class.');
+        line_error(mfilename,'Line:UnsupportedMethod','Unsupported method for a model with 1 station and 1 class.');
 end
 
 RN(queue_ist,1) = R *qn.visits{1}(queue_ist);

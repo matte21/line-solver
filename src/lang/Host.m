@@ -21,7 +21,7 @@ classdef Host  < LayeredNetworkElement
             % self = HOST(MODEL, NAME, MULTIPLICITY, SCHEDULING, QUANTUM, SPEEDFACTOR)
             
             if ~exist('name','var')
-                error('Constructor requires to specify at least a name.');
+                line_error(mfilename,'Constructor requires to specify at least a name.');
             end
             self@LayeredNetworkElement(name);
             

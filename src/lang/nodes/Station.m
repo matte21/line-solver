@@ -57,7 +57,7 @@ classdef Station < StatefulNode
             
             qn = self.model.getStruct;
             if numel(values) ~= qn.nchains
-                error('The method requires in input a capacity value for each chain.');
+                line_error(mfilename,'The method requires in input a capacity value for each chain.');
             end
             for c = 1:qn.nchains
                 inchain = find(qn.chains(c,:));

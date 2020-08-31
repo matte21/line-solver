@@ -209,7 +209,7 @@ for p=1:length(proc)
                             PostType(end+1,1) = 0; % post
                         end
                     otherwise
-                        error('Precedence is not supported yet.');
+                        line_error(mfilename,'Precedence is not supported yet.');
                 end
             elseif strcmpi(act_prec_tp(ap).preType,ActivityPrecedence.PRE_SEQ)
                 switch act_prec_tp(ap).postType
@@ -246,10 +246,10 @@ for p=1:length(proc)
                         end
                     otherwise
                         
-                        error('Precedence is not supported yet.');
+                        line_error(mfilename,'Precedence is not supported yet.');
                 end
             else
-                error('Precedence is not supported yet.');
+                line_error(mfilename,'Precedence is not supported yet.');
             end
         end
     end

@@ -17,6 +17,6 @@ if isfield(options,'timespan')  && isfinite(options.timespan(2))
     end
     Pi_t = [t, pi_t];
 else
-    error('getTranProb in SolverCTMC requires to specify a finite timespan T, e.g., SolverCTMC(model,''timespan'',[0,T]).');
+    line_error(mfilename,'getTranProb in SolverCTMC requires to specify a finite timespan T, e.g., SolverCTMC(model,''timespan'',[0,T]).');
 end
 end

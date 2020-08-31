@@ -26,7 +26,7 @@ classdef Task < LayeredNetworkElement
             % self = TASK(MODEL, NAME, MULTIPLICITY, SCHEDULING, THINKTIME)
             
             if ~exist('name','var')
-                error('Constructor requires to specify at least a name.');
+                line_error(mfilename,'Constructor requires to specify at least a name.');
             end
             self@LayeredNetworkElement(name);
             

@@ -59,7 +59,7 @@ for c=1:qn.nchains
     Nchain(c) = sum(NK(inchain));
     refstatchain(c) = qn.refstat(inchain(1));
     if any((qn.refstat(inchain(1))-refstatchain(c))~=0)
-        error(sprintf('Classes in chain %d have different reference station.',c));
+        line_error(sprintf('Classes in chain %d have different reference station.',c));
     end
 end
 STchain(~isfinite(STchain))=0;
@@ -140,13 +140,19 @@ end
 %     end
 % end
 if isnan(Xchain)
-    error('Normalizing constant computation produced floating-point range exception. Model is too large.');
+    line_error(mfilename,'Normalizing constant computation produced floating-point range exception. Model is too large.');
 end
 
 runtime = toc(Tstart);
 
+<<<<<<< HEAD
 %if options.verbose > 0
 %    fprintf(1,'Normalizing constant (NC) analysis completed in %f sec\n',runtime);
 %end
+=======
+if options.verbose > 0
+    line_printf('\nNC analysis completed. Runtime: %f seconds.\n',runtime);
+end
+>>>>>>> refs/remotes/origin/master
 return
 end

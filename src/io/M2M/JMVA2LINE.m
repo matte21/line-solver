@@ -39,7 +39,7 @@ if isfield(xDoc.parameters.stations,'listation')
 end
 
 if isfield(xDoc.parameters.stations,'ldstation')
-    error('Load-dependent stations not yet supported.');
+    line_error(mfilename,'Load-dependent stations not yet supported.');
 end
 
 %%
@@ -114,6 +114,6 @@ for r=1:nClosedClasses
 end
 model.link(P);
 tot=toc(T0);
-%fprintf(1,['JMT2LINE parsing time: ',num2str(Ttot),' s\n']);
+%line_printf(['JMT2LINE parsing time: ',num2str(Ttot),' s\n']);
 
 end

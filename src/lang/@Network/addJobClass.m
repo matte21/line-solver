@@ -5,7 +5,7 @@ function addJobClass(self, customerClass)
 % All rights reserved.
 if self.doChecks
     if sum(cellfun(@(x) strcmp(x.name,customerClass.name), {self.classes{1:end}}))>0
-        error('A class with name %s already exists.\n', customerClass.name);
+        line_error(mfilename,'A class with name %s already exists.\n', customerClass.name);
     end
 end
 nClasses = length(self.classes);

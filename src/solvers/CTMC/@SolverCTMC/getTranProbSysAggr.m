@@ -7,6 +7,6 @@ if isfield(options,'timespan')  && isfinite(options.timespan(2))
     [t,pi_t,~,~,~,~,~,~,~,~,~,SSsysa] = solver_ctmc_transient_analysis(qn, options);
     Pi_t = [t, pi_t];
 else
-    error('getTranProbSysAggr in SolverCTMC requires to specify a finite timespan T, e.g., SolverCTMC(model,''timespan'',[0,T]).');
+    line_error(mfilename,'getTranProbSysAggr in SolverCTMC requires to specify a finite timespan T, e.g., SolverCTMC(model,''timespan'',[0,T]).');
 end
 end

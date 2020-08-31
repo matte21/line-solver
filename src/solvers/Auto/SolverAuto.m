@@ -7,6 +7,7 @@ classdef SolverAuto < NetworkSolver
     
     properties
         candidates; % feasible solvers
+        solvers;
     end
     
     methods
@@ -18,14 +19,32 @@ classdef SolverAuto < NetworkSolver
             self.setOptions(Solver.parseOptions(varargin, self.defaultOptions));
             
             % solvers sorted from fastest to slowest
+<<<<<<< HEAD
             solvers = {SolverMAM(model), SolverMVA(model), SolverNC(model), SolverFluid(model), SolverJMT(model), SolverSSA(model), SolverCTMC(model)};
             wstatus = warning('query');
             %warning off;
             boolSolver = [];
             for s=1:length(solvers)
                 boolSolver(s) = solvers{s}.supports(self.model);
+=======
+            self.solvers = {};
+            self.solvers{1,self.CANDIDATE_MAM} = SolverMAM(model);
+            self.solvers{1,self.CANDIDATE_MVA} = SolverMVA(model);
+            self.solvers{1,self.CANDIDATE_NC} = SolverNC(model);
+            self.solvers{1,self.CANDIDATE_FLUID} = SolverFluid(model);
+            self.solvers{1,self.CANDIDATE_JMT} = SolverJMT(model);
+            self.solvers{1,self.CANDIDATE_SSA} = SolverSSA(model);
+            self.solvers{1,self.CANDIDATE_CTMC} = SolverCTMC(model);
+            % turn off warnigns temporarily
+            wstatus = warning('query');            
+            warning off;
+            boolSolver = [];
+            for s=1:length(self.solvers)
+                boolSolver(s) = self.solvers{s}.supports(self.model);
+                self.solvers{s}.setOptions(self.options);
+>>>>>>> refs/remotes/origin/master
             end
-            self.candidates = {solvers{find(boolSolver)}};
+            self.candidates = {self.solvers{find(boolSolver)}};
             warning(wstatus);
         end
     end
@@ -41,12 +60,23 @@ classdef SolverAuto < NetworkSolver
             end
         end
         
+<<<<<<< HEAD
         function runtime = run(self, options) % generic method to run the solver
+=======
+        function runtime = runAnalysis(self, options, config) % generic method to run the solver
+>>>>>>> refs/remotes/origin/master
             % RUNTIME = RUN()
             % Run the solver % GENERIC METHOD TO RUN THE SOLVER
             
             T0 = tic;
             runtime = toc(T0);
+            if nargin<2
+                options = self.getOptions;
+            end
+            if nargin<3
+                config = [];
+            end
+            
         end
         
         function [QN,UN,RN,TN] = getAvg(self,Q,U,R,T)
@@ -116,6 +146,7 @@ classdef SolverAuto < NetworkSolver
             ncoptions = self.options;
             if model.hasProductFormSolution
                 if model.hasSingleChain
+<<<<<<< HEAD
                     %ncoptions = SolverNC.defaultOptions; 
                     ncoptions.method = 'exact';
                     solver = SolverNC(model, ncoptions);
@@ -141,6 +172,30 @@ classdef SolverAuto < NetworkSolver
             else
                 solver = self.candidates{1}; % take fastest
             end
+=======
+                    %ncoptions = SolverNC.defaultOptions;
+                    solver = self.solvers{self.CANDIDATE_NC};
+                else % MultiChain
+                    if model.hasHomogeneousScheduling(SchedStrategy.INF)
+                        solver = self.solvers{self.CANDIDATE_MVA};
+                    elseif model.hasMultiServer
+                        if sum(model.getNumberOfJobs) / sum(model.getNumberOfChains) > 30 % likely fluid regime
+                            solver = self.solvers{self.CANDIDATE_FLUID};
+                        elseif sum(model.getNumberOfJobs) / sum(model.getNumberOfChains) > 10 % mid/heavy load
+                            solver = self.solvers{self.CANDIDATE_MVA};
+                        elseif sum(model.getNumberOfJobs) < 5 % light load
+                            solver = self.solvers{self.CANDIDATE_NC};
+                        else
+                            solver = self.solvers{self.CANDIDATE_MVA};
+                        end
+                    else % product-form, no infinite servers
+                        solver = self.solvers{self.CANDIDATE_NC};
+                    end
+                end
+            else
+                solver = self.solvers{self.CANDIDATE_MVA};
+            end            
+>>>>>>> refs/remotes/origin/master
         end
     end
 end

@@ -13,7 +13,7 @@ R = self.getNumberOfClasses;
 M = self.getNumberOfNodes;
 
 if ~iscell(P) && R>1
-    error('Multiclass model: the linked routing matrix P must be a cell array, e.g., P = model.initRoutingMatrix; P{1} = Pclass1; P{2} = Pclass2.');
+    line_error(mfilename,'Multiclass model: the linked routing matrix P must be a cell array, e.g., P = model.initRoutingMatrix; P{1} = Pclass1; P{2} = Pclass2.');
 end
 
 isLinearP = true;
@@ -38,7 +38,7 @@ if size(P,1) == size(P,2)
                 % degenerate
                 isLinearP = false;
                 if self.nodes{ind}.server.hitClass == self.nodes{ind}.server.missClass
-                    warning('Ambiguous use of hitClass and missClass at cache, it is recommended to use different classes.');
+                    line_warning(mfilename,'Ambiguous use of hitClass and missClass at cache, it is recommended to use different classes.');
                 end
         end
     end
@@ -90,11 +90,11 @@ end
 % link virtual sinks automatically to sink
 ispool = cellisa(self.nodes,'Sink');
 if sum(ispool) > 1
-    error('The model can have at most one sink node.');
+    line_error(mfilename,'The model can have at most one sink node.');
 end
 
 if sum(cellisa(self.nodes,'Source')) > 1
-    error('The model can have at most one source node.');
+    line_error(mfilename,'The model can have at most one source node.');
 end
 ispool_nnz = find(ispool)';
 
@@ -180,10 +180,10 @@ end
 %             for r=1:R
 %                 Psum=cellsum({P{r,:}})*ones(M,1);
 %                 if min(Psum)<1-1e-4
-%                   error('Invalid routing probabilities (Node %d departures, switching from class %d).',minpos(Psum),r);
+%                   line_error(mfilename,'Invalid routing probabilities (Node %d departures, switching from class %d).',minpos(Psum),r);
 %                 end
 %                 if max(Psum)>1+1e-4
-%                   error(sprintf('Invalid routing probabilities (Node %d departures, switching from class %d).',maxpos(Psum),r));
+%                   line_error(sprintf('Invalid routing probabilities (Node %d departures, switching from class %d).',maxpos(Psum),r));
 %                 end
 %             end
 
@@ -260,11 +260,11 @@ isAboveOne = pSum > 1.0 + Distrib.Zero;
 if any(isAboveOne)
     for i=find(isAboveOne)
         if self.nodes{i}.schedStrategy ~= SchedStrategy.FORK
-            error('The total routing probability for jobs leaving node %s in class %s is greater than 1.0.',self.nodes{i}.name,self.classes{r}.name);
+            line_error(mfilename,'The total routing probability for jobs leaving node %s in class %s is greater than 1.0.',self.nodes{i}.name,self.classes{r}.name);
         end
         %        elseif pSum < 1.0 - Distrib.Zero % we cannot check this case as class r may not reach station i, in which case its outgoing routing prob is zero
         %            if self.nodes{i}.schedStrategy ~= SchedStrategy.EXT % if not a sink
-        %                error('The total routing probability for jobs leaving node %s in class %s is less than 1.0.',self.nodes{i}.name,self.classes{r}.name);
+        %                line_error(mfilename,'The total routing probability for jobs leaving node %s in class %s is less than 1.0.',self.nodes{i}.name,self.classes{r}.name);
         %            end
     end
 end

@@ -197,6 +197,7 @@ classdef NetworkStruct <handle
             end
             self.phases = phases;
             self.phasessz = max(self.phases,ones(size(self.phases)));
+            self.phasessz(self.nodeToStation(self.nodetype == NodeType.Join),:)=phases(self.nodeToStation(self.nodetype == NodeType.Join),:);
             self.phaseshift = [zeros(size(phases,1),1),cumsum(self.phasessz,2)];
         end
         
@@ -217,6 +218,7 @@ classdef NetworkStruct <handle
             end
             self.phases = phases;
             self.phasessz = max(self.phases,ones(size(self.phases)));
+            self.phasessz(self.nodeToStation(self.nodetype == NodeType.Join),:)=phases(self.nodeToStation(self.nodetype == NodeType.Join),:);
             self.phaseshift = [zeros(size(phases,1),1),cumsum(self.phasessz,2)];
         end
         

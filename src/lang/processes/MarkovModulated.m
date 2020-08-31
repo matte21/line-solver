@@ -22,7 +22,7 @@ classdef MarkovModulated < PointProcess
             if map_isfeasible(MAP)
                 X = map_sample(MAP,n);
             else
-                error('This process is infeasible (negative rates).');
+                line_error(mfilename,'This process is infeasible (negative rates).');
             end
         end
     end
@@ -31,12 +31,12 @@ classdef MarkovModulated < PointProcess
         function phases = getNumberOfPhases(self)
             % PHASES = GETNUMBEROFPHASES()
             
-            error('Line:AbstractMethodCall','An abstract method was called. The function needs to be overridden by a subclass.');
+            line_error(mfilename,'Line:AbstractMethodCall','An abstract method was called. The function needs to be overridden by a subclass.');
         end
         function MAP = getRepresentation(self)
             % MAP = GETREPRESENTATION()
             
-            error('Line:AbstractMethodCall','An abstract method was called. The function needs to be overridden by a subclass.');
+            line_error(mfilename,'Line:AbstractMethodCall','An abstract method was called. The function needs to be overridden by a subclass.');
         end
     end
     
@@ -44,7 +44,7 @@ classdef MarkovModulated < PointProcess
         function cx = fit(MEAN, SCV)
             % CX = FIT(MEAN, SCV)
             
-            error('Line:AbstractMethodCall','An abstract method was called. The function needs to be overridden by a subclass.');
+            line_error(mfilename,'Line:AbstractMethodCall','An abstract method was called. The function needs to be overridden by a subclass.');
         end
     end
     

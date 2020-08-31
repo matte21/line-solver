@@ -2,10 +2,10 @@ function [XN,QN,UN,CN] = pfqn_mvaldmx(lambda,D,N,Z,mu,S)
 % [XN,QN,UN,CN] = PFQN_MVALDMX(LAMBDA,D,N,Z,MU,S)
 
 if size(mu,2) < sum(N(isfinite(N)))
-    error('MVALDMX requires to specify the load-dependent rates with one job more than the maximum closed population.');
+    line_error(mfilename,'MVALDMX requires to specify the load-dependent rates with one job more than the maximum closed population.');
 end
 if any(N(find(lambda))>0 & isfinite(N(find(lambda))))
-    error('Arrival rate cannot be specified on closed classes.');
+    line_error(mfilename,'Arrival rate cannot be specified on closed classes.');
 end
 [M,R] = size(D);
 openClasses = find(isinf(N));

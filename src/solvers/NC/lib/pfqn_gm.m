@@ -79,7 +79,7 @@ function [Q,nv] = grnmol( f, V, s , tol)
 %     order 1, 2, ..., s (degree 2s+1) Grundmann-Moler rules.
 %   Output Q is a vector approximations of degree 1, 3, ... 2s+1.
 %   Example: % final two results should be 2/(11x10x9x8x7x6)
-%    n = 4; disp( grnmol(@(x)x(1)^2*x(n)^5,eye(n,n+1),4) )
+%    n = 4;  grnmol(@(x)x(1)^2*x(n)^5,eye(n,n+1),4) 
 %     Reference:
 %       "Invariant Integration Formulas for the N-Simplex by
 %        Combinatorial Methods", A. Grundmann and H. M. Moller,

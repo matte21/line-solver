@@ -17,7 +17,11 @@ end
 [SS,SSh,qnc] = State.spaceGenerator(qn.copy, options.cutoff, options);
 qn.space = qnc.space;
 if options.verbose
+<<<<<<< HEAD
     fprintf(1,'State space size: %d states.\n',size(SS,1));
+=======
+    line_printf('\nCTMC state space size: %d states. ',size(SS,1));
+>>>>>>> refs/remotes/origin/master
 end
 if ~isfield(options, 'hide_immediate')
     options.hide_immediate = true;
@@ -81,7 +85,7 @@ for a=1:A
         [new_state_a, rate_a] = State.afterEventHashed( qn, node_a, state_a, event_a, class_a);        
         %% debugging block
 %        if true%options.verbose == 2
-%            fprintf(1,'---\n');
+%            line_printf('---\n');
 %            sync{a}.active{1}.print,
 %        end
         %%
@@ -99,7 +103,7 @@ for a=1:A
                     %if prob_sync_p > 0
                     %% debugging block
                     if options.verbose == 2
-                        fprintf(1,'---\n');
+                        line_printf('---\n');
                         sync{a}.active{1}.print,
                         sync{a}.passive{1}.print
                     end
@@ -138,7 +142,7 @@ for a=1:A
                             if ns>0
                                 if ~isnan(rate_a)
                                     if node_p < local && ~csmask(class_a, class_p) && rate_a(ia) * prob_sync_p >0 && (qn.nodetype(node_p)~=NodeType.Source)
-                                        error('Error: state-dependent routing at node %d (%s) violates the class switching mask (node %d -> node %d, class %d -> class %d).', node_a, qn.nodenames{node_a}, node_a, node_p, class_a, class_p);
+                                        line_error(mfilename,'Error: state-dependent routing at node %d (%s) violates the class switching mask (node %d -> node %d, class %d -> class %d).', node_a, qn.nodenames{node_a}, node_a, node_p, class_a, class_p);
                                     end
                                     if size(Dfilt{a}) >= [s,ns] % check needed as D{a} is a sparse matrix
                                         Dfilt{a}(s,ns) = Dfilt{a}(s,ns) + rate_a(ia) * prob_sync_p;

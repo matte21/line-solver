@@ -1,8 +1,15 @@
-function line_warning(errmsg)
-% LINE_WARNING(ERRMSG)
+function line_warning(caller,MSG, varargin)
+% LINE_WARNING(CALLER, ERRMSG)
 
 % Copyright (c) 2012-2020, Imperial College London
 % All rights reserved.
-warning(errmsg);
-%    fprintf(1,'ERROR: %s',errmsg);
+
+MSG=sprintf(MSG, varargin{:});
+w = warning('QUERY','ALL');
+switch w(1).state
+    case 'on'
+        warning('[%s] %s',caller,MSG);
+        %line_printf(sprintf('Warning [%s]: %s\n',caller,errmsg));
+    case 'off'
+end
 end

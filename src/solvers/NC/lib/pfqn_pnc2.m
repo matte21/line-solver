@@ -1,4 +1,8 @@
+<<<<<<< HEAD:src/solvers/NC/lib/pfqn_pnc2.m
 function [G,lG]= pfqn_pnc2(L,N,Z)
+=======
+function [G,lG]= pfqn_mmint2(L,N,Z)
+>>>>>>> refs/remotes/origin/master:src/solvers/NC/lib/pfqn_mmint2.m
 % [G,LOGG] = PFQN_PNC2(L,N,Z)
 
 nonzeroClasses = find(N);

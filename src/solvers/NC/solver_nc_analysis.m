@@ -64,7 +64,7 @@ while max(abs(1-eta./eta_1)) > options.iter_tol && it <= options.iter_max
         Nchain(c) = sum(NK(inchain));
         refstatchain(c) = qn.refstat(inchain(1));
         if any((qn.refstat(inchain(1))-refstatchain(c))~=0)
-            error('Classes in chain %d have different reference station.',c);
+            line_error(mfilename,'Classes in chain %d have different reference station.',c);
         end
     end
     STchain(~isfinite(STchain))=0;
@@ -85,8 +85,13 @@ while max(abs(1-eta./eta_1)) > options.iter_tol && it <= options.iter_max
             Zcorr(i,:) = 0;
         else
             if strcmpi(options.method,'exact') && nservers(i)>1
+<<<<<<< HEAD
                 options.method = 'default';
                 warning('%s does not support exact multiserver yet. Switching to approximate method.', mfilename);
+=======
+                %options.method = 'default';
+                line_warning(mfilename,'%s does not support exact multiserver yet. Switching to approximate method.', mfilename);
+>>>>>>> refs/remotes/origin/master
             end
             Lcorr(i,:) = Lchain(i,:) / nservers(i);
             Z(i,:) = 0;
@@ -139,7 +144,14 @@ while max(abs(1-eta./eta_1)) > options.iter_tol && it <= options.iter_max
         %        lG
         %        lGr
         %        lGar
+<<<<<<< HEAD
         warning('Normalizing constant computations produced a floating-point range exception. Model is likely too large.');
+=======
+        line_warning(mfilename,'Normalizing constant computations produced a floating-point range exception. Model is likely too large.');
+        %Demands=Lcorr
+        %PopulationVector=oner(Nchain,r)
+        %ThinkTimes=sum(Z,1)+sum(Zcorr,1)
+>>>>>>> refs/remotes/origin/master
     end
     
     Z = sum(Z(1:M,:),1);
@@ -198,6 +210,7 @@ while max(abs(1-eta./eta_1)) > options.iter_tol && it <= options.iter_max
         sd = ST0(i,:)>0;
         switch sched(i)
             case SchedStrategy.FCFS
+<<<<<<< HEAD
                 if range(ST0(i,sd))>0 && (max(SCV(i,sd))>1 - Distrib.Zero || min(SCV(i,sd))<1 + Distrib.Zero) % check if non-product-form                    
                     ca(i) = 0;
                     for j=1:M
@@ -217,6 +230,31 @@ while max(abs(1-eta./eta_1)) > options.iter_tol && it <= options.iter_max
                     cs(i) = (SCV(i,sd)*T(i,sd)')/sum(T(i,sd));
                     % asymptotic decay rate (diffusion approximation, Kobayashi JACM)
                     eta(i) = exp(-2*(1-rho(i))/(cs(i)+ca(i)*rho(i)));
+=======
+                if range(ST0(i,sd))>0 && (max(SCV(i,sd))>1 - Distrib.Zero || min(SCV(i,sd))<1 + Distrib.Zero) % check if non-product-form
+%                    if rho(i) <= 1
+%                     else
+%                         ca(i) = 0;
+%                         for j=1:M
+%                             for r=1:K
+%                                 if ST0(j,r)>0
+%                                     for s=1:K
+%                                         if ST0(i,s)>0
+%                                             pji_rs = qn.rt((j-1)*qn.nclasses + r, (i-1)*qn.nclasses + s);
+%                                             ca(i) = ca(i) + (T(j,r)*pji_rs/sum(T(i,sd)))*(1 - pji_rs + pji_rs*((1-rho(j)^2)*ca_1(j) + rho(j)^2*cs_1(j)));
+%                                         end
+%                                     end
+%                                 end
+%                             end
+%                         end
+%                     end
+                    ca(i) = 1;
+                    cs(i) = (SCV(i,sd)*T(i,sd)')/sum(T(i,sd));                    
+                    gamma(i) = (rho(i)^nservers(i)+rho(i))/2; % multi-server                    
+                    % asymptotic decay rate (diffusion approximation, Kobayashi JACM)
+                    eta(i) = exp(-2*(1-rho(i))/(cs(i)+ca(i)*rho(i)));
+                    %eta(i) = rho(i);
+>>>>>>> refs/remotes/origin/master
                 end
                 %eta(i) = rho(i);
                 %eta(i) = (rho(i)^nservers(i)+rho(i))/2; % multi-server
@@ -229,6 +267,7 @@ while max(abs(1-eta./eta_1)) > options.iter_tol && it <= options.iter_max
             case SchedStrategy.FCFS
                 if range(ST0(i,sd))>0 && (max(SCV(i,sd))>1 - Distrib.Zero || min(SCV(i,sd))<1 + Distrib.Zero) % check if non-product-form
                     for k=1:K
+<<<<<<< HEAD
                         if ST0(i,k)>0
                             ST(i,k) = (1-rho(i)^2)*ST0(i,k) + rho(i)^2 * eta(i)*nservers(i)/sum(T(i,sd));
                             %                             if sum(Q(i,ST(i,:)>0)) < nservers(i)
@@ -239,6 +278,10 @@ while max(abs(1-eta./eta_1)) > options.iter_tol && it <= options.iter_max
                             %                                 if ST0(i,k)>0
                             %                                     ST(i,k) = eta(i)*nservers(i)/sum(T(i,sd));
                             %                                 end
+=======
+                        if qn.rates(i,k)>0                            
+                            ST(i,k) = (1-rho(i)^4)*ST0(i,k) + rho(i)^4*((1-rho(i)^4) * gamma(i)*nservers(i)/sum(T(i,sd)) +  rho(i)^4* eta(i)*nservers(i)/sum(T(i,sd)) );                            
+>>>>>>> refs/remotes/origin/master
                         end
                     end
                 end

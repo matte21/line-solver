@@ -85,7 +85,11 @@ if qn.isopen()
             switch qn.nodetype(ind)
                 case NodeType.Queue
                     if length(ARV{ind}{1}) > config.space_max
+<<<<<<< HEAD
                         fprintf(1,'Arrival process at node %d is now at %d states. Compressing.\n',ind,length(ARV{ind}{1}));
+=======
+                        line_printf('\nArrival process at node %d is now at %d states. Compressing.',ind,length(ARV{ind}{1}));
+>>>>>>> refs/remotes/origin/master
                         ARV{ind} = mmap_compress(ARV{ind});
                     end                    
                     [Qret{1:K}, ncDistr] = MMAPPH1FCFS({ARV{ind}{[1,3:end]}}, {pie{ist,:}}, {D0{ist,:}}, 'ncMoms', 1, 'ncDistr',2);
@@ -167,10 +171,14 @@ if qn.isopen()
         end
     end
     if options.verbose
+<<<<<<< HEAD
         fprintf(1,'MAM parametric decomposition completed in %d iterations.\n',it);
+=======
+        line_printf('\nMAM parametric decomposition completed in %d iterations.',it);
+>>>>>>> refs/remotes/origin/master
     end
 else
-    warning('This model is not supported by SolverMAM yet. Returning with no result.');
+    line_warning(mfilename,'This model is not supported by SolverMAM yet. Returning with no result.');
 end
 
 end

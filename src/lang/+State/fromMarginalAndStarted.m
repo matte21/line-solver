@@ -33,10 +33,17 @@ space = [];
 if any(n>qn.classcap(isf,:))
     exceeded = n>qn.classcap(isf,:);
     for r=find(exceeded)
+<<<<<<< HEAD
         if ~isempty(qn.proc) && ~isempty(qn.proc{isf,r}) && any(any(isnan(qn.proc{isf,r}{1})))
             warning('State vector at station %d (n=%s) exceeds the class capacity (classcap=%s). Some service classes are disabled.\n',ist,mat2str(n(isf,:)),mat2str(qn.classcap(isf,:)));
         else
             warning('State vector at station %d (n=%s) exceeds the class capacity (classcap=%s).\n',ist,mat2str(n(isf,:)),mat2str(qn.classcap(isf,:)));
+=======
+        if ~isempty(qn.proc) && ~isempty(qn.proc{ist,r}) && any(any(isnan(qn.proc{ist,r}{1})))
+            line_warning(mfilename,'State vector at station %d (n=%s) exceeds the class capacity (classcap=%s). Some service classes are disabled.\n',ist,mat2str(n(ist,:)),mat2str(qn.classcap(ist,:)));
+        else
+            line_warning(mfilename,'State vector at station %d (n=%s) exceeds the class capacity (classcap=%s).\n',ist,mat2str(n(ist,:)),mat2str(qn.classcap(ist,:)));
+>>>>>>> refs/remotes/origin/master
         end
     end
     return
@@ -99,13 +106,6 @@ switch qn.nodetype(ind)
                     end
                 end
             case {SchedStrategy.FCFS, SchedStrategy.HOL, SchedStrategy.LCFS}
-                sizeEstimator = multinomialln(n);
-                sizeEstimator = round(sizeEstimator/log(10));
-                if sizeEstimator > 2                    
-                    if ~isfield(options,'force') || options.force == false
-                        error(sprintf('State space size is very large: 1e%d states. Stopping execution. Set options.force=true to bypass this control.\n',sizeEstimator));
-                    end
-                end
                 if sum(n) == 0
                     space = zeros(1,1+sum(K));
                     return
@@ -118,6 +118,19 @@ switch qn.nodetype(ind)
                 for r=1:R
                     if n(r)>0
                         vi=[vi, r*ones(1,n(r)-s(r))];
+<<<<<<< HEAD
+=======
+                    end
+                end
+                
+                sizeEstimator = multinomialln(n);
+                sizeEstimator = round(sizeEstimator/log(10));
+                if sizeEstimator > 2                    
+                    if ~isfield(options,'force') || options.force == false
+                        line_warning(sprintf('State space size is very large: 1e%d states. Cannot generate valid state space. Initializing station $d from a default state.\n',sizeEstimator,ind));              
+                            state = vi;                            
+                        return
+>>>>>>> refs/remotes/origin/master
                     end
                 end
                 
@@ -131,8 +144,8 @@ switch qn.nodetype(ind)
                 mi = uniqueperms(vi);
                 if isempty(mi)
                     mi_buf = zeros(1,max(1,sum(n)-S(ist)));
-                    state = zeros(1,R);
-                    state = State.decorate(state,[mi_buf,state]);
+                    state = zeros(1,sum(K));
+                    state = [mi_buf,state];
                 else
                     % mi_buf: class of job in buffer position i (0=empty)
                     if sum(n)>sum(s)
@@ -160,7 +173,7 @@ switch qn.nodetype(ind)
                         state = [state; repmat(mi_buf(b,:),size(kstate,1),1), kstate];
                     end
                 end
-                space = state;
+                space = state;                
             case {SchedStrategy.SJF, SchedStrategy.LJF}
                 % in these policies the state space includes continuous
                 % random variables for the service times
@@ -176,7 +189,11 @@ switch qn.nodetype(ind)
                 % IS
                 
                 % called to initial models with SJF and LJF
+<<<<<<< HEAD
                 error('The scheduling policy does not admit a discrete state space.\n');
+=======
+                line_warning(mfilename,'The scheduling policy does not admit a discrete state space.\n');
+>>>>>>> refs/remotes/origin/master
         end
     case NodeType.Cache
         switch qn.sched(ist)

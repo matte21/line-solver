@@ -47,7 +47,7 @@ classdef Queue < Station
                         self.schedPolicy = SchedStrategyType.NP;
                         self.server = Server(classes);
                     otherwise
-                        error(sprintf('The specified scheduling strategy (%s) is unsupported.',schedStrategy));
+                        line_error(sprintf('The specified scheduling strategy (%s) is unsupported.',schedStrategy));
                 end
             end
         end
@@ -56,7 +56,7 @@ classdef Queue < Station
             % SETNUMBEROFSERVERS(VALUE)
             switch self.schedStrategy
                 case SchedStrategy.INF
-                    %warning('A request to change the number of servers in an infinite server node has been ignored.');
+                    %line_warning(mfilename,'A request to change the number of servers in an infinite server node has been ignored.');
                     %ignore
                 otherwise
                     self.setNumServers(value);
@@ -69,7 +69,7 @@ classdef Queue < Station
             switch self.schedStrategy
                 case {SchedStrategy.DPS, SchedStrategy.GPS}
                     if value ~= 1
-                        error('Cannot use multi-server stations with %s scheduling.', self.schedStrategy);
+                        line_error(mfilename,'Cannot use multi-server stations with %s scheduling.', self.schedStrategy);
                     end
                 otherwise
                     self.numberOfServers = value;
@@ -95,7 +95,7 @@ classdef Queue < Station
                     distribution = self.server.serviceProcess{1, class.index}{3};
                 catch ME
                     distribution = [];
-                    warning('No distribution is available for the specified class');
+                    line_warning(mfilename,'No distribution is available for the specified class');
                 end
             end
         end
@@ -115,9 +115,9 @@ classdef Queue < Station
             if length(self.server.serviceProcess) >= class.index
                 if length(self.server.serviceProcess{1,class.index})>= 3
                     resetInitState = true; % must be carried out at the end
+                    self.state=[]; % reset the state vector
                 end
             end
-            
             self.serviceProcess{class.index} = distribution;
             self.server.serviceProcess{1, class.index}{2} = ServiceStrategy.LI;
             if distribution.isImmediate()

@@ -11,7 +11,7 @@ qn = self.model.getStruct;
     self.result.('solver') = self.getName();
     self.result.Prob.joint = Pn;
 %else
-%    error('The model state is invalid.');
+%    line_error(mfilename,'The model state is invalid.');
 %end
 runtime = toc(T0);
 self.result.runtime = runtime;

@@ -42,7 +42,7 @@ classdef JobClass < NetworkElement
         % SELF = SET.PRIORITY(PRIORITY)
         
         %             if ~(rem(priority,1) == 0 && priority >= 0)
-        %                 error('Priority must be an integer.\n');
+        %                 line_error(mfilename,'Priority must be an integer.\n');
         %             end
         %             self.priority = priority;
         %         end

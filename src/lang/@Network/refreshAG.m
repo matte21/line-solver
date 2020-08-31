@@ -73,10 +73,12 @@ for s=1:S
                             [new_state_p, ~] = State.afterEvent(qn, node_p, state_p, event_p, class_p, issim);
                         end
                         for j = 1:size(state_p,1)
-                            sp = matchrow(space{qn.nodeToStateful(node_p)},state_p(j,:));
-                            nsp = matchrow(space{qn.nodeToStateful(node_p)},new_state_p(j,:));
-                            if sp>0 && nsp >= 0
-                                RL{s,passive}(sp,nsp)=prob_p;
+                            try
+                                sp = matchrow(space{qn.nodeToStateful(node_p)},state_p(j,:));
+                                nsp = matchrow(space{qn.nodeToStateful(node_p)},new_state_p(j,:));
+                                if sp>0 && nsp >= 0
+                                    RL{s,passive}(sp,nsp)=prob_p;
+                                end
                             end
                         end
                     end
@@ -107,6 +109,6 @@ AP(inactiveSync,:)=[];
 self.ag = struct();
 self.ag.space = space;
 self.ag.actions = RL;
-self.ag.roles = AP;
+self.ag.role = AP;
 %[x, pi, Q, stats, xls, xus] = autocat(ag.rate, ag.role, 'linprog', 'lpr')
 end
