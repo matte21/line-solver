@@ -12,7 +12,7 @@ LINE is a MATLAB toolbox for performance and reliability analysis of systems and
 
 Supported models include *extended queueing networks*, both open and closed, and *layered queueing networks*. Models can be solved with either native or external solvers, the latter include [JMT](http://jmt.sourceforge.net/) and [LQNS](http://www.sce.carleton.ca/rads/lqns/). Native solvers are based on continuous-time Markov chains (CTMC), fluid ordinary differential equations, matrix analytic methods (MAM), normalizing constant analysis, and mean-value analysis (MVA). 
 
-### Getting started (MATLAB RELEASE)
+### Getting started (MATLAB SOURCE RELEASE)
 
 To get started, expand the archive (or clone the repository) in the chosen installation folder.
 
@@ -27,7 +27,8 @@ allExamples
 
 ### Getting started (DOCKER BINARY RELEASE)
 
-This version uses the royalty-free MATLAB compiler runtime to allow users without a MATLAB license to use LINE.
+This version uses the royalty-free MATLAB compiler runtime to allow users without a MATLAB license to use LINE. This release can only solve JMT or LQNS models using the LINE solvers.
+
 To get started, retrieve the LINE container:
 ```
 docker pull linemcr/cli-ubuntu
@@ -36,7 +37,7 @@ Then run
 ```
 docker run -it linemcr/cli-ubuntu
 ```
-Examples are given in the README file. For instance
+Examples are given in the /home/line/README file. For instance
 ```
 line example-oqn.jsimg mva all
 ```

@@ -125,7 +125,6 @@ for i=1:self.model.getNumberOfStations % stations
     end
 end
 
-
 sysStateAggr = struct();
 sysStateAggr.handle = self.model.stations';
 sysStateAggr.t = tranSysStateAggr{1};

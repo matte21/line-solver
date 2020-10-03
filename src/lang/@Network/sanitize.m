@@ -99,6 +99,20 @@ if isempty(self.qn)
                         self.nodes{i}.input.sourceClasses{k} = {[],ServiceStrategy.LI,Disabled()};
                     end
                 end
+            case 'Place'
+                for k=1:K
+                    if k > length(self.nodes{i}.server.serviceProcess) || isempty(self.nodes{i}.server.serviceProcess{k})
+                        self.nodes{i}.schedStrategyPar(k) = 0;
+                        self.nodes{i}.server.serviceProcess{k} = {[],ServiceStrategy.LI,Disabled()};
+                    end
+                end
+            case 'Transition'
+                for k=1:K
+                    if k > length(self.nodes{i}.server.serviceProcess) || isempty(self.nodes{i}.server.serviceProcess{k})
+%                         self.nodes{i}.schedStrategyPar(k) = 0;
+                        self.nodes{i}.server.serviceProcess{k} = {[],ServiceStrategy.LI,Disabled()};
+                    end
+                end
         end
     end
     for i=1:M

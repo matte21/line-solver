@@ -56,6 +56,27 @@ for i=1:(numOfNodes)
                 case 'Forker'
                     xml_section.setAttribute('className', 'Fork'); %overwrite with JMT class name
                     [simXMLDoc, xml_section] = saveForkStrategy(self, simXMLDoc, xml_section, currentNode);
+                case 'Storage'
+                    xml_section.setAttribute('className', 'Storage'); %overwrite with JMT class name
+                    [simXMLDoc, xml_section] = saveTotalCapacity(self, simXMLDoc, xml_section, currentNode);
+                    [simXMLDoc, xml_section] = savePlaceCapacities(self, simXMLDoc, xml_section, currentNode);
+                    [simXMLDoc, xml_section] = saveDropRule(self, simXMLDoc, xml_section, currentNode);
+                    [simXMLDoc, xml_section] = saveGetStrategy(self, simXMLDoc, xml_section, currentNode);
+                    [simXMLDoc, xml_section] = savePutStrategies(self, simXMLDoc, xml_section, currentNode);
+                case 'Enabling'
+                    xml_section.setAttribute('className', 'Enabling'); %overwrite with JMT class name
+                    [simXMLDoc, xml_section] = saveEnablingConditions(self, simXMLDoc, xml_section, currentNode);
+                    [simXMLDoc, xml_section] = saveInhibitingConditions(self, simXMLDoc, xml_section, currentNode);
+                case 'Firing'
+                    xml_section.setAttribute('className', 'Firing'); %overwrite with JMT class name
+                    [simXMLDoc, xml_section] = saveFiringOutcomes(self, simXMLDoc, xml_section, currentNode);
+                case 'Timing'
+                    xml_section.setAttribute('className', 'Timing'); %overwrite with JMT class name
+                    [simXMLDoc, xml_section] = saveModeNames(self, simXMLDoc, xml_section, currentNode);
+                    [simXMLDoc, xml_section] = saveNumbersOfServers(self, simXMLDoc, xml_section, currentNode);
+                    [simXMLDoc, xml_section] = saveTimingStrategies(self, simXMLDoc, xml_section, currentNode);
+                    [simXMLDoc, xml_section] = saveFiringPriorities(self, simXMLDoc, xml_section, currentNode);
+                    [simXMLDoc, xml_section] = saveFiringWeights(self, simXMLDoc, xml_section, currentNode);
             end
             node.appendChild(xml_section);
         end

@@ -10,5 +10,21 @@ classdef (Sealed) DropStrategy
         BlockingAfterService = 2;
     end
     
+    methods (Static)
+        
+        function text = toText(type)
+            % TEXT = TOTEXT(TYPE)
+            
+            switch type
+                case DropStrategy.InfiniteBuffer
+                    text = 'waiting queue';
+                case DropStrategy.Drop
+                    text = 'drop';
+                case DropStrategy.BlockingAfterService
+                    text = 'BAS blocking';
+            end
+        end
+    end
+
 end
 

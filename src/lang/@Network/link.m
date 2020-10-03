@@ -271,6 +271,12 @@ if any(isAboveOne)
     end
 end
 
+for i=1:M
+    if isa(self.nodes{i},'Place')
+        self.nodes{i}.init;
+    end
+end
+
 if isReset
     self.refreshStruct; % without this exception with linkAndLog
 end

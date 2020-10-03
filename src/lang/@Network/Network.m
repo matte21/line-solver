@@ -348,6 +348,10 @@ classdef Network < Model
                         nodeTypes(i) = NodeType.Join;
                     case 'Source'
                         nodeTypes(i) = NodeType.Source;
+                    case 'Place'
+                        nodeTypes(i) = NodeType.Place;
+                    case 'Transition'
+                        nodeTypes(i) = NodeType.Transition;
                     otherwise
                         line_error(mfilename,'Unknown node type.');
                 end

@@ -13,7 +13,9 @@ capacity = zeros(M,1);
 for i=1:M
     station = self.getStationByIndex(i);
     for r=1:K
-        if isempty(self.qn.rates(i,r)) || self.qn.rates(i,r)==0 || any(~isfinite(self.qn.rates(i,r)))
+        if isa(station, 'Place')
+            classcap(i,r) = min(station.classCap(r), station.cap);
+        elseif isempty(self.qn.rates(i,r)) || self.qn.rates(i,r)==0 || any(~isfinite(self.qn.rates(i,r)))
             classcap(i,r) = 0;
             chaincap(i,r) = 0;
         else
