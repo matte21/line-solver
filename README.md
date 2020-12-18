@@ -1,10 +1,10 @@
-## LINE: Performance and Reliability Analysis Engine
+## LINE: Performance and Reliability Modeling Engine
 
 Website: http://line-solver.sourceforge.net/
 
 Latest stable release: https://sourceforge.net/projects/line-solver/files/latest/download
 
-Docker binary release (MCR): docker pull linemcr/cli-ubuntu
+Docker binary release (MCR): https://hub.docker.com/r/linemcr/cli-ubuntu
 
 [![View LINE on File Exchange](https://www.mathworks.com/matlabcentral/images/matlab-file-exchange.svg)](https://www.mathworks.com/matlabcentral/fileexchange/71486-line)
 
