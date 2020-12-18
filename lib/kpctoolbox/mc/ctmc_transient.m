@@ -15,6 +15,7 @@ if nargin==3
     t0=0;
 end
 
+
 odeoptions = odeset('RelTol', reltol);
 if isinf(t1)
     nonZeroRates = abs(Q(Q~=0));

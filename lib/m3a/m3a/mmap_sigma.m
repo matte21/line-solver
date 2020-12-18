@@ -9,9 +9,7 @@ function sigma = mmap_sigma(mmap)
 C = length(mmap)-2;
 
 if map_issym(mmap)
-    if ~isdeployed
-        sigma = sym(zeros(C,C));
-    end
+    sigma = sym(zeros(C,C));
 else
     sigma = zeros(C,C);
 end

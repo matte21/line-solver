@@ -18,7 +18,6 @@ classdef Transition < Node
         % schedStrategyPar;
         nmodes;
         cap;
-        isInit;
     end
     
     methods
@@ -46,11 +45,6 @@ classdef Transition < Node
             self.firingWeights = [];
             self.firingOutcomes = [];
             self.nmodes = 0;
-            self.isInit = false;
-        end
-        
-        function bool = isInitialized(self)
-            bool = self.isInit;
         end
    
         function self = init(self)
@@ -69,12 +63,9 @@ classdef Transition < Node
             self.distributions = cell(1, self.nmodes);
             self.distributions(:) = {Exp(1)};
             self.firingOutcomes = zeros(nnodes,nclasses,self.nmodes);
-            self.isInit = true;
         end
         
-        function modeObj = addMode(self, modeName)            
-            modeObj = Mode(modeName, self.nmodes+1);
-            self.nmodes = self.nmodes + 1;     
+        function self = addMode(self, modeName)
             self.modeNames{end+1} = modeName;
             self.enablingConditions(:,end+1) = 0;
             self.inhibitingConditions(:,end+1) = Inf;
@@ -84,14 +75,12 @@ classdef Transition < Node
             self.firingPriorities(end+1) = 1;
             self.distributions{end+1} = Exp(1);
             self.firingOutcomes(:,end+1) = 0;
+            self.nmodes = self.nmodes + 1;            
         end
 
         function self = setEnablingConditions(self, mode, class, node, enablingCondition)
             % SELF = SETENABLINGCONDITIONS(MODE, CLASS, NODE, ENABLINGCONDITIONS)
             
-            if ~self.isInitialized
-                self.init;
-            end
             nnodes = length(self.model.nodes);
             if isa(node, 'Place')
                 node = self.model.getNodeIndex(node.name);
@@ -106,9 +95,6 @@ classdef Transition < Node
         function self = setInhibitingConditions(self, mode, class, node, inhibitingCondition)
             % SELF = SETINHIBITINGCONDITIONS(MODE, CLASS, NODE, INHIBITINGCONDITIONS)
             
-            if ~self.isInitialized
-                self.init;
-            end
             nnodes = length(self.model.nodes);
             if isa(node, 'Place')
                 node = self.model.getNodeIndex(node.name);
@@ -134,33 +120,25 @@ classdef Transition < Node
 
         function self = setTimingStrategy(self, mode, timingStrategy)
             % SELF = SETTIMINGSTRATEGY(MODE, TIMINGSTRATEGY)
-            if ~self.isInitialized
-                self.init;
-            end
+
             self.timingStrategies(mode) = timingStrategy;
         end
         
         function self = setFiringPriorities(self, mode, firingPriority)
             % SELF = SETFIRINGPRIORITIES(MODE, FIRINGPRIORITIES)
-            if ~self.isInitialized
-                self.init;
-            end            
+            
             self.firingPriorities(mode) = firingPriority;
         end
 
         function self = setFiringWeights(self, mode, firingWeight)
             % SELF = SETFIRINGWEIGHTS(MODE, FIRINGWEIGHTS)
-            if ~self.isInitialized
-                self.init;
-            end            
+            
             self.firingWeights(mode) = firingWeight;
         end
 
         function self = setFiringOutcome(self, class, mode, node, firingOutcome)
             % SELF = SETFIRINGOUTCOMES(MODE, CLASS, NODE, FIRINGOUTCOME)
-            if ~self.isInitialized
-                self.init;
-            end
+
             nnodes = length(self.model.nodes);
             if isa(node, 'Node')
                 node = self.model.getNodeIndex(node.name);

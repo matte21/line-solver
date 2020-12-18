@@ -12,9 +12,7 @@ for i = 1:L
 end
 
 if symbolic
-    if ~isdeployed
     r = sym(zeros(2,L));
-    end
 else
     r = zeros(2,L);
 end
@@ -49,9 +47,7 @@ for i = 1:L % for each M3PP[2]
     m = size(m3pps{i},2)-2;
     for j = 1:m % for each class in the i-th M3PP[m]
         if symbolic
-            if ~isdeployed
             s{2+c} = sym(zeros(n,n));
-            end
         else
             s{2+c} = zeros(n,n);
         end
@@ -68,9 +64,7 @@ for i = 1:L % for each M3PP[2]
 end
 % compute D1
 if symbolic
-    if ~isdeployed
     s{2} = sym(zeros(n,n));
-    end
 else
     s{2} = zeros(n,n);
 end

@@ -27,9 +27,7 @@ guess.x1 = a*3/4;
 guess.x2 = a*3/2;
 guess.x3 = 1/3;
 guess.x4 = 2/3;
-if ~isdeployed
 [xopt, fxopt] = solve(prob, guess);
-end
 
 %fprintf('Unified fitting error: %f\n', fxopt);
 FIT = assemble_mmap(xopt.x1, xopt.x2, xopt.x3, xopt.x4);

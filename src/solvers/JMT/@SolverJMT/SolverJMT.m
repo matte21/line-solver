@@ -143,7 +143,7 @@ classdef SolverJMT < NetworkSolver
         tranSysStateAggr = sampleSysAggr(self, numsamples);
         
         %% Cdf methods
-        RD = getCdfRespT(self, R);
+        [RD,log] = getCdfRespT(self, R);
         RD = getTranCdfRespT(self, R);
         RD = getTranCdfPassT(self, R);
     end

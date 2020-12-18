@@ -13,11 +13,9 @@ n = size(map{1},1);
 
 D = map{1} + map{2};
 if map_issym(map)
-    if ~isdeployed
-        I = sym(eye(n));
-        e = sym(ones(n,1));
-        v = sym(zeros(length(t),1));
-    end
+    I = sym(eye(n));
+    e = sym(ones(n,1));
+    v = sym(zeros(length(t),1));
 else
     I = eye(n);
     e = ones(n,1);

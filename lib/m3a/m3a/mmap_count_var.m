@@ -11,15 +11,13 @@ n = size(mmap{1},1);
 K = size(mmap,2)-2;
 
 if map_issym(mmap)
-    if ~isdeployed
-        I = sym(eye(n));
-        e = sym(ones(n,1));
-        lk = sym(zeros(K,1));
-        ck = sym(zeros(K,n));
-        dk = sym(zeros(n,K));
-        llk = sym(zeros(K,1));
-        vk = sym(zeros(K,1));
-    end
+    I = sym(eye(n));
+    e = sym(ones(n,1));
+    lk = sym(zeros(K,1));
+    ck = sym(zeros(K,n));
+    dk = sym(zeros(n,K));
+    llk = sym(zeros(K,1));
+    vk = sym(zeros(K,1));
 else
     I = eye(n);
     e = ones(n,1);

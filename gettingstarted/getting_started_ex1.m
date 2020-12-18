@@ -10,8 +10,10 @@ queue.setService(oclass, Exp(2));
 %% Block 3: topology
 model.link(Network.serialRouting(source,queue,sink));
 %% Block 4: solution
-AvgTable = SolverJMT(model,'seed',23000).getAvgTable
-
-% select a particular table row
-%ARow = tget(AvgTable, queue, oclass); % this is also valid
+AvgTable = SolverJMT(model,'seed',23000,'samples',10000).getAvgTable
+%% select a particular table row
+ARow = tget(AvgTable, queue, oclass) % this is also valid
+%% select a particular table row by node and class label
 ARow = tget(AvgTable, 'myQueue', 'myClass')
+%% export to JMT
+%model.jsimgView

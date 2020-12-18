@@ -9,11 +9,9 @@ function [E,V,Z] = mamap2m_can2_coefficients(h1,h2,r1,r2)
 % - Z: denominators
 
 if issym(h1) || issym(h2) || issym(r1) || issym(r2)
-    if ~isdeployed
     E = sym(zeros(14,1));
     V = sym(zeros(12,1));
     Z = sym(zeros(3,1));
-    end
 else
     E = zeros(15,1);
     V = zeros(12,1);

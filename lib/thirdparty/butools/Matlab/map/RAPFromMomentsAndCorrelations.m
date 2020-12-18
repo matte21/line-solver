@@ -86,3 +86,9 @@ function [D0,D1] = RAPFromMomentsAndCorrelations (moms, corr)
 
     D1=-D0*inv(U2)*T2*Y*inv(T2)*U2;
 end
+        
+
+
+
+
+

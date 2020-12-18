@@ -170,7 +170,13 @@ classdef EnsembleSolver < Solver
                 self.post(it);
                 Tsynch(it)=toc(T2);
                 if options.verbose
-                    line_printf('\nAnalyze: %.3fs. Update: %.3fs. Runtime: %.3fs. ',Tsolve(it),Tsynch(it),Ttot);
+                    if it<=10
+                        line_printf('\nAnalyze: %.3fs. Update: %.3fs. Runtime: %.3fs. ',Tsolve(it),Tsynch(it),Ttot);
+                    else
+                        if mod(it,5)==0
+                            line_printf('\nAnalyze: %.3fs. Update: %.3fs. Runtime: %.3fs. ',Tsolve(it),Tsynch(it),Ttot);
+                        end
+                    end
                 end
             end
             self.finish();

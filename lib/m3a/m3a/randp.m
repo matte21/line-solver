@@ -1,4 +1,4 @@
-function X = randrelp(P,varargin) ;
+function X = randp(P,varargin) ;
 % RANDP - pick random values with relative probability
 %
 %     R = RANDP(PROB,..) returns integers in the range from 1 to
@@ -35,7 +35,6 @@ function X = randrelp(P,varargin) ;
 % 1.2 (aug 2006) - fixed bug when called with scalar argument P
 % 2.0 (feb 2009) - use HISTC for creating the integers (faster and simplier than
 %                  previous algorithm)
-% Giuliano Casale: renamed RANDP to randrelp
 
 error(nargchk(2,Inf,nargin)) ;
 

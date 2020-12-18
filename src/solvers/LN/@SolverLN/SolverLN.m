@@ -30,6 +30,7 @@ classdef SolverLN < LayeredNetworkSolver & EnsembleSolver
         tputproc;
         thinkproc;
         callresptproc;
+        getCdfRespT;
     end
     
     properties (Hidden) % registries of quantities to update at every iteration
@@ -78,6 +79,7 @@ classdef SolverLN < LayeredNetworkSolver & EnsembleSolver
             self.lqn = lqn;
             
             % initialize call response times
+            self.getCdfRespT = cell(length(lqn.hostdem),1);
             self.svctproc = lqn.hostdem;
             self.thinkproc = lqn.think;
             self.callresptproc = cell(lqn.ncalls,1);

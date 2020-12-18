@@ -1,5 +1,5 @@
-function [SCVj,acfCoeff]=kpcfit_sub_eval_acfit(SCV,G2,acfLag)
-%  function [SCVj,acfCoeff]=kpcfit_sub_eval_acfit(SCV,G2,acfLag)
+function [SCVj,acfCoeff]=kpcfit_sub_eval_iat2(SCV,G2,acfLag)
+%  function [SCVj,acfCoeff]=kpcfit_sub_eval_iat2(SCV,G2,acfLag)
 %
 %   Input:
 %       SCV = a vector of squared coefficient of variation for each
@@ -25,4 +25,5 @@ for j=2:J
     X=SCV(j)*r0j*G2(j).^acfLag;
     acfCoeff=(X+SCVj_1.*acfCoeff.*(1+X))./SCVj;
 end
+
 end

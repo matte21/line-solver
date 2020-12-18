@@ -1,4 +1,4 @@
-function RD = getCdfRespT(self, R)
+function [RD,logData] = getCdfRespT(self, R)
 % RD = GETCDFRESPT(R)
 
 if ~exist('R','var')

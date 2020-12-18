@@ -9,11 +9,9 @@ function [G,U,Y] = mamap2m_can1_coefficients(h1,h2,r1,r2)
 % - Y: denominators
 
 if issym(h1) || issym(h2) || issym(r1) || issym(r2)
-    if ~isdeployed
     G = sym(zeros(15,1));
     U = sym(zeros(12,1));
     Y = sym(zeros(3,1));
-    end
 else
     G = zeros(15,1);
     U = zeros(12,1);

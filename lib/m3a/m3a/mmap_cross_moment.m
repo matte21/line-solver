@@ -12,10 +12,8 @@ function MC = mmap_cross_moment(mmap, k)
 C = length(mmap)-2;
 
 if map_issym(mmap)
-    if ~isdeployed
-        TG = sym(zeros(C,1));
-        MC = sym(zeros(C,C));
-    end
+    TG = sym(zeros(C,1));
+    MC = sym(zeros(C,C));
 else
     TG = zeros(C,1);
     MC = zeros(C,C);

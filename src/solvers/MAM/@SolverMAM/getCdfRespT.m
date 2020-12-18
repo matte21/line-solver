@@ -8,7 +8,7 @@ end
 qn = self.getStruct;
 self.getAvg; % get steady-state solution
 options = self.getOptions;
-RD = solver_mam_passage_time(qn, qn.ph, options);
+RD = solver_mam_passage_time(qn, qn.proc, options);
 runtime = toc(T0);
 self.setDistribResults(RD, runtime);
 end
