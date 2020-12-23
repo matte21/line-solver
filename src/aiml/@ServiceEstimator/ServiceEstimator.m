@@ -55,7 +55,7 @@ classdef ServiceEstimator < handle
             r = self.model.getClassIndex(jobclass);
             nodeData = self.samples{i,r};
             for d=1:length(nodeData)
-                if strcmp(nodeData{d}.type, Metric.ArvR)
+                if strcmp(nodeData{d}.type, MetricType.ArvR)
                     data = nodeData{d};
                     return
                 end
@@ -70,7 +70,7 @@ classdef ServiceEstimator < handle
             r = self.model.getClassIndex(jobclass);
             nodeData = self.samples{i,r};
             for d=1:length(nodeData)
-                if strcmp(nodeData{d}.type, Metric.Util)
+                if strcmp(nodeData{d}.type, MetricType.Util)
                     data = nodeData{d};
                     return
                 end
@@ -85,7 +85,7 @@ classdef ServiceEstimator < handle
             r = self.model.getClassIndex(jobclass);
             nodeData = self.samples{i,r};
             for d=1:length(nodeData)
-                if strcmp(nodeData{d}.type, Metric.RespT)
+                if strcmp(nodeData{d}.type, MetricType.RespT)
                     data = nodeData{d};
                     return
                 end
@@ -99,7 +99,7 @@ classdef ServiceEstimator < handle
             i = self.model.getNodeIndex(node);
             nodeAggrData = self.samplesAggr{i};
             for d=1:length(nodeAggrData)
-                if strcmp(nodeAggrData{d}.type, Metric.Util)
+                if strcmp(nodeAggrData{d}.type, MetricType.Util)
                     data = nodeAggrData{d};
                     return
                 end
@@ -115,7 +115,7 @@ classdef ServiceEstimator < handle
             nodeData = self.samples{i,r};
             if isempty(ev)
                 for d=1:length(nodeData)
-                    if strcmp(nodeData{d}.type, Metric.QLen)
+                    if strcmp(nodeData{d}.type, MetricType.QLen)
                         data = nodeData{d};
                         return
                     end
@@ -123,7 +123,7 @@ classdef ServiceEstimator < handle
             else
                 for d=1:length(nodeData)
                     % e.g., arrival queue-length
-                    if strcmp(nodeData{d}.type, Metric.QLen) && (nodeData{d}.event.node == ev.node) && (nodeData{d}.event.class == ev.class) && (nodeData{d}.event.node == ev.event)
+                    if strcmp(nodeData{d}.type, MetricType.QLen) && (nodeData{d}.event.node == ev.node) && (nodeData{d}.event.class == ev.class) && (nodeData{d}.event.node == ev.event)
                         data = nodeData{d};
                         return
                     end
@@ -139,7 +139,7 @@ classdef ServiceEstimator < handle
             nodeData = self.samplesAggr{i};
             if isempty(ev)
                 for d=1:length(nodeData)
-                    if strcmp(nodeData{d}.type, Metric.QLen)
+                    if strcmp(nodeData{d}.type, MetricType.QLen)
                         data = nodeData{d};
                         return
                     end
@@ -147,7 +147,7 @@ classdef ServiceEstimator < handle
             else
                 for d=1:length(nodeData)
                     % e.g., arrival queue-length
-                    if strcmp(nodeData{d}.type, Metric.QLen) && (nodeData{d}.cond.node == ev.node) && (nodeData{d}.cond.class == ev.class) && (nodeData{d}.cond.event == ev.event)
+                    if strcmp(nodeData{d}.type, MetricType.QLen) && (nodeData{d}.cond.node == ev.node) && (nodeData{d}.cond.class == ev.class) && (nodeData{d}.cond.event == ev.event)
                         data = nodeData{d};
                         return
                     end

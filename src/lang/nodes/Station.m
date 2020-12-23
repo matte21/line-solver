@@ -73,14 +73,42 @@ classdef Station < StatefulNode
         end
         
         
-        function isD = isServiceDisabled(self, class)
-            % ISD = ISSERVICEDISABLED(CLASS)
-            
+        function isD = isServiceDefined(self, class)
+            K = size(self.model.classes,2);
+            isD = true(1, K);
             switch self.server.className
                 case 'ServiceTunnel'
-                    isD = false;
+                    %noop                    
                 otherwise
-                    isD = self.server.serviceProcess{1,class}{end}.isDisabled();
+                    for r=1:K
+                        if isempty(self.server.serviceProcess{1,r})
+                            isD(r) = false;
+                        end
+                    end
+            end
+        end
+        
+        function isD = isServiceDisabled(self, class)
+            % ISD = ISSERVICEDISABLED(CLASS)
+            if nargin>=2
+                switch self.server.className
+                    case 'ServiceTunnel'
+                        isD = false;
+                    otherwise
+                        isD = self.server.serviceProcess{1,class}{end}.isDisabled();
+                end
+            else
+                K = size(self.model.classes,2);
+                isD = false(1, K);
+                switch self.server.className
+                    case 'ServiceTunnel'
+                        %noop
+                    otherwise
+                        %isD = cellfun(@(sp) sp{end}.isDisabled, self.server.serviceProcess);
+                        for r=1:K
+                            isD(r) = self.server.serviceProcess{1,r}{end}.isDisabled();
+                        end
+                end
             end
         end
         
@@ -117,26 +145,26 @@ classdef Station < StatefulNode
             end
         end
         
-%         function svcProc = getService(self)
-%             % svcProc = GETSERVICE()
-% 
-%             % RETURN SERVICE PROCESSES FOR ALL CLASSES
-%             
-%             svcProc = {};
-%             for r=1:nclasses
-%                 if isempty(self.server.serviceProcess{r})
-%                     self.server.serviceProcess{r} = {[],ServiceStrategy.LI,Disabled()};
-%                     svcProc{r} = Disabled();
-%                 elseif self.server.serviceProcess{r}{end}.isImmediate()
-%                     svcProc{r} = Immediate();
-%                 elseif ~self.server.serviceProcess{r}{end}.isDisabled()
-%                     svcProc{r} = serviceProcess{r}{end};
-%                 else
-%                     svcProc{r} = [];
-%                 end
-%             end
-%         end    
-
+        %         function svcProc = getService(self)
+        %             % svcProc = GETSERVICE()
+        %
+        %             % RETURN SERVICE PROCESSES FOR ALL CLASSES
+        %
+        %             svcProc = {};
+        %             for r=1:nclasses
+        %                 if isempty(self.server.serviceProcess{r})
+        %                     self.server.serviceProcess{r} = {[],ServiceStrategy.LI,Disabled()};
+        %                     svcProc{r} = Disabled();
+        %                 elseif self.server.serviceProcess{r}{end}.isImmediate()
+        %                     svcProc{r} = Immediate();
+        %                 elseif ~self.server.serviceProcess{r}{end}.isDisabled()
+        %                     svcProc{r} = serviceProcess{r}{end};
+        %                 else
+        %                     svcProc{r} = [];
+        %                 end
+        %             end
+        %         end
+        
         function [map, mu, phi] = getMarkovianSourceRates(self)
             % [PH,MU,PHI] = GETPHSOURCERATES()
             

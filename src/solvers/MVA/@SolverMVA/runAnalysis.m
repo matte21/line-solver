@@ -1,4 +1,4 @@
-function runtime = runAnalysis(self, options, config)
+function [runtime, analyzer] = runAnalysis(self, options, config)
 % RUNTIME = RUN()
 % Run the solver
 
@@ -32,6 +32,9 @@ method = options.method;
 
 if qn.nclasses==1 && qn.nclosedjobs == 0 && length(qn.nodetype)==3 && all(sort(qn.nodetype)' == sort([NodeType.Source,NodeType.Queue,NodeType.Sink])) % is a queueing system
     [QN,UN,RN,TN,CN,XN,lG,runtime] = solver_mva_qsys_analysis(qn, options);
+    if nargout > 1
+        analyzer = @(qn) solver_mva_qsys_analysis(qn, options);
+    end
 elseif qn.nclosedjobs == 0 && length(qn.nodetype)==3 && all(sort(qn.nodetype)' == sort([NodeType.Source,NodeType.Cache,NodeType.Sink])) % is a non-rentrant cache
     % random initialization
     for ind = 1:qn.nnodes
@@ -45,6 +48,9 @@ elseif qn.nclosedjobs == 0 && length(qn.nodetype)==3 && all(sort(qn.nodetype)' =
     self.model.refreshChains;
     % start iteration
     [QN,UN,RN,TN,CN,XN,lG,runtime] = solver_mva_cache_analysis(qn, options);
+    if nargout > 1
+        analyzer = @(qn) solver_mva_cache_analysis(qn, options);
+    end
     
     for ind = 1:qn.nnodes
         if qn.nodetype(ind) == NodeType.Cache
@@ -71,8 +77,14 @@ else % queueing network
     switch method
         case {'aba.upper', 'aba.lower', 'bjb.upper', 'bjb.lower', 'pb.upper', 'pb.lower', 'gb.upper', 'gb.lower'}
             [QN,UN,RN,TN,CN,XN,lG,runtime] = solver_mva_bound_analysis(qn, options);
+            if nargout > 1
+                analyzer = @(qn) solver_mva_bound_analysis(qn, options);
+            end
         otherwise
             [QN,UN,RN,TN,CN,XN,lG,runtime] = solver_mva_analysis(qn, options);
+            if nargout > 1
+                analyzer = @(qn) solver_mva_analysis(qn, options);
+            end
     end
 end
 self.setAvgResults(QN,UN,RN,TN,CN,XN,runtime,method);

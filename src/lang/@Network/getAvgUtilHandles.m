@@ -14,7 +14,7 @@ if isempty(self.handles) || ~isfield(self.handles,'U')
     U = cell(M,1); % utilizations
     for i=1:M
         for r=1:K
-            U{i,r} = Metric(Metric.Util, self.classes{r}, self.stations{i});
+            U{i,r} = Metric(MetricType.Util, self.classes{r}, self.stations{i});
             if isa(self.stations{i},'Source')
                 U{i,r}.disable();
             end

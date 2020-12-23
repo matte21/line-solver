@@ -14,7 +14,7 @@ if isempty(self.handles) || ~isfield(self.handles,'R')
     R = cell(M,K); % response times
     for i=1:M
         for r=1:K
-            R{i,r} = Metric(Metric.RespT, self.classes{r}, self.stations{i});
+            R{i,r} = Metric(MetricType.RespT, self.classes{r}, self.stations{i});
             if isa(self.stations{i},'Source')
                 R{i,r}.disable();
             end

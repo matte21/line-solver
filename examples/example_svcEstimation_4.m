@@ -33,11 +33,11 @@ options = ServiceEstimator.defaultOptions;
 options.method = 'ubo';
 se = ServiceEstimator(model, options);
 
-lambda1 = SampledMetric(Metric.ArvR, ts, arvr1_samples, node{2}, jobclass{1});
-lambda2 = SampledMetric(Metric.ArvR, ts2, arvr2_samples, node{2}, jobclass{2});
-respT1 = SampledMetric(Metric.RespT, ts, respt1_samples, node{2}, jobclass{1});
-respT2 = SampledMetric(Metric.RespT, ts, respt2_samples, node{2}, jobclass{2});
-util = SampledMetric(Metric.Util, ts, util_samples, node{2});
+lambda1 = SampledMetric(MetricType.ArvR, ts, arvr1_samples, node{2}, jobclass{1});
+lambda2 = SampledMetric(MetricType.ArvR, ts2, arvr2_samples, node{2}, jobclass{2});
+respT1 = SampledMetric(MetricType.RespT, ts, respt1_samples, node{2}, jobclass{1});
+respT2 = SampledMetric(MetricType.RespT, ts, respt2_samples, node{2}, jobclass{2});
+util = SampledMetric(MetricType.Util, ts, util_samples, node{2});
 
 se.addSamples(lambda1);
 se.addSamples(lambda2);

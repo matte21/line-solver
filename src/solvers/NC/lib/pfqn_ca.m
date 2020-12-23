@@ -19,7 +19,7 @@ if min(N)<0
     return;
 end
 
-if ~exist('Z','var') || isempty(Z)
+if nargin<3 || isempty(Z)
     Z=zeros(1,R);
 end
 

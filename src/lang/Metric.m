@@ -2,58 +2,7 @@ classdef Metric < Copyable
     % An output metric of a Solver, such as a performance index
     %
     % Copyright (c) 2012-2020, Imperial College London
-    % All rights reserved.
-    
-    properties (Constant)
-        ResidT = 'Residence Time'; % Response Time * Visits
-        RespT = 'Response Time'; % Response Time for one Visit
-        DropRate = 'Drop Rate';
-        QLen = 'Number of Customers';
-        QueueT = 'Queue Time';
-        FCRWeight = 'FCR Total Weight';
-        FCRMemOcc = 'FCR Memory Occupation';
-        FJQLen = 'Fork Join Response Time';
-        FJRespT = 'Fork Join Response Time';
-        RespTSink = 'Response Time per Sink';
-        SysDropR = 'System Drop Rate';
-        SysQLen = 'System Number of Customers';
-        SysPower = 'System Power';
-        SysRespT = 'System Response Time';
-        SysTput = 'System Throughput';
-        Tput = 'Throughput';
-        ArvR = 'Arrival Rate';
-        TputSink = 'Throughput per Sink';
-        Util = 'Utilization';
-        TranQLen = 'Tran Number of Customers';
-        TranUtil = 'Tran Utilization';
-        TranTput = 'Tran Throughput';
-        TranRespT = 'Tran Response Time';
-        
-        ID_ResidT = 0; % Response Time * Visits
-        ID_RespT = 1; % Response Time for one Visit
-        ID_DropRate = 2;
-        ID_QLen = 3;
-        ID_QueueT = 4;
-        ID_FCRWeight = 5;
-        ID_FCRMemOcc = 6;
-        ID_FJQLen = 7;
-        ID_FJRespT = 8;
-        ID_RespTSink = 9;
-        ID_SysDropR = 10;
-        ID_SysQLen = 11;
-        ID_SysPower = 12;
-        ID_SysRespT = 13;
-        ID_SysTput = 14;
-        ID_Tput = 15;
-        ID_ArvR = 16;
-        ID_TputSink = 17;
-        ID_Util = 18;
-        ID_TranQLen = 19;
-        ID_TranUtil = 20;
-        ID_TranTput = 21;
-        ID_TranRespT = 22;
-    end
-    
+    % All rights reserved.  
     
     properties
         type;
@@ -83,28 +32,39 @@ classdef Metric < Copyable
             else
                 self.station = '';
                 self.station.name = '';
-            end            
-            switch self.type
-                case {Metric.TranQLen, Metric.TranUtil, Metric.TranTput}
-                    self.simConfInt = NaN;
-                    self.simMaxRelErr = NaN;
-                otherwise % currently used only by JMT
-                    self.simConfInt = 0.99;
-                    self.simMaxRelErr = 0.03;
             end
+            self.simConfInt = 0.99;
+            self.simMaxRelErr = 0.03;
             self.disabled = 0;
             self.transient = false;
-            switch type
-                case {Metric.TranQLen, Metric.TranTput, Metric.TranUtil}
-                    self.transient = true;
-            end
+%            switch type
+%                case {MetricType.TranQLen, MetricType.TranTput, MetricType.TranUtil}
+%                    self.transient = true;
+%                    self.simConfInt = NaN;
+%                    self.simMaxRelErr = NaN;
+%            end
+            %    self.nodeIndex = NaN;
             self.stationIndex = NaN;
-        %    self.nodeIndex = NaN;
             self.classIndex = NaN;
         end
     end
     
     methods
+        function setTransient(self)
+            self.transient = true;
+            self.simConfInt = NaN;
+            self.simMaxRelErr = NaN;
+        end
+        function setStationIndex(self, i)
+            % SELF = SETSTATIONINDEX(INDEX)
+            self.stationIndex = i;
+        end
+        
+        function setClassIndex(self, r)
+             % SELF = SETCLASSINDEX(INDEX)
+            self.classIndex = r;
+        end
+        
         function self = setTran(self, bool)
             % SELF = SETTRAN(BOOL)
             
@@ -141,9 +101,9 @@ classdef Metric < Copyable
             if self.disabled == 1
                 value = NaN;
                 return
-            end            
+            end
             if isnan(self.stationIndex) || self.stationIndex < 0
-                stationnames = model.getStationNames();                
+                stationnames = model.getStationNames();
                 self.stationIndex = findstring(stationnames,self.station.name);
             end
             i = self.stationIndex;
@@ -154,24 +114,24 @@ classdef Metric < Copyable
             r = self.classIndex;
             
             switch results.solver
-                case 'SolverJMT'                    
+                case 'SolverJMT'
                     switch self.type
-                        case Metric.TranTput
+                        case MetricType.TranTput
                             %results.Tran.Avg.T{i,r}.Name = sprintf('Throughput (station %d, class %d)',i,r);
                             %results.Tran.Avg.T{i,r}.TimeInfo.Units = 'since initialization';
                             value = results.Tran.Avg.T{i,r};
                             return
-                        case Metric.TranUtil
+                        case MetricType.TranUtil
                             %results.Tran.Avg.U{i,r}.Name = sprintf('Utilization (station %d, class %d)',i,r);
                             %results.Tran.Avg.U{i,r}.TimeInfo.Units = 'since initialization';
                             value = results.Tran.Avg.U{i,r};
                             return
-                        case Metric.TranQLen
+                        case MetricType.TranQLen
                             %results.Tran.Avg.Q{i,r}.Name = sprintf('Queue Length (station %d, class %d)',i,r);
                             %results.Tran.Avg.Q{i,r}.TimeInfo.Units = 'since initialization';
                             value = results.Tran.Avg.Q{i,r};
                             return
-                        case Metric.TranRespT
+                        case MetricType.TranRespT
                             %results.Tran.Avg.Q{i,r}.Name = sprintf('Queue Length (station %d, class %d)',i,r);
                             %results.Tran.Avg.Q{i,r}.TimeInfo.Units = 'since initialization';
                             value = results.Tran.Avg.R{i,r};
@@ -181,14 +141,14 @@ classdef Metric < Copyable
                     for i=1:length(results.metric)
                         type = self.type;
                         switch self.type
-                            case Metric.TranQLen
-                                type = Metric.QLen;
-                            case Metric.TranUtil
-                                type = Metric.Util;
-                            case Metric.TranTput
-                                type = Metric.Tput;
-                            case Metric.TranRespT
-                                type = Metric.RespT;
+                            case MetricType.TranQLen
+                                type = MetricType.QLen;
+                            case MetricType.TranUtil
+                                type = MetricType.Util;
+                            case MetricType.TranTput
+                                type = MetricType.Tput;
+                            case MetricType.TranRespT
+                                type = MetricType.RespT;
                         end
                         if strcmp(results.metric{i}.class, self.class.name) && strcmp(results.metric{i}.measureType,type) && strcmp(results.metric{i}.station, self.station.name)
                             chainIdx = find(cellfun(@any,strfind(model.getStruct.classnames,self.class.name)));
@@ -212,7 +172,7 @@ classdef Metric < Copyable
                         end
                     end
                 otherwise % another LINE solver
-                    if ~exist('model','var')
+                    if nargin<3 %~exist('model','var')
                         line_error(mfilename,'Wrong syntax, use Metric.get(results,model).\n');
                     end
                     if isnan(self.stationIndex)
@@ -226,51 +186,51 @@ classdef Metric < Copyable
                     end
                     r = self.classIndex;
                     switch self.type
-                        case Metric.Util
+                        case MetricType.Util
                             if isempty(results.Avg.U)
                                 value = NaN;
                             else
                                 value = results.Avg.U(i,r);
                             end
-                        case Metric.SysRespT
+                        case MetricType.SysRespT
                             if isempty(results.Avg.C)
                                 value = NaN;
                             else
                                 value = results.Avg.C(i,r);
                             end
-                        case Metric.SysTput
+                        case MetricType.SysTput
                             if isempty(results.Avg.X)
                                 value = NaN;
                             else
                                 value = results.Avg.X(i,r);
                             end
-                        case Metric.RespT
+                        case MetricType.RespT
                             if isempty(results.Avg.R)
                                 value = NaN;
                             else
                                 value = results.Avg.R(i,r);
-                            end                            
-                        case Metric.Tput
+                            end
+                        case MetricType.Tput
                             if isempty(results.Avg.T)
                                 value = NaN;
                             else
                                 value = results.Avg.T(i,r);
                             end
-                        case Metric.QLen
+                        case MetricType.QLen
                             if isempty(results.Avg.Q)
                                 value = NaN;
                             else
                                 value = results.Avg.Q(i,r);
                             end
-                        case Metric.TranTput
+                        case MetricType.TranTput
                             %results.Tran.Avg.T{i,r}.Name = sprintf('Throughput (station %d, class %d)',i,r);
                             %results.Tran.Avg.T{i,r}.TimeInfo.Units = 'since initialization';
                             if isempty(results.Tran.Avg.T)
                                 value = NaN;
                             else
                                 value = results.Tran.Avg.T{i,r};
-                            end                            
-                        case Metric.TranUtil
+                            end
+                        case MetricType.TranUtil
                             %results.Tran.Avg.U{i,r}.Name = sprintf('Utilization (station %d, class %d)',i,r);
                             %results.Tran.Avg.U{i,r}.TimeInfo.Units = 'since initialization';
                             value = results.Tran.Avg.U{i,r};
@@ -278,8 +238,8 @@ classdef Metric < Copyable
                                 value = NaN;
                             else
                                 value = results.Tran.Avg.U{i,r};
-                            end                            
-                        case Metric.TranQLen
+                            end
+                        case MetricType.TranQLen
                             %results.Tran.Avg.Q{i,r}.Name = sprintf('Queue Length (station %d, class %d)',i,r);
                             %results.Tran.Avg.Q{i,r}.TimeInfo.Units = 'since initialization';
                             value = results.Tran.Avg.Q{i,r};
@@ -287,8 +247,8 @@ classdef Metric < Copyable
                                 value = NaN;
                             else
                                 value = results.Tran.Avg.Q{i,r};
-                            end                            
-                        case Metric.TranRespT
+                            end
+                        case MetricType.TranRespT
                             %results.Tran.Avg.Q{i,r}.Name = sprintf('Queue Length (station %d, class %d)',i,r);
                             %results.Tran.Avg.Q{i,r}.TimeInfo.Units = 'since initialization';
                             value = results.Tran.Avg.R{i,r};
@@ -296,7 +256,7 @@ classdef Metric < Copyable
                                 value = NaN;
                             else
                                 value = results.Tran.Avg.R{i,r};
-                            end                            
+                            end
                     end
             end
         end

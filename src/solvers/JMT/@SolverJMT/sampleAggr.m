@@ -36,7 +36,7 @@ else
     numEvents = self.getOptions.samples;
 end
 solverjmt.getAvg(); % log data
-logData = SolverJMT.parseLogs(modelCopy, isNodeLogged, Metric.QLen);
+logData = SolverJMT.parseLogs(modelCopy, isNodeLogged, MetricType.QLen);
 
 % from here convert from nodes in logData to stations
 qn = modelCopy.getStruct;

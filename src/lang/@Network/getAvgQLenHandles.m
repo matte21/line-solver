@@ -13,7 +13,7 @@ if isempty(self.handles) || ~isfield(self.handles,'Q')
     Q = cell(M,K); % queue-length
     for i=1:M
         for r=1:K
-            Q{i,r} = Metric(Metric.QLen, self.classes{r}, self.stations{i});                        
+            Q{i,r} = Metric(MetricType.QLen, self.classes{r}, self.stations{i});                        
             if isa(self.stations{i},'Source')
                 Q{i,r}.disable();
             end            

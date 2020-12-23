@@ -20,13 +20,13 @@ Qt = cell(M,K); % queue-length
 Ut = cell(M,1); % utilizations
 for i=1:M
     for r=1:K
-        Tt{i,r} = Metric(Metric.TranTput, self.classes{r}, self.stations{i});
+        Tt{i,r} = Metric(MetricType.TranTput, self.classes{r}, self.stations{i});
         self.addTranMetric(Tt{i,r});
-        Qt{i,r} = Metric(Metric.TranQLen, self.classes{r}, self.stations{i});
+        Qt{i,r} = Metric(MetricType.TranQLen, self.classes{r}, self.stations{i});
         self.addTranMetric(Qt{i,r});
-        %        Rt{i,r} = Metric(Metric.TranRespT, self.classes{r}, self.stations{i});
+        %        Rt{i,r} = Metric(MetricType.TranRespT, self.classes{r}, self.stations{i});
         %        self.addTranMetric(Rt{i,r});
-        Ut{i,r} = Metric(Metric.TranUtil, self.classes{r}, self.stations{i});
+        Ut{i,r} = Metric(MetricType.TranUtil, self.classes{r}, self.stations{i});
         self.addTranMetric(Ut{i,r});
         if isa(self.stations{i},'Source')
             Qt{i,r}.disable();

@@ -23,6 +23,13 @@ classdef Disabled < ContinuousDistrib & DiscreteDistrib
             bool = true;
         end
         
+        function bool = isDisabled(self)
+            % BOOL = ISDISABLED()
+            
+            % Returns true is the distribution is disabled
+            bool = true;
+        end
+        
         function bool = isDiscrete(self)
             % BOOL = ISDISCRETE()
             

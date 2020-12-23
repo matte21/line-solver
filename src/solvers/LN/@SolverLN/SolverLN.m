@@ -192,12 +192,12 @@ classdef SolverLN < LayeredNetworkSolver & EnsembleSolver
             % reset all non-pure layers
             for e= self.routereset
                 %self.ensemble{e}.refreshChains(true);
-                self.solvers{e}.reset();
+                %self.solvers{e}.reset();
             end
             
             for e= self.svcreset
                 %self.ensemble{e}.refreshService();
-                self.solvers{e}.reset();
+                %self.solvers{e}.reset();
             end
             
             % recompute think times

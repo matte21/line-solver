@@ -128,6 +128,10 @@ classdef Solver < handle
             end
             self.options = options;
         end
+        
+        function staticSolver = getStatic(self)
+            staticSolver = StaticSolver(self);
+        end
     end
     
     methods (Static)
@@ -320,5 +324,6 @@ classdef Solver < handle
                     solver = Library(model, options);
             end
         end
+        
     end
 end

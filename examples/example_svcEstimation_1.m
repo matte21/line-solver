@@ -32,9 +32,9 @@ estoptions = ServiceEstimator.defaultOptions;
 estoptions.method = 'ubr';
 se = ServiceEstimator(model, estoptions);
 
-lambda1 = SampledMetric(Metric.ArvR, ts, arvr1_samples, node{2}, jobclass{1});
-respT1 = SampledMetric(Metric.RespT, ts, respt_samples, node{2}, jobclass{1});
-util = SampledMetric(Metric.Util, ts, util_samples, node{2});
+lambda1 = SampledMetric(MetricType.ArvR, ts, arvr1_samples, node{2}, jobclass{1});
+respT1 = SampledMetric(MetricType.RespT, ts, respt_samples, node{2}, jobclass{1});
+util = SampledMetric(MetricType.Util, ts, util_samples, node{2});
 
 se.addSamples(lambda1);
 se.addSamples(respT1);

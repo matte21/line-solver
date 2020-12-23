@@ -4,7 +4,7 @@ Website: http://line-solver.sourceforge.net/
 
 Latest stable release: https://sourceforge.net/projects/line-solver/files/latest/download
 
-Docker binary release (MCR): https://hub.docker.com/r/linert
+Docker binary release (MCR): https://hub.docker.com/r/linemcr/cli
 
 [![View LINE on File Exchange](https://www.mathworks.com/matlabcentral/images/matlab-file-exchange.svg)](https://www.mathworks.com/matlabcentral/fileexchange/71486-line)
 
@@ -31,17 +31,17 @@ This version uses the royalty-free MATLAB compiler runtime to allow users withou
 
 To get started, retrieve the LINE container:
 ```
-docker pull linert/linux
+docker pull linemcr/cli-ubuntu
 ```
-Then run from the Linux shell, after downloading [example_openModel_3.jsimg](https://raw.githubusercontent.com/line-solver/line/master/examples/example_openModel_3.jsimg)
+After downloading [example_openModel_3.jsimg](https://raw.githubusercontent.com/line-solver/line/master/examples/example_openModel_3.jsimg) to a local directory, run from the command linux line
 ```
-cat example_openModel_3.jsimg | docker run -i --rm linert/linux -i jsimg -s mva -a all -o json
+cat example_openModel_3.jsimg | docker run -i --rm linemcr/cli -i jsimg -s mva -a all -o json
 ```
-that will print the results of getAvgTable and getAvgSysTable in JSON format.
+The command will print the results of getAvgTable and getAvgSysTable in JSON format.
 
 Further help can be obtained as follows
 ```
-docker run -i --rm linert/linux -i jsimg -h
+docker run -i --rm linemcr/cli -h
 ```
 
 ### Documentation

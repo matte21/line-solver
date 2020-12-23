@@ -38,7 +38,7 @@ options = self.getOptions; options.samples = numEvents;
 solverjmt = SolverJMT(modelCopy, options);
 solverjmt.maxEvents = numEvents;
 solverjmt.runAnalysis(); % log data
-logData = SolverJMT.parseLogs(modelCopy, isNodeLogged, Metric.QLen);
+logData = SolverJMT.parseLogs(modelCopy, isNodeLogged, MetricType.QLen);
 
 % from here convert from nodes in logData to stations
 event = {};

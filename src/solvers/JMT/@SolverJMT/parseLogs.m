@@ -61,7 +61,7 @@ for ind=1:qn.nnodes
             save(logFileDepMat,'jobDepTS','jobDepID','jobDepClass','jobDepClasses','jobDepClassID');
             
             switch metric
-                case Metric.QLen
+                case MetricType.QLen
                     [nodeState{ind}, evtype, evclass] = SolverJMT.parseTranState(logFileArvMat, logFileDepMat, nodePreload{ind});
                     
                     %% save in default data structure
@@ -81,7 +81,7 @@ for ind=1:qn.nnodes
                         logData{ind,r}.arvID = jobArvID;
                         logData{ind,r}.depID = jobDepID;                        
                     end
-                case Metric.RespT
+                case MetricType.RespT
                     [classResT, jobRespT, jobResTArvTS] = SolverJMT.parseTranRespT(logFileArvMat, logFileDepMat);
                     
                     for r=1:nclasses

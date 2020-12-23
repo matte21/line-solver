@@ -31,10 +31,10 @@ options = ServiceEstimator.defaultOptions;
 options.method = 'ubr';
 se = ServiceEstimator(model, options);
 
-lambda1 = SampledMetric(Metric.ArvR, ts, arvr1_samples, node{2}, jobclass{1});
-lambda2 = SampledMetric(Metric.ArvR, ts2, arvr2_samples, node{2}, jobclass{2});
-util1 = SampledMetric(Metric.Util, ts, util1_samples, node{2}, jobclass{1});
-util = SampledMetric(Metric.Util, ts, util_samples, node{2});
+lambda1 = SampledMetric(MetricType.ArvR, ts, arvr1_samples, node{2}, jobclass{1});
+lambda2 = SampledMetric(MetricType.ArvR, ts2, arvr2_samples, node{2}, jobclass{2});
+util1 = SampledMetric(MetricType.Util, ts, util1_samples, node{2}, jobclass{1});
+util = SampledMetric(MetricType.Util, ts, util_samples, node{2});
 
 se.addSamples(lambda1);
 se.addSamples(lambda2);

@@ -12,7 +12,6 @@ classdef Element < Copyable
         %Constructor
         function self = Element(name)
             % SELF = ELEMENT(NAME)
-            
             self.setName(name);
         end
         

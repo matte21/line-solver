@@ -34,14 +34,14 @@ options = ServiceEstimator.defaultOptions;
 options.method = 'erps';
 se = ServiceEstimator(model, options);
 
-aql1 = SampledMetric(Metric.QLen, ts, aqlen1_samples, node{2}); % aggregate queue-length
+aql1 = SampledMetric(MetricType.QLen, ts, aqlen1_samples, node{2}); % aggregate queue-length
 aql1.setConditional(Event(EventType.ARV, node{2}, jobclass{1})); % set that this metric is conditional on class-1 arrivals at node 2
 
-aql2 = SampledMetric(Metric.QLen, ts, aqlen2_samples, node{2});  % aggregate queue-length
+aql2 = SampledMetric(MetricType.QLen, ts, aqlen2_samples, node{2});  % aggregate queue-length
 aql2.setConditional(Event(EventType.ARV, node{2}, jobclass{2})); % set that this metric is conditional on class-2 arrivals at node 2
 
-respT1 = SampledMetric(Metric.RespT, ts, respt1_samples, node{2}, jobclass{1});
-respT2 = SampledMetric(Metric.RespT, ts, respt2_samples, node{2}, jobclass{2});
+respT1 = SampledMetric(MetricType.RespT, ts, respt1_samples, node{2}, jobclass{1});
+respT2 = SampledMetric(MetricType.RespT, ts, respt2_samples, node{2}, jobclass{2});
 
 se.addSamples(aql1);
 se.addSamples(aql2);

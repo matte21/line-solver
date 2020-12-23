@@ -80,7 +80,7 @@ for nc=1:qn.nchains
         %if ~options.force && abs(1-njobs_chain/statejobs_chain) > options.iter_tol
         if abs(1-njobs_chain/statejobs_chain) > 1e-4
             isValid = false;
-            line_error(mfilename,'Chain %d is initialized with an incorrect number of jobs: %f instead of %d.', nc, statejobs_chain, njobs_chain);
+            line_error(mfilename,sprintf('Chain %d is initialized with an incorrect number of jobs: %f instead of %d.', nc, statejobs_chain, njobs_chain));
             return
         end
         %end

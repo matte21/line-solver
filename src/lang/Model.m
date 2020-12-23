@@ -19,13 +19,11 @@ classdef Model < Copyable
             % SELF = MODEL(NAME)
             %[~,lineVersion] = system('git describe'); 
             lineVersion = '2.0.11';
-            persistent lineSplashScreenShown
-            if isempty(lineSplashScreenShown)
-                lineSplashScreenShown = true;
-                line_printf('LINE solver 2.0 initialized.');
-            %else
-                %line_printf('\b');
-            end
+            %persistent lineSplashScreenShown
+            %if isempty(lineSplashScreenShown) || lineSplashScreenShown
+            %    lineSplashScreenShown = true;
+                %line_printf('LINE solver 2.0 initialized.');
+            %end
             lineVersion = strip(lineVersion);
             self.setVersion(lineVersion);
             self.setName(name);            

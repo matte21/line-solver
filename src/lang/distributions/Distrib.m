@@ -123,7 +123,7 @@ classdef Distrib < Copyable
             % Check if the distribution is equivalent to a Disabled
             % distribution
             %bool = cellfun(@(c) isnan(c.paramValue), self.params)
-            bool = isnan(self.getMean()) || isa(self,'Disabled');
+            bool = isnan(self.getMean());
         end
         
         function bool = isImmediate(self)

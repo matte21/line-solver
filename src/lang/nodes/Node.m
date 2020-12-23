@@ -14,9 +14,8 @@ classdef Node < NetworkElement
     methods(Hidden)
         %Constructor
         function self = Node(name)
-            % SELF = NODE(NAME)
-            
-            self@NetworkElement(name);
+            % SELF = NODE(NAME)            
+            self@NetworkElement(name);            
         end
         
         function self = setModel(self, model)
