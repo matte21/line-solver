@@ -31,7 +31,7 @@ This version uses the royalty-free MATLAB compiler runtime to allow users withou
 
 To get started, retrieve the LINE container:
 ```
-docker pull linemcr/cli-ubuntu
+docker pull linemcr/cli
 ```
 After downloading [example_openModel_3.jsimg](https://raw.githubusercontent.com/line-solver/line/master/examples/example_openModel_3.jsimg) to a local directory, run from the command linux line
 ```
