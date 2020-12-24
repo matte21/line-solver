@@ -7,15 +7,15 @@ function [ph, mu, phi, phases] = refreshServicePhases(self)
 
 M = self.getNumberOfStations();
 K = self.getNumberOfClasses();
-
+stations = self.stations;
 mu = cell(M,K);
 phi = cell(M,K);
 phases = zeros(M,K);
 for i=1:M
     if i == self.getIndexSourceStation
-        [~,mu_i,phi_i] = self.stations{i}.getMarkovianSourceRates();
+        [~,mu_i,phi_i] = stations{i}.getMarkovianSourceRates();
     else
-        switch class(self.stations{i})
+        switch class(stations{i})
             case 'Fork'
                 mu_i = cell(1,K);
                 phi_i = cell(1,K);
@@ -31,7 +31,7 @@ for i=1:M
                     phi_i{r} = NaN;
                 end
             otherwise
-                [~,mu_i,phi_i] = self.stations{i}.getMarkovianServiceRates();
+                [~,mu_i,phi_i] = stations{i}.getMarkovianServiceRates();
         end
     end
     for r=1:K

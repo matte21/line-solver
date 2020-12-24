@@ -8,23 +8,24 @@ M = self.getNumberOfStations();
 K = self.getNumberOfClasses();
 hasOpenClasses = self.hasOpenClasses;
 rates = zeros(M,K);
+stations = self.stations;
 % determine rates
 for i=1:M
     for r=1:K
-        switch self.stations{i}.server.className
+        switch stations{i}.server.className
             case 'ServiceTunnel'
                 % do nothing
-                switch class(self.stations{i})
+                switch class(stations{i})
                     case 'Source'
-                        if isempty(self.stations{i}.input.sourceClasses{r}) || self.stations{i}.input.sourceClasses{r}{end}.isDisabled
+                        if isempty(stations{i}.input.sourceClasses{r}) || stations{i}.input.sourceClasses{r}{end}.isDisabled
                             rates(i,r) = NaN;
                             scv(i,r) = NaN;
-                        elseif self.stations{i}.input.sourceClasses{r}{end}.isImmediate
+                        elseif stations{i}.input.sourceClasses{r}{end}.isImmediate
                             rates(i,r) = Distrib.InfRate;
                             scv(i,r) = 0;
                         else
-                            rates(i,r) = 1/self.stations{i}.input.sourceClasses{r}{end}.getMean();
-                            scv(i,r) = self.stations{i}.input.sourceClasses{r}{end}.getSCV();
+                            rates(i,r) = 1/stations{i}.input.sourceClasses{r}{end}.getMean();
+                            scv(i,r) = stations{i}.input.sourceClasses{r}{end}.getSCV();
                         end
                     case 'Join'
                         rates(i,r) = Inf;
@@ -32,15 +33,15 @@ for i=1:M
                 end
             otherwise
                 if ~hasOpenClasses || i ~= self.getIndexSourceStation
-                    if isempty(self.stations{i}.server.serviceProcess{r}) || self.stations{i}.server.serviceProcess{r}{end}.isDisabled
+                    if isempty(stations{i}.server.serviceProcess{r}) || stations{i}.server.serviceProcess{r}{end}.isDisabled
                         rates(i,r) = NaN;
                         scv(i,r) = NaN;
-                    elseif self.stations{i}.server.serviceProcess{r}{end}.isImmediate
+                    elseif stations{i}.server.serviceProcess{r}{end}.isImmediate
                         rates(i,r) = Distrib.InfRate;
                         scv(i,r) = 0;
                     else
-                        rates(i,r) = 1/self.stations{i}.server.serviceProcess{r}{end}.getMean();
-                        scv(i,r) = self.stations{i}.server.serviceProcess{r}{end}.getSCV();
+                        rates(i,r) = 1/stations{i}.server.serviceProcess{r}{end}.getMean();
+                        scv(i,r) = stations{i}.server.serviceProcess{r}{end}.getSCV();
                     end
                 end
         end

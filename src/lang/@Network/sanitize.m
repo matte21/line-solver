@@ -21,9 +21,9 @@ if isempty(self.qn)
                     self.nodes{i}.accessProb = cell(K,self.nodes{i}.items.nitems);
                     for v=1:K
                         for k=1:self.nodes{i}.items.nitems
-							% accessProb{v,k}(l,p) is the cost (probability) for a user-v request to item k in list l to access list p
+                            % accessProb{v,k}(l,p) is the cost (probability) for a user-v request to item k in list l to access list p
                             self.nodes{i}.accessProb{v,k} = diag(ones(1,self.nodes{i}.nLevels),1);
-							self.nodes{i}.accessProb{v,k}(1+self.nodes{i}.nLevels,1+self.nodes{i}.nLevels) = 1;
+                            self.nodes{i}.accessProb{v,k}(1+self.nodes{i}.nLevels,1+self.nodes{i}.nLevels) = 1;
                         end
                     end
                 end
@@ -67,7 +67,7 @@ if isempty(self.qn)
                         end
                         if length(unique(svcTime)) ~= K
                             line_error(mfilename,'LEPT does not support identical service time means.');
-                        end                        
+                        end
                         [svcTimeSorted] = sort(unique(svcTime),'descend');
                         self.nodes{i}.schedStrategyPar = zeros(1,K);
                         for k=1:K
@@ -109,15 +109,15 @@ if isempty(self.qn)
             case 'Transition'
                 for k=1:K
                     if k > length(self.nodes{i}.server.serviceProcess) || isempty(self.nodes{i}.server.serviceProcess{k})
-%                         self.nodes{i}.schedStrategyPar(k) = 0;
+                        %                         self.nodes{i}.schedStrategyPar(k) = 0;
                         self.nodes{i}.server.serviceProcess{k} = {[],ServiceStrategy.LI,Disabled()};
                     end
                 end
         end
     end
     for i=1:M
-        for r=1:K
-            if isempty(self.getIndexSourceStation) || i ~= self.getIndexSourceStation
+        if isempty(self.getIndexSourceStation) || i ~= self.getIndexSourceStation
+            for r=1:K
                 switch self.stations{i}.server.className
                     case 'ServiceTunnel'
                         % do nothing

@@ -29,13 +29,6 @@ throw(ME);
 end
 
 qn = self.getStruct();
-
-if any(isinf(qn.njobs))
-    if isinf(options.cutoff)
-        line_error(mfilename,'Line:NoCutoff','The model has open chains, it is mandatory to specify a finite cutoff value, e.g., SolverCTMC(model,''cutoff'',1).');
-    end
-end
-
 M = qn.nstations;
 K = qn.nclasses;
 NK = qn.njobs;
@@ -43,6 +36,16 @@ sizeEstimator = 0;
 for k=1:K
     sizeEstimator = sizeEstimator + gammaln(1+NK(k)+M-1) - gammaln(1+M-1) - gammaln(1+NK(k)); % worst-case estimate of the state space
 end
+
+if any(isinf(qn.njobs))
+    if isinf(options.cutoff)
+        line_warning(mfilename,sprintf('The model has open chains, it is recommended to specify a finite cutoff value, e.g., SolverCTMC(model,''cutoff'',1).'));
+        self.options.cutoff= ceil(6000^(1/(M*K)));
+        options.cutoff= ceil(6000^(1/(M*K)));
+        line_warning(mfilename,sprintf('Setting cutoff=%d.',self.options.cutoff));
+    end
+end
+
 if sizeEstimator > 6
     if ~isfield(options,'force') || options.force == false
 %        line_error(mfilename,'Line:ModelTooLargeToSolve','CTMC size may be too large to solve. Stopping SolverCTMC. Set options.force=true to bypass this control.\n');

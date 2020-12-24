@@ -34,14 +34,15 @@ for ind=1:qn.nnodes
                     for s=1:nclasses
                         p = rtmask((isf-1)*nclasses+r,(jsf-1)*nclasses+s);
                         if p > 0
-                            sync{end+1,1} = struct('active',cell(1),'passive',cell(1));
-                            sync{end,1}.active{1} = Event(EventType.DEP, ind, r);
+                            new_sync = struct('active',cell(1),'passive',cell(1));
+                            new_sync.active{1} = Event(EventType.DEP, ind, r);
                             switch qn.routing(ind,s)
                                 case {RoutingStrategy.ID_RRB, RoutingStrategy.ID_JSQ}
-                                    sync{end,1}.passive{1} = Event(EventType.ARV, jnd, s, @(state_before, state_after) at(self.qn.rtfun(state_before, state_after), (isf-1)*nclasses+r, (jsf-1)*nclasses+s));
+                                    new_sync.passive{1} = Event(EventType.ARV, jnd, s, @(state_before, state_after) at(self.qn.rtfun(state_before, state_after), (isf-1)*nclasses+r, (jsf-1)*nclasses+s));
                                 otherwise
-                                    sync{end,1}.passive{1} = Event(EventType.ARV, jnd, s, self.qn.rt((isf-1)*nclasses+r, (jsf-1)*nclasses+s));
+                                    new_sync.passive{1} = Event(EventType.ARV, jnd, s, self.qn.rt((isf-1)*nclasses+r, (jsf-1)*nclasses+s));
                             end
+                            sync{end+1,1} = new_sync;
                         end
                     end
                 end

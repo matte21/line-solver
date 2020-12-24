@@ -162,10 +162,11 @@ classdef NetworkStruct <handle
             
             self.sched = sched;
             self.schedparam = schedparam;
-            self.schedid = zeros(self.nstations,1);
+            schedid = zeros(self.nstations,1);
             for i=1:self.nstations
-                self.schedid(i) = SchedStrategy.toId(sched(i));
+                schedid(i) = SchedStrategy.toId(sched(i));
             end
+            self.schedid = schedid;
         end
         
         function setLSTs(self, lst)
@@ -183,18 +184,21 @@ classdef NetworkStruct <handle
         function setMAPService(self, map, phases)
             % SETMAPSERVICE(MAP, PHASES)
             
-            self.proc = map;
-            self.pie = cell(size(map));
+            proc = map;
+            pie = cell(size(map));
             for i=1:size(map,1)
                 for r=1:size(map,2)
-                    if ~isempty(map{i,r})
-                        self.proc{i,r} = map_normalize(map{i,r});
-                        self.pie{i,r} = map_pie(map{i,r});
+                    map_ir = map{i,r};
+                    if ~isempty(map_ir)
+                        proc{i,r} = map_normalize(map_ir);
+                        pie{i,r} = map_pie(map_ir);
                     else
-                        self.pie{i,r} = NaN;
+                        pie{i,r} = NaN;
                     end
                 end
             end
+            self.proc = proc;
+            self.pie = pie;
             self.phases = phases;
             self.phasessz = max(self.phases,ones(size(self.phases)));
             self.phasessz(self.nodeToStation(self.nodetype == NodeType.Join),:)=phases(self.nodeToStation(self.nodetype == NodeType.Join),:);

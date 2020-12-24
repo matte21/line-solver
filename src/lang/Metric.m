@@ -2,7 +2,7 @@ classdef Metric < Copyable
     % An output metric of a Solver, such as a performance index
     %
     % Copyright (c) 2012-2020, Imperial College London
-    % All rights reserved.  
+    % All rights reserved.
     
     properties
         type;
@@ -37,12 +37,7 @@ classdef Metric < Copyable
             self.simMaxRelErr = 0.03;
             self.disabled = 0;
             self.transient = false;
-%            switch type
-%                case {MetricType.TranQLen, MetricType.TranTput, MetricType.TranUtil}
-%                    self.transient = true;
-%                    self.simConfInt = NaN;
-%                    self.simMaxRelErr = NaN;
-%            end
+            
             %    self.nodeIndex = NaN;
             self.stationIndex = NaN;
             self.classIndex = NaN;
@@ -55,13 +50,14 @@ classdef Metric < Copyable
             self.simConfInt = NaN;
             self.simMaxRelErr = NaN;
         end
+        
         function setStationIndex(self, i)
             % SELF = SETSTATIONINDEX(INDEX)
             self.stationIndex = i;
         end
         
         function setClassIndex(self, r)
-             % SELF = SETCLASSINDEX(INDEX)
+            % SELF = SETCLASSINDEX(INDEX)
             self.classIndex = r;
         end
         
@@ -103,13 +99,15 @@ classdef Metric < Copyable
                 return
             end
             if isnan(self.stationIndex) || self.stationIndex < 0
-                stationnames = model.getStationNames();
-                self.stationIndex = findstring(stationnames,self.station.name);
+                %stationnames = model.getStationNames();
+                %self.stationIndex = findstring(stationnames,self.station.name);
+                self.stationIndex = self.station.stationIndex;
             end
             i = self.stationIndex;
             if isnan(self.classIndex)
-                classnames = model.getClassNames();
-                self.classIndex = findstring(classnames,self.class.name);
+                %classnames = model.getClassNames();
+                %self.classIndex = findstring(classnames,self.class.name);
+                self.classIndex = self.class.index;
             end
             r = self.classIndex;
             
@@ -176,13 +174,15 @@ classdef Metric < Copyable
                         line_error(mfilename,'Wrong syntax, use Metric.get(results,model).\n');
                     end
                     if isnan(self.stationIndex)
-                        stationnames = model.getStationNames();
-                        self.stationIndex = findstring(stationnames,self.station.name);
+                        %stationnames = model.getStationNames();
+                        %self.stationIndex = findstring(stationnames,self.station.name);
+                        self.stationIndex = self.station.stationIndex;
                     end
                     i = self.stationIndex;
                     if isnan(self.classIndex)
-                        classnames = model.getClassNames();
-                        self.classIndex = findstring(classnames,self.class.name);
+                        %classnames = model.getClassNames();
+                        %self.classIndex = findstring(classnames,self.class.name);
+                        self.classIndex = self.class.index;
                     end
                     r = self.classIndex;
                     switch self.type

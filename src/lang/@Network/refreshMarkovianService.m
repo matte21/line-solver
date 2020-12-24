@@ -8,11 +8,12 @@ M = self.getNumberOfStations();
 K = self.getNumberOfClasses();
 ph = cell(M,K);
 phases = zeros(M,K);
+stations = self.stations;
 for i=1:M
     if i == self.getIndexSourceStation
-        ph_i = self.stations{i}.getMarkovianSourceRates();
+        ph_i = stations{i}.getMarkovianSourceRates();
     else
-        switch class(self.stations{i})
+        switch class(stations{i})
             case 'Fork'
                 mu_i = cell(1,K);
                 phi_i = cell(1,K);
@@ -30,7 +31,7 @@ for i=1:M
                     ph_i{r} = Coxian(mu_i{r},phi_i{r}).getRepresentation;
                 end
             otherwise
-                ph_i = self.stations{i}.getMarkovianServiceRates();
+                ph_i = stations{i}.getMarkovianServiceRates();
         end
     end
     for r=1:K

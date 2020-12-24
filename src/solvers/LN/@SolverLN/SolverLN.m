@@ -7,6 +7,7 @@ classdef SolverLN < LayeredNetworkSolver & EnsembleSolver
     properties
         initNodeAvgTable = {};
         initCallAvgTable = {};
+        insist = true;
     end
     
     properties (Hidden)
@@ -16,7 +17,7 @@ classdef SolverLN < LayeredNetworkSolver & EnsembleSolver
         svctmatrix; % auxiliary matrix to determine entry svct
         routereset; % models that require hard reset of service chains
         svcreset; % models that require hard reset of service process
-        maxIterErr;
+        maxIterErr;        
     end
     
     properties (Hidden) % performance metrics and related processes
@@ -113,6 +114,7 @@ classdef SolverLN < LayeredNetworkSolver & EnsembleSolver
         function bool = converged(self, it) % convergence test at iteration it
             % BOOL = CONVERGED(IT) % CONVERGENCE TEST AT ITERATION IT
             bool = false;
+                        
             if it>=30 % assume steady-state
                 for e=1:length(self.ensemble)
                     kmax = 5; % number of previous solutions to avg
@@ -143,18 +145,30 @@ classdef SolverLN < LayeredNetworkSolver & EnsembleSolver
                     end
                 end
                 if self.options.verbose
-                    line_printf(sprintf('\bSolverLN error is: %f',self.maxIterErr(it)/E));
+                    line_printf(sprintf('\b SolverLN error is: %f',self.maxIterErr(it)/E));
                     if it==30
                         if self.options.verbose
-                            line_printf( ' Starting moving window to help convergence.');
+                            line_printf( ' Starting moving window to help convergence.');                            
                         end
                     end
                 end
                 if it>2 && self.maxIterErr(it) < self.options.iter_tol && self.maxIterErr(it-1) < self.options.iter_tol
-                    %if self.options.verbose
-                    %line_printf( sprintf('\nSolverLN completed in %d iterations.\n',size(self.results,1)));
-                    %end
-                    bool = true;
+                    if self.insist
+                        % do a hard reset to check that this is really the
+                        % fixed point
+                        for e=1:length(self.ensemble)
+                            self.ensemble{e}.reset();
+                        end                       
+                        if self.options.verbose
+                            line_printf( '\b Testing convergence.'); %Deep reset.');
+                        end
+                        self.insist = false;
+                    else
+                        if self.options.verbose
+                            line_printf( sprintf('\nSolverLN completed in %d iterations.\n',size(self.results,1)));
+                        end
+                        bool = true;
+                    end
                 end
             end
         end
@@ -191,13 +205,13 @@ classdef SolverLN < LayeredNetworkSolver & EnsembleSolver
             
             % reset all non-pure layers
             for e= self.routereset
-                %self.ensemble{e}.refreshChains(true);
-                %self.solvers{e}.reset();
+                self.ensemble{e}.refreshChains(true);                
+                self.solvers{e}.reset();                
             end
             
             for e= self.svcreset
-                %self.ensemble{e}.refreshService();
-                %self.solvers{e}.reset();
+                self.ensemble{e}.refreshService();
+                self.solvers{e}.reset();
             end
             
             % recompute think times
@@ -217,11 +231,17 @@ classdef SolverLN < LayeredNetworkSolver & EnsembleSolver
                     self.solvers{e}.setChecks(false);
                 end
             end
-            
-            for e=1:length(self.ensemble)
-                self.ensemble{e}.reset();
-            end
-            
+                        
+%            switch self.options.config.reset
+%                case 'shallow'
+                    for e=1:length(self.ensemble)
+                        self.ensemble{e}.resetPerfIndexes();
+                    end
+%                 case 'deep' % more accurate
+%                     for e=1:length(self.ensemble)
+%                         self.ensemble{e}.reset();
+%                     end
+%            end            
         end
         
         updateThinkTimes(self, it);
@@ -490,6 +510,7 @@ classdef SolverLN < LayeredNetworkSolver & EnsembleSolver
         function options = defaultOptions()
             % OPTIONS = DEFAULTOPTIONS()
             options = lineDefaults('LN');
+%            options.config.reset = 'shallow';
         end
     end
 end

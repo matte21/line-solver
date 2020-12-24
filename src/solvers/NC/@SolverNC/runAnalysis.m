@@ -20,7 +20,7 @@ if self.enableChecks && ~self.supports(self.model)
     %                return
 end
 Solver.resetRandomGeneratorSeed(options.seed);
-[qn] = self.model.getStruct();
+[qn] = self.model.getStruct(false); % doesn't need initial state
 
 if qn.nclosedjobs == 0 && length(qn.nodetype)==3 && all(sort(qn.nodetype)' == sort([NodeType.Source,NodeType.Cache,NodeType.Sink])) % is a non-rentrant cache
     % random initialization

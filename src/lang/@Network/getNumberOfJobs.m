@@ -6,10 +6,11 @@ function N = getNumberOfJobs(self)
 
 K = self.getNumberOfClasses();
 N = zeros(K,1); % changed later
+classes = self.classes;
 for k=1:K
-    switch self.classes{k}.type
+    switch classes{k}.type
         case 'closed'
-            N(k) = self.classes{k}.population;
+            N(k) = classes{k}.population;
         case 'open'
             N(k) = Inf;
     end

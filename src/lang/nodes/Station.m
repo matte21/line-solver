@@ -7,7 +7,8 @@ classdef Station < StatefulNode
     properties
         numberOfServers;
         cap;
-        classCap;
+        classCap;        
+        stationIndex;
     end
     
     methods(Hidden)
@@ -214,30 +215,31 @@ classdef Station < StatefulNode
             mu = cell(1,nclasses);
             phi = cell(1,nclasses);
             for r=1:nclasses
-                if isempty(self.server.serviceProcess{r})
-                    self.server.serviceProcess{r} = {[],ServiceStrategy.LI,Disabled()};
+                serviceProcess_r = self.server.serviceProcess{r};
+                if isempty(serviceProcess_r)
+                    serviceProcess_r = {[],ServiceStrategy.LI,Disabled()};
                     map{r}  = {[NaN],[NaN]};
                     mu{r}  = NaN;
                     phi{r}  = NaN;
-                elseif self.server.serviceProcess{r}{end}.isImmediate()
+                elseif serviceProcess_r{end}.isImmediate()
                     map{r}  = {[-Distrib.InfRate],[Distrib.InfRate]};
                     mu{r}  = [Distrib.InfRate];
                     phi{r}  = [1];
-                elseif ~self.server.serviceProcess{r}{end}.isDisabled()
-                    switch class(self.server.serviceProcess{r}{end})
+                elseif ~serviceProcess_r{end}.isDisabled()
+                    switch class(serviceProcess_r{end})
                         case 'Replayer'
-                            aph = self.server.serviceProcess{r}{end}.fitAPH;
+                            aph = serviceProcess_r{end}.fitAPH;
                             map{r} = aph.getRepresentation();
                             mu{r} = aph.getMu;
                             phi{r} = aph.getPhi;
                         case {'Exp','Coxian','Erlang','HyperExp','MarkovianDistribution','APH','MAP'}
-                            map{r} = self.server.serviceProcess{r}{end}.getRepresentation();
-                            mu{r} = self.server.serviceProcess{r}{end}.getMu;
-                            phi{r} = self.server.serviceProcess{r}{end}.getPhi;
+                            map{r} = serviceProcess_r{end}.getRepresentation();
+                            mu{r} = serviceProcess_r{end}.getMu;
+                            phi{r} = serviceProcess_r{end}.getPhi;
                         case 'MMPP2'
-                            map{r} = self.server.serviceProcess{r}{end}.getRepresentation();
-                            mu{r} = self.server.serviceProcess{r}{end}.getMu;
-                            phi{r} = self.server.serviceProcess{r}{end}.getPhi;
+                            map{r} = serviceProcess_r{end}.getRepresentation();
+                            mu{r} = serviceProcess_r{end}.getMu;
+                            phi{r} = serviceProcess_r{end}.getPhi;
                     end
                 else
                     map{r}  = {[NaN],[NaN]};

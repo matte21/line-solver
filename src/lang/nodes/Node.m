@@ -9,6 +9,7 @@ classdef Node < NetworkElement
         input;
         server;
         output;
+        index;
     end
     
     methods(Hidden)
@@ -16,6 +17,7 @@ classdef Node < NetworkElement
         function self = Node(name)
             % SELF = NODE(NAME)            
             self@NetworkElement(name);            
+            index = NaN;
         end
         
         function self = setModel(self, model)
@@ -63,10 +65,10 @@ classdef Node < NetworkElement
             % SETROUTING(CLASS, STRATEGY, DESTINATION, PROBABILITY)
             
             switch nargin
-                case 3
+                case 3 % no destination specified
                     self.output.outputStrategy{1, class.index}{2} = RoutingStrategy.toType(strategy);
                 case 5
-                    self.output.outputStrategy{1, class.index}{2} = RoutingStrategy.toType(strategy);
+                    self.output.outputStrategy{1, class.index}{2} = RoutingStrategy.toType(strategy);                    
                     if length(self.output.outputStrategy{1, class.index})<3
                         self.output.outputStrategy{1, class.index}{3}{1} = {destination, probability};
                     else

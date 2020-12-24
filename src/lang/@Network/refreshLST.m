@@ -8,9 +8,10 @@ function [lt] = refreshLST(self)
 M = self.getNumberOfStations();
 K = self.getNumberOfClasses();
 lt = cell(M,K);
+source_i = self.getIndexSourceStation;
 for i=1:M
     for r=1:K
-        if i == self.getIndexSourceStation
+        if i == source_i
             if  isa(self.stations{i}.input.sourceClasses{r}{end},'Disabled')
                 lt{i,r} = [];
             else

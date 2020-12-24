@@ -13,6 +13,7 @@ classdef Network < Model
         modifiedRoutingTable;
         isInitialized;
         doChecks;
+        connMatrix;
     end
     
     properties (Access=protected)
@@ -50,7 +51,7 @@ classdef Network < Model
         ft = getForks(self, rt) % get fork table
         [chainsObj,chainsMatrix] = getChains(self, rt) % get chain table
         
-        [P,Pnodes,links,myPc,myPs] = getRoutingMatrix(self, arvRates) % get routing matrix
+        [rt,rtNodes,connMatrix,rtNodesByClass,rtNodesByStation] = getRoutingMatrix(self, arvRates) % get routing matrix
         
         nodes = resetNetwork(self)
         
@@ -86,6 +87,7 @@ classdef Network < Model
     end
     
     methods
+        connMatrix = getConnectionMatrix(self);
         sync = refreshSync(self);
         classprio = refreshPriorities(self);
         [sched, schedid, schedparam] = refreshScheduling(self);
@@ -117,6 +119,7 @@ classdef Network < Model
             self.nodes = {};
             self.stations = {};
             self.classes = {};
+            self.connMatrix = [];
             self.perfIndex = struct();
             self.perfIndex.('Avg') = {};
             self.perfIndex.('Tran') = {};
@@ -194,10 +197,14 @@ classdef Network < Model
             end
         end
         
-        function resetHandles(self)
+        function resetPerfIndexes(self)
             self.perfIndex.Avg = {};
-            self.perfIndex.Tran = {};
+            self.perfIndex.Tran = {};            
+        end
+        
+        function resetHandles(self)
             self.handles = {};
+            self.resetPerfIndexes();
         end
         
         function reset(self, resetState)
@@ -216,12 +223,14 @@ classdef Network < Model
             self.qn = [];
         end
         
-        function resetModel(self, resetState)
-            % RESETMODEL(RESETSTATE)
+        function resetModel(self, resetState, resetHandles)
+            % RESETMODEL(RESETSTATE, RESETHANDLES)
             %
             % If RESETSTATE is true, the model requires re-initialization
-            % of its state
-            self.resetHandles();
+            % of its state            
+            %if nargin>=3 && resetHandles
+                self.resetHandles();                
+            %end
             self.qn = [];
             self.ag = [];
             if nargin == 2 && resetState
@@ -392,10 +401,12 @@ classdef Network < Model
             % NODEINDEX = GETNODEINDEX(NAME)
             
             if isa(name,'Node')
-                node = name;
-                name = node.getName();
+                %node = name;
+                %name = node.getName();
+                nodeIndex = name.index;
+                return
             end
-            nodeIndex = find(cellfun(@(c) strcmp(c,name),self.getNodeNames));
+            nodeIndex = find(cellfun(@(c) strcmp(c,name),self.getNodeNames));            
         end
         
         function stationIndex = getStationIndex(self, name)

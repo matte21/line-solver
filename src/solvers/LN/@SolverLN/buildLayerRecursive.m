@@ -184,13 +184,15 @@ for tidx_caller = callers
         % for each entry of the calling task
         ncaller_entries = length(lqn.entriesof{tidx_caller});
         for eidx = lqn.entriesof{tidx_caller}
+            aidxClass_eidx = aidxClass{eidx};
+            aidxClass_tidx_caller = aidxClass{tidx_caller};
             % initialize the probability to select an entry to be identical
-            P{aidxClass{tidx_caller}, aidxClass{eidx}}(clientDelay, clientDelay) = 1 / ncaller_entries;
+            P{aidxClass_tidx_caller, aidxClass_eidx}(clientDelay, clientDelay) = 1 / ncaller_entries;
             if ncaller_entries > 1
                 % at successive iterations make sure to replace this with throughput ratio
-                self.routeupdmap{idx}(end+1,:) = [idx, tidx_caller, eidx, 1, 1, aidxClass{tidx_caller}.index, aidxClass{eidx}.index];
+                self.routeupdmap{idx}(end+1,:) = [idx, tidx_caller, eidx, 1, 1, aidxClass_tidx_caller.index, aidxClass_eidx.index];
             end
-            P = recurActGraph(P, tidx_caller, eidx, aidxClass{eidx}, atClient);
+            P = recurActGraph(P, tidx_caller, eidx, aidxClass_eidx, atClient);
         end
     end
 end

@@ -119,7 +119,7 @@ classdef Queue < Station
             end
             self.serviceProcess{class.index} = distribution;
             self.server.serviceProcess{1, class.index}{2} = ServiceStrategy.LI;                        
-            if distribution.isImmediate()
+            if distribution.isImmediate() % check if mean is negligible
                 self.server.serviceProcess{1, class.index}{3} = Immediate();
             else
                 self.server.serviceProcess{1, class.index}{3} = distribution;
