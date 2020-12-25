@@ -1,7 +1,7 @@
 function [t,pit,QNt,UNt,RNt,TNt,CNt,XNt,InfGen,StateSpace,StateSpaceAggr,EventFiltration,runtime,fname] = solver_ctmc_transient_analysis(qn, options)
 % [T,PIT,QNT,UNT,RNT,TNT,CNT,XNT,INFGEN,STATESPACE,STATESPACEAGGR,EVENTFILTRATION,RUNTIME,FNAME] = SOLVER_CTMC_TRANSIENT_ANALYSIS(QN, OPTIONS)
 %
-% Copyright (c) 2012-2020, Imperial College London
+% Copyright (c) 2012-2021, Imperial College London
 % All rights reserved.
 
 RNt=[]; CNt=[];  XNt=[];

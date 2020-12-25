@@ -1,7 +1,7 @@
 function [Q,U,R,T,C,X,runtime] = solver_nc_analysis_ld(qn, options)
 % [Q,U,R,T,C,X,RUNTIME] = SOLVER_NC_ANALYSIS_LD(QN, OPTIONS)
 
-% Copyright (c) 2012-2020, Imperial College London
+% Copyright (c) 2012-2021, Imperial College London
 % All rights reserved.
 
 M = qn.nstations;    %number of stations

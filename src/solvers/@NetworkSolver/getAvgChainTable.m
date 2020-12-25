@@ -1,7 +1,7 @@
 function [AvgChain,QTc,UTc,RTc,TTc] = getAvgChainTable(self,Q,U,R,T)
 % [AVGCHAIN,QTC,UTC,RTC,TTC] = GETAVGCHAINTABLE(SELF,Q,U,R,T)
 
-% Copyright (c) 2012-2020, Imperial College London
+% Copyright (c) 2012-2021, Imperial College London
 % All rights reserved.
 
 M = self.model.getNumberOfStations();

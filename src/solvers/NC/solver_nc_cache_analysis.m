@@ -1,7 +1,7 @@
 function [QN,UN,RN,TN,CN,XN,lG,pij,runtime] = solver_nc_cache_analysis(qn, options)
 % [Q,U,R,T,C,X,LG,PIJ,RUNTIME] = SOLVER_NC_CACHE_ANALYSIS(QN, OPTIONS)
 
-% Copyright (c) 2012-2020, Imperial College London
+% Copyright (c) 2012-2021, Imperial College London
 % All rights reserved.
 
 T0=tic;

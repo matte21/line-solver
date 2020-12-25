@@ -1,7 +1,7 @@
 function addMetric(self, perfIndex)
 % ADDMETRIC(PERFINDEX)
 
-% Copyright (c) 2012-2020, Imperial College London
+% Copyright (c) 2012-2021, Imperial College London
 % All rights reserved.
 nel = numel(perfIndex);
 if nel == 1

@@ -1,7 +1,7 @@
 function [simDoc, section] = saveJoinStrategy(self, simDoc, section, currentNode)
 % [SIMDOC, SECTION] = SAVEJOINSTRATEGY(SIMDOC, SECTION, CURRENTNODE)
 
-% Copyright (c) 2012-2020, Imperial College London
+% Copyright (c) 2012-2021, Imperial College London
 % All rights reserved.
 strategyNode = simDoc.createElement('parameter');
 strategyNode.setAttribute('array', 'true');

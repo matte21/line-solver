@@ -1,7 +1,7 @@
 classdef Join < Station
     % A node to join sibling tasks
     %
-    % Copyright (c) 2012-2020, Imperial College London
+    % Copyright (c) 2012-2021, Imperial College London
     % All rights reserved.
     
     % The number of jobs inside JoinStation is interpreted as the number of

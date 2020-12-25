@@ -1,7 +1,7 @@
 classdef Queue < Station
     % A service station with queueing
     %
-    % Copyright (c) 2012-2020, Imperial College London
+    % Copyright (c) 2012-2021, Imperial College London
     % All rights reserved.
     
     properties
@@ -119,7 +119,7 @@ classdef Queue < Station
             end
             self.serviceProcess{class.index} = distribution;
             self.server.serviceProcess{1, class.index}{2} = ServiceStrategy.LI;                        
-            if distribution.isImmediate() % check if mean is negligible
+            if distribution.isImmediate()
                 self.server.serviceProcess{1, class.index}{3} = Immediate();
             else
                 self.server.serviceProcess{1, class.index}{3} = distribution;

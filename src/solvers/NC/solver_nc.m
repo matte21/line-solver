@@ -1,7 +1,7 @@
 function [Qchain,Uchain,Rchain,Tchain,Cchain,Xchain] = solver_nc(STchain, Vchain, Nchain, S, gamma, refstatchain, options)
 % [QCHAIN,UCHAIN,RCHAIN,TCHAIN,CCHAIN,XCHAIN] = SOLVER_NC(STCHAIN, VCHAIN, NCHAIN, S, GAMMA, REFSTATCHAIN, OPTIONS)
 
-% Copyright (c) 2012-2020, Imperial College London
+% Copyright (c) 2012-2021, Imperial College London
 % All rights reserved.
 
 [M,K]=size(STchain);

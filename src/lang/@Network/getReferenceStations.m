@@ -1,7 +1,7 @@
 function refstat = getReferenceStations(self)
 % REFSTAT = GETREFERENCESTATIONS()
 
-% Copyright (c) 2012-2020, Imperial College London
+% Copyright (c) 2012-2021, Imperial College London
 % All rights reserved.
 
 K = self.getNumberOfClasses();

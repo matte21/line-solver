@@ -1,7 +1,7 @@
 function [simDoc, section] = saveDropRule(self, simDoc, section, currentNode)
     % [SIMDOC, SECTION] = SAVEDROPRULE(SIMDOC, SECTION)
     
-    % Copyright (c) 2012-2020, Imperial College London
+    % Copyright (c) 2012-2021, Imperial College London
     % All rights reserved.
     
     schedStrategyNode = simDoc.createElement('parameter');

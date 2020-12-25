@@ -1,7 +1,7 @@
 classdef Processor  < Host
     % A hardware server in a LayeredNetwork.
     %
-    % Copyright (c) 2012-2020, Imperial College London
+    % Copyright (c) 2012-2021, Imperial College London
     % All rights reserved.
     
     

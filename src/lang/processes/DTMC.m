@@ -1,7 +1,7 @@
 classdef DTMC < Process
     % An abstract class for a discrete time Markov chain
     %
-    % Copyright (c) 2012-2020, Imperial College London
+    % Copyright (c) 2012-2021, Imperial College London
     % All rights reserved.
     
     properties

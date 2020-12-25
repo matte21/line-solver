@@ -2,7 +2,7 @@ function addTranMetric(self, perfIndex)
 % ADDTRANMETRIC(PERFINDEX)
 % Add handle for a transient metric
 
-% Copyright (c) 2012-2020, Imperial College London
+% Copyright (c) 2012-2021, Imperial College London
 % All rights reserved.
 nel = numel(perfIndex);
 if nel == 1

@@ -2,7 +2,7 @@ function lme = logmeanexp(x)
 % L = LOGMEANEXP(X)
 % Approximate the logarithm of a mean of exponentials
 %
-% Copyright (c) 2012-2020, Imperial College London
+% Copyright (c) 2012-2021, Imperial College London
 % All rights reserved.
 
     lme = logsumexp(x) - log(length(x));

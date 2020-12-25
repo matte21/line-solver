@@ -1,7 +1,7 @@
 function model = JMVA2LINE(filename,modelName)
 % MODEL = JMVA2LINE(FILENAME,MODELNAME)
 
-% Copyright (c) 2012-2020, Imperial College London
+% Copyright (c) 2012-2021, Imperial College London
 % All rights reserved.
 T0=tic;
 % import model

@@ -1,7 +1,7 @@
 function model = LINE2SCRIPT(model, filename)
 % MODEL = LINE2SCRIPT(MODEL, FILENAME)
 
-% Copyright (c) 2012-2020, Imperial College London
+% Copyright (c) 2012-2021, Imperial College London
 % All rights reserved.
 if exist('filename','var')
     fid = fopen(filename,'w'); % discard

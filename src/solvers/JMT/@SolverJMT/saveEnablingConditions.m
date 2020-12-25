@@ -1,7 +1,7 @@
 function [simDoc, section] = saveEnablingConditions(self, simDoc, section, currentNode)
     % [SIMDOC, SECTION] = SAVEFIRINGOUTCOMES(SIMDOC, SECTION, CURRENTNODE)
     
-    % Copyright (c) 2012-2020, Imperial College London
+    % Copyright (c) 2012-2021, Imperial College London
     % All rights reserved.
     
     enablingConditionsNode = simDoc.createElement('parameter');

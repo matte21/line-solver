@@ -1,7 +1,7 @@
 classdef (Sealed) MetricType
     % An output metric of a Solver, such as a performance index
     %
-    % Copyright (c) 2012-2020, Imperial College London
+    % Copyright (c) 2012-2021, Imperial College London
     % All rights reserved.
     
     properties (Constant)

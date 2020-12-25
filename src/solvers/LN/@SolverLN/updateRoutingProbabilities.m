@@ -23,7 +23,7 @@ for u = 1:length(self.unique_routeupdmap)
         end
     end
     if idx_updated
-        self.ensemble{self.idxhash(idx)}.resetNetwork();
+        %self.ensemble{self.idxhash(idx)}.resetNetwork();
         self.ensemble{self.idxhash(idx)}.link(P);
     end
 end

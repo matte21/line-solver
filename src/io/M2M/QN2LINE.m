@@ -1,7 +1,7 @@
 function model = QN2LINE(qn, modelName)
 % MODEL = QN2LINE(QN, MODELNAME)
 
-% Copyright (c) 2012-2020, Imperial College London
+% Copyright (c) 2012-2021, Imperial College London
 % All rights reserved.
 if ~exist('modelName','var')
     modelName = 'qn';

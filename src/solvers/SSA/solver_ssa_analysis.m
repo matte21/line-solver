@@ -1,7 +1,7 @@
 function [QN,UN,RN,TN,CN,XN,runtime,tranSysState,tranSync, qnc] = solver_ssa_analysis(qn, options)
 % [QN,UN,RN,TN,CN,XN,RUNTIME,TRANSYSSTATE] = SOLVER_SSA_ANALYSIS(QN, OPTIONS)
 
-% Copyright (c) 2012-2020, Imperial College London
+% Copyright (c) 2012-2021, Imperial College London
 % All rights reserved.
 
 M = qn.nstations;    %number of stations

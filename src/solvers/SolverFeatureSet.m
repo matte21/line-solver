@@ -1,7 +1,7 @@
 classdef SolverFeatureSet < handle
     % An auxiliary class to specify the features supported by a solver.
     %
-    % Copyright (c) 2012-2020, Imperial College London
+    % Copyright (c) 2012-2021, Imperial College London
     % All rights reserved.
     
     properties

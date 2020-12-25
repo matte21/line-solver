@@ -1,7 +1,7 @@
 classdef OpenClass < JobClass
     % A class of jobs that arrive from the external world
     %
-    % Copyright (c) 2012-2020, Imperial College London
+    % Copyright (c) 2012-2021, Imperial College London
     % All rights reserved.
     
     methods

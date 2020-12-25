@@ -3,7 +3,7 @@ function [n]=pprodcon(n,lb,ub)
 % n=PPRODCON(n,N)
 % Runs pprod with constraints on vector range 
 %
-% Copyright (c) 2012-2020, Imperial College London
+% Copyright (c) 2012-2021, Imperial College London
 % All rights reserved.
 
 % initialization

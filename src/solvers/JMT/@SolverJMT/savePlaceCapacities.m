@@ -1,7 +1,7 @@
 function [simDoc, section] = savePlaceCapacities(self, simDoc, section, currentNode)
     % [SIMDOC, SECTION] = SAVEPLACECAPACITY(SIMDOC, SECTION)
     
-    % Copyright (c) 2012-2020, Imperial College London
+    % Copyright (c) 2012-2021, Imperial College London
     % All rights reserved.
     
     placeCapacityNode = simDoc.createElement('parameter');

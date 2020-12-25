@@ -1,7 +1,7 @@
 function isValid = isValid(qn, n, s, options)
 % ISVALID = ISVALID(QN, N, S, OPTIONS)
 
-% Copyright (c) 2012-2020, Imperial College London
+% Copyright (c) 2012-2021, Imperial College London
 % All rights reserved.
 
 % n(r): number of jobs at the station in class r

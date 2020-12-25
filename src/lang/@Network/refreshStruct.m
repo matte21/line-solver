@@ -1,6 +1,6 @@
 function refreshStruct(self)
 % REFRESHSTRUCT()
-% Copyright (c) 2012-2020, Imperial College London
+% Copyright (c) 2012-2021, Imperial College London
 % All rights reserved.
 self.sanitize();
 nodetypes = self.getNodeTypes();

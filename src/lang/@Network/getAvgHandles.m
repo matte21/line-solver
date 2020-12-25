@@ -8,7 +8,7 @@ function [Q,U,R,T,A] = getAvgHandles(self)
 % T(i,r): mean throughput of class r at node i
 % A(i,r): mean arrival rate of class r at node i
 
-% Copyright (c) 2012-2020, Imperial College London
+% Copyright (c) 2012-2021, Imperial College London
 % All rights reserved.
 M = self.getNumberOfStations();
 K = self.getNumberOfClasses();

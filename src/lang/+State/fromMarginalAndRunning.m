@@ -1,7 +1,7 @@
 function space = fromMarginalAndRunning(qn, ind, n, s, options)
 % SPACE = FROMMARGINALANDRUNNING(QN, IND, N, S, OPTIONS)
 
-% Copyright (c) 2012-2020, Imperial College London
+% Copyright (c) 2012-2021, Imperial College London
 % All rights reserved.
 
 if ~exist('options','var')

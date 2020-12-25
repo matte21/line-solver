@@ -1,7 +1,7 @@
 function line_warning(caller,MSG, varargin)
 % LINE_WARNING(CALLER, ERRMSG)
 
-% Copyright (c) 2012-2020, Imperial College London
+% Copyright (c) 2012-2021, Imperial College London
 % All rights reserved.
 
 MSG=sprintf(MSG, varargin{:});

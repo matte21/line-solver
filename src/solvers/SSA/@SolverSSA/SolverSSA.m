@@ -1,7 +1,7 @@
 classdef SolverSSA < NetworkSolver
     % A solver based on discrete-event stochastic simulation analysis.
     %
-    % Copyright (c) 2012-2020, Imperial College London
+    % Copyright (c) 2012-2021, Imperial College London
     % All rights reserved.
     
     methods

@@ -2,7 +2,7 @@ function [RN] = getAvgRespTChain(self,R)
 % [RN] = GETAVGRESPTCHAIN(SELF,R)
 % Return average response time aggregated by chain
 %
-% Copyright (c) 2012-2020, Imperial College London
+% Copyright (c) 2012-2021, Imperial College London
 % All rights reserved.
 
 qn = self.model.getStruct();

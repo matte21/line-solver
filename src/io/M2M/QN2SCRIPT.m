@@ -1,7 +1,7 @@
 function QN2SCRIPT(model, modelName, fid)
 % QN2SCRIPT(MODEL, MODELNAME, FID)
 
-% Copyright (c) 2012-2020, Imperial College London
+% Copyright (c) 2012-2021, Imperial College London
 % All rights reserved.
 if ~exist('modelName','var')
     modelName='myModel';

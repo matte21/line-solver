@@ -1,7 +1,7 @@
 function r = QN_amva_multicore(n,c)
 % R = QN_AMVA_MULTICORE(N,C)
 
-% Copyright (c) 2012-2020, Imperial College London
+% Copyright (c) 2012-2021, Imperial College London
 % All rights reserved.
 
 M = length(n);

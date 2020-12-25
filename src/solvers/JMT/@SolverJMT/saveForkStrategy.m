@@ -1,7 +1,7 @@
 function [simDoc, section] = saveForkStrategy(self, simDoc, section, currentNode)
 % [SIMDOC, SECTION] = SAVEFORKSTRATEGY(SIMDOC, SECTION, CURRENTNODE)
 
-% Copyright (c) 2012-2020, Imperial College London
+% Copyright (c) 2012-2021, Imperial College London
 % All rights reserved.
 
 jplNode = simDoc.createElement('parameter');

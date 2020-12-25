@@ -2,7 +2,7 @@ function v = multichoosecon(n,S)
 % v = MULTICHOOSECON(n,S)
 % Pick vectors of S elements from the available units in vector n
 %
-% Copyright (c) 2012-2020, Imperial College London
+% Copyright (c) 2012-2021, Imperial College London
 % All rights reserved.
 if S == 1
     v = [];

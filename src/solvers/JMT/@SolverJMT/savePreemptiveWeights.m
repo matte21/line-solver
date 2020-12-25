@@ -1,7 +1,7 @@
 function [simDoc, section] = savePreemptiveWeights(self, simDoc, section, currentNode)
 % [SIMDOC, SECTION] = SAVEPREEMPTIVEWEIGHTS(SIMDOC, SECTION, CURRENTNODE)
 
-% Copyright (c) 2012-2020, Imperial College London
+% Copyright (c) 2012-2021, Imperial College London
 % All rights reserved.
 visitsNode = simDoc.createElement('parameter');
 visitsNode.setAttribute('array', 'true');

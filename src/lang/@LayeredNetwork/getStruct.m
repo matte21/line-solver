@@ -2,7 +2,7 @@ function lqn = getStruct(self)
 % LQN = GETSTRUCT(SELF)
 %
 %
-% Copyright 2012-2020, Imperial College London
+% Copyright 2012-2021, Imperial College London
 
 lqn = struct();
 lqn.nidx = 0;

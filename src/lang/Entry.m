@@ -1,7 +1,7 @@
 classdef Entry < LayeredNetworkElement
     % An entry point of service for a Task.
     %
-    % Copyright (c) 2012-2020, Imperial College London
+    % Copyright (c) 2012-2021, Imperial College London
     % All rights reserved.
     
     properties

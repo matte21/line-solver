@@ -3,7 +3,7 @@ function [QN] = getAvgQLenChain(self,Q)
 
 % Return average queue-lengths aggregated by chain
 %
-% Copyright (c) 2012-2020, Imperial College London
+% Copyright (c) 2012-2021, Imperial College London
 % All rights reserved.
 
 qn = self.model.getStruct();

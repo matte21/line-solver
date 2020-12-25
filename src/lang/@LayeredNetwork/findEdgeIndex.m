@@ -1,7 +1,7 @@
 function idx = findEdgeIndex(self,source,dest)
 % IDX = FINDEDGEINDEX(SELF,SOURCE,DEST)
 %
-% Copyright (c) 2012-2020, Imperial College London
+% Copyright (c) 2012-2021, Imperial College London
 % All rights reserved.
 
 %G = self.lqnGraph;

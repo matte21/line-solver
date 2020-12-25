@@ -1,7 +1,7 @@
 function RTret = solver_fluid_passage_time(qn, options)
 % RTRET = SOLVER_FLUID_PASSAGE_TIME(QN, OPTIONS)
 
-% Copyright (c) 2012-2020, Imperial College London
+% Copyright (c) 2012-2021, Imperial College London
 % All rights reserved.
 
 iter_max = options.iter_max;

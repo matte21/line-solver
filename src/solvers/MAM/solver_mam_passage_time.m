@@ -1,7 +1,7 @@
 function [RD] = solver_mam_passage_time(qn, PH, options)
 % [RD] = SOLVER_MAM_PASSAGE_TIME(QN, PH, OPTIONS)
 
-% Copyright (c) 2012-2020, Imperial College London
+% Copyright (c) 2012-2021, Imperial College London
 % All rights reserved.
 
 global BuToolsVerbose;

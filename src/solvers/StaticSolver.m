@@ -1,7 +1,7 @@
 classdef StaticSolver < NetworkSolver
     % A fast static solver derived from a regular NetworkSolver
     %
-    % Copyright (c) 2012-2020, Imperial College London
+    % Copyright (c) 2012-2021, Imperial College London
     % All rights reserved.
     
     properties (GetAccess = 'private', SetAccess='private')

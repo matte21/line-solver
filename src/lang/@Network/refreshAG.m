@@ -3,7 +3,7 @@ function refreshAG(self, cutoffs)
 % Export network as a collection of interacting stochastic agents
 
 
-% Copyright (c) 2012-2020, Imperial College London
+% Copyright (c) 2012-2021, Imperial College London
 % All rights reserved.
 
 % We now generate the global state space

@@ -3,7 +3,7 @@ function [AvgSysChainTable, CT,XT] = getAvgSysTable(self,R,T)
 
 % Return table of average system metrics
 %
-% Copyright (c) 2012-2020, Imperial College London
+% Copyright (c) 2012-2021, Imperial College London
 % All rights reserved.
 
 if nargin==1

@@ -1,7 +1,7 @@
 function [simDoc, section] = savePutStrategy(self, simDoc, section, currentNode)
 % [SIMDOC, SECTION] = SAVEPUTSTRATEGY(SIMDOC, SECTION, CURRENTNODE)
 
-% Copyright (c) 2012-2020, Imperial College London
+% Copyright (c) 2012-2021, Imperial College London
 % All rights reserved.
 queuePutStrategyNode = simDoc.createElement('parameter');
 queuePutStrategyNode.setAttribute('array', 'true');

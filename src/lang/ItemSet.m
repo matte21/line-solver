@@ -1,7 +1,7 @@
 classdef ItemSet < NetworkElement
     % A set of cacheable items
     %
-    % Copyright (c) 2012-2020, Imperial College London
+    % Copyright (c) 2012-2021, Imperial College London
     % All rights reserved.
     
     properties

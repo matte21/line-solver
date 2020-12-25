@@ -1,7 +1,7 @@
 function [simDoc, section] = saveLogTunnel(self, simDoc, section, currentNode)
 % [SIMDOC, SECTION] = SAVELOGTUNNEL(SIMDOC, SECTION, CURRENTNODE)
 
-% Copyright (c) 2012-2020, Imperial College London
+% Copyright (c) 2012-2021, Imperial College London
 % All rights reserved.
 loggerNodesCP = {'java.lang.String','java.lang.String'};
 for i=3:9 loggerNodesCP{i} = 'java.lang.Boolean'; end

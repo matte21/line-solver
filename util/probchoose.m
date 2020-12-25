@@ -2,7 +2,7 @@ function [pos,f] = probchoose(p)
 % pos = PROBCHOOSE(P)
 % Choose an element according to probability vector P
 %
-% Copyright (c) 2012-2020, Imperial College London
+% Copyright (c) 2012-2021, Imperial College London
 % All rights reserved.
 
 f = cumsum(p);

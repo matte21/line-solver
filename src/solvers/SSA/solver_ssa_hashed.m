@@ -1,7 +1,7 @@
 function [pi,SSq,arvRates,depRates]=solver_ssa_hashed(qn,options)
 % [PI,SSQ,ARVRATES,DEPRATES]=SOLVER_SSA_HASHED(QN,OPTIONS)
 
-% Copyright (c) 2012-2020, Imperial College London
+% Copyright (c) 2012-2021, Imperial College London
 % All rights reserved.
 
 % by default the jobs are all initialized in the first valid state

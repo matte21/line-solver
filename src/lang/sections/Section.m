@@ -1,7 +1,7 @@
 classdef Section < NetworkElement
     % An abstract class for sections that define the behavior of a Node
     %
-    % Copyright (c) 2012-2020, Imperial College London
+    % Copyright (c) 2012-2021, Imperial College London
     % All rights reserved.
     
     properties

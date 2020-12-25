@@ -1,7 +1,7 @@
 classdef SolverNC < NetworkSolver
     % A solver based on normalizing constant methods.
     %
-    % Copyright (c) 2012-2020, Imperial College London
+    % Copyright (c) 2012-2021, Imperial College London
     % All rights reserved.
     
     methods

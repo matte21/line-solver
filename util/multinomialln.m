@@ -2,7 +2,7 @@ function r = multinomialln(m)
 % r = MULTINOMIALLN(M)
 % Logarithm of multinomial coefficient sum(M)!/(M(1)!* M(2)! * ... * M(n)!)
 %
-% Copyright (c) 2012-2020, Imperial College London
+% Copyright (c) 2012-2021, Imperial College London
 % All rights reserved.
 r = gammaln(1+sum(m));
     for i=1:length(m)

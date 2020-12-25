@@ -1,7 +1,7 @@
 function [hashid, qn] = getHashOrAdd(qn, ind, inspace)
 % [HASHID, QN] = GETHASHORADD(QN, IND, INSPACE)
 
-% Copyright (c) 2012-2020, Imperial College London
+% Copyright (c) 2012-2021, Imperial College London
 % All rights reserved.
 
 if isempty(inspace)

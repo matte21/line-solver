@@ -1,7 +1,7 @@
 function [Q,U,R,T,C,X] = solver_amva(ST,V,N,nservers,SCV,options,sched,schedparam,refstat)
 % [Q,U,R,T,C,X] = SOLVER_AMVA(ST,V,N,S,SCV,OPTIONS,SCHED,SCHEDPARAM,REFSTAT)
 %
-% Copyright (c) 2012-2020, Imperial College London
+% Copyright (c) 2012-2021, Imperial College London
 % All rights reserved.
 
 [M,K]=size(ST);

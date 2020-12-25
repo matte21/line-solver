@@ -1,6 +1,6 @@
 function writeXML(self,filename)
 % WRITEXML(SELF,FILENAME)
-% Copyright (c) 2012-2020, Imperial College London
+% Copyright (c) 2012-2021, Imperial College London
 % All rights reserved.
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.DocumentBuilder;
