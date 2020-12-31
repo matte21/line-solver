@@ -4,7 +4,7 @@ function N = getNumberOfJobs(self)
 % Copyright (c) 2012-2021, Imperial College London
 % All rights reserved.
 
-K = self.getNumberOfClasses();
+K = getNumberOfClasses(self);
 N = zeros(K,1); % changed later
 classes = self.classes;
 for k=1:K

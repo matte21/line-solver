@@ -5,7 +5,7 @@ function self = refreshEnsemble(self)
 % All rights reserved.
 
 ensemble = self.ensemble;
-lqnGraph = self.getGraph();
+lqnGraph = getGraph(self);
 graphLayer = self.layerGraph;
 clientTask = self.clientTask;
 

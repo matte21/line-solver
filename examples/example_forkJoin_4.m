@@ -1,3 +1,4 @@
+if ~isoctave(), clearvars -except exampleName; end
 model = Network('model');
 
 source = Source(model,'Source');
@@ -24,4 +25,7 @@ P(queue2,sink) = 1.0;
 P(queue3,sink) = 1.0;
 
 model.link(P);
-SolverJMT(model,'keep',true).getAvgNodeTable
+solver = {};
+solver{end+1} = SolverJMT(model,'seed',23000);
+
+AvgTable = {};AvgTable{end+1} = solver{end}.getAvgTable

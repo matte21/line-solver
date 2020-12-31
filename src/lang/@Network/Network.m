@@ -78,11 +78,12 @@ classdef Network < Model
         [Qt,Ut,Tt] = getTranHandles(self)
     end
     
-    methods (Access = protected)
-        [rates, scv] = refreshRates(self);
-        [ph, mu, phi, phases] = refreshServicePhases(self);
-        [rt, rtfun, csmask, rtnodes] = refreshRoutingMatrix(self, rates);
-        [lt] = refreshLST(self);
+    methods %(Access = protected)
+        [rates, scv, hasRateChanged, hasSCVChanged] = refreshRates(self, statSet, classSet);
+        [ph, mu, phi, phases] = refreshServicePhases(self, statSet, classSet);
+        proctypes = refreshServiceTypes(self);
+        [rt, rtfun, rtnodes] = refreshRoutingMatrix(self, rates);
+        [lt] = refreshLST(self, statSet, classSet);
         sanitize(self);
     end
     
@@ -97,10 +98,11 @@ classdef Network < Model
         function [rates, mu, phi, phases] = refreshArrival(self) % LINE treats arrival distributions as service distributions of the Source object
             % [RATES, MU, PHI, PHASES] = REFRESHARRIVAL() % LINE TREATS ARRIVAL DISTRIBUTIONS AS SERVICE DISTRIBUTIONS OF THE SOURCE OBJECT
             
-            [rates, mu, phi, phases] = self.refreshService();
+            [rates, mu, phi, phases, lt, proctype] = refreshService(self);
         end
-        [rates, scv, mu, phi, phases] = refreshService(self);
-        [chains, visits, rt] = refreshChains(self, wantVisits)
+        [rates, scv, mu, phi, phases] = refreshService(self, statSet, classSet);
+        [chains, visits, rt] = refreshChains(self, propagate)
+        [visits, nodevisits] = refreshVisits(self, chains, rt, rtNodes)
         [cap, classcap] = refreshCapacity(self);
         nvars = refreshLocalVars(self);
     end
@@ -124,7 +126,7 @@ classdef Network < Model
             self.perfIndex.('Avg') = {};
             self.perfIndex.('Tran') = {};
             self.links = {};
-            self.initUsedFeatures();
+            initUsedFeatures(self);
             self.qn = [];
             self.linkedRoutingTable = {};
             self.ag = [];
@@ -204,7 +206,7 @@ classdef Network < Model
         
         function resetHandles(self)
             self.handles = {};
-            self.resetPerfIndexes();
+            resetPerfIndexes(self);
         end
         
         function reset(self, resetState)
@@ -223,13 +225,13 @@ classdef Network < Model
             self.qn = [];
         end
         
-        function resetModel(self, resetState, resetHandles)
+        function resetModel(self, resetState, wantResetHandles)
             % RESETMODEL(RESETSTATE, RESETHANDLES)
             %
             % If RESETSTATE is true, the model requires re-initialization
             % of its state            
-            %if nargin>=3 && resetHandles
-                self.resetHandles();                
+            %if nargin>=3 && wantResetHandles
+            resetHandles(self);
             %end
             self.qn = [];
             self.ag = [];
@@ -257,7 +259,7 @@ classdef Network < Model
         function bool = hasOpenClasses(self)
             % BOOL = HASOPENCLASSES()
             
-            bool = any(isinf(self.getNumberOfJobs()));
+            bool = any(isinf(getNumberOfJobs(self)));
         end
         
         function bool = hasClassSwitch(self)
@@ -269,19 +271,19 @@ classdef Network < Model
         function bool = hasClosedClasses(self)
             % BOOL = HASCLOSEDCLASSES()
             
-            bool = any(isfinite(self.getNumberOfJobs()));
+            bool = any(isfinite(getNumberOfJobs(self)));
         end
         
         function index = getIndexOpenClasses(self)
             % INDEX = GETINDEXOPENCLASSES()
             
-            index = find(isinf(self.getNumberOfJobs()))';
+            index = find(isinf(getNumberOfJobs(self)))';
         end
         
         function index = getIndexClosedClasses(self)
             % INDEX = GETINDEXCLOSEDCLASSES()
             
-            index = find(isfinite(self.getNumberOfJobs()))';
+            index = find(isfinite(getNumberOfJobs(self)))';
         end
         
         function c = getClassChain(self, className)
@@ -397,16 +399,16 @@ classdef Network < Model
             end
         end
         
-        function nodeIndex = getNodeIndex(self, name)
+        function ind = getNodeIndex(self, name)
             % NODEINDEX = GETNODEINDEX(NAME)
             
             if isa(name,'Node')
                 %node = name;
                 %name = node.getName();
-                nodeIndex = name.index;
+                ind = name.index;
                 return
             end
-            nodeIndex = find(cellfun(@(c) strcmp(c,name),self.getNodeNames));            
+            ind = find(cellfun(@(c) strcmp(c,name),self.getNodeNames));            
         end
         
         function stationIndex = getStationIndex(self, name)
@@ -762,12 +764,15 @@ classdef Network < Model
         function jsimwView(self)
             % JSIMWVIEW()
             
-            s=SolverJMT(self,Solver.defaultOptions,jmtGetPath); s.jsimwView;
+            [Q,U,R,T,A] = getAvgHandles(self); % create measures
+            s=SolverJMT(self,Solver.defaultOptions,jmtGetPath); 
+            s.jsimwView;
         end
         
         function jsimgView(self)
             % JSIMGVIEW()
             
+            [Q,U,R,T,A] = getAvgHandles(self); % create measures
             s=SolverJMT(self,Solver.defaultOptions,jmtGetPath); s.jsimgView;
         end
         
@@ -791,7 +796,7 @@ classdef Network < Model
             for ist=1:qn.nstations
                 isf = qn.stationToStateful(ist);
                 if size(qn.state{isf},1)>1
-                    line_warning(mfilename,'isStateValid will ignore some node %d states, define a unique initial state to address this problem.',ist);
+                    line_warning(mfilename,sprintf('isStateValid will ignore some node %d states, define a unique initial state to address this problem.',ist));
                     qn.state{isf} = qn.state{isf}(1,:);
                 end
                 [~, nir(ist,:), sir(ist,:), ~] = State.toMarginal(qn, qn.stationToNode(ist), qn.state{isf});
@@ -860,7 +865,7 @@ classdef Network < Model
             % running jobs are allocated in class id order until all
             % servers are busy
             
-            %self.refreshStruct();  % we force update of the model before we initialize
+            %refreshStruct(self);  % we force update of the model before we initialize
             
             qn = self.getStruct(false);
             N = qn.njobs';
@@ -884,6 +889,8 @@ classdef Network < Model
                     switch qn.nodetype(i)
                         case NodeType.Cache
                             state_i = [state_i, 1:qn.nvars(i)];
+                        case NodeType.Place                            
+                            state_i = 0; % for now PNs are single class
                     end
                     switch qn.routing(i)
                         case RoutingStrategy.ID_RRB
@@ -891,7 +898,7 @@ classdef Network < Model
                             state_i = [state_i, find(qn.rt(i,:),1)];
                     end
                     if isempty(state_i)
-                        line_error(mfilename,'Default initialization failed on station %d.',i);
+                        line_error(mfilename,sprintf('Default initialization failed on station %d.',i));
                     else
                         %state_i = state_i(1,:); % to change: this effectively disables priors
                         self.nodes{i}.setState(state_i);
@@ -923,7 +930,7 @@ classdef Network < Model
         function initFromMarginal(self, n, options) % n(i,r) : number of jobs of class r in node i
             % INITFROMMARGINAL(N, OPTIONS) % N(I,R) : NUMBER OF JOBS OF CLASS R IN NODE I
             
-            qn = self.getStruct();
+            qn = getStruct(self);
             if ~exist('options','var')
                 options = Solver.defaultOptions;
             end
@@ -940,7 +947,12 @@ classdef Network < Model
             for ind=1:qn.nnodes
                 if qn.isstateful(ind)
                     ist = qn.nodeToStation(ind);
-                    self.nodes{ind}.setState(State.fromMarginal(qn,ind,n(ist,:)));
+                    switch qn.nodetype(ind)
+                        case NodeType.Place
+                            self.nodes{ind}.setState(sum(n(ist,:))); % must be single class token
+                        otherwise
+                            self.nodes{ind}.setState(State.fromMarginal(qn,ind,n(ist,:)));
+                    end
                     if isempty(self.nodes{ind}.getState)
                         line_error(sprintf('Invalid state assignment for station %d.',ind));
                     end
@@ -952,7 +964,7 @@ classdef Network < Model
         function initFromMarginalAndRunning(self, n, s, options) % n(i,r) : number of jobs of class r in node i
             % INITFROMMARGINALANDRUNNING(N, S, OPTIONS) % N(I,R) : NUMBER OF JOBS OF CLASS R IN NODE I
             
-            qn = self.getStruct();
+            qn = getStruct(self);
             [isvalidn] = State.isValid(qn, n, s);
             if ~isvalidn
                 line_error(mfilename,'Initial state is not valid.');
@@ -971,7 +983,7 @@ classdef Network < Model
         function initFromMarginalAndStarted(self, n, s, options) % n(i,r) : number of jobs of class r in node i
             % INITFROMMARGINALANDSTARTED(N, S, OPTIONS) % N(I,R) : NUMBER OF JOBS OF CLASS R IN NODE I
             
-            qn = self.getStruct();
+            qn = getStruct(self);
             [isvalidn] = State.isValid(qn, n, s);
             if ~isvalidn
                 line_error(mfilename,'Initial state is not valid.');
@@ -1007,7 +1019,7 @@ classdef Network < Model
             M = self.getNumberOfNodes;
             K = self.getNumberOfClasses;
             qn = self.getStruct;
-            [P,Pnodes] = self.getRoutingMatrix();
+            [P,Pnodes] = getRoutingMatrix(self);
             name = {}; sched = categorical([]); type = {}; nservers = [];
             for i=1:M
                 name{end+1} = self.nodes{i}.name;
@@ -1099,7 +1111,7 @@ classdef Network < Model
             
             node_names = self.getNodeNames;
             classnames = self.getClassNames;
-            [~,Pnodes] = self.getRoutingMatrix(); % get routing matrix
+            [~,Pnodes] = getRoutingMatrix(self); % get routing matrix
             M = self.getNumberOfNodes;
             K = self.getNumberOfClasses;
             for i=1:M
@@ -1126,7 +1138,7 @@ classdef Network < Model
             %
             % Remove the specified CLASS from the model
             
-            if self.hasSingleClass()
+            if hasSingleClass(self)
                 if self.classes{1}.name == jobclass.name
                     line_error(mfilename,'The network has a single class, it cannot be removed from the model.');
                 else
@@ -1236,7 +1248,7 @@ classdef Network < Model
         function bool = hasFCFS(self)
             % BOOL = HASFCFS()
             
-            bool = any(self.getStruct.sched==SchedStrategy.FCFS);
+            bool = any(self.getStruct.schedid==SchedStrategy.ID_FCFS);
         end
         
         function bool = hasHomogeneousScheduling(self, strategy)
@@ -1248,73 +1260,73 @@ classdef Network < Model
         function bool = hasDPS(self)
             % BOOL = HASDPS()
             
-            bool = any(self.getStruct.sched==SchedStrategy.DPS);
+            bool = any(self.getStruct.schedid==SchedStrategy.ID_DPS);
         end
         
         function bool = hasGPS(self)
             % BOOL = HASGPS()
             
-            bool = any(self.getStruct.sched==SchedStrategy.GPS);
+            bool = any(self.getStruct.schedid==SchedStrategy.ID_GPS);
         end
         
         function bool = hasINF(self)
             % BOOL = HASINF()
             
-            bool = any(self.getStruct.sched==SchedStrategy.INF);
+            bool = any(self.getStruct.schedid==SchedStrategy.ID_INF);
         end
         
         function bool = hasPS(self)
             % BOOL = HASPS()
             
-            bool = any(self.getStruct.sched==SchedStrategy.PS);
+            bool = any(self.getStruct.schedid==SchedStrategy.ID_PS);
         end
         
         function bool = hasRAND(self)
             % BOOL = HASRAND()
             
-            bool = any(self.getStruct.sched==SchedStrategy.SIRO);
+            bool = any(self.getStruct.schedid==SchedStrategy.ID_SIRO);
         end
         
         function bool = hasHOL(self)
             % BOOL = HASHOL()
             
-            bool = any(self.getStruct.sched==SchedStrategy.HOL);
+            bool = any(self.getStruct.schedid==SchedStrategy.ID_HOL);
         end
         
         function bool = hasLCFS(self)
             % BOOL = HASLCFS()
             
-            bool = any(self.getStruct.sched==SchedStrategy.LCFS);
+            bool = any(self.getStruct.schedid==SchedStrategy.ID_LCFS);
         end
         
         function bool = hasSEPT(self)
             % BOOL = HASSEPT()
             
-            bool = any(self.getStruct.sched==SchedStrategy.SEPT);
+            bool = any(self.getStruct.schedid==SchedStrategy.ID_SEPT);
         end
         
         function bool = hasLEPT(self)
             % BOOL = HASLEPT()
             
-            bool = any(self.getStruct.sched==SchedStrategy.LEPT);
+            bool = any(self.getStruct.schedid==SchedStrategy.ID_LEPT);
         end
         
         function bool = hasSJF(self)
             % BOOL = HASSJF()
             
-            bool = any(self.getStruct.sched==SchedStrategy.SJF);
+            bool = any(self.getStruct.schedid==SchedStrategy.ID_SJF);
         end
         
         function bool = hasLJF(self)
             % BOOL = HASLJF()
             
-            bool = any(self.getStruct.sched==SchedStrategy.LJF);
+            bool = any(self.getStruct.schedid==SchedStrategy.ID_LJF);
         end
         
         function bool = hasMultiClassFCFS(self)
             % BOOL = HASMULTICLASSFCFS()
             
-            i = find(self.getStruct.sched == SchedStrategy.FCFS);
+            i = find(self.getStruct.schedid == SchedStrategy.ID_FCFS);
             if i > 0
                 bool = range([self.getStruct.rates(i,:)])>0;
             else
@@ -1357,7 +1369,7 @@ classdef Network < Model
             
             bool = true;
             % language features
-            featUsed = self.getUsedLangFeatures().list;
+            featUsed = getUsedLangFeatures(self).list;
             if featUsed.Fork, bool = false; end
             if featUsed.Join, bool = false; end
             if featUsed.MMPP2, bool = false; end
@@ -1458,8 +1470,8 @@ classdef Network < Model
             [M,R] = size(S);
             node{1} = Source(model, 'Source');
             for i=1:M
-                switch strategy{i}
-                    case SchedStrategy.INF
+                switch SchedStrategy.toId(strategy{i})
+                    case SchedStrategy.ID_INF
                         node{end+1} = DelayStation(model, ['Station',num2str(i)]);
                     otherwise
                         node{end+1} = Queue(model, ['Station',num2str(i)], strategy{i});
@@ -1546,8 +1558,8 @@ classdef Network < Model
             node = {};
             nQ = 0; nD = 0;
             for i=1:M
-                switch strategy{i}
-                    case SchedStrategy.INF
+                switch SchedStrategy.toId(strategy{i})
+                    case SchedStrategy.ID_INF
                         nD = nD + 1;
                         node{end+1} = DelayStation(model, ['Delay',num2str(nD)]);
                     otherwise

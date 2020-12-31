@@ -8,9 +8,9 @@ function [QNclass,UNclass,RNclass,TNclass] = getAvg(self,Q,U,R,T)
 
 if nargin == 1 % no parameter
     if isempty(self.model.handles) || ~isfield(self.model.handles,'Q') || ~isfield(self.model.handles,'U') || ~isfield(self.model.handles,'R') || ~isfield(self.model.handles,'T') || ~isfield(self.model.handles,'A')
-        self.resetResults(); % reset in case there are partial results saved
+        resetResults(self); % reset in case there are partial results saved        
     end
-    [Q,U,R,T] = self.model.getAvgHandles;
+    [Q,U,R,T] = self.getAvgHandles;
 elseif nargin == 2
     handlers = Q;
     Q=handlers{1};
@@ -29,7 +29,7 @@ end
 
 if ~self.hasAvgResults || ~self.options.cache
     try
-        self.runAnalysis();
+        runAnalyzer(self);
     catch ME
         switch ME.identifier
             case {'Line:FeatureNotSupportedBySolver', 'Line:ModelTooLargeToSolve', 'Line:UnspecifiedOption'}
@@ -51,8 +51,9 @@ if ~self.hasAvgResults || ~self.options.cache
     end
 end % else return cached value
 
-M = self.model.getNumberOfStations();
-K = self.model.getNumberOfClasses();
+qn = self.model.getStruct();
+M = qn.nstations();
+K = qn.nclasses();
 
 QNclass = [];
 UNclass = [];

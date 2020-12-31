@@ -14,13 +14,13 @@ classdef EventType < Copyable
         ID_READ = 4; % read cache item
         ID_STAGE = 5; % random environment stage change
         
-        INIT = categorical("INIT"); 
-        LOCAL = categorical("LOCAL");
-        ARV = categorical("ARV");
-        DEP = categorical("DEP");
-        PHASE = categorical("PHASE");
-        READ = categorical("READ");
-        STAGE = categorical("STAGE");
+        INIT = 'init'; 
+        LOCAL = 'local';
+        ARV = 'arv';
+        DEP = 'dep';
+        PHASE = 'phase';
+        READ = 'read';
+        STAGE = 'stage';
     end
     
     methods(Static)

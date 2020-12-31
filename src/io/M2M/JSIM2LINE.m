@@ -79,11 +79,14 @@ for i=1:length(node_name)
                         otherwise
                             xsection_par{i} = {xsection{i}.parameter};
                             xsection_i_par{i} = xsection_i{i}.parameter;
+                            
                             xsection_i_value{i} = {xsection_i_par{i}.value};
+                            xsection_i_par_attr{i} = {xsection_i_par{i}.ATTRIBUTE};
+                            
+                            xsection_i_subpar{i} = {xsection_i_par{i}.subParameter};
                             %if xsection_i_value{i}{1}==-1
                             %    node{i} = Router(model, node_name{i});
                             %else
-                            xsection_i_subpar{i} = {xsection_i_par{i}.subParameter};
                             
                             xsvc{i} = {xsection_i{i}(2).parameter.subParameter};
                             xrouting{i} = {xsection_i{i}(3).parameter.subParameter.ATTRIBUTE};
@@ -129,8 +132,8 @@ for i=1:length(node_name)
                                     node{i}.setCapacity(xcapacity{1}); % buffer size
                                     xsection_par_val{i} = {xsection_par{end}{2}.value};
                                     node{i}.setNumServers(xsection_par_val{i}{1});
-                                    switch strategy{i}
-                                        case SchedStrategy.SEPT
+                                    switch SchedStrategy.toId(strategy{i})
+                                        case SchedStrategy.ID_SEPT
                                             schedparams{i} = NaN;
                                     end
                                 case 'PSServer' % requires JMT >= 1.0.2
@@ -163,6 +166,10 @@ for i=1:length(node_name)
                             end
                     end
             end
+        case 'Storage'
+            node{i} = Place(model, node_name{i});
+        case 'Enabling'
+            node{i} = Transition(model, node_name{i});
     end
 end
 
@@ -179,6 +186,157 @@ for r=1:length(classes)
             if strcmpi(classes{r}.referenceSource,'StatelessClassSwitcher')
                 sourceIdx = cellisa(node,'Source');
                 node{sourceIdx}.setArrival(jobclass{r},Disabled());
+            end
+    end
+end
+
+
+for i=1:length(node_name)
+    xsection_i{i} = {xsection{i}};
+    xsection_i{i} = xsection_i{i}{1}; %   input, service, and output sections of node i
+    xsection_javaClass{i} = {xsection_i{i}.ATTRIBUTE};
+    switch xsection_javaClass{i}{1}.className % input section
+        
+        case 'Storage'
+            node{i}.init();
+            if xsection_i{1,i}(1).parameter(1).value == -1
+                node{i}.setCapacity(Inf);
+            else
+                node{i}.setCapacity(xsection_i{1,i}(1).parameter(1).value);
+            end
+            if isa(xsection_i{1, i}(1).parameter(2).refClass,'cell')
+                nclasses = length(xsection_i{1, i}(1).parameter(2).refClass);
+            else
+                nclasses = 1;
+            end
+            for c=1:nclasses
+                if xsection_i{1, i}(1).parameter(2).subParameter(c).value == -1
+                    node{i}.setClassCapacity(c, Inf);
+                else
+                    node{i}.setClassCapacity(c, xsection_i{1, i}(1).parameter(2).subParameter(c).value);
+                end
+                switch xsection_i{1, i}(1).parameter(3).subParameter(c).value
+                    case 'BAS blocking'
+                        node{i}.setDropRule(c, DropStrategy.BlockingAfterService);
+                    case 'drop'
+                        node{i}.setDropRule(c, DropStrategy.Drop);
+                    case 'waiting queue'
+                        node{i}.setDropRule(c, DropStrategy.WaitingQueue);
+                end
+            end
+            node{i}.setState(0);
+            
+        case 'Enabling'
+            % Enabling Section
+            nmodes = length(xsection_i{1, i}(1).parameter(1).subParameter);
+            for m=1:nmodes
+                node{i}.setModeNames(m, xsection_i{1, i}(2).parameter(1).subParameter(m).value);
+            end
+            node{i}.init();
+            for m=1:nmodes
+                ninputs = length(xsection_i{1, i}(1).parameter(1).subParameter(m).subParameter.subParameter);
+                for j=1:ninputs
+                    refClasses = xsection_i{1, i}(1).parameter(1).subParameter(m).subParameter.subParameter(j).subParameter(2).refClass;
+                    if isa(refClasses,'cell')
+                        nclasses = length(refClasses);
+                    else
+                        nclasses = 1;
+                    end
+                    nodeName = xsection_i{1, i}(1).parameter(1).subParameter(m).subParameter.subParameter(j).subParameter(1).value;
+                    ind = model.getNodeIndex(nodeName);
+                    for k=1:nclasses
+                        enable = xsection_i{1, i}(1).parameter(1).subParameter(m).subParameter.subParameter(j).subParameter(2).subParameter(k).value;
+                        if enable == -1
+                            node{i}.setEnablingConditions(m,k,ind,Inf);
+                        else
+                            node{i}.setEnablingConditions(m,k,ind,enable);
+                        end
+                        inhibit = xsection_i{1, i}(1).parameter(2).subParameter(m).subParameter.subParameter(j).subParameter(2).subParameter(k).value;
+                        if inhibit == -1
+                            node{i}.setInhibitingConditions(m,k,ind,Inf);
+                        else
+                            node{i}.setInhibitingConditions(m,k,ind,inhibit);
+                        end
+                    end
+                end
+            end
+            % Timing Section
+            for m=1:nmodes
+                numOfServers = xsection_i{1, i}(2).parameter(2).subParameter(m).value;
+                if numOfServers == -1
+                    node{i}.setNumberOfServers(m, Inf);
+                else
+                    node{i}.setNumberOfServers(m, numOfServers);
+                end
+                timingSt = xsection_i{1, i}(2).parameter(3).subParameter(m).ATTRIBUTE.classPath;
+                if strcmp(timingSt,'jmt.engine.NetStrategies.ServiceStrategies.ZeroServiceTimeStrategy')
+                    node{i}.setTimingStrategy(m,TimingStrategy.Immediate);
+                else
+                    node{i}.setTimingStrategy(m,TimingStrategy.Timed);
+                    distribution = xsection_i{1, i}(2).parameter(3).subParameter(m).subParameter(1).ATTRIBUTE.name;
+                    lambda = xsection_i{1, i}(2).parameter(3).subParameter(m).subParameter(2).subParameter(1).value;
+                    switch distribution
+                        case 'Exponential'
+                            node{i}.setDistribution(m,Exp(lambda));
+                        case 'Erlang'
+                            lambda1 = xsection_i{1, i}(2).parameter(3).subParameter(m).subParameter(2).subParameter(2).value;
+                            node{i}.setDistribution(m,Erlang(lambda, lambda1));
+                        case 'Hyperexponential'
+                            lambda1 = xsection_i{1, i}(2).parameter(3).subParameter(m).subParameter(2).subParameter(2).value;
+                            lambda2 = xsection_i{1, i}(2).parameter(3).subParameter(m).subParameter(2).subParameter(3).value;
+                            node{i}.setDistribution(m,HyperExp(lambda, lambda1, lambda2));
+                        case 'Coxian'
+                            lambda1 = xsection_i{1, i}(2).parameter(3).subParameter(m).subParameter(2).subParameter(2).value;
+                            lambda2 = xsection_i{1, i}(2).parameter(3).subParameter(m).subParameter(2).subParameter(3).value;
+                            node{i}.setDistribution(m,Coxian(lambda, lambda1, lambda2));
+                        case 'Deterministic'
+                            node{i}.setDistribution(m,Det(lambda));
+                        case 'Pareto'
+                            lambda1 = xsection_i{1, i}(2).parameter(3).subParameter(m).subParameter(2).subParameter(2).value;
+                            node{i}.setDistribution(m,Pareto(lambda, lambda1));
+                        case 'Gamma'
+                            lambda1 = xsection_i{1, i}(2).parameter(3).subParameter(m).subParameter(2).subParameter(2).value;
+                            node{i}.setDistribution(m,Gamma(lambda, lambda1));
+                        case 'Uniform'
+                            lambda1 = xsection_i{1, i}(2).parameter(3).subParameter(m).subParameter(2).subParameter(2).value;
+                            node{i}.setDistribution(m,Uniform(lambda, lambda1));
+                        case 'Replayer'
+                            node{i}.setDistribution(m,Replayer(lambda));
+                        otherwise
+                            error('The model includes an arrival distribution not supported by the model-to-model transformation from JMT.')
+                            node{i}.setDistribution(m,Exp(1));
+                    end
+                end
+                firingPriorities = xsection_i{1, i}(2).parameter(4).subParameter(m).value;
+                node{i}.setFiringPriorities(m, firingPriorities);
+                firingWeights = xsection_i{1, i}(2).parameter(5).subParameter(m).value;
+                node{i}.setFiringWeights(m, firingWeights);
+            end
+            % Firing Section
+            for m=1:nmodes
+                if isfield(xsection_i{1, i}(3).parameter(1).subParameter(m).subParameter,'CONTENT')
+                    noutputs = 0;
+                else
+                    noutputs = length(xsection_i{1, i}(3).parameter(1).subParameter(m).subParameter.subParameter);
+                end
+                for j=1:noutputs
+                    refClasses = xsection_i{1, i}(3).parameter(1).subParameter(m).subParameter.subParameter(j).subParameter(2).refClass;
+                    if isa(refClasses, 'cell')
+                        nclasses = length(refClasses);
+                    else
+                        nclasses = 1;
+                    end
+                    nodeName = xsection_i{1, i}(3).parameter(1).subParameter(m).subParameter.subParameter(j).subParameter(1).value;
+                    ind = model.getNodeIndex(nodeName);
+                    for k=1:nclasses
+                        outcome = xsection_i{1, i}(3).parameter(1).subParameter(m).subParameter.subParameter(j).subParameter(2).subParameter(k).value;
+                        if outcome == -1
+                            node{i}.setFiringOutcome(m,k,ind,Inf);
+                        else
+                            node{i}.setFiringOutcome(m,k,ind,outcome);
+                        end
+                    end
+                end
             end
     end
 end
@@ -227,7 +385,7 @@ for i=1:length(node_name)
                         par={xarv_sec{i}{r}.subParameter}; par=par{2};
                         node{i}.setArrival(jobclass{r}, Replayer(par.value));
                     otherwise
-						line_error(mfilename,'The model includes an arrival distribution not supported by the model-to-model transformation from JMT.')
+                        line_error(mfilename,'The model includes an arrival distribution not supported by the model-to-model transformation from JMT.')
                         xarv_statdistrib{i}{r}{1}.name
                         node{i}.setArrival(jobclass{r}, Exp(1)); %TODO
                 end
@@ -235,8 +393,8 @@ for i=1:length(node_name)
         end
     elseif isa(node{i},'Queue') || isa(node{i},'DelayStation')
         if isempty(schedparams{i})
-            switch strategy{i}
-                case {SchedStrategy.SEPT,SchedStrategy.LEPT}
+            switch SchedStrategy.toId(strategy{i})
+                case {SchedStrategy.ID_SEPT,SchedStrategy.ID_LEPT}
                     schedparams{i} = NaN*ones(1,length(classes));
                 otherwise
                     schedparams{i} = ones(1,length(classes));
@@ -309,6 +467,23 @@ for i=1:length(node_name)
                     node{i}.setService(jobclass{r}, Exp(1), para_ir); %TODO
             end
         end
+        for c=1:length(xsection_i_par_attr{i})
+            switch xsection_i_par_attr{i}{c}.name
+                case 'size'
+                    node{i}.input.setSize(xsection_i_value{i}{c}); % buffer size
+                case 'dropStrategies'
+                    for r=1:length(node{i}.input.inputJobClasses)
+                        switch xsection_i_subpar{i}{c}(r).value
+                            case 'drop'
+                                node{i}.input.inputJobClasses{r}{3} = DropStrategy.Drop; % this can be stored by JMT even if buffer capacity is infinite
+                            case 'waiting queue'
+                                node{i}.input.inputJobClasses{r}{3} = DropStrategy.WaitingQueue;
+                            case 'BAS blocking'
+                                node{i}.input.inputJobClasses{r}{3} = DropStrategy.BlockingAfterService;
+                        end
+                    end
+            end
+        end
     end
 end
 
@@ -333,43 +508,71 @@ for from=1:length(node_name)
 end
 
 for from=1:length(node_name)
-    if ~isa(node{from},'Sink')
-        for r=1:length(classes)
-            switch xrouting{from}{r}.name
-                case 'Random'
-                    node{from}.setRouting(jobclass{r},RoutingStrategy.RAND);
-                    %                     targets = find(C(from,:));
-                    %                     if isa(jobclass{r},'Class')
-                    %                         targets = setdiff(targets, [sink_idx, source_idx]);
-                    %                     end
-                    %                     for target = targets(:)'
-                    % %                        node{from}.setProbRouting(jobclass{r}, node{target}, 1 / length(targets));
-                    %                        P((from-1)*length(classes)+r, (target-1)*length(classes)+r) = 1 / length(targets);
-                    %                     end
-                case 'Probabilities'
-                    node{from}.setRouting(jobclass{r},RoutingStrategy.PROB);
-                    xroutprobarray = {xsection_i{from}(3).parameter.subParameter.subParameter};
-                    xroutprob = {xroutprobarray{r}.subParameter}; xroutprob = xroutprob{1};
-                    xroutprobdest = {xroutprob.subParameter};
-                    for j=1:length(xroutprobdest)
-                        xprob={xroutprobdest{j}.value};
-                        target = findstring(node_name,xprob{1});
-                        prob = xprob{2};
-                        node{from}.setProbRouting(jobclass{r}, node{target}, prob);
-                        %                        P((from-1)*length(classes)+r, (target-1)*length(classes)+r) = prob;
-                    end
-                case 'Round Robin'
-                    node{from}.setRouting(jobclass{r},RoutingStrategy.RRB);
-                case 'Join the Shortest Queue (JSQ)'
-                    node{from}.setRouting(jobclass{r},RoutingStrategy.JSQ);
-                case 'Disabled'
-                    node{from}.setRouting(jobclass{r},RoutingStrategy.DISABLED);
+    switch  class(node{from})
+        case 'Place'
+        case 'Transition'
+        case 'Sink'
+        otherwise
+            for r=1:length(classes)
+                switch xrouting{from}{r}.name
+                    case 'Random'
+                        node{from}.setRouting(jobclass{r},RoutingStrategy.RAND);
+                        %                     targets = find(C(from,:));
+                        %                     if isa(jobclass{r},'Class')
+                        %                         targets = setdiff(targets, [sink_idx, source_idx]);
+                        %                     end
+                        %                     for target = targets(:)'
+                        % %                        node{from}.setProbRouting(jobclass{r}, node{target}, 1 / length(targets));
+                        %                        P((from-1)*length(classes)+r, (target-1)*length(classes)+r) = 1 / length(targets);
+                        %                     end
+                    case 'Probabilities'
+                        node{from}.setRouting(jobclass{r},RoutingStrategy.PROB);
+                        xroutprobarray = {xsection_i{from}(3).parameter.subParameter.subParameter};
+                        xroutprob = {xroutprobarray{r}.subParameter}; xroutprob = xroutprob{1};
+                        xroutprobdest = {xroutprob.subParameter};
+                        for j=1:length(xroutprobdest)
+                            xprob={xroutprobdest{j}.value};
+                            target = findstring(node_name,xprob{1});
+                            prob = xprob{2};
+                            node{from}.setProbRouting(jobclass{r}, node{target}, prob);
+                            %                        P((from-1)*length(classes)+r, (target-1)*length(classes)+r) = prob;
+                        end
+                    case 'Round Robin'
+                        node{from}.setRouting(jobclass{r},RoutingStrategy.RRB);
+                    case 'Join the Shortest Queue (JSQ)'
+                        node{from}.setRouting(jobclass{r},RoutingStrategy.JSQ);
+                    case 'Disabled'
+                        node{from}.setRouting(jobclass{r},RoutingStrategy.DISABLED);
+                end
+            end
+    end
+end
+%model.link(P);
+%line_printf(['JMT2LINE parsing time: ',num2str(Ttot),' s\n']);
+
+% Preload
+state = zeros(length(node),length(classes));
+if isfield(xDoc,'preload') && ~isempty(xDoc.preload.stationPopulations)
+    npreloadStates = length(xDoc.preload.stationPopulations);
+    for st=1:npreloadStates
+        nodeName = xDoc.preload.stationPopulations(st).ATTRIBUTE.stationName;
+        ind = model.getNodeIndex(nodeName);
+        for r=1:length(xDoc.preload.stationPopulations(st).classPopulation)
+            c = model.getClassIndex(xDoc.preload.stationPopulations(st).classPopulation(r).ATTRIBUTE.refClass);
+            state(ind,c) = xDoc.preload.stationPopulations(st).classPopulation(r).ATTRIBUTE.population;
+        end
+        if isa(node{ind},'Place')
+            %node{ind}.setState(state(ind,:));
+            if length(classes)>1
+                line_error(mfilename,'Import failed: Colored Petri net models are not yet supported in LINE.');
             end
         end
     end
 end
-%model.link(P);
+try
+    model.initFromMarginal(state);
+catch
+    line_warning(mfilename,'Import failed to automatically initialize the model.');
+end
 Ttot=toc(T0);
-%line_printf(['JMT2LINE parsing time: ',num2str(Ttot),' s\n']);
-
 end

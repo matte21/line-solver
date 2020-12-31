@@ -11,14 +11,15 @@ if ~exist('arvRates','var')
 end
 nodes = self.nodes;
 
-nodeNames = self.getNodeNames();
+%nodeNames = getNodeNames(self);
 % connection matrix
 connMatrix = self.getConnectionMatrix;
+self.qn.connmatrix = connMatrix;
 rtNodesByClass = {};
 rtNodesByStation = {};
-hasOpenClasses = self.hasOpenClasses();
+hasOpen = hasOpenClasses(self);
 if ~exist('arvRates','var')
-    if hasOpenClasses
+    if hasOpen
         line_error(mfilename,'getRoutingMatrix requires arrival rates for open classes.');
     end
 end
@@ -57,7 +58,7 @@ for i=1:M
             for k=1:K
                 outputStrategy_k = node_i.output.outputStrategy{k};
                 switch outputStrategy_k{2}
-                    case RoutingStrategy.PROB                        
+                    case RoutingStrategy.PROB
                         if isinf(NK(k)) || ~isSink_i
                             %rtNodes((i-1)*K+k,(j-1)*K+k) = self.modifiedRoutingTable{k,k}(i,j);
                             for t=1:length(outputStrategy_k{end}) % for all outgoing links
@@ -119,13 +120,13 @@ for i=1:self.getNumberOfNodes % source
         %end
         rtNodes(((i-1)*K+1):i*K,:) = 0;
         for j=1:M % destination
-            Pij = Pi(1:K,((j-1)*K+1):j*K); %Pij(r,s)            
-           % for r=1:K
-                for s=1:K
-                    % Find the routing probability section determined by the router section in the first loop
-                    %Pnodes(((i-1)*K+1):i*K,((j-1)*K+1):j*K) = Pcs*Pij;
-                    rtNodes(((i-1)*K+1) : ((i-1)*K+K),(j-1)*K+s) = Pcs(1:K,s)*Pij(s,s);
-                end
+            Pij = Pi(1:K,((j-1)*K+1):j*K); %Pij(r,s)
+            % for r=1:K
+            for s=1:K
+                % Find the routing probability section determined by the router section in the first loop
+                %Pnodes(((i-1)*K+1):i*K,((j-1)*K+1):j*K) = Pcs*Pij;
+                rtNodes(((i-1)*K+1) : ((i-1)*K+K),(j-1)*K+s) = Pcs(1:K,s)*Pij(s,s);
+            end
             %end
         end
     elseif isa(nodes{i}.server,'StatefulClassSwitcher')
@@ -151,7 +152,7 @@ for i=1:self.getNumberOfNodes % source
                         end
                     end
                 end
-            end      
+            end
             
             for r=1:K
                 if length(nodes{i}.server.actualHitProb)>=r && length(nodes{i}.server.hitClass)>=r
@@ -190,7 +191,7 @@ for i=1:self.getNumberOfNodes % source
     % since these are classes that cannot arrive to the node
     % unless this column belongs to the source
     colsToIgnore = find(sum(rtNodes,1)==0);
-    if hasOpenClasses
+    if hasOpen
         idxSource = self.getIndexSourceNode;
         colsToIgnore = setdiff(colsToIgnore,(idxSource-1)*K+(1:K));
     end
@@ -204,7 +205,7 @@ for i=1:self.getNumberOfNodes % source
     % We here re-route back as C and leave for the chain analyzer
     % to detect that C is in a chain with A and B and change this
     % part.
-        
+    
     [C,inChain]=weaklyconncomp(rtNodes+rtNodes');
     inChain(colsToIgnore) = 0;
     chainCandidates = cell(1,C);
@@ -227,7 +228,7 @@ for i=1:self.getNumberOfNodes % source
     % this routes open classes back from the sink into the source
     % it will not work with non-renewal arrivals as it choses in which open
     % class to reroute a job with probability depending on the arrival rates
-    if hasOpenClasses
+    if hasOpen
         arvRates(isnan(arvRates)) = 0;
         idxSink = self.getIndexSinkNode;
         for s=self.getIndexOpenClasses
@@ -242,7 +243,7 @@ for i=1:self.getNumberOfNodes % source
     % correct transition probabilities, that includes the effects
     % of the non-stateful nodes (e.g., ClassSwitch)
     statefulNodesClasses = [];
-    for i=self.getIndexStatefulNodes()
+    for i=getIndexStatefulNodes(self)
         statefulNodesClasses(end+1:end+K)= ((i-1)*K+1):(i*K);
     end
     
@@ -261,6 +262,16 @@ for i=1:self.getNumberOfNodes % source
         end
     end
     
+    % verify irreducibility
+
+    try
+        eigen = eig(rt); % exception if rt has NaN or Inf
+        if sum(eigen>=1)>1
+            line_warning(mfilename, 'Solutions may be invalid, the routing matrix is reducible. The path of two or more classes can be analyzed with independent models.');
+        end
+    end
+    
+    %
     if nargout >= 5
         rtNodesByStation = cellzeros(M,M,K,K);
         for i=1:M

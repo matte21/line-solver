@@ -1,11 +1,11 @@
-classdef Event 
+classdef Event
     % A generic event occurring in a Network.
     %
     % Object of the Event class are not passed by handle.
     %
     % Copyright (c) 2012-2021, Imperial College London
     % All rights reserved.
-        
+    
     properties
         node;
         event;
@@ -19,19 +19,18 @@ classdef Event
         function self = Event(event, node, class, prob, state, t)
             % SELF = EVENT(EVENT, NODE, CLASS, PROB, STATE, TIMESTAMP)
             
-            self.node = node;
+            self.node = node;            
             self.event = event;
             self.class = class;
-            if ~exist('prob','var')
+            if nargin <4
                 prob = NaN;
             end
             self.prob = prob;
-            if ~exist('state','var')
+            if nargin <5
                 state = []; % local state of the node or environment transition
             end
             self.state = state;
-            
-            if ~exist('ts','var')
+            if nargin <6
                 t = NaN; % timestamp
             end
             self.t = t;

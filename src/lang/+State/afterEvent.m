@@ -57,7 +57,7 @@ end
 %    case {NodeType.Queue, NodeType.Delay, NodeType.Source}
 if qn.isstation(ind)
     switch event
-        case EventType.ARV %% passive
+        case EventType.ID_ARV %% passive
             % return if there is no space to accept the arrival
             [ni,nir] = State.toMarginalAggr(qn,ind,inspace,K,Ks,space_buf,space_srv,space_var);
             % otherwise check scheduling strategy
@@ -144,7 +144,7 @@ if qn.isstation(ind)
                     outprob = 1;
                 end
             end
-        case EventType.DEP
+        case EventType.ID_DEP
             if any(any(space_srv(:,(Ks(class)+1):(Ks(class)+K(class))))) % something is busy
                 if hasOnlyExp && (qn.schedid(ist) == SchedStrategy.ID_PS || qn.schedid(ist) == SchedStrategy.ID_DPS || qn.schedid(ist) == SchedStrategy.ID_GPS || qn.schedid(ist) == SchedStrategy.ID_INF)
                     nir = space_srv;
@@ -371,7 +371,7 @@ if qn.isstation(ind)
                                         space_srv(en_wbuf,Ks(sept_class)+kentry) = space_srv(en_wbuf,Ks(sept_class)+kentry) - 1; % bring job in service
                                     end
                                 otherwise
-                                    line_error(mfilename,'Scheduling strategy %s is not supported.', qn.sched(ist));
+                                    line_error(mfilename,'Scheduling strategy %s is not supported.', qn.sched{ist});
                             end
                         end
                     end
@@ -387,7 +387,7 @@ if qn.isstation(ind)
                     end
                 end
             end
-        case EventType.PHASE
+        case EventType.ID_PHASE
             outspace = [];
             outrate = [];
             outprob = [];
@@ -454,17 +454,17 @@ elseif qn.isstateful(ind)
             % job arrives in class, then reads and moves into hit or miss
             % class, then departs
             switch event
-                case EventType.ARV
+                case EventType.ID_ARV
                     space_srv(:,class) = space_srv(:,class) + 1;
                     outspace = [space_srv, space_var]; % buf is empty
                     outrate = -1*ones(size(outspace,1)); % passive action, rate is unspecified
-                case EventType.DEP
+                case EventType.ID_DEP
                     if space_srv(class)>0
                         space_srv(:,class) = space_srv(:,class) - 1;
                         outspace = [space_srv, space_var]; % buf is empty
                         outrate = Distrib.InfRate*ones(size(outspace,1)); % passive action, rate is unspecified
                     end
-                case EventType.READ
+                case EventType.ID_READ
                     n = qn.varsparam{ind}.nitems; % n items
                     m = qn.varsparam{ind}.cap; % capacity
                     ac = qn.varsparam{ind}.accost; % access cost                    

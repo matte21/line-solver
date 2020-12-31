@@ -7,8 +7,8 @@ function [AvgSysChainTable, CT,XT] = getAvgSysTable(self,R,T)
 % All rights reserved.
 
 if nargin==1
-    R = self.model.getAvgRespTHandles;
-    T = self.model.getAvgTputHandles;
+    R = self.getAvgRespTHandles;
+    T = self.getAvgTputHandles;
 end
 [SysRespT, SysTput] = getAvgSys(self,R,T);
 SysRespT = SysRespT';

@@ -54,6 +54,7 @@ model.link(P);
 % T1
 node{10}.addMode('Mode1');
 node{10}.init();
+node{10}.setDistribution(1,Exp(4));
 node{10}.setEnablingConditions(1,jobclass{1},node{3},1);
 node{10}.setFiringOutcome(1,jobclass{1},node{4},1);
 
@@ -99,12 +100,14 @@ node{14}.setFiringPriorities(1,1);
 % T6
 node{15}.addMode('Mode1');
 node{15}.init();
+node{15}.setDistribution(1,Erlang(2,2));
 node{15}.setEnablingConditions(1,jobclass{1},node{8},1);
 node{15}.setFiringOutcome(1,jobclass{1},node{3},1);
 
 % T7
 node{16}.addMode('Mode1');
 node{16}.init();
+node{16}.setDistribution(1,Exp(2));
 node{16}.setEnablingConditions(1,jobclass{1},node{9},1);
 node{16}.setFiringOutcome(1,jobclass{1},node{3},1);
 node{16}.setFiringOutcome(1,jobclass{1},node{7},1);

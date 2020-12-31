@@ -11,8 +11,8 @@ function [Qt,Ut,Tt] = getTranHandles(self)
 
 % The method returns the handles to the performance indices but
 % they are optional to collect
-M = self.getNumberOfStations();
-K = self.getNumberOfClasses();
+M = getNumberOfStations(self);
+K = getNumberOfClasses(self);
 
 Tt = cell(1,K); % throughputs
 Qt = cell(M,K); % queue-length

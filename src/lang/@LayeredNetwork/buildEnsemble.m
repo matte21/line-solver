@@ -4,14 +4,14 @@ function self = buildEnsemble(self)
 % Copyright (c) 2012-2021, Imperial College London
 % All rights reserved.
 ensemble = self.ensemble;
-[lqnGraph, taskGraph] = self.getGraph();
+[lqnGraph, taskGraph] = getGraph(self);
 %if isempty(self.param.Nodes.RespT)
 self.nodeMult = lqnGraph.Nodes.Mult(:);
 self.edgeWeight = lqnGraph.Edges.Weight(:);
 %end
 
 if isempty(self.layerGraph)
-    self.layerGraph = self.getGraphLayers();
+    self.layerGraph = getGraphLayers(self);
 end
 graphLayer = self.layerGraph;
 

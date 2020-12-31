@@ -4,8 +4,8 @@ function [ph, phases] = refreshMarkovianService(self)
 % Copyright (c) 2012-2021, Imperial College London
 % All rights reserved.
 
-M = self.getNumberOfStations();
-K = self.getNumberOfClasses();
+M = getNumberOfStations(self);
+K = getNumberOfClasses(self);
 ph = cell(M,K);
 phases = zeros(M,K);
 stations = self.stations;
@@ -46,6 +46,25 @@ for i=1:M
     end
 end
 if ~isempty(self.qn) %&& isprop(self.qn,'mu')
-    self.qn.setMAPService(ph, phases);
+	proc = ph;
+	pie = cell(size(ph));
+	for i=1:size(ph,1)
+    	for r=1:size(ph,2)
+        	map_ir = ph{i,r};
+        	if ~isempty(map_ir)
+				% proc{i,r} = map_normalize(map_ir);
+                proc{i,r} = map_ir;
+				pie{i,r} = map_pie(map_ir);
+    	    else
+				pie{i,r} = NaN;
+    	    end
+    	end
+	end
+	self.qn.proc = proc;
+	self.qn.pie = pie;
+	self.qn.phases = phases;
+	self.qn.phasessz = max(self.qn.phases,ones(size(self.qn.phases)));
+	self.qn.phasessz(self.qn.nodeToStation(self.qn.nodetype == NodeType.Join),:)=phases(self.qn.nodeToStation(self.qn.nodetype == NodeType.Join),:);
+	self.qn.phaseshift = [zeros(size(phases,1),1),cumsum(self.qn.phasessz,2)];	
 end
 end

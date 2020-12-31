@@ -25,7 +25,7 @@ rootElement = doc.createElement('lqn-model');
 doc.appendChild(rootElement);
 rootElement.setAttribute('xmlns:xsi', 'http://www.w3.org/2001/XMLSchema-instance');
 rootElement.setAttribute('xsi:noNamespaceSchemaLocation', 'lqn.xsd');
-rootElement.setAttribute('name', self.getName());
+rootElement.setAttribute('name', getName(self));
 
 for p = 1:length(self.hosts)
     %processor
@@ -37,12 +37,12 @@ for p = 1:length(self.hosts)
     if curProc.replication>1
         procElement.setAttribute('replication', num2str(curProc.replication));
     end
-    if curProc.scheduling ~= SchedStrategy.INF
+    if ~strcmp(curProc.scheduling,SchedStrategy.INF)
         mult = num2str(curProc.multiplicity);
         if isinf(mult), mult=1; end
         procElement.setAttribute('multiplicity', mult);
     end
-    if curProc.scheduling== SchedStrategy.PS
+    if strcmp(curProc.scheduling,SchedStrategy.PS)
         procElement.setAttribute('quantum', num2str(curProc.quantum));
     end
     procElement.setAttribute('speed-factor', num2str(curProc.speedFactor));
@@ -55,10 +55,10 @@ for p = 1:length(self.hosts)
         if curTask.replication>1
         taskElement.setAttribute('replication',  num2str(curTask.replication));
         end
-        if curTask.scheduling ~= SchedStrategy.INF
+        if ~strcmp(curTask.scheduling,SchedStrategy.INF)
             taskElement.setAttribute('multiplicity', num2str(curTask.multiplicity));
         end
-        if curTask.scheduling == SchedStrategy.REF
+        if strcmp(curTask.scheduling,SchedStrategy.REF)
             taskElement.setAttribute('think-time', num2str(curTask.thinkTimeMean));
         end
         for e=1:length(curTask.entries)

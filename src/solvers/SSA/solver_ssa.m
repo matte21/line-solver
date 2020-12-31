@@ -1,5 +1,5 @@
-function [pi,SSq,arvRates,depRates,tranSysState,tranSync]=solver_ssa(qn,options)
-% [PI,SSQ,ARVRATES,DEPRATES,TRANSYSSTATE]=SOLVER_SSA(QN,OPTIONS)
+function [pi,SSq,arvRates,depRates,tranSysState,tranSync,qn]=solver_ssa(qn,options)
+% [PI,SSQ,ARVRATES,DEPRATES,TRANSYSSTATE,QN]=SOLVER_SSA(QN,OPTIONS)
 
 % Copyright (c) 2012-2021, Imperial College London
 % All rights reserved.
@@ -155,7 +155,7 @@ while samples_collected < options.samples && cur_time <= options.timespan(2)
                     end
                     if ~isnan(rate_a{act})
                         if all(~cellfun(@isempty,newStateCell{act}))
-                            if event_a{act} == EventType.DEP
+                            if event_a{act} == EventType.ID_DEP
                                 node_a_sf{act} = qn.nodeToStateful(node_a{act});
                                 node_p_sf{act} = qn.nodeToStateful(node_p{act});
                                 depRatesSamples(samples_collected,node_a_sf{act},class_a{act}) = depRatesSamples(samples_collected,node_a_sf{act},class_a{act}) + outprob_a{act} * outprob_p{act} * rate_a{act}(ia) * prob_sync_p{act};

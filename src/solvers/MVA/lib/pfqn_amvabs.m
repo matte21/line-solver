@@ -1,25 +1,28 @@
 function [XN,QN,UN]=pfqn_amvabs(L,N,Z,tol,maxiter,QN,weight)
 % [XN,QN,UN]=PFQN_AMVABS(L,N,Z,TOL,MAXITER,QN,WEIGHT)
 
-if ~exist('Z','var')
+if nargin<3%~exist('Z','var')
     Z=0*N;
 end
-if ~exist('tol','var')
+if nargin<4%~exist('tol','var')
     tol = 1e-6;
 end
-if ~exist('maxiter','var')
+if nargin<5%~exist('maxiter','var')
     maxiter = 1000;
 end
 [M,R]=size(L);
 CN=zeros(M,R);
-if ~exist('QN','var')
+if nargin<6 %~exist('QN','var')
     QN=repmat(N,M,1)/M;
+else
+    QN = QN+eps; % 0 gives problems
 end
-if ~exist('relprio','var')
+if nargin<7 %~exist('weight','var')
     weight = ones(M,R);
 end
 XN=zeros(1,R);
 UN=zeros(M,R);
+relprio=zeros(M,R);
 for it=1:maxiter
     QN_1 = QN;
     for i=1:M

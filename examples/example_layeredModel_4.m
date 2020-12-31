@@ -1,6 +1,6 @@
 %% This example is temporarily disabled
 if ~isoctave(), clearvars -except exampleName; end
-fprintf(1,'This example illustrates the solution of a moderately large LQN\n')
+fprintf(1,'This example illustrates the solution of a moderately large LQN.\n')
 
 cwd = fileparts(which(mfilename));
 model = LayeredNetwork.parseXML([cwd,filesep,'ofbizExample.xml']);

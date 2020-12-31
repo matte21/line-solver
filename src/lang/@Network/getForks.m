@@ -4,8 +4,8 @@ function ft = getForks(self, rt)
 % Copyright (c) 2012-2021, Imperial College London
 % All rights reserved.
 
-M = self.getNumberOfStations();
-K = self.getNumberOfClasses();
+M = getNumberOfStations(self);
+K = getNumberOfClasses(self);
 
 ft = zeros(M*K); % fork table
 for i=1:M % source

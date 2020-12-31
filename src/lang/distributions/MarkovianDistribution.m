@@ -12,11 +12,13 @@ classdef MarkovianDistribution < ContinuousDistrib
             self@ContinuousDistrib(name, numParam, [0,Inf]);
             
             self.invSubgenerator = [];
+            self.initProb = [];
         end
     end
     
     properties (Hidden)
         invSubgenerator;
+        initProb;
         representation;
     end
     
@@ -83,6 +85,7 @@ classdef MarkovianDistribution < ContinuousDistrib
             % ALPHA = GETINITPROB()
             aph = self.getRepresentation;
             alpha = map_pie(aph);
+            self.initProb = alpha;
         end
         
         function T = getSubgenerator(self)

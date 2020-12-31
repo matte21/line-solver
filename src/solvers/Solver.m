@@ -26,7 +26,7 @@ classdef Solver < handle
         function self = Solver(model, name, options)
             % SELF = SOLVER(MODEL, NAME, OPTIONS)
             if ~exist('options','var')
-                options = self.defaultOptions();
+                options = self.defaultOptions;
             end
             self.model = model;
             self.name = name;
@@ -41,13 +41,20 @@ classdef Solver < handle
             model = self.model;
         end
         
+        function qn = getStruct(self)
+            % QN = GETSTRUCT()
+            
+            % Get data structure summarizing the model
+            qn = self.model.getStruct();
+        end        
+        
         function bool = supports(self,model)
             % BOOL = SUPPORTS(SELF,MODEL)
             % True if the input model is supported by the solver
             line_error(mfilename,'Line:AbstractMethodCall','An abstract method was called. The function needs to be overridden by a subclass.');            
         end
         
-        function runtime = runAnalysis(self, options, config) % generic method to run the solver
+        function runtime = runAnalyzer(self, options, config) % generic method to run the solver
             % RUNTIME = RUN()
             % Run the solver % GENERIC METHOD TO RUN THE SOLVER
             % Solve the model
@@ -107,7 +114,7 @@ classdef Solver < handle
 		function reset(self)
             % RESET()
             % Dispose previously stored results
-			self.resetResults();
+			resetResults(self);
 		end
 		
         function resetResults(self)
@@ -129,9 +136,6 @@ classdef Solver < handle
             self.options = options;
         end
         
-        function staticSolver = getStatic(self)
-            staticSolver = StaticSolver(self);
-        end
     end
     
     methods (Static)
@@ -143,8 +147,11 @@ classdef Solver < handle
                 warning('off','MATLAB:RandStream:ActivatingLegacyGenerators');
                 warning('off','MATLAB:RandStream:ReadingInactiveLegacyGeneratorState');
             end
-            rand('seed',seed);
-            %rng(seed,'twister');            
+            if isoctave
+                rand('seed',seed);
+            else
+                rng(seed,'twister');            
+            end
         end
         
         function bool = isAvailable()

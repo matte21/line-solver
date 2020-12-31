@@ -134,10 +134,10 @@ classdef EnsembleSolver < Solver
             T0 = tic;
             it = 0;
             options = self.options;
-            E = self.getNumberOfModels();
+            E = getNumberOfModels(self);
             results = cell(1,E);
             sruntime = zeros(1,E); % solver runtimes
-            self.init();
+            init(self);
             % nearly identical, but parfor based
             while ~self.converged(it) && it < options.iter_max
                 it = it + 1;
@@ -177,7 +177,7 @@ classdef EnsembleSolver < Solver
                     end
                 end
             end
-            self.finish();
+            finish(self);
             runtime = toc(T0);
             if options.verbose
                 line_printf('\nSummary: Analyze avg: %.3fs. Update avg: %.3fs. Cumtime: %.3fs. ',mean(Tsolve),mean(Tsynch),runtime);
@@ -185,7 +185,7 @@ classdef EnsembleSolver < Solver
         end
         
         function AvgTables = getEnsembleAvgTables(self)
-            E = self.getNumberOfModels();
+            E = getNumberOfModels(self);
             AvgTables = cell(1,E);
             for e=1:E
                 AvgTables{1,e} = self.solvers{e}.getAvgTable();

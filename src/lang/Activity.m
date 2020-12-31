@@ -89,8 +89,8 @@ classdef Activity < LayeredNetworkElement
             % OBJ = REPLIESTO(OBJ, ENTRY)
             
             if ~isempty(obj.parent)
-                switch obj.parent.scheduling
-                    case SchedStrategy.REF
+                switch SchedStrategy.toId(obj.parent.scheduling)
+                    case SchedStrategy.ID_REF
                         line_error(mfilename,'Activities in reference tasks cannot reply.');
                     otherwise
                         entry.replyActivity{end+1} = obj.name;

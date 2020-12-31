@@ -53,7 +53,7 @@ classdef Distrib < Copyable
         function VAR = getVariance(self)
             % VAR = GETVARIANCE()
             % Get distribution variance
-            VAR = self.getSCV()*self.getMean()^2;
+            VAR = getSCV(self)*getMean(self)^2;
         end
         
         function SKEW = getSkewness(self)
@@ -123,14 +123,14 @@ classdef Distrib < Copyable
             % Check if the distribution is equivalent to a Disabled
             % distribution
             %bool = cellfun(@(c) isnan(c.paramValue), self.params)
-            bool = isnan(self.getMean());
+            bool = isnan(getMean(self));
         end
         
         function bool = isImmediate(self)
             % BOOL = ISIMMEDIATE()
             % Check if the distribution is equivalent to an Immediate
             % distribution
-            bool = self.getMean() < Distrib.Zero;% || isa(self,'Immediate');
+            bool = getMean(self) < Distrib.Zero;% || isa(self,'Immediate');
         end
         
         function bool = isContinuous(self)

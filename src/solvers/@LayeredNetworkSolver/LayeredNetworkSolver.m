@@ -35,7 +35,7 @@ classdef LayeredNetworkSolver < Solver
             if ~exist('wantLQNSnaming','var')
                 useLQNSnaming = false;
             end
-            [QN,UN,RN,TN] = self.getAvg();
+            [QN,UN,RN,TN] = getAvg(self);
             lqn = self.model.getStruct;
             Node = categorical(lqn.names);
             O = length(Node);

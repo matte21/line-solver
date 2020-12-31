@@ -60,7 +60,7 @@ classdef Erlang < MarkovianDistribution
             
             % Return the renewal process associated to the distribution
             r = self.getParam(2).paramValue;
-            PH = map_erlang(self.getMean(),r);
+            PH = map_erlang(getMean(self),r);
         end
         
         function L = evalLST(self, s)

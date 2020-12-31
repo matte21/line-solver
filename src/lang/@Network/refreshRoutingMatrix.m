@@ -1,4 +1,4 @@
-function [rt, rtfun, csmask, rtnodes] = refreshRoutingMatrix(self, rates)
+function [rt, rtfun, rtnodes] = refreshRoutingMatrix(self, rates)
 % [RT, RTFUN, CSMASK, RTNODES] = REFRESHROUTINGMATRIX(RATES)
 %
 % Copyright (c) 2012-2021, Imperial College London
@@ -14,18 +14,25 @@ end
 
 qn = self.qn;
 M = self.getNumberOfNodes;
-K = self.getNumberOfClasses();
+K = getNumberOfClasses(self);
 arvRates = zeros(1,K);
+stateful = self.getIndexStatefulNodes;
+
 for r = self.getIndexOpenClasses
     arvRates(r) = rates(self.getIndexSourceStation,r);
 end
 
 [rt, rtnodes, linksmat] = self.getRoutingMatrix(arvRates);
 
+for r=1:self.qn.nclasses
+    if all(self.qn.routing(:,r) == -1)
+        line_error(sprintf('Routing strategy in class %d is unspecified at all nodes.',r));
+    end
+end
+
 isStateDep = any(qn.isstatedep(:,3));
 
 rnodefuncell = cell(M*K,M*K);
-stateful = self.getIndexStatefulNodes;
 
 if isStateDep
     for ind=1:M % from
@@ -50,44 +57,8 @@ if isStateDep
     end
 end
 
-csmask = false(K,K);
-for r=1:K
-    for s=1:K
-        for isf=1:length(stateful) % source
-            for jsf=1:length(stateful) % source
-                if rt((isf-1)*K+r, (jsf-1)*K+s) > 0
-                    % this is to ensure that we use rt, which is
-                    % the stochastic complement taken over the stateful
-                    % nodes, otherwise sequences of cs can produce a wrong
-                    % csmask
-                    csmask(r,s) = true;
-                end
-            end
-        end
-    end
-end
-
-for isf=1:length(stateful) % source
-    % this is to ensure that also stateful cs like caches
-    % are accounted
-    ind = qn.statefulToNode(isf);
-    isCS = qn.nodetype(ind) == NodeType.Cache | qn.nodetype(ind) == NodeType.ClassSwitch;
-    for r=1:K
-        csmask(r,r) = true;
-        for s=1:K
-            if r~=s
-                if isCS
-                    if self.nodes{ind}.server.csFun(r,s,[],[])>0
-                        csmask(r,s) = true;
-                    end
-                end
-            end
-        end
-    end
-end
-
 statefulNodesClasses = [];
-for ind=self.getIndexStatefulNodes()
+for ind=getIndexStatefulNodes(self)
     statefulNodesClasses(end+1:end+K)= ((ind-1)*K+1):(ind*K);
 end
 
@@ -111,7 +82,7 @@ end
 if ~isempty(self.qn)
     self.qn.rt = rt;
     self.qn.rtnodes = rtnodes;
-    self.qn.setRoutingFunction(rtfun, csmask);
+    self.qn.rtfun = rtfun;
 end
 
     function p = sub_rr(ind, jnd, r, s, linksmat, state_before, state_after)
@@ -154,4 +125,5 @@ end
             end
         end
     end
+
 end

@@ -1,11 +1,11 @@
 [model,source,queue,sink,oclass]=gallery_merl1;
 %% Block 4: solution
-solver = SolverCTMC(model,'cutoff',100,'seed',23002);
+solver = SolverCTMC(model,'cutoff',150,'seed',23000);
 
-sa = solver.sampleSysAggr(5e4);
+sa = solver.sampleSysAggr(1e5);
 ind = model.getNodeIndex(queue);
 
-filtEvent = cellfun(@(c) c.node == ind && c.event == EventType.DEP, sa.event);
+filtEvent = cellfun(@(c) c.node == ind && c.event == EventType.ID_DEP, sa.event);
 interDepTimes = diff(cellfun(@(c) c.t, {sa.event{filtEvent}}));
 
 % estimated squared coeff. of variation of departures

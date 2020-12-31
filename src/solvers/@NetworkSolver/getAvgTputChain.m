@@ -8,9 +8,9 @@ function [TN] = getAvgTputChain(self,T)
 
 qn = self.model.getStruct();
 %if nargin == 1
-%    [Q] = self.model.getAvgHandles();
+%    [Q] = getAvgHandles(self);
 %end
-[TNclass] = self.getAvgTput();
+[TNclass] = getAvgTput(self);
 
 % compute average chain metrics
 TN = zeros(qn.nstations, qn.nchains);

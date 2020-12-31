@@ -4,7 +4,7 @@ function sourceidx = getIndexSourceStation(self)
 % Copyright (c) 2012-2021, Imperial College London
 % All rights reserved.
 if isempty(self.sourceidx)
-    if self.hasOpenClasses()
+    if hasOpenClasses(self)
         self.sourceidx = find(cellisa(self.stations,'Source'));
     end
 end

@@ -45,8 +45,8 @@ end
 % generate local-state space
 switch qn.nodetype(ind)
     case {NodeType.Queue, NodeType.Delay, NodeType.Source}
-        switch qn.sched(ist)
-            case SchedStrategy.EXT
+        switch qn.schedid(ist)
+            case SchedStrategy.ID_EXT
                 for r=1:R
                     if ~isempty(qn.proc) && ~isempty(qn.proc{ist,r}) && any(any(isnan(qn.proc{ist,r}{1}))) % disabled
                         init = 0*ones(1,K(r));
@@ -57,14 +57,14 @@ switch qn.nodetype(ind)
                 end
                 space = State.decorate(space,state);
                 space = [Inf*ones(size(space,1),1),space];
-            case {SchedStrategy.INF, SchedStrategy.PS, SchedStrategy.DPS, SchedStrategy.GPS}
+            case {SchedStrategy.ID_INF, SchedStrategy.ID_PS, SchedStrategy.ID_DPS, SchedStrategy.ID_GPS}
                 % in these policies we only track the jobs in the servers
                 for r=1:R
                     init = State.spaceClosedSingle(K(r),n(r));
                     state = State.decorate(state,init);
                 end
                 space = State.decorate(space,state);
-            case {SchedStrategy.SIRO, SchedStrategy.LEPT, SchedStrategy.SEPT}
+            case {SchedStrategy.ID_SIRO, SchedStrategy.ID_LEPT, SchedStrategy.ID_SEPT}
                 % in these policies we track an un-ordered buffer and
                 % the jobs in the servers
                 % build list of job classes in the node, with repetition
@@ -88,7 +88,7 @@ switch qn.nodetype(ind)
                         space = [space; state];
                     end
                 end
-            case {SchedStrategy.FCFS, SchedStrategy.HOL, SchedStrategy.LCFS}
+            case {SchedStrategy.ID_FCFS, SchedStrategy.ID_HOL, SchedStrategy.ID_LCFS}
                 sizeEstimator = multinomialln(n) - gammaln(sum(n)) + gammaln(1+qn.cap(ist));
                 sizeEstimator = round(sizeEstimator/log(10));
                 if sizeEstimator > 2
@@ -146,7 +146,7 @@ switch qn.nodetype(ind)
                     end
                 end
                 space = state;
-            case {SchedStrategy.SJF, SchedStrategy.LJF}
+            case {SchedStrategy.ID_SJF, SchedStrategy.ID_LJF}
                 % in these policies the state space includes continuous
                 % random variables for the service times
                 line_error(mfilename,'The scheduling policy does not admit a discrete state space.\n');
@@ -156,8 +156,8 @@ switch qn.nodetype(ind)
                 space = State.decorate(space, qn.varsparam{ind}.outlinks(:));
         end
     case NodeType.Cache
-        switch qn.sched(ist)
-            case SchedStrategy.INF
+        switch qn.schedid(ist)
+            case SchedStrategy.ID_INF
                 % in this policies we only track the jobs in the servers
                 for r=1:R
                     init = State.spaceClosedSingle(K(r),n(r));

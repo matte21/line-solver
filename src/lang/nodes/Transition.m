@@ -57,7 +57,7 @@ classdef Transition < Node
             self.enablingConditions = zeros(nnodes,nclasses,self.nmodes);
             self.inhibitingConditions = zeros(nnodes,nclasses,self.nmodes);
             self.numbersOfServers = Inf(1,self.nmodes);
-            self.timingStrategies = repmat(TimingStrategy.Timed,1,self.nmodes);
+            self.timingStrategies = repmat(TimingStrategy.ID_TIMED,1,self.nmodes);
             self.firingWeights = ones(1,self.nmodes);
             self.firingPriorities = ones(1,self.nmodes);
             self.distributions = cell(1, self.nmodes);
@@ -70,7 +70,7 @@ classdef Transition < Node
             self.enablingConditions(:,end+1) = 0;
             self.inhibitingConditions(:,end+1) = Inf;
             self.numbersOfServers(end+1) = Inf;
-            self.timingStrategies(end+1) = TimingStrategy.Timed;
+            self.timingStrategies(end+1) = TimingStrategy.ID_TIMED;
             self.firingWeights(end+1) = 1;
             self.firingPriorities(end+1) = 1;
             self.distributions{end+1} = Exp(1);
@@ -85,7 +85,7 @@ classdef Transition < Node
             if isa(node, 'Place')
                 node = self.model.getNodeIndex(node.name);
                 self.enablingConditions(node,class,mode) = enablingCondition;
-            elseif isa(node, 'double') && node <= nnodes && isa(self.model.nodes{node}, 'Place')
+            elseif isnumeric(node) && node <= nnodes && isa(self.model.nodes{node}, 'Place')
                 self.enablingConditions(node,class,mode) = enablingCondition;
             else
                 error('Node must be a Place node or index of a Place node.');

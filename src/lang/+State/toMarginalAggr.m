@@ -4,7 +4,7 @@ function [ni, nir] = toMarginalAggr(qn, ind, state_i, K, Ks, space_buf, space_sr
 % Copyright (c) 2012-2021, Imperial College London
 % All rights reserved.
 
-if ~isa(qn,'NetworkStruct') % the input can be a Network object too
+if ~isstruct(qn) % the input can be a Network object too
     qn=qn.getStruct();
 end
 % ind: node index

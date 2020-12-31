@@ -1063,9 +1063,9 @@ classdef graphViz4Matlab < handle
             obj.displayGraph();
         end
         
-        function moveNode(obj, nodeIndex, xpos, ypos)
+        function moveNode(obj, nodeIdx, xpos, ypos)
             % Programmatically set a node position.
-            obj.nodeArray(nodeIndex).move(xpos, ypos);
+            obj.nodeArray(nodeIdx).move(xpos, ypos);
             obj.displayGraph();
         end
         

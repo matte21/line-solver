@@ -7,8 +7,8 @@ function [Q] = getAvgQLenHandles(self)
 % The method returns the handles to the performance indices but
 % they are optional to collect
 if isempty(self.handles) || ~isfield(self.handles,'Q')
-    M = self.getNumberOfStations();
-    K = self.getNumberOfClasses();
+    M = getNumberOfStations(self);
+    K = getNumberOfClasses(self);
     
     Q = cell(M,K); % queue-length
     for i=1:M

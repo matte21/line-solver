@@ -37,12 +37,16 @@ classdef Replayer < TimeSeries
             self.data = [];
         end
         
+        function rate = getRate(self)
+            rate = 1 / self.getMean;
+        end
+        
         function ex = getMean(self)
             % EX = GETMEAN()
             
             % Get distribution mean
             if isempty(self.data)
-                self.load();
+                load(self);
             end
             ex = mean(self.data);
         end
@@ -52,7 +56,7 @@ classdef Replayer < TimeSeries
             
             % Get distribution squared coefficient of variation (SCV = variance / mean^2)
             if isempty(self.data)
-                self.load();
+                load(self);
             end
             SCV = var(self.data)/mean(self.data)^2;
         end
@@ -62,7 +66,7 @@ classdef Replayer < TimeSeries
             
             % Get distribution skewness
             if isempty(self.data)
-                self.load();
+                load(self);
             end
             SKEW = skewness(self.data);
         end
@@ -88,7 +92,7 @@ classdef Replayer < TimeSeries
             % L = EVALST(S)
             % Evaluate the Laplace-Stieltjes transform of the distribution function at t
             if isempty(self.data)
-                self.load();
+                load(self);
             end
             L = mean(exp(-s*self.data));
         end

@@ -1,10 +1,12 @@
 function qn = getStruct(self, wantInitialState)
 % QN = GETSTRUCT(WANTINITSTATE)
 if isempty(self.qn)
-    self.refreshStruct();
+    refreshStruct(self);
 end
 if nargin == 1 || wantInitialState
-    self.qn.state = self.getState;
+    [s0, s0prior] = self.getState;
+    self.qn.state = s0;
+    self.qn.stateprior = s0prior;
 end
-qn = self.qn.copy;
+qn = self.qn;
 end

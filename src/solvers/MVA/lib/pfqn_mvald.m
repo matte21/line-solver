@@ -4,9 +4,6 @@ function [XN,QN,UN,CN,lGN,isNumStable,pi]=pfqn_mvald(L,N,Z,mu)
 warn = true;
 isNumStable = true;
 [M,R]=size(L); % get number of queues (M) and classes (R)
-if ~exist('mi','var')
-    mi = ones(M,1);
-end
 Xs=zeros(R,prod(N+1)); % throughput for a model with station i less
 pi=ones(M,sum(N)+1,prod(N+1)); % marginal queue-length probabilities pi(k)
 WN=zeros(M,R);
@@ -56,8 +53,8 @@ while n~=-1
         end
     end
     
-    last_nnz = max(find(n>0));
-    if sum(n(1:last_nnz-1)) == sum(N(1:last_nnz-1)) & sum(n((last_nnz+1):R))==0
+    last_nnz = max(n>0);
+    if sum(n(1:last_nnz-1)) == sum(N(1:last_nnz-1)) && sum(n((last_nnz+1):R))==0
         logX = log(Xs(last_nnz,hashpop(n,N)));
         %hashpop(n,N)
         if ~isempty(logX)

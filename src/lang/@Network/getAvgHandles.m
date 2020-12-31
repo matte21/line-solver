@@ -10,8 +10,14 @@ function [Q,U,R,T,A] = getAvgHandles(self)
 
 % Copyright (c) 2012-2021, Imperial College London
 % All rights reserved.
-M = self.getNumberOfStations();
-K = self.getNumberOfClasses();
+% Q = self.getAvgQLenHandles;
+% U = self.getAvgUtilHandles;
+% R = self.getAvgRespTHandles;
+% T = self.getAvgTputHandles;
+% A = self.getAvgArvRHandles;
+
+M = getNumberOfStations(self);
+K = getNumberOfClasses(self);
 classes = self.classes;
 stations = self.stations;
 
@@ -25,7 +31,7 @@ for i=1:M
     hasServiceTunnel(i) = strcmpi(class(stations{i}.server),'ServiceTunnel');
     if ~hasServiceTunnel(i)
         for r=1:K
-            if isempty(stations{i}.server.serviceProcess{r}) || strcmpi(class(stations{i}.server.serviceProcess{r}{end}),'Disabled')
+            if isempty(stations{i}.server.serviceProcess{r}) || stations{i}.server.serviceProcess{r}{end}.isDisabled()
                 isServiceDefined(i,r) = false;
             end
         end
@@ -58,8 +64,8 @@ else
 end
 
 if isempty(self.handles) || ~isfield(self.handles,'U')
-    M = self.getNumberOfStations();
-    K = self.getNumberOfClasses();
+    M = getNumberOfStations(self);
+    K = getNumberOfClasses(self);
     
     U = cell(M,1); % utilizations
     for i=1:M
@@ -89,8 +95,8 @@ else
 end
 
 if isempty(self.handles) || ~isfield(self.handles,'R')
-    M = self.getNumberOfStations();
-    K = self.getNumberOfClasses();
+    M = getNumberOfStations(self);
+    K = getNumberOfClasses(self);
     
     R = cell(M,K); % response times
     for i=1:M
@@ -117,8 +123,8 @@ else
 end
 
 if isempty(self.handles) || ~isfield(self.handles,'T')
-    M = self.getNumberOfStations();
-    K = self.getNumberOfClasses();
+    M = getNumberOfStations(self);
+    K = getNumberOfClasses(self);
     
     T = cell(1,K); % throughputs
     for i=1:M
@@ -139,8 +145,8 @@ else
 end
 
 if isempty(self.handles) || ~isfield(self.handles,'A')
-    M = self.getNumberOfStations();
-    K = self.getNumberOfClasses();
+    M = getNumberOfStations(self);
+    K = getNumberOfClasses(self);
     
     A = cell(1,K); % arrival rate
     for i=1:M

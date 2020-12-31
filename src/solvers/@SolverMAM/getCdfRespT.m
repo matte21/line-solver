@@ -1,0 +1,14 @@
+function RD = getCdfRespT(self, R)
+% RD = GETCDFRESPT(R)
+
+T0 = tic;
+if ~exist('R','var')
+    R = self.getAvgRespTHandles;
+end
+qn = self.getStruct;
+self.getAvg; % get steady-state solution
+options = self.getOptions;
+RD = solver_mam_passage_time(qn, qn.proc, options);
+runtime = toc(T0);
+self.setDistribResults(RD, runtime);
+end

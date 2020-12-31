@@ -1,26 +1,26 @@
-function [Q,U,R,T,C,X,lG] = solver_mva(ST,V,N,S,~,sched,refstat)
-% [Q,U,R,T,C,X,LG] = SOLVER_MVA(ST,V,N,S,OPTIONS,SCHED,REFSTAT)
+function [Q,U,R,T,C,X,lG] = solver_mva(ST,V,N,S,~,schedid,refstat)
+% [Q,U,R,T,C,X,LG] = SOLVER_MVA(ST,V,N,S,OPTIONS,SCHEDID,REFSTAT)
 
 % Copyright (c) 2012-2021, Imperial College London
 % All rights reserved.
 [M,K]=size(ST);
 
-if ~exist('sched','var')
-    sched = cell(M,1);
+if nargin < 6 %schedid
+    schedid = nan(M,1);
     for i=1:M
         if isinf(S(i))
-            sched(i) = SchedStrategy.INF;
+            schedid(i) = SchedStrategy.ID_INF;
         else
-            sched(i) = SchedStrategy.PS; % default for non-inf servers is PS
+            schedid(i) = SchedStrategy.ID_PS; % default for non-inf servers is PS
         end
     end
 end
 
-infSET = find(sched==SchedStrategy.INF);
+infSET = find(schedid==SchedStrategy.ID_INF);
 if K==1
-    pfSET = find(sched==SchedStrategy.SIRO | sched==SchedStrategy.PS | sched==SchedStrategy.FCFS);
+    pfSET = find(schedid==SchedStrategy.ID_SIRO | schedid==SchedStrategy.ID_PS | schedid==SchedStrategy.ID_FCFS);
 else
-    pfSET = find(sched==SchedStrategy.SIRO | sched==SchedStrategy.PS);
+    pfSET = find(schedid==SchedStrategy.ID_SIRO | schedid==SchedStrategy.ID_PS);
 end
 
 U = zeros(M,K);
@@ -96,8 +96,8 @@ end
 for k=1:M
     for r=1:K
         if V(k,r)*ST(k,r)>0
-            switch sched(k)
-                case {SchedStrategy.FCFS,SchedStrategy.PS}
+            switch schedid(k)
+                case {SchedStrategy.ID_FCFS,SchedStrategy.ID_PS}
                     if sum(U(k,:))>1
                         U(k,r) = min(1,sum(U(k,:))) * V(k,r)*ST(k,r)*X(r) / ((V(k,:).*ST(k,:))*X(:));
                     end

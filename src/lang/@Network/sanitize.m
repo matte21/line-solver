@@ -7,8 +7,8 @@ function sanitize(self)
 % All rights reserved.
 
 if isempty(self.qn)
-    M = self.getNumberOfStations();
-    K = self.getNumberOfClasses();
+    M = getNumberOfStations(self);
+    K = getNumberOfClasses(self);
     for i=1:self.getNumberOfNodes
         switch class(self.nodes{i})
             case {'Cache'}
@@ -33,6 +33,10 @@ if isempty(self.qn)
                 %no-op
             case 'ClassSwitch'
                 %no-op
+            case 'Join'
+                for k=1:K
+                    self.nodes{i}.classCap(k) = Inf;
+                end
             case 'Queue'
                 for k=1:K
                     if k > length(self.nodes{i}.server.serviceProcess) || isempty(self.nodes{i}.server.serviceProcess{k})
@@ -40,10 +44,11 @@ if isempty(self.qn)
                         self.nodes{i}.classCap(k) = 0;
                         self.nodes{i}.schedStrategyPar(k) = 0;
                         self.nodes{i}.server.serviceProcess{k} = {[],ServiceStrategy.LI,Disabled()};
+                        self.nodes{i}.input.inputJobClasses{k} = {[],SchedStrategyType.NP,DropStrategy.WaitingQueue};
                     end
                 end
-                switch self.nodes{i}.schedStrategy
-                    case SchedStrategy.SEPT
+                switch SchedStrategy.toId(self.nodes{i}.schedStrategy)
+                    case SchedStrategy.ID_SEPT
                         svcTime = zeros(1,K);
                         for k=1:K
                             svcTime(k) = self.nodes{i}.serviceProcess{k}.getMean;
@@ -60,7 +65,7 @@ if isempty(self.qn)
                                 self.nodes{i}.schedStrategyPar(k) = find(isnan(svcTimeSorted));
                             end
                         end
-                    case SchedStrategy.LEPT
+                    case SchedStrategy.ID_LEPT
                         svcTime = zeros(1,K);
                         for k=1:K
                             svcTime(k) = self.nodes{i}.serviceProcess{k}.getMean;
@@ -81,10 +86,11 @@ if isempty(self.qn)
                         self.nodes{i}.classCap(k) = 0;
                         self.nodes{i}.schedStrategyPar(k) = 0;
                         self.nodes{i}.server.serviceProcess{k} = {[],ServiceStrategy.LI,Disabled()};
+                        self.nodes{i}.input.inputJobClasses{k} = {[],SchedStrategyType.NP,DropStrategy.WaitingQueue};
                     end
                 end
-                switch self.nodes{i}.schedStrategy
-                    case SchedStrategy.SEPT
+                switch SchedStrategy.toId(self.nodes{i}.schedStrategy)
+                    case SchedStrategy.ID_SEPT
                         svcTime = zeros(1,K);
                         for k=1:K
                             svcTime(k) = self.nodes{i}.serviceProcess{k}.getMean;

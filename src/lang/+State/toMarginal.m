@@ -4,7 +4,7 @@ function [ni, nir, sir, kir] = toMarginal(qn, ind, state_i, K, Ks, space_buf, sp
 % Copyright (c) 2012-2021, Imperial College London
 % All rights reserved.
 
-if ~isa(qn,'NetworkStruct') % the input can be a Network object too
+if ~isstruct(qn) % the input can be a Network object too
     qn=qn.getStruct();
 end
 
@@ -31,7 +31,7 @@ if max(K)==1
     isExponential = true;
 end
 
-if nargin < 8    
+if nargin < 8
     space_var = state_i(:,(end-sum(qn.nvars(ind,:))+1):end); % server stat
     space_srv = state_i(:,(end-sum(K)-sum(qn.nvars(ind,:))+1):(end-sum(qn.nvars(ind,:))));
     space_buf = state_i(:,1:(end-sum(K)-sum(qn.nvars(ind,:))));
@@ -102,13 +102,15 @@ switch qn.schedid(ist)
         end
 end
 
-for r=1:R
-    if isnan(qn.rates(ist,r)) % if disabled
-        nir(:,r) = 0;
-        for k=1:K(r)
-            kir(:,r,k) = 0;
+if qn.nodetype(ind) ~= NodeType.Place
+    for r=1:R
+        if isnan(qn.rates(ist,r)) % if disabled station
+            nir(:,r) = 0;
+            for k=1:K(r)
+                kir(:,r,k) = 0;
+            end
+            sir(:,r)=0;
         end
-        sir(:,r)=0;
     end
 end
 

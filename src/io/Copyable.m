@@ -20,7 +20,7 @@ classdef Copyable < handle
                     % MATLAB R2010b or newer - directly in memory (faster)
                     objByteArray = getByteStreamFromArray(obj);
                     newObj = getArrayFromByteStream(objByteArray);
-                catch me
+                catch ME
                     fname = [tempname '.mat'];
                     save(fname, 'obj');
                     newObj = load(fname);

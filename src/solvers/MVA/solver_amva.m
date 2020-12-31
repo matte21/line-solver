@@ -1,5 +1,5 @@
-function [Q,U,R,T,C,X] = solver_amva(ST,V,N,nservers,SCV,options,sched,schedparam,refstat)
-% [Q,U,R,T,C,X] = SOLVER_AMVA(ST,V,N,S,SCV,OPTIONS,SCHED,SCHEDPARAM,REFSTAT)
+function [Q,U,R,T,C,X] = solver_amva(ST,V,N,nservers,SCV,options,schedid,schedparam,refstat)
+% [Q,U,R,T,C,X] = SOLVER_AMVA(ST,V,N,S,SCV,OPTIONS,SCHEDID,SCHEDPARAM,REFSTAT)
 %
 % Copyright (c) 2012-2021, Imperial College London
 % All rights reserved.
@@ -19,25 +19,25 @@ else
     Q=Q0;
 end
 
-if ~exist('sched','var')
-    sched = cell(M,1);
+if nargin < 7 %schedid
+    schedid = nan(M,1);
     for i=1:M
         if isinf(nservers(i))
-            sched(i) = SchedStrategy.INF;
+            schedid(i) = SchedStrategy.ID_INF;
         else
-            sched(i) = SchedStrategy.PS; % default for non-inf servers is PS
+            schedid(i) = SchedStrategy.ID_PS; % default for non-inf servers is PS
         end
     end
 end
 
-extSET = find(sched==SchedStrategy.EXT);
-infSET = find(sched==SchedStrategy.INF);
-dpsSET = find(sched==SchedStrategy.DPS);
-fcfsSET = find(sched==SchedStrategy.FCFS);
+extSET = find(schedid==SchedStrategy.ID_EXT);
+infSET = find(schedid==SchedStrategy.ID_INF);
+dpsSET = find(schedid==SchedStrategy.ID_DPS);
+fcfsSET = find(schedid==SchedStrategy.ID_FCFS);
 if K==1
-    pfSET = find(sched==SchedStrategy.SIRO | sched==SchedStrategy.PS | sched==SchedStrategy.FCFS);
+    pfSET = find(schedid==SchedStrategy.ID_SIRO | schedid==SchedStrategy.ID_PS | schedid==SchedStrategy.ID_FCFS);
 else
-    pfSET = find(sched==SchedStrategy.SIRO | sched==SchedStrategy.PS);
+    pfSET = find(schedid==SchedStrategy.ID_SIRO | schedid==SchedStrategy.ID_PS);
 end
 
 
@@ -174,8 +174,8 @@ end
 for k=1:M
     for r=1:K
         if V(k,r)*ST(k,r)>0
-            switch sched(k)
-                case {SchedStrategy.FCFS,SchedStrategy.PS,SchedStrategy.DPS}
+            switch schedid(k)
+                case {SchedStrategy.ID_FCFS,SchedStrategy.ID_PS,SchedStrategy.ID_DPS}
                     if sum(U(k,:))>1
                         U(k,r) = min(1,sum(U(k,:))) * V(k,r)*ST(k,r)*X(r) / ((V(k,:).*ST(k,:))*X(:));
                     end

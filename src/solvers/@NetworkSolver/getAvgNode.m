@@ -4,9 +4,9 @@ function [QNn,UNn,RNn,TNn,ANn] = getAvgNode(self, Q, U, R, T, A)
 % Compute average utilizations at steady-state for all nodes
 if nargin == 1 % no parameter
     if isempty(self.model.handles) || ~isfield(self.model.handles,'Q') || ~isfield(self.model.handles,'U') || ~isfield(self.model.handles,'R') || ~isfield(self.model.handles,'T') || ~isfield(self.model.handles,'A')
-        self.resetResults(); % reset in case there are partial results saved
+        resetResults(self); % reset in case there are partial results saved
     end
-    [Q,U,R,T] = self.model.getAvgHandles;
+    [Q,U,R,T] = self.getAvgHandles;
 elseif nargin == 2
     handlers = Q;
     Q=handlers{1};
@@ -18,10 +18,10 @@ end
 
 qn = self.model.getStruct; % must be called after getAvg
 
-I = self.model.getNumberOfNodes;
-M = self.model.getNumberOfStations;
-R = self.model.getNumberOfClasses;
-C = self.model.getNumberOfChains;
+I = qn.nnodes;
+M = qn.nstations;
+R = qn.nclasses;
+C = qn.nchains;
 QNn = zeros(I,R);
 UNn = zeros(I,R);
 RNn = zeros(I,R);

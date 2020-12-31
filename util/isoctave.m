@@ -6,7 +6,7 @@ function r = isoctave ()
 % All rights reserved.
   persistent x;
   if (isempty (x))
-    x = exist ('OCTAVE_VERSION', 'builtin');
+    x = exist('OCTAVE_VERSION', 'builtin');
   end
   r = x;
 end

@@ -4,6 +4,8 @@ function self = link(self, P)
 % Copyright (c) 2012-2021, Imperial College London
 % All rights reserved.
 
+sanitize(self);
+
 isReset = false;
 if ~isempty(self.qn)
     isReset = true;
@@ -243,17 +245,18 @@ for i=1:M
 end
 
 connected = zeros(Mplus);
+nodes = self.nodes;
 for r=1:R
     [I,J,S] = find(P{r,r});
-    for k=1:length(I)
+    for k=1:length(I)        
         if connected(I(k),J(k)) == 0
-            self.addLink(self.nodes{I(k)}, self.nodes{J(k)});
+            self.addLink(nodes{I(k)}, nodes{J(k)});
             connected(I(k),J(k)) = 1;
         end
-        self.nodes{I(k)}.setProbRouting(self.classes{r}, self.nodes{J(k)}, S(k));
+        nodes{I(k)}.setProbRouting(self.classes{r}, nodes{J(k)}, S(k));
     end
 end
-
+self.nodes = nodes;
 self.modifiedRoutingTable = P;
 
 % check if the probability out of any node sums to >1.0
@@ -261,7 +264,7 @@ pSum = cellsum(P);
 isAboveOne = pSum > 1.0 + Distrib.Zero;
 if any(isAboveOne)
     for i=find(isAboveOne)
-        if self.nodes{i}.schedStrategy ~= SchedStrategy.FORK
+        if SchedStrategy.toId(self.nodes{i}.schedStrategy) ~= SchedStrategy.ID_FORK
             line_error(mfilename,'The total routing probability for jobs leaving node %s in class %s is greater than 1.0.',self.nodes{i}.name,self.classes{r}.name);
         end
         %        elseif pSum < 1.0 - Distrib.Zero % we cannot check this case as class r may not reach station i, in which case its outgoing routing prob is zero
@@ -278,7 +281,7 @@ for i=1:M
 end
 
 if isReset
-    self.refreshStruct; % without this exception with linkAndLog
+    self.refreshChains; % without this exception with linkAndLog
 end
 
 end

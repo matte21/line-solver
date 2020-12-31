@@ -163,13 +163,13 @@ classdef LayeredNetwork < Model & Ensemble
         function E = getNumberOfLayers(self)
             % E = GETNUMBEROFLAYERS()
             
-            E = self.getNumberOfModels();
+            E = getNumberOfModels(self);
         end
         function E = getNumberOfModels(self)
             % E = GETNUMBEROFMODELS()
             
             if isempty(self.ensemble)
-                self.ensemble = self.getEnsemble();
+                self.ensemble = getEnsemble(self);
             end
             E = length(self.ensemble);
         end
@@ -177,7 +177,7 @@ classdef LayeredNetwork < Model & Ensemble
         function layers = getLayers(self)
             % LAYERS = GETLAYERS()
             
-            layers = self.getEnsemble();
+            layers = getEnsemble(self);
         end
         
         % setUsedFeatures : records that a certain language feature has been used
@@ -190,7 +190,7 @@ classdef LayeredNetwork < Model & Ensemble
         function self = initUsedFeatures(self)
             % SELF = INITUSEDFEATURES()
             
-            for e=1:self.getNumberOfModels()
+            for e=1:getNumberOfModels(self)
                 self.usedFeatures{e} = SolverFeatureSet;
             end
         end
@@ -198,7 +198,7 @@ classdef LayeredNetwork < Model & Ensemble
         function usedFeatures = getUsedLangFeatures(self)
             % USEDFEATURES = GETUSEDLANGFEATURES()
             
-            E = self.getNumberOfLayers();
+            E = getNumberOfLayers(self);
             usedFeatures = cell(1,E);
             for e=1:E
                 usedFeatures{e} = self.ensemble{e}.getUsedLangFeatures;

@@ -10,7 +10,7 @@ N = qn.nclosedjobs;    %population
 Mu = qn.mu;
 Phi = qn.phi;
 PH = qn.proc;
-sched = qn.sched;
+schedid = qn.schedid;
 rt = qn.rt;
 S = qn.nservers;
 NK = qn.njobs';  %initial population
@@ -62,7 +62,7 @@ for i = 1:M
     for k = 1:K
         if match(i,k) > 0 % indicates whether a class is served at a station
             if isinf(NK(k))
-                if sched(i)==SchedStrategy.EXT
+                if schedid(i)==SchedStrategy.ID_EXT
                     toAssign = 1; % open job pool
                 else
                     toAssign = 0; % set to zero open jobs everywhere

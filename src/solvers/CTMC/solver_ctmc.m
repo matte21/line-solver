@@ -14,7 +14,7 @@ if isoctave
     %warning off;
 end
 
-[SS,SSh,qnc] = State.spaceGenerator(qn.copy, options.cutoff, options);
+[SS,SSh,qnc] = State.spaceGenerator(qn, options.cutoff, options);
 qn.space = qnc.space;
 if options.verbose
     line_printf('\nCTMC state space size: %d states. ',size(SS,1));
@@ -181,7 +181,7 @@ for a=1:A
     % passive
     node_p = sync{a}.passive{1}.node;
     class_p = sync{a}.passive{1}.class;
-    if event_a == EventType.DEP
+    if event_a == EventType.ID_DEP
         node_a_sf = qn.nodeToStateful(node_a);
         node_p_sf = qn.nodeToStateful(node_p);
         for s=1:size(SSh,1)

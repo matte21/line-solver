@@ -1,8 +1,8 @@
 classdef (Sealed) CallType
     properties (Constant)
-        SYNC = categorical({'Synchronous'});
-        ASYNC = categorical({'Asynchronous'});
-        FWD = categorical({'Forwarding'});
+        SYNC = 'Synchronous';
+        ASYNC = 'Asynchronous';
+        FWD = 'Forwarding';
         
         ID_SYNC = 1;
         ID_ASYNC = 2;

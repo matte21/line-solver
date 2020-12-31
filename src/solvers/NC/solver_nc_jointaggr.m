@@ -8,7 +8,7 @@ method = options.method;
 M = qn.nstations;    %number of stations
 nservers = qn.nservers;
 NK = qn.njobs';  % initial population per class
-sched = qn.sched;
+schedid = qn.schedid;
 %chains = qn.chains;
 SCV = qn.scv;
 ST = 1 ./ qn.rates;
@@ -35,7 +35,7 @@ eta_1 = zeros(1,M);
 eta = ones(1,M);
 ca = ones(1,M);
 
-if ~any(sched==SchedStrategy.FCFS) options.iter_max=1; end
+if ~any(schedid==SchedStrategy.ID_FCFS) options.iter_max=1; end
 
 it = 0;
 while max(abs(1-eta./eta_1)) > options.iter_tol && it <= options.iter_max
@@ -172,8 +172,8 @@ while max(abs(1-eta./eta_1)) > options.iter_tol && it <= options.iter_max
     for i=1:M
         sd = ST0(i,:)>0;
         eta(i) = sum(U(i,:));
-        switch sched(i)
-            case SchedStrategy.FCFS
+        switch schedid(i)
+            case SchedStrategy.ID_FCFS
                 %if range(ST0(i,sd))>0 && (max(SCV(i,sd))>1 - Distrib.Zero || min(SCV(i,sd))<1 + Distrib.Zero) % check if non-product-form
                 rho(i) = sum(U(i,:)); % true utilization of each server
                 ca(i) = 0;
@@ -204,8 +204,8 @@ while max(abs(1-eta./eta_1)) > options.iter_tol && it <= options.iter_max
     
     for i=1:M
         sd = ST0(i,:)>0;
-        switch sched(i)
-            case SchedStrategy.FCFS
+        switch schedid(i)
+            case SchedStrategy.ID_FCFS
                 %if range(ST0(i,sd))>0 && (max(SCV(i,sd))>1 - Distrib.Zero || min(SCV(i,sd))<1 + Distrib.Zero) % check if non-product-form
                 for k=1:K
                     if ST0(i,k)>0

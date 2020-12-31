@@ -34,11 +34,11 @@ for i = 1 : M
     end
 end
 % to speed up convert sched strings in numerical values
-sched_id = zeros(1,M);
+schedid = zeros(1,M);
 for i = 1 : M
-    sched_id(i) = SchedStrategy.toId(sched(i));
-    switch sched(i) % source
-        case SchedStrategy.DPS
+    schedid(i) = SchedStrategy.toId(sched{i});
+    switch schedid(i) % source
+        case SchedStrategy.ID_DPS
             w(i,:) = schedparam(i,:);
     end
 end
@@ -52,11 +52,11 @@ switch options.method
         all_jumps = ode_jumps_new(M, K, enabled, q_indices, P, Kic);
         % determines a vector with the fixed part of the rates,
         % and defines the indexes that correspond to the events that occur
-        [rateBase, eventIdx] = ode_rate_base(Phi, Mu, PH, M, K, enabled, q_indices, P, Kic, sched_id, all_jumps);
-        ode_si_h = @(t,x) all_jumps * ode_rates_stateindep(x, M, K, q_indices, Kic, nservers, w, sched_id, rateBase, eventIdx);
+        [rateBase, eventIdx] = ode_rate_base(Phi, Mu, PH, M, K, enabled, q_indices, P, Kic, schedid, all_jumps);
+        ode_si_h = @(t,x) all_jumps * ode_rates_stateindep(x, M, K, q_indices, Kic, nservers, w, schedid, rateBase, eventIdx);
         ode_h = ode_si_h;
     case 'statedep'
-        ode_sd_h = @(t,x) ode_statedep(x, Phi, Mu, PH, M, K, enabled, q_indices, P, Kic, nservers, w, sched_id);
+        ode_sd_h = @(t,x) ode_statedep(x, Phi, Mu, PH, M, K, enabled, q_indices, P, Kic, nservers, w, schedid);
         ode_h = ode_sd_h;
         %ode_sd_h = @(t,x) ode_hybrid(x, Phi, Mu, PH, M, K, enabled, q_indices, P, Kic, nservers, w, sched_id, all_jumps, rateBase, eventIdx);
 end

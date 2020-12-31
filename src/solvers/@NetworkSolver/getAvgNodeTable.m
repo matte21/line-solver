@@ -8,10 +8,10 @@ if ~exist('keepDisabled','var')
     keepDisabled = false;
 end
 qn = self.model.getStruct;
-I = self.model.getNumberOfNodes();
-K = self.model.getNumberOfClasses();
+I = qn.nnodes();
+K = qn.nclasses();
 if nargin == 1
-    [Q,U,R,T,A] = self.model.getAvgHandles();
+    [Q,U,R,T,A] = getAvgHandles(self);
 end
 
 [QN,UN,RN,TN,AN] = self.getAvgNode(Q,U,R,T,A);

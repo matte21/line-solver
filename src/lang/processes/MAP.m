@@ -63,7 +63,7 @@ classdef MAP < MarkovModulated
         
         function MAP = getRepresentation(self)
             % MAP = GETREPRESENTATION()
-            MAP = self.getProcess();
+            MAP = getProcess(self);
         end
         
         function MAP = getProcess(self)
@@ -83,21 +83,21 @@ classdef MAP < MarkovModulated
         function mu = getMu(self)
             % MU = GETMU()
             % Aggregate departure rate from each state
-            MAP = self.getProcess();
+            MAP = getProcess(self);
             mu = sum(MAP{2},2); % sum D1 rows / diag -D0                        
         end
         
         function phi = getPhi(self)
             % MAPI = GETMAPI()
             % Return the exit vector of the underlying MAP
-            MAP = self.getProcess();
+            MAP = getProcess(self);
             phi = sum(MAP{2},2) ./ diag(-MAP{1}); % sum D1 rows / diag -D0            
         end
         
         function bool = isImmmediate(self)
             % BOOL = ISIMMMEDIATE()
             
-            bool = self.getMean() == 0;
+            bool = getMean(self) == 0;
         end
     end
 end

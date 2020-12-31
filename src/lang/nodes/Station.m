@@ -128,7 +128,7 @@ classdef Station < StatefulNode
         function [p] = getSelfLoopProbabilities(self)
             % [P] = GETSELFLOOPPROBABILITIES()
             
-            R = self.getNumberOfServiceClasses();
+            R = getNumberOfServiceClasses(self);
             p = zeros(1,R);
             for k=1:R
                 nOutLinks = length(self.output.outputStrategy{k}{end});

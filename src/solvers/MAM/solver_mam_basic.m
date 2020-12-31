@@ -33,7 +33,7 @@ for c=1:C
     lambda(inchain) = sum(lambdas_inchain{c}(isfinite(lambdas_inchain{c})));
 end
 
-if qn.isopen()
+if all(isinf(qn.njobs)) % is open 
     % open queueing system (one node is the external world)
     BuToolsVerbose = false;
     BuToolsCheckInput = true;
@@ -42,8 +42,8 @@ if qn.isopen()
     D0 = {};
     % first build the joint arrival process
     for ist=1:M
-        switch qn.sched(ist)
-            case SchedStrategy.EXT
+        switch qn.schedid(ist)
+            case SchedStrategy.ID_EXT
                 % assemble a MMAP for the arrival process from all classes
                 for k=1:K
                     if isnan(PH{ist,k}{1})
@@ -73,7 +73,7 @@ if qn.isopen()
                     TN(ist,inchain) = lambdas_inchain{c};
                     %TN(ist,isnan(lambdas_inchain{c}))=0;
                 end
-            case {SchedStrategy.FCFS, SchedStrategy.HOL, SchedStrategy.PS}
+            case {SchedStrategy.ID_FCFS, SchedStrategy.ID_HOL, SchedStrategy.ID_PS}
                 for k=1:K
                     % divide service time by number of servers and put
                     % later a surrogate delay server in tandem to compensate
@@ -88,15 +88,15 @@ if qn.isopen()
     for ind=1:I
         if qn.isstation(ind)
             ist = qn.nodeToStation(ind);
-            switch qn.sched(ist)
-                case SchedStrategy.INF
+            switch qn.schedid(ist)
+                case SchedStrategy.ID_INF
                     for k=1:K
                         TN(ist,k) = lambda(k)*V(ist,k);
                         UN(ist,k) = map_mean(PH{ist,k})*TN(ist,k);
                         QN(ist,k) = TN(ist,k).*map_mean(PH{ist,k})*V(ist,k);
                         RN(ist,k) = QN(ist,k)/TN(ist,k);
                     end
-                case SchedStrategy.PS
+                case SchedStrategy.ID_PS
                     for k=1:K
                         TN(ist,k) = lambda(k)*V(ist,k);
                         UN(ist,k) = map_mean(PH{ist,k})*TN(ist,k);
@@ -106,7 +106,7 @@ if qn.isopen()
                         QN(ist,k) = UN(ist,k)/(1-sum(UN(ist,:)));
                         RN(ist,k) = QN(ist,k)/TN(ist,k);
                     end
-                case {SchedStrategy.FCFS, SchedStrategy.HOL}
+                case {SchedStrategy.ID_FCFS, SchedStrategy.ID_HOL}
                     chainArrivalAtNode = cell(1,C);
                     Qret = {};
                     rates = cell(M,C);
@@ -123,7 +123,7 @@ if qn.isopen()
                             aggrArrivalAtNode = mmap_super_safe({aggrArrivalAtNode, chainArrivalAtNode{c}}, config.space_max, 'default');
                         end
                     end
-                    if strcmp(qn.sched(ist),SchedStrategy.HOL) && any(qn.classprio ~= qn.classprio(1)) % if priorities are not identical
+                    if strcmp(qn.schedid(ist),SchedStrategy.ID_HOL) && any(qn.classprio ~= qn.classprio(1)) % if priorities are not identical
                         [uK,iK] = unique(qn.classprio);
                         if length(uK) == length(qn.classprio) % if all priorities are different
                             [Qret{iK}] = MMAPPH1NPPR({aggrArrivalAtNode{[1;2+iK]}}, {pie{ist,iK}}, {D0{ist,iK}}, 'ncMoms', 1);

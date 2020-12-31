@@ -21,5 +21,6 @@ end
 
 self.links = {};
 self.handles = {};
+self.connMatrix = zeros(self.getNumberOfNodes);
 nodes = self.getNodes;
 end

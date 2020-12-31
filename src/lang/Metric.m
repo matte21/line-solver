@@ -17,7 +17,7 @@ classdef Metric < Copyable
     properties (Hidden)
         stationIndex;
         classIndex;
-        %nodeIndex;
+        %ind;
     end
     
     methods (Hidden)
@@ -38,7 +38,7 @@ classdef Metric < Copyable
             self.disabled = 0;
             self.transient = false;
             
-            %    self.nodeIndex = NaN;
+            %    self.ind = NaN;
             self.stationIndex = NaN;
             self.classIndex = NaN;
         end

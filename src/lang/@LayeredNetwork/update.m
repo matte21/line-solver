@@ -3,5 +3,5 @@ function self = update(self)
 
 % Copyright (c) 2012-2021, Imperial College London
 % All rights reserved.
-self.generateGraph();
+generateGraph(self);
 end

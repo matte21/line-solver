@@ -6,8 +6,7 @@ node{3} = Queue(model, 'Queue2', SchedStrategy.PS);
 
 node{3}.setNumServers(2);
 
-
-N=[1,0,4,0];
+N=[1,0,3,0];
 jobclass{1} = ClosedClass(model, 'Class1', N(1), node{1}, 0);
 jobclass{2} = ClosedClass(model, 'Class2', N(2), node{1}, 0);
 jobclass{3} = ClosedClass(model, 'Class3', N(3), node{1}, 0);
@@ -81,5 +80,5 @@ options.method = 'exact';
 solver = SolverNC(model,options);
 Pr_nc = solver.getProbSysAggr()
 
-solver = SolverJMT(model,'samples',1e5,'seed',532733);
+solver = SolverJMT(model,'samples',1e4,'seed',532733);
 Pr_jmt = solver.getProbSysAggr()

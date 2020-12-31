@@ -10,7 +10,7 @@ if ~exist('showProcs','var')
     showProcs = true;
 end
 
-[lqnGraph,taskGraph] = self.getGraph();
+[lqnGraph,taskGraph] = getGraph(self);
 
 %figure;
 %plot(taskGraph,'Layout','layered','NodeLabel',taskGraph.Nodes.Node);

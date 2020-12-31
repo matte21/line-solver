@@ -4,7 +4,7 @@ function bool = isValid(self)
 % Copyright (c) 2012-2021, Imperial College London
 % All rights reserved.
 bool = true;
-lqnGraph = self.getGraph();
+lqnGraph = getGraph(self);
 refTasks = findstring(lqnGraph.Nodes.Type, 'R');
 for r=refTasks(:)'
     numEntriesInRefTask = intersect(findstring(lqnGraph.Nodes.Type, 'E'), findstring(lqnGraph.Nodes.Task, lqnGraph.Nodes.Name{r}));

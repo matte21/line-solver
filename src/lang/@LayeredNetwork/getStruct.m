@@ -35,7 +35,8 @@ lqn.actsof = cell(lqn.ntasks,1);
 lqn.callsof = cell(lqn.ntasks,1);
 lqn.hostdem = {};
 lqn.think = {};
-lqn.sched = categorical([]);
+lqn.sched = {};
+lqn.schedid = [];
 lqn.names = {};
 lqn.hashnames = {};
 lqn.shortnames = {};
@@ -53,7 +54,8 @@ ashift = lqn.nhosts + lqn.ntasks + lqn.nentries;
 lqn.parent = [];
 for p=1:lqn.nhosts
     lqn.hostidx(end+1) = idx;
-    lqn.sched(idx,1) = SchedStrategy.fromText(self.hosts{p}.scheduling);
+    lqn.sched{idx,1} = SchedStrategy.fromText(self.hosts{p}.scheduling);
+    lqn.schedid(idx,1) = SchedStrategy.toId(lqn.sched{idx,1});
     lqn.mult(idx,1) = self.hosts{p}.multiplicity;
     lqn.repl(idx,1) = self.hosts{p}.replication;
     lqn.names{idx,1} = self.hosts{p}.name;
@@ -67,14 +69,15 @@ for p=1:lqn.nhosts
     pidx = p;
     for t=1:lqn.ntasksof(p)
         lqn.taskidx(end+1) = idx;
-        lqn.sched(idx,1) = SchedStrategy.fromText(self.hosts{p}.tasks(t).scheduling);
+        lqn.sched{idx,1} = SchedStrategy.fromText(self.hosts{p}.tasks(t).scheduling);
+        lqn.schedid(idx,1) = SchedStrategy.toId(lqn.sched{idx,1});
         lqn.hostdem{idx,1} = Immediate();
         lqn.think{idx,1} = self.hosts{p}.tasks(t).thinkTime;
         lqn.mult(idx,1) = self.hosts{p}.tasks(t).multiplicity;
         lqn.repl(idx,1) = self.hosts{p}.tasks(t).replication;
         lqn.names{idx,1} = self.hosts{p}.tasks(t).name;        
-        switch lqn.sched(idx,1)
-            case SchedStrategy.REF
+        switch lqn.schedid(idx,1)
+            case SchedStrategy.ID_REF
                 lqn.hashnames{idx,1} = ['R:',lqn.names{idx,1}];
                 lqn.shortnames{idx,1} = ['R',num2str(idx-tshift)];
             otherwise
@@ -259,7 +262,7 @@ end
 lqn.ncalls = size(lqn.calltype,1);
 
 % correct multiplicity for infinite server stations
-for tidx = find(lqn.sched== SchedStrategy.INF)
+for tidx = find(lqn.schedid== SchedStrategy.ID_INF)
     if lqn.type(tidx) == LayeredNetworkElement.TASK
         callers = find(lqn.taskgraph(:, tidx));
         callers_inf = strcmp(lqn.mult(callers), SchedStrategy.INF);
@@ -274,5 +277,5 @@ for tidx = find(lqn.sched== SchedStrategy.INF)
     end
 end
 
-lqn.isref = lqn.sched==SchedStrategy.REF;
+lqn.isref = lqn.schedid==SchedStrategy.ID_REF;
 end

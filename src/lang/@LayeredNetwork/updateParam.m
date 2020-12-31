@@ -7,8 +7,8 @@ function self = updateParam(self, AvgTableLayer, netSortAscending)
 % Copyright (c) 2012-2021, Imperial College London
 % All rights reserved.
 
-network = self.getEnsemble();
-[lqnGraph,taskGraph] = self.getGraph();
+network = getEnsemble(self);
+[lqnGraph,taskGraph] = getGraph(self);
 
 nNodes = length(self.nodeNames);
 nEdges = size(self.endNodes,1);
@@ -111,7 +111,7 @@ for net = netorder
                 if strcmpi(ttargetname, self.serverName{net}) % if server is this activity's task
                     entry_chainidx = cellfun(@(c) any(strcmpi(c.classnames, AvgTableLayer{net}.Class(h))), self.chains{net});
                     %% mandatory metrics
-                    if  self.ensemble{net}.getStruct.sched(2) == SchedStrategy.INF  % if server is an infinite server
+                    if  self.ensemble{net}.getStruct.schedid(2) == SchedStrategy.ID_INF  % if server is an infinite server
                         nJobs = network{net}.getNumberOfJobs;
                         inChain = self.chains{net}{entry_chainidx}.index{:};
                         chainPopulation = sum(nJobs(inChain));

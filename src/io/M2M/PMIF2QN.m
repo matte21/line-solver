@@ -11,9 +11,9 @@ parsed = PMIF.parseXML(filename,verbose);
 if ~isempty(parsed)
     %% build CQN model
     % transformation of scheduling policies
-    schedTranslate = {  'IS',   SchedStrategy.INF;
-        'FCFS', SchedStrategy.FCFS;
-        'PS',   SchedStrategy.PS};
+    schedidTranslate = {  'IS',   SchedStrategy.ID_INF;
+                        'FCFS', SchedStrategy.ID_FCFS;
+                        'PS',   SchedStrategy.ID_PS};
     
     % extract basic information
     Ms = length(parsed.servers);
@@ -37,7 +37,7 @@ if ~isempty(parsed)
     P = zeros(M*K,M*K);
     numservers = zeros(M,1);
     rates = zeros(M,K);
-    sched = categorical(M,1);
+    schedid = nan(M,1);
     njobs = zeros(K,1);
     chains = eye(K);
     refstat = zeros(K,1);
@@ -63,8 +63,8 @@ if ~isempty(parsed)
     
     % extract information from servers
     for i = 1:Ms
-        sched(i,1) = schedTranslate{findstring(schedTranslate(:,1),parsed.servers(i).scheduling), 2 };
-        if sched(i) == SchedStrategy.INF
+        schedid(i,1) = schedidTranslate{findstring(schedidTranslate(:,1),parsed.servers(i).scheduling), 2 };
+        if schedid(i) == SchedStrategy.ID_INF
             numservers(i) = Inf;
         else
             numservers(i) = parsed.servers(i).quantity;
@@ -72,8 +72,8 @@ if ~isempty(parsed)
     end
     
     for i = 1:Mw
-        sched(Ms+i,1) = schedTranslate{findstring(schedTranslate(:,1),parsed.workUnitServers(i).scheduling), 2 };
-        if sched(Ms+i) == SchedStrategy.INF
+        schedid(Ms+i,1) = schedidTranslate{findstring(schedidTranslate(:,1),parsed.workUnitServers(i).scheduling), 2 };
+        if schedid(Ms+i) == SchedStrategy.ID_INF
             numservers(Ms+i) = Inf;
         else
             numservers(Ms+i) = parsed.workUnitServers(i).quantity;
@@ -127,22 +127,61 @@ if ~isempty(parsed)
     
     nodenames = stationnames;
     routing = RoutingStrategy.ID_PROB * ones(size(rates));
-    for j=1:size(sched,1)
-        switch sched(j)
-            case SchedStrategy.INF
+    for j=1:size(schedid,1)
+        switch schedid(j)
+            case SchedStrategy.ID_INF
                 nodetype(j) = NodeType.Delay;
             otherwise
                 nodetype(j) = NodeType.Queue;
         end
     end
-    qn = NetworkStruct(nodetype, nodenames, classnames, numservers, njobs, refstat, routing);
-    qn.sched = sched;
+            
+    qn = NetworkStruct();
+    qn.nnodes = numel(nodenames);
+    qn.nclasses = length(classnames);
+    qn.nclosedjobs = sum(njobs(isfinite(njobs)));
+    qn.nservers = numservers;
+    qn.nodetype = -1*ones(qn.nstations,1);
+    qn.scv = ones(qn.nstations,qn.nclasses);
+    %qn.forks = zeros(M,K);
+    qn.njobs = njobs(:)';
+    qn.refstat = refstat;
+    qn.space = cell(qn.nstations,1);
+    qn.dropid = -1* ones(qn.nstations,qn.nclasses);
+    qn.routing = routing;
+    qn.chains = [];
+    qn.lst = {};
+    qn.nodetype = nodetype;
+    qn.isstation = NodeType.isStation(nodetype);
+    qn.nstations = sum(qn.isstation);
+    qn.isstateful = NodeType.isStateful(nodetype);
+    qn.isstatedep = false(qn.nnodes,3); % col 1: buffer, col 2: srv, col 3: routing
+    for ind=1:qn.nnodes
+        switch qn.nodetype(ind)
+            case NodeType.Cache
+                qn.isstatedep(ind,2) = true; % state dependent service
+                %                            qn.isstatedep(ind,3) = true; % state dependent routing
+        end
+        for r=1:qn.nclasses
+            switch qn.routing(ind,r)
+                case {RoutingStrategy.ID_RRB, RoutingStrategy.ID_JSQ}
+                    qn.isstatedep(ind,3) = true; % state dependent routing
+            end
+        end
+    end
+    qn.nstateful = sum(qn.isstateful);
+    qn.state = cell(qn.nstations,1); for i=1:qn.nstateful qn.state{i} = []; end
+    qn.nodenames = nodenames;
+    qn.classnames = classnames;
+    %qn.reindex();
+    qn.schedid = schedid;
     qn.phi = ones(size(rates));
     qn.pie = ones(size(rates));
     qn.proc = cell(size(rates));
     qn.rt = P;
     for i=1:size(rates,1)
-        for r=1:size(rates,2)            
+        qn.sched{i} = SchedStrategy.fromId(qn.schedid(i));
+        for r=1:size(rates,2)
             if rates(i,r) == 0
                 rates(i,r) = NaN;
                 qn.proc{i,r} = {[NaN],[NaN]};

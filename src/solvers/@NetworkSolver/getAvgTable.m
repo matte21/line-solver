@@ -5,21 +5,21 @@ function [AvgTable,QT,UT,RT,TT] = getAvgTable(self,Q,U,R,T,keepDisabled)
 % Copyright (c) 2012-2021, Imperial College London
 % All rights reserved.
 
-qn = self.getStruct();
+qn = getStruct(self);
 
 if ~exist('keepDisabled','var')
     keepDisabled = false;
 end
-M = self.model.getNumberOfStations();
-K = self.model.getNumberOfClasses();
+M = qn.nstations();
+K = qn.nclasses();
 if nargin == 2
     keepDisabled = Q;
-    [Q,U,R,T,~] = self.model.getAvgHandles();
+    [Q,U,R,T,~] = getAvgHandles(self);
 elseif nargin == 1
-    [Q,U,R,T,~] = self.model.getAvgHandles();
+    [Q,U,R,T,~] = getAvgHandles(self);
 end
 if isfinite(self.getOptions.timespan(2))
-    [Qt,Ut,Tt] = self.model.getTranHandles();
+    [Qt,Ut,Tt] = getTranHandles(self);
     [QNt,UNt,TNt] = self.getTranAvg(Qt,Ut,Tt);
     QN = cellfun(@(c) c.metric(end),QNt);
     UN = cellfun(@(c) c.metric(end),UNt);

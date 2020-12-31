@@ -65,7 +65,7 @@ classdef Cache < StatefulNode
         %                 self.server.serviceProcess{1+level, itemclass.index} = {[], ServiceStrategy.ID_SD, distribution};
         %             end
         %         end
-
+        
         function self = reset(self)
             % SELF = RESET()
             %
@@ -79,6 +79,13 @@ classdef Cache < StatefulNode
             %noop
         end
         
+        function self = setResultHitProb(self, actualHitProb)
+            self.server.actualHitProb = actualHitProb;
+        end
+        
+        function self = setResultMissProb(self, actualMissProb)
+            self.server.actualMissProb = actualMissProb;
+        end
         
         function setHitClass(self, jobinclass, joboutclass)
             % SETHITCLASS(JOBINCLASS, JOBOUTCLASS)
@@ -128,6 +135,24 @@ classdef Cache < StatefulNode
             % SECTIONS = GETSECTIONS()
             
             sections = {self.input, self.server, self.output};
+        end
+        
+        function hitClass = getHitClass(self)
+            % HITCLASS = GETHITCLASS
+            %
+            % For an incoming job of class r, HITCLASS(r) is the new class
+            % of that job after a hit
+            
+            hitClass = self.server.hitClass;
+        end
+        
+        function missClass = getMissClass(self)
+            % MISSCLASS = GETMISSCLASS
+            %
+            % For an incoming job of class r, MISSCLASS(r) is the new class
+            % of that job after a miss
+            
+            missClass = self.server.missClass;
         end
     end
 end

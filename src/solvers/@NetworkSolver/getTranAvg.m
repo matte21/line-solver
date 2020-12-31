@@ -7,7 +7,7 @@ function [QNclass_t, UNclass_t, TNclass_t] = getTranAvg(self,Qt,Ut,Tt)
 % All rights reserved.
 
 if nargin == 1
-    [Qt,Ut,Tt] = self.model.getTranHandles;
+    [Qt,Ut,Tt] = self.getTranHandles;
 end
 if nargin == 2
     handlers = Qt;
@@ -24,7 +24,7 @@ TNclass_t={};
 
 qn = self.model.getStruct;
 minrate = min(qn.rates(isfinite(qn.rates)));
-if ~self.hasTranResults()
+if ~hasTranResults(self)
     if isinf(self.options.timespan(1)) && isinf(self.options.timespan(2))
         self.options.timespan = [0,30/minrate];
         line_warning(mfilename,'Timespan of transient analysis unspecified, setting the timespan option to [0, %d]. Use %s(model,''timespan'',[0,T]) to customize.',self.options.timespan(2),class(self));
@@ -37,11 +37,11 @@ if ~self.hasTranResults()
         self.options.timespan(2) = 30/minrate;
         line_warning(mfilename,'End time of transient analysis unspecified, setting the timespan option to [%d,%d]. Use %s(model,''timespan'',[0,T]) to customize.',self.options.timespan(1),self.options.timespan(2),class(self));
     end
-    self.runAnalysis();
+    runAnalyzer(self);
 end
 
-M = self.model.getNumberOfStations();
-K = self.model.getNumberOfClasses();
+M = qn.nstations();
+K = qn.nclasses();
 if ~isempty(Qt)
     QNclass_t = cell(M,K);
     UNclass_t = cell(M,K);

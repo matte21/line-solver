@@ -6,10 +6,10 @@ function [XN,QN,UN,CN,lG]=pfqn_mvams(lambda,L,N,Z,mi,S)
 [M,R]=size(L); % get number of queues (M) and classes (R)
 Ntot = sum(N(isfinite(N)));
 mu = ones(M,Ntot);
-if ~exist('S','var')
+if nargin<6 %~exist('S','var')
     S = ones(M,1);
 end
-if ~exist('mi','var')
+if nargin<5 %~exist('mi','var')
     mi = ones(M,1);
 end
 if isempty(Z)

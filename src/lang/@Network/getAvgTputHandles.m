@@ -8,8 +8,8 @@ function [T] = getAvgTputHandles(self)
 % The method returns the handles to the performance indices but
 % they are optional to collect
 if isempty(self.handles) || ~isfield(self.handles,'T')
-    M = self.getNumberOfStations();
-    K = self.getNumberOfClasses();
+    M = getNumberOfStations(self);
+    K = getNumberOfClasses(self);
     
     T = cell(1,K); % throughputs
     for i=1:M

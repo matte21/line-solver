@@ -4,12 +4,12 @@ function classprio = refreshPriorities(self)
 % Copyright (c) 2012-2021, Imperial College London
 % All rights reserved.
 
-K = self.getNumberOfClasses();
+K = getNumberOfClasses(self);
 classprio = zeros(1,K);
 for r=1:K
     classprio(r) = self.getClassByIndex(r).priority;
 end
 if ~isempty(self.qn)
-    self.qn.setPrio(classprio);
+    self.qn.classprio = classprio;
 end
 end

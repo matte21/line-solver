@@ -8,8 +8,8 @@ function [CNchain,XNchain] = getAvgSys(self,R,T)
 
 qn = self.model.getStruct();
 if nargin < 3
-    R = self.model.getAvgRespTHandles;
-    T = self.model.getAvgTputHandles;
+    R = self.getAvgRespTHandles;
+    T = self.getAvgTputHandles;
 end
 [~,~,RN,TN] = self.getAvg([],[],R,T);
 

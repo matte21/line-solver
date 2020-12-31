@@ -52,8 +52,8 @@ classdef Coxian < MarkovianDistribution
             % EX = GETMEAN()
             % Get distribution mean
             if length(self.params) == 2
-                mu = self.getMu();
-                phi = self.getPhi();
+                mu = getMu(self);
+                phi = getPhi(self);
                 ex = map_mean({diag(-mu)+diag(mu(1:end-1).*(1-phi(1:end-1)),1),[phi.*mu,zeros(length(mu),length(mu)-1)]});
             else
                 % Get distribution mean
@@ -68,8 +68,8 @@ classdef Coxian < MarkovianDistribution
             % SCV = GETSCV()
             % Get the squared coefficient of variation of the distribution (SCV = variance / mean^2)
             if length(self.params) == 2
-                mu = self.getMu();
-                phi = self.getPhi();
+                mu = getMu(self);
+                phi = getPhi(self);
                 SCV = map_scv({diag(-mu)+diag(mu(1:end-1).*(1-phi(1:end-1)),1),[phi.*mu,zeros(length(mu),length(mu)-1)]});
             else
                 mu1 = self.getParam(1).paramValue;
@@ -85,8 +85,8 @@ classdef Coxian < MarkovianDistribution
             % PH = GETREPRESENTATION()
             % Return the renewal process associated to the distribution
             if length(self.params) == 2
-                mu = self.getMu();
-                phi = self.getPhi();
+                mu = getMu(self);
+                phi = getPhi(self);
                 PH = {diag(-mu)+diag(mu(1:end-1).*(1-phi(1:end-1)),1),[phi.*mu,zeros(length(mu),length(mu)-1)]};
             else
                 mu1 = self.getParam(1).paramValue;

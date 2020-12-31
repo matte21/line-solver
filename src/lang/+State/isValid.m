@@ -35,13 +35,16 @@ K = zeros(1,R);
 for ist=1:qn.nstations
     for r=1:R
         K(r) = qn.phases(ist,r);
-        if ~isempty(qn.proc) && ~isempty(qn.proc{ist,r}) && any(any(isnan(qn.proc{ist,r}{1}))) && n(ist,r)>0 % if disabled
-            isValid = false;
-            %            line_error(mfilename,'Chain %d is initialized with an incorrect number of jobs: %f instead of %d.', nc, statejobs_chain, njobs_chain);
-            return
+        if qn.nodetype(qn.stationToNode(ist)) ~= NodeType.Place
+            if ~isempty(qn.proc) && ~isempty(qn.proc{ist,r}) && any(any(isnan(qn.proc{ist,r}{1}))) && n(ist,r)>0 % if disabled
+                isValid = false;
+                %            line_error(mfilename,sprintf('Chain %d is initialized with an incorrect number of jobs: %f instead of %d.', nc, statejobs_chain, njobs_chain));
+                return
+            end
         end
     end
     if any(n(ist,:)>qn.classcap(ist,:))
+        line_warning(mfilename,'Station %d is in a state with more jobs than its allowed capacity');
         isValid = false;
         return
     end
@@ -52,8 +55,8 @@ if nargin > 2 && ~isempty(s)
         if qn.nservers(ist)>0
             % if more running jobs than servers
             if sum(s(ist,:)) > qn.nservers(ist)
-                switch qn.sched(ist) % don't flag invalid if ps
-                    case {SchedStrategy.FCFS,SchedStrategy.SIRO,SchedStrategy.LCFS,SchedStrategy.HOL}
+                switch qn.schedid(ist) % don't flag invalid if ps
+                    case {SchedStrategy.ID_FCFS,SchedStrategy.ID_SIRO,SchedStrategy.ID_LCFS,SchedStrategy.ID_HOL}
                         isValid = false;
                         return
                 end

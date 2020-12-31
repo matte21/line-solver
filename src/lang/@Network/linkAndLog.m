@@ -38,7 +38,7 @@ end
 if exist('logPath','var')
     self.setLogPath(logPath);
 else
-    logPath = self.getLogPath();
+    logPath = getLogPath(self);
 end
 
 Mnodesnew = 3*Mnodes;

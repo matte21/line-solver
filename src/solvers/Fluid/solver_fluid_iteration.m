@@ -20,7 +20,7 @@ t=[];
 ymean_t=[];
 % heuristic to select stiff or non-stiff ODE solver
 nonZeroRates = slowrate(:);
-nonZeroRates = nonZeroRates(nonZeroRates>0);
+nonZeroRates = nonZeroRates( nonZeroRates >Distrib.Tol );
 
 nonZeroRates = nonZeroRates(isfinite(nonZeroRates));
 rategap = log10(max(nonZeroRates)/min(nonZeroRates)); % if the max rate is Distrib.InfRate and the min is 1, then rategap = 6

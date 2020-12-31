@@ -9,12 +9,12 @@ if ~exist('keepDisabled','var')
     keepDisabled = false;
 end
 
-M = self.model.getNumberOfStations();
-K = self.model.getNumberOfClasses();
+M = qn.nstations();
+K = qn.nclasses();
 if nargin == 1
-    U = self.model.getAvgUtilHandles();
+    U = getAvgUtilHandles(self);
 end
-UN = self.getAvgUtil();
+UN = getAvgUtil(self);
 if isempty(UN)
     AvgTable = Table();
     UT = Table();

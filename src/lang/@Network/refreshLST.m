@@ -1,16 +1,28 @@
-function [lt] = refreshLST(self)
-% [LT] = REFRESHLAPLST()
+function [lt] = refreshLST(self,statSet,classSet)
+% [LT] = REFRESHLAPLST(STATSET,CLASSSET)
 % Refresh the Laplace-Stieltjes transforms in the NetworkStruct object
 
 % Copyright (c) 2012-2021, Imperial College London
 % All rights reserved.
 
-M = self.getNumberOfStations();
-K = self.getNumberOfClasses();
-lt = cell(M,K);
+M = getNumberOfStations(self);
+K = getNumberOfClasses(self);
+if nargin<2
+    statSet = 1:M;
+    classSet = 1:K;
+elseif nargin==2
+    classSet = 1:K;
+elseif nargin==3 && isfield(self.qn,'lt')
+    % we are only updating selected stations and classes so use the
+    % existing ones for the others
+    lt = self.qn.lt;
+else
+    lt = cell(M,K);
+end
+
 source_i = self.getIndexSourceStation;
-for i=1:M
-    for r=1:K
+for i=statSet
+    for r=classSet
         if i == source_i
             if  isa(self.stations{i}.input.sourceClasses{r}{end},'Disabled')
                 lt{i,r} = [];
@@ -30,6 +42,6 @@ for i=1:M
     end
 end
 if ~isempty(self.qn) %&& isprop(self.qn,'mu')
-    self.qn.setLSTs(lt);
+    self.qn.lst = lt;
 end
 end

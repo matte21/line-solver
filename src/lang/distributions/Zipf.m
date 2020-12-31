@@ -39,7 +39,7 @@ classdef Zipf < DiscreteDistrib
             % Get distribution squared coefficient of variation (SCV = variance / mean^2)
             s = self.getParam(3).paramValue;
             n = self.getParam(4).paramValue;
-            ex = self.getMean();
+            ex = getMean(self);
             var = self.genHarmonic(s-2,n) / self.genHarmonic(s,n) - ex^2;
             SCV = var / ex^2;
         end

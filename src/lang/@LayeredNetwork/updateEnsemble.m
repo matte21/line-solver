@@ -5,9 +5,9 @@ function self = updateEnsemble(self, isBuild)
 % All rights reserved.
 
 if isBuild
-    self = self.buildEnsemble();
+    self = buildEnsemble(self);
 else
-    self = self.refreshEnsemble();
+    self = refreshEnsemble(self);
 end
 
 end

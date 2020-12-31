@@ -19,6 +19,10 @@ classdef Buffer < InputSection
             self.inputJobClasses = {};
             initQueueJobClasses(self, classes);
         end
+        
+        function self = setSize(self, size)
+            self.size = size;
+        end
     end
     
     methods (Access = 'private')
@@ -26,7 +30,7 @@ classdef Buffer < InputSection
             % INITQUEUEJOBCLASSES(CUSTOMERCLASSES)
             
             for i = 1 : length(customerClasses)
-                self.inputJobClasses{i} = {customerClasses{i}, SchedStrategy.FCFS, DropStrategy.InfiniteBuffer};
+                self.inputJobClasses{i} = {customerClasses{i}, SchedStrategy.FCFS, DropStrategy.WaitingQueue};
             end
         end
     end

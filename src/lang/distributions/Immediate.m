@@ -27,6 +27,10 @@ classdef Immediate < Distrib
             X = zeros(n,1);
         end
         
+        function rate = getRate(self)
+            rate = Distrib.InfRate;
+        end
+        
         function ex = getMean(self)
             % EX = GETMEAN()
             

@@ -13,8 +13,8 @@ if ~isempty(self.getIndexOpenClasses)
 end
 
 % Get attributes
-for i=1:self.getNumberOfNodes()
-    for r=1:self.getNumberOfClasses()
+for i=1:getNumberOfNodes(self)
+    for r=1:getNumberOfClasses(self)
         try % not all nodes have all classes
             switch class(self.nodes{i})
                 case {'Queue','QueueingStation','DelayStation','Delay'}
@@ -48,6 +48,15 @@ for i=1:self.getNumberOfNodes()
                 case 'Cache'
                     self.setUsedFeatures('CacheClassSwitcher');
                     self.setUsedFeatures('Cache');
+                case 'Transition'
+                    self.setUsedFeatures('Transition');
+                    self.setUsedFeatures('Enabling');
+                    self.setUsedFeatures('Timing');
+                    self.setUsedFeatures('Firing');
+                case 'Place'
+                    self.setUsedFeatures('Storage');
+                    self.setUsedFeatures('Linkage');
+                    self.setUsedFeatures('Place');
             end
         end
     end

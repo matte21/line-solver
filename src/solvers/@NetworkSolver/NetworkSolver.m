@@ -21,17 +21,63 @@ classdef NetworkSolver < Solver
             end
             if exist('options','var'), self.setOptions(options); end
             self.result = [];
-            self.handles.Q = [];
-            self.handles.U = [];
-            self.handles.W = [];
-            self.handles.T = [];
+            
+            [Q,U,R,T,A] = model.getAvgHandles;
+            self.setAvgHandles(Q,U,R,T,A);
+            
+            [Qt,Ut,Tt] = model.getTranHandles;
+            self.setTranHandles(Qt,Ut,Tt);
+            
             if ~model.hasStruct()
-                %self.model.sanitize;
                 self.model.refreshStruct(); % force model to refresh
             end
+        end        
+        
+        function self = setTranHandles(self,Qt,Ut,Tt)
+            self.handles.Qt = Qt;
+            self.handles.Ut = Ut;
+            self.handles.Tt = Tt;
         end
         
+        function self = setAvgHandles(self,Q,U,R,T,A)
+            self.handles.Q = Q;
+            self.handles.U = U;
+            self.handles.R = R;
+            self.handles.T = T;
+            self.handles.A = A;
+        end
+        
+        function [Qt,Ut,Tt] = getTranHandles(self)
+            Qt = self.handles.Qt;
+            Ut = self.handles.Ut;
+            Tt = self.handles.Tt;
+        end
+        
+        function [Q,U,R,T,A] = getAvgHandles(self)
+            Q = self.handles.Q;
+            U = self.handles.U;
+            R = self.handles.R;
+            T = self.handles.T;
+            A = self.handles.A;
+        end
+        
+        function Q = getAvgQLenHandles(self)
+            Q = self.handles.Q;
+        end
+        
+        function R = getAvgRespTHandles(self)
+            R = self.handles.R;
+        end
+        
+        function U = getAvgUtilHandles(self)
+            U = self.handles.U;
+        end
+        
+        function T = getAvgTputHandles(self)
+            T = self.handles.T;
+        end
     end
+        
     
     methods (Access = 'protected')
         function bool = hasAvgResults(self)
@@ -94,19 +140,12 @@ classdef NetworkSolver < Solver
             % Get agent representation
             ag = self.model.getAG();
         end
-        
-        function qn = getStruct(self)
-            % QN = GETSTRUCT()
-            
-            % Get data structure summarizing the model
-            qn = self.model.getStruct();
-        end
-        
+                
         function QN = getAvgQLen(self)
             % QN = GETAVGQLEN()
             
             % Compute average queue-lengths at steady-state
-            Q = self.model.getAvgQLenHandles();
+            Q = getAvgQLenHandles(self);
             [QN,~,~,~] = self.getAvg(Q,[],[],[]);
         end
         
@@ -114,7 +153,7 @@ classdef NetworkSolver < Solver
             % UN = GETAVGUTIL()
             
             % Compute average utilizations at steady-state
-            U = self.model.getAvgUtilHandles();
+            U = getAvgUtilHandles(self);
             [~,UN,~,~] = self.getAvg([],U,[],[]);
         end
         
@@ -122,14 +161,14 @@ classdef NetworkSolver < Solver
             % RN = GETAVGRESPT()
             
             % Compute average response times at steady-state
-            R = self.model.getAvgRespTHandles();
+            R = getAvgRespTHandles(self);
             [~,~,RN,~] = self.getAvg([],[],R,[]);
         end
         
         function WN = getAvgWaitT(self)
             % RN = GETAVGWAITT()           
             % Compute average waiting time in queue excluding service
-            R = self.model.getAvgRespTHandles();
+            R = getAvgRespTHandles(self);
             [~,~,RN,~] = self.getAvg([],[],R,[]);
             if isempty(RN)
                 WN = [];
@@ -144,7 +183,7 @@ classdef NetworkSolver < Solver
             % TN = GETAVGTPUT()
             
             % Compute average throughputs at steady-state
-            T = self.model.getAvgTputHandles();
+            T = getAvgTputHandles(self);
             [~,~,~,TN] = self.getAvg([],[],[],T);
         end
         
@@ -152,9 +191,9 @@ classdef NetworkSolver < Solver
             % AN = GETAVGARVR()
             
             % Compute average arrival rate at steady-state
-            M = self.model.getNumberOfStations;
-            K = self.model.getNumberOfClasses;
-            T = self.model.getAvgTputHandles();
+            M = qn.nstations;
+            K = qn.nclasses;
+            T = getAvgTputHandles(self);
             [~,~,~,TN] = self.getAvg([],[],[],T);
             qn = self.model.getStruct;
             if ~isempty(T)
@@ -208,9 +247,9 @@ classdef NetworkSolver < Solver
         function self = setAvgResults(self,Q,U,R,T,C,X,runtime,method)
             % SELF = SETAVGRESULTS(SELF,Q,U,R,T,C,X,RUNTIME,METHOD)            
             % Store average metrics at steady-state
-            self.result.('solver') = self.getName();
+            self.result.('solver') = getName(self);
             if ~exist('method','var')
-                method = self.getOptions().method;
+                method = getOptions(self).method;
             end
             self.result.Avg.('method') = method;
             if isnan(Q), Q=[]; end
@@ -226,7 +265,7 @@ classdef NetworkSolver < Solver
             self.result.Avg.T = T;
             self.result.Avg.C = C;
             self.result.Avg.runtime = runtime;
-            if self.getOptions().verbose
+            if getOptions(self).verbose
                 try
                     solvername = erase(self.result.solver,'Solver');
                 catch
@@ -240,8 +279,8 @@ classdef NetworkSolver < Solver
             % SELF = SETDISTRIBRESULTS(SELF,CD,RUNTIME)
             
             % Store distribution metrics at steady-state
-            self.result.('solver') = self.getName();
-            self.result.Distrib.('method') = self.getOptions().method;
+            self.result.('solver') = getName(self);
+            self.result.Distrib.('method') = getOptions(self).method;
             self.result.Distrib.C = Cd;
             self.result.Distrib.runtime = runtime;
         end
@@ -250,8 +289,8 @@ classdef NetworkSolver < Solver
             % SELF = SETTRANPROB(SELF,T,PI_T,SS,RUNTIMET)
             
             % Store transient average metrics
-            self.result.('solver') = self.getName();
-            self.result.Tran.Prob.('method') = self.getOptions().method;
+            self.result.('solver') = getName(self);
+            self.result.Tran.Prob.('method') = getOptions(self).method;
             self.result.Tran.Prob.t = t;
             self.result.Tran.Prob.pi_t = pi_t;
             self.result.Tran.Prob.SS = SS;
@@ -262,8 +301,8 @@ classdef NetworkSolver < Solver
             % SELF = SETTRANAVGRESULTS(SELF,QT,UT,RT,TT,CT,XT,RUNTIMET)
             
             % Store transient average metrics
-            self.result.('solver') = self.getName();
-            self.result.Tran.Avg.('method') = self.getOptions().method;
+            self.result.('solver') = getName(self);
+            self.result.Tran.Avg.('method') = getOptions(self).method;
             for i=1:size(Qt,1), for r=1:size(Qt,2), if isnan(Qt{i,r}), Qt={}; end, end, end
             for i=1:size(Rt,1), for r=1:size(Rt,2), if isnan(Rt{i,r}), Rt={}; end, end, end
             for i=1:size(Ut,1), for r=1:size(Ut,2), if isnan(Ut{i,r}), Ut={}; end, end, end

@@ -52,9 +52,9 @@ else % Z>0
     A = (A+A')/2; % let's get rid of small numerical perturbations
     iA = inv(A);
     x0 = [log(umax(1:M-1)/umax(M))',log(vmax)]; % move to R^{K}
-    if isempty(samples)
+    if isempty(samples)        
         samples = mvnrnd(x0,iA,I);
-    end    
+    end 
     T = zeros(I,1);
     epsilon=1e-10;
     eN = epsilon*sum(N);

@@ -7,9 +7,9 @@ function [RN] = getAvgRespTChain(self,R)
 
 qn = self.model.getStruct();
 %if nargin == 1
-%    [Q] = self.model.getAvgHandles();
+%    [Q] = getAvgHandles(self);
 %end
-[RNclass] = self.getAvgRespT();
+[RNclass] = getAvgRespT(self);
 
 % compute chain visits
 alpha = zeros(qn.nstations,qn.nclasses);

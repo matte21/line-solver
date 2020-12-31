@@ -17,7 +17,7 @@ classdef TimeSeries < PointProcess
             % TRANSFORM(FILTERTYPE, FILTERPARAM)
             
             if isempty(self.data)
-                self.load();
+                load(self);
             end
             I = length(self.data);
             switch filterType
@@ -64,7 +64,7 @@ classdef TimeSeries < PointProcess
             % SUMMARY()
             
             if isempty(self.data)
-                self.load();
+                load(self);
             end
             MEAN = self.getMean;
             MED = median(self.data);

@@ -1,11 +1,11 @@
 function [XN,QN,UN,CN,lGN] = pfqn_mvamx(lambda,D,N,Z, mi)
 % [XN,QN,UN,CN,LGN] = PFQN_MVAMX(LAMBDA,D,N,Z, MI)
 
-if any(N(find(lambda))>0 & isfinite(N(find(lambda))))
+if any(N(lambda>0)>0 & isfinite(N(lambda>0)))
     line_error(mfilename,'Arrival rate cannot be specified on closed classes.');
 end
 [M,R] = size(D);
-if ~exist('mi','var')
+if nargin<5 %~exist('mi','var')
     mi = ones(M,1);
 end
 openClasses = find(isinf(N));

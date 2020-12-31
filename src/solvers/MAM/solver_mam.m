@@ -36,7 +36,7 @@ for k=1:K
     chain(k) = find(qn.chains(:,k));
 end
 
-if qn.isopen()
+if all(isinf(qn.njobs)) % is open 
     %    open queueing system (one node is the external world)
     BuToolsVerbose = false;
     BuToolsCheckInput = false;
@@ -45,11 +45,11 @@ if qn.isopen()
     pie = {};
     D0 = {};
     for ist=1:M
-        switch qn.sched(ist)
-            case SchedStrategy.EXT
+        switch qn.schedid(ist)
+            case SchedStrategy.ID_EXT
                 TN(ist,:) = qn.rates(ist,:);
                 TN(ist,isnan(TN(ist,:)))=0;
-            case {SchedStrategy.FCFS, SchedStrategy.HOL, SchedStrategy.PS}
+            case {SchedStrategy.ID_FCFS, SchedStrategy.ID_HOL, SchedStrategy.ID_PS}
                 for k=1:K
                     %                    divide service time by number of servers and put
                     %                    later a surrogate delay server in tandem to compensate

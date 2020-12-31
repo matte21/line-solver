@@ -7,9 +7,9 @@ function [UN] = getAvgUtilChain(self,U)
 
 qn = self.model.getStruct();
 %if nargin == 1
-%    [Q] = self.model.getAvgHandles();
+%    [Q] = getAvgHandles(self);
 %end
-[UNclass] = self.getAvgUtil();
+[UNclass] = getAvgUtil(self);
 
 % compute average chain metrics
 UN = zeros(qn.nstations, qn.nchains);

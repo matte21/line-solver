@@ -18,16 +18,16 @@ model = Network(modelName);
 hasSink = 0;
 idSource = [];
 for i = 1:M
-    switch qn.sched(i)
-        case SchedStrategy.INF
+    switch qn.schedid(i)
+        case SchedStrategy.ID_INF
             node{i} = DelayStation(model, qn.nodenames{i});
-        case SchedStrategy.FORK
+        case SchedStrategy.ID_FORK
             node{i} = ForkStation(model, qn.nodenames{i});
-        case SchedStrategy.EXT
+        case SchedStrategy.ID_EXT
             node{i} = Source(model, 'Source'); idSource = i;
             node{M+1} = Sink(model, 'Sink'); hasSink = 1;
         otherwise
-            node{i} = Queue(model, qn.nodenames{i}, qn.sched(i));
+            node{i} = Queue(model, qn.nodenames{i}, qn.sched{i});
             node{i}.setNumServers(qn.nservers(i));
     end
 end
@@ -59,8 +59,8 @@ for k = 1:K
     for i=1:M
         SCVik = map_scv(PH{i,k});
         %        if SCVik >= 0.5
-        switch qn.sched(i)
-            case SchedStrategy.EXT
+        switch qn.schedid(i)
+            case SchedStrategy.ID_EXT
                 if isnan(qn.rates(i,k))
                     node{i}.setArrival(jobclass{k}, Disabled());
                 elseif qn.rates(i,k)==0
@@ -68,7 +68,7 @@ for k = 1:K
                 else
                     node{i}.setArrival(jobclass{k}, APH.fitMeanAndSCV(map_mean(PH{i,k}),SCVik));
                 end
-            case SchedStrategy.FORK
+            case SchedStrategy.ID_FORK
                 % do nothing
             otherwise
                 if isnan(qn.rates(i,k))
@@ -83,10 +83,10 @@ for k = 1:K
         % this could be made more precised by fitting into a 2-state
         % APH, especially if SCV in [0.5,0.1]
         %            nPhases = max(1,round(1/SCVik));
-        %            switch qn.sched(i)
-        %                case SchedStrategy.EXT
+        %            switch qn.schedid(i)
+        %                case SchedStrategy.ID_EXT
         %                    node{i}.setArrival(jobclass{k}, Erlang(nPhases/map_mean(PH{i,k}),nPhases));
-        %                case SchedStrategy.FORK
+        %                case SchedStrategy.ID_FORK
         % do nothing
         %                otherwise
         %                    node{i}.setService(jobclass{k}, Erlang(nPhases/map_mean(PH{i,k}),nPhases));

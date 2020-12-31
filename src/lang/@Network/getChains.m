@@ -5,9 +5,10 @@ function [qnchains,chains] = getChains(self, rt)
 % All rights reserved.
 
 if ~exist('rt','var')
-    rt = self.getRoutingMatrix();
+    rt = getRoutingMatrix(self);
 end
-refstat = self.getReferenceStations();
+
+refstat = getReferenceStations(self);
 % getChains
 [C, inChain] = weaklyconncomp(rt+rt');
 chainCandidates = cell(1,C);

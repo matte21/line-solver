@@ -62,21 +62,6 @@ fprintf(1,'\n\nExample: <strong>example_mixedModel_2</strong>\n');
 clear; example_mixedModel_2; fprintf(1,'Pausing...'); pause(3.0);
 
 %%
-fprintf(1,'\n<strong>RUNNING: example_forkJoin_*</strong>');
-fprintf(1,'\n\nExample: <strong>example_forkJoin_1</strong>\n');
-fprintf(1,'This example shows the simulation of a fork-join open queueing network.\n');
-clear; example_forkJoin_1; fprintf(1,'Pausing...'); pause(3.0);
-fprintf(1,'\n\nExample: <strong>example_forkJoin_2</strong>\n');
-fprintf(1,'This example shows the simulation of a multiclass fork-join open queueing network.\n');
-clear; example_forkJoin_2; fprintf(1,'Pausing...'); pause(3.0);
-fprintf(1,'\n\nExample: <strong>example_forkJoin_3</strong>\n');
-fprintf(1,'This example shows the simulation of nested forks and joins.\n');
-clear; example_forkJoin_3; fprintf(1,'Pausing...'); pause(3.0);
-fprintf(1,'\n\nExample: <strong>example_forkJoin_4</strong>\n');
-fprintf(1,'This example shows a model with a fork but without a join.\n');
-clear; example_forkJoin_4; fprintf(1,'Pausing...'); pause(3.0);
-
-%%
 fprintf(1,'\n<strong>RUNNING: example_sdRouting_*</strong>');
 fprintf(1,'This example analyzes round-robin scheduling.\n');
 fprintf(1,'\n\nExample: <strong>example_sdRouting_1</strong>\n');
@@ -163,6 +148,21 @@ fprintf('This example shows service demand estimation in a multiclass model usin
 clear; example_svcEstimation_3; fprintf(1,'Pausing...'); pause(3.0);
 fprintf('This example shows service demand estimation in a multiclass model using the utilization-based optimization (UBO) method.\n')
 clear; example_svcEstimation_4; fprintf(1,'Pausing...'); pause(3.0);
+
+%%
+fprintf(1,'\n<strong>RUNNING: example_forkJoin_*</strong>');
+fprintf(1,'\n\nExample: <strong>example_forkJoin_1</strong>\n');
+fprintf(1,'This example shows the simulation of a fork-join open queueing network.\n');
+clear; example_forkJoin_1; fprintf(1,'Pausing...'); pause(3.0);
+fprintf(1,'\n\nExample: <strong>example_forkJoin_2</strong>\n');
+fprintf(1,'This example shows the simulation of a multiclass fork-join open queueing network.\n');
+clear; example_forkJoin_2; fprintf(1,'Pausing...'); pause(3.0);
+fprintf(1,'\n\nExample: <strong>example_forkJoin_3</strong>\n');
+fprintf(1,'This example shows the simulation of nested forks and joins.\n');
+clear; example_forkJoin_3; fprintf(1,'Pausing...'); pause(3.0);
+fprintf(1,'\n\nExample: <strong>example_forkJoin_4</strong>\n');
+fprintf(1,'This example shows a model with a fork but without a join.\n');
+clear; example_forkJoin_4; fprintf(1,'Pausing...'); pause(3.0);
 
 %%
 fprintf(1,'\nExamples completed.\n')

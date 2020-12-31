@@ -1,4 +1,4 @@
-clear;
+if ~isoctave(), clearvars -except exampleName; end 
 model = Network('model');
 
 node{1} = Queue(model, 'Queue1', SchedStrategy.PS);
@@ -71,14 +71,14 @@ end
 state = model.getState;
 
 tic;
-solver = Solver.load('ctmc',model);
+solver = Solver.load('ctmc',model,'seed',23000);
 ATex=solver.getAvgTable
 toc
 tic;
-solver = SolverMVA(model,'method','exact');
+solver = SolverMVA(model,'method','exact','seed',23000);
 ATmva=solver.getAvgTable
 toc
 tic;
-solver = SolverJMT(model,'method','jmva.ls','samples',1000);
+solver = SolverNC(model,'method','ls','seed',23000,'samples',1000);
 ATls=solver.getAvgTable
 toc

@@ -5,20 +5,35 @@ classdef (Sealed) TimingStrategy
     % All rights reserved.
     
     properties (Constant)
-        Timed = 0;
-        Immediate = 1;
+        Timed = categorical({'timed'});
+        Immediate = categorical({'immediate'});
+        
+        ID_TIMED = 0;
+        ID_IMMEDIATE = 1;
     end
     
     methods (Static)
+        
+        function id = toId(type)
+            % ID = TOOD(TYPE)
+            
+            switch type
+                case TimingStrategy.Timed
+                    id = ID_TIMED;
+                case TimingStrategy.Immediate
+                    id = ID_IMMEDIATE;
+            end
+            
+        end
         
         function text = toText(type)
             % TEXT = TOTEXT(TYPE)
             
             switch type
                 case TimingStrategy.Timed
-                    text = 'Timed Transaction';
+                    text = 'Timed Transition';
                 case TimingStrategy.Immediate
-                    text = 'Immediate Transaction';
+                    text = 'Immediate Transition';
             end
         end
     end

@@ -7,7 +7,7 @@ function ag = getAG(self)
 
 % parses all but the service processes
 if isempty(self.ag)
-    self.refreshAG();
+    refreshAG(self);
 end
 ag=self.ag;
 end

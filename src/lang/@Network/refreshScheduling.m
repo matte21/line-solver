@@ -5,10 +5,10 @@ function [sched, schedid, schedparam] = refreshScheduling(self)
 % All rights reserved.
 
 % determine scheduling parameters
-M = self.getNumberOfStations();
-K = self.getNumberOfClasses();
+M = getNumberOfStations(self);
+K = getNumberOfClasses(self);
 
-sched = self.getStationScheduling();
+sched = getStationScheduling(self);
 schedparam = zeros(M,K);
 for i=1:M
     if isempty(self.getIndexSourceStation) || i ~= self.getIndexSourceStation
@@ -19,8 +19,8 @@ for i=1:M
                 if ~isempty(self.stations{i}.schedStrategyPar) & ~isnan(self.stations{i}.schedStrategyPar) %#ok<AND2>
                     schedparam(i,:) = self.stations{i}.schedStrategyPar;
                 else
-                    switch sched(i)
-                        case SchedStrategy.SEPT
+                    switch SchedStrategy.toId(sched{i})
+                        case SchedStrategy.ID_SEPT
                             svcTime = zeros(1,K);
                             for k=1:K
                                 svcTime(k) = self.nodes{i}.serviceProcess{k}.getMean;
@@ -30,7 +30,7 @@ for i=1:M
                             for k=1:K
                                 self.nodes{i}.schedStrategyPar(k) = find(svcTimeSorted == svcTime(k));
                             end
-                        case SchedStrategy.LEPT
+                        case SchedStrategy.ID_LEPT
                             svcTime = zeros(1,K);
                             for k=1:K
                                 svcTime(k) = self.nodes{i}.serviceProcess{k}.getMean;
@@ -47,6 +47,12 @@ for i=1:M
 end
 
 if ~isempty(self.qn)
-    self.qn.setSched(sched, schedparam);
+    self.qn.sched = sched;
+    self.qn.schedparam = schedparam;
+    schedid = zeros(self.qn.nstations,1);
+    for i=1:self.qn.nstations
+		schedid(i) = SchedStrategy.toId(sched{i});
+    end
+	self.qn.schedid = schedid;
 end
 end

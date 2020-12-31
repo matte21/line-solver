@@ -8,8 +8,8 @@ function R = getAvgRespTHandles(self)
 % The method returns the handles to the performance indices but
 % they are optional to collect
 if isempty(self.handles) || ~isfield(self.handles,'R')
-    M = self.getNumberOfStations();
-    K = self.getNumberOfClasses();
+    M = getNumberOfStations(self);
+    K = getNumberOfClasses(self);
     
     R = cell(M,K); % response times
     for i=1:M

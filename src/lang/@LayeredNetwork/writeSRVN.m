@@ -14,16 +14,16 @@ fprintf(fid,'#Host block\n');
 fprintf(fid,['P ',num2str(length(self.hosts)),'\n']);
 for p=1:length(self.hosts)
     curProc = self.hosts(p);
-    switch curProc.scheduling
-        case SchedStrategy.INF
+    switch SchedStrategy.toId(curProc.scheduling)
+        case SchedStrategy.ID_INF
             fprintf(fid,['p ',curProc.name,' i','\n']);
-        case SchedStrategy.FCFS
+        case SchedStrategy.ID_FCFS
             fprintf(fid,['p ',curProc.name,' f m ',num2str(curProc.multiplicity),'\n']);
-        case SchedStrategy.PS
+        case SchedStrategy.ID_PS
             fprintf(fid,['p ',curProc.name,' s ',num2str(curProc.quantum),' m ',num2str(curProc.multiplicity),'\n']);
-        case SchedStrategy.SIRO
+        case SchedStrategy.ID_SIRO
             fprintf(fid,['p ',curProc.name,' r m ',num2str(curProc.multiplicity),'\n']);
-        case SchedStrategy.HOL
+        case SchedStrategy.ID_HOL
             fprintf(fid,['p ',curProc.name,' h m ',num2str(curProc.multiplicity),'\n']);
         otherwise
             line_error(mfilename,'Unsupported scheduling policy.');
@@ -50,14 +50,14 @@ for p=1:length(self.hosts)
                 entryNameList = [entryNameList,' ',curEntry.name];
             end
         end
-        switch curTask.scheduling
-            case SchedStrategy.REF
+        switch SchedStrategy.toId(curTask.scheduling)
+            case SchedStrategy.ID_REF
                 fprintf(fid,['t ',curTask.name,' r ',entryNameList,' -1 ',curProc.name,' z ',num2str(curTask.thinkTimeMean),' m ',num2str(curTask.multiplicity),'\n']);
-            case SchedStrategy.INF
+            case SchedStrategy.ID_INF
                 fprintf(fid,['t ',curTask.name,' i ',entryNameList,' -1 ',curProc.name,'\n']);
-            case SchedStrategy.FCFS
+            case SchedStrategy.ID_FCFS
                 fprintf(fid,['t ',curTask.name,' f ',entryNameList,' -1 ',curProc.name,' m ',num2str(curTask.multiplicity),'\n']);
-            case SchedStrategy.HOL
+            case SchedStrategy.ID_HOL
                 fprintf(fid,['t ',curTask.name,' h ',entryNameList,' -1 ',curProc.name,' m ',num2str(curTask.multiplicity),'\n']);
             otherwise
                 line_error(mfilename,'Unsupported scheduling policy.');

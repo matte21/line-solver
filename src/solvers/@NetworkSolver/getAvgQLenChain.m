@@ -8,9 +8,9 @@ function [QN] = getAvgQLenChain(self,Q)
 
 qn = self.model.getStruct();
 %if nargin == 1
-%    [Q] = self.model.getAvgHandles();
+%    [Q] = getAvgHandles(self);
 %end
-[QNclass] = self.getAvgQLen();
+[QNclass] = getAvgQLen(self);
 
 % compute average chain metrics
 QN = zeros(qn.nstations, qn.nchains);

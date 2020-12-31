@@ -50,7 +50,7 @@ for i = 1:qn.nstations
                 
                 % determine max integration time
                 nonZeroRates = slowrate(:);
-                nonZeroRates = nonZeroRates( nonZeroRates >0 );
+                nonZeroRates = nonZeroRates( nonZeroRates > Distrib.Tol );
                 T = abs(100/min(nonZeroRates)); % solve ode until T = 100 events with slowest exit rate
                 
                 % indices of new classes at station i

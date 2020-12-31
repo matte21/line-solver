@@ -16,8 +16,8 @@ for ind=1:qn.nnodes
         state_i = [];
         init_sol_i = [];  % compared to state_i, this does not track disabled classes and removes Inf entries in the Sources
         [~, nir, ~, kir_i] = State.toMarginal(qn, ind, qn.state{isf});
-        switch qn.sched(ist)
-            case {SchedStrategy.EXT}
+        switch qn.schedid(ist)
+            case {SchedStrategy.ID_EXT}
                 state_i(:,1) = Inf; % fluid does not model infinite buffer?
                 for r=1:size(kir_i,2)
                     for k=1:length(qn.mu{ist,r})
@@ -27,7 +27,7 @@ for ind=1:qn.nnodes
                         end
                     end
                 end
-            case {SchedStrategy.FCFS, SchedStrategy.PS, SchedStrategy.INF, SchedStrategy.DPS, SchedStrategy.HOL}
+            case {SchedStrategy.ID_FCFS, SchedStrategy.ID_SIRO, SchedStrategy.ID_PS, SchedStrategy.ID_INF, SchedStrategy.ID_DPS, SchedStrategy.ID_HOL}
                 for r=1:size(kir_i,2)
                     for k=1:length(qn.mu{ist,r})
                         if k==1
@@ -44,7 +44,7 @@ for ind=1:qn.nnodes
                     end
                 end
             otherwise
-                line_error(mfilename,'Unsupported scheduling policy at station %d',ist);
+                line_error(mfilename,sprintf('Unsupported scheduling policy at station %d',ist));
                 return
         end
         init_sol = [init_sol, init_sol_i];

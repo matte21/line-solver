@@ -49,6 +49,10 @@ classdef MMPP2 < MarkovModulated
             vart = vart + 2*pi*D1*(expm((D0+D1)*t)-I)*inv(D0+D1+pie*e)^2*D1*e;
         end
         
+        function rate = getRate(self)
+            rate = 1 / getMean(self);
+        end
+        
         % inter-arrival time properties
         function mean = getMean(self)
             % MEAN = GETMEAN()
@@ -88,12 +92,12 @@ classdef MMPP2 < MarkovModulated
         end
         
         function MAP = getRepresentation(self)
-            MAP = self.getProcess();
+            MAP = getProcess(self);
         end
         
         function PH = getPH(self)
             % PH = GETREPRESENTATION()
-            PH = self.getProcess();
+            PH = getProcess(self);
         end
         
         function MAP = getProcess(self)
@@ -115,21 +119,21 @@ classdef MMPP2 < MarkovModulated
         
         function mu = getMu(self)
             % MU = GETMU()
-            MAP = self.getProcess();
+            MAP = getProcess(self);
             mu = sum(MAP{2},2); % sum D1 rows / diag -D0                        
         end
         
         function phi = getPhi(self)
             % PHI = GETPHI()
             % Return the exit vector of the underlying PH
-            MAP = self.getProcess();
+            MAP = getProcess(self);
             phi = sum(MAP{2},2) ./ diag(-MAP{1}); % sum D1 rows / diag -D0            
         end
         
         function bool = isImmmediate(self)
             % BOOL = ISIMMMEDIATE()
             
-            bool = self.getMean() == 0;
+            bool = getMean(self) == 0;
         end
     end
 end

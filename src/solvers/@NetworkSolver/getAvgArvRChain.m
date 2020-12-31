@@ -7,9 +7,9 @@ function [AN] = getAvgArvRChain(self,A)
 
 qn = self.model.getStruct();
 %if nargin == 1
-%    [Q] = self.model.getAvgHandles();
+%    [Q] = getAvgHandles(self);
 %end
-[ANclass] = self.getAvgArvR();
+[ANclass] = getAvgArvR(self);
 
 % compute average chain metrics
 AN = zeros(qn.nstations, qn.nchains);

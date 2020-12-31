@@ -29,7 +29,7 @@ classdef Uniform < ContinuousDistrib
             
             % Get distribution squared coefficient of variation (SCV = variance / mean^2)
             var = (self.getParam(2).paramValue-self.getParam(1).paramValue)^2 / 12;
-            SCV = var/self.getMean()^2;
+            SCV = var/getMean(self)^2;
         end
         
         function Ft = evalCDF(self,t)

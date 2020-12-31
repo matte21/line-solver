@@ -1,5 +1,5 @@
-function [pi,SSq,arvRates,depRates]=solver_ssa_hashed(qn,options)
-% [PI,SSQ,ARVRATES,DEPRATES]=SOLVER_SSA_HASHED(QN,OPTIONS)
+function [pi,SSq,arvRates,depRates,qn]=solver_ssa_hashed(qn,options)
+% [PI,SSQ,ARVRATES,DEPRATES,QN]=SOLVER_SSA_HASHED(QN,OPTIONS)
 
 % Copyright (c) 2012-2021, Imperial College London
 % All rights reserved.
@@ -119,11 +119,11 @@ while samples_collected < options.samples
                     state_p{act} = state(qn.nodeToStateful(node_p{act}));
                     if node_p{act} == node_a{act} %self-loop
                         if update_cond
-                            [new_state_p{act}, ~, outprob_p{act}] = State.afterEventHashedOrAdd(qn, node_p{act}, new_state_a{act}(ia), event_p{act}, class_p{act});
+                            [new_state_p{act}, ~, outprob_p{act}, qn] = State.afterEventHashedOrAdd(qn, node_p{act}, new_state_a{act}(ia), event_p{act}, class_p{act});
                         end
                     else % departure
                         if update_cond
-                            [new_state_p{act}, ~, outprob_p{act}] = State.afterEventHashedOrAdd( qn, node_p{act}, state_p{act}, event_p{act}, class_p{act});
+                            [new_state_p{act}, ~, outprob_p{act}, qn] = State.afterEventHashedOrAdd( qn, node_p{act}, state_p{act}, event_p{act}, class_p{act});
                         end
                     end
                     if new_state_p{act} ~= -1
@@ -151,7 +151,7 @@ while samples_collected < options.samples
                     end
                     if ~isnan(rate_a{act})
                         if all(new_state>0)
-                            if event_a{act} == EventType.DEP
+                            if event_a{act} == EventType.ID_DEP
                                 node_a_sf{act} = qn.nodeToStateful(node_a{act});
                                 node_p_sf{act} = qn.nodeToStateful(node_p{act});
                                 depRatesSamples(samples_collected,node_a_sf{act},class_a{act}) = depRatesSamples(samples_collected,node_a_sf{act},class_a{act}) + outprob_a{act} * outprob_p{act} * rate_a{act}(ia) * prob_sync_p{act};

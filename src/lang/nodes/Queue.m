@@ -22,7 +22,7 @@ classdef Queue < Station
             self.input = Buffer(classes);
             self.output = Dispatcher(classes);
             self.schedPolicy = SchedStrategyType.PR;
-            self.schedStrategy = SchedStrategy.PS;
+            self.schedStrategy = SchedStrategy.ID_PS;
             self.serviceProcess = {};
             self.server = Server(classes);
             self.numberOfServers = 1;
@@ -32,18 +32,18 @@ classdef Queue < Station
             
             if exist('schedStrategy','var')
                 self.schedStrategy = schedStrategy;
-                switch schedStrategy
-                    case {SchedStrategy.PS, SchedStrategy.DPS,SchedStrategy.GPS}
+                switch SchedStrategy.toId(self.schedStrategy)
+                    case {SchedStrategy.ID_PS, SchedStrategy.ID_DPS,SchedStrategy.ID_GPS}
                         self.schedPolicy = SchedStrategyType.PR;
                         self.server = SharedServer(classes);
-                    case {SchedStrategy.FCFS, SchedStrategy.LCFS, SchedStrategy.SIRO, SchedStrategy.SEPT, SchedStrategy.LEPT, SchedStrategy.SJF, SchedStrategy.LJF}
+                    case {SchedStrategy.ID_FCFS, SchedStrategy.ID_LCFS, SchedStrategy.ID_SIRO, SchedStrategy.ID_SEPT, SchedStrategy.ID_LEPT, SchedStrategy.ID_SJF, SchedStrategy.ID_LJF}
                         self.schedPolicy = SchedStrategyType.NP;
                         self.server = Server(classes);
-                    case SchedStrategy.INF
+                    case SchedStrategy.ID_INF
                         self.schedPolicy = SchedStrategyType.NP;
                         self.server = InfiniteServer(classes);
                         self.numberOfServers = Inf;
-                    case SchedStrategy.HOL
+                    case SchedStrategy.ID_HOL
                         self.schedPolicy = SchedStrategyType.NP;
                         self.server = Server(classes);
                     otherwise
@@ -54,8 +54,8 @@ classdef Queue < Station
         
         function setNumberOfServers(self, value)
             % SETNUMBEROFSERVERS(VALUE)
-            switch self.schedStrategy
-                case SchedStrategy.INF
+            switch SchedStrategy.toId(self.schedStrategy)
+                case SchedStrategy.ID_INF
                     %line_warning(mfilename,'A request to change the number of servers in an infinite server node has been ignored.');
                     %ignore
                 otherwise
@@ -66,8 +66,8 @@ classdef Queue < Station
         function setNumServers(self, value)
             % SETNUMSERVERS(VALUE)
             
-            switch self.schedStrategy
-                case {SchedStrategy.DPS, SchedStrategy.GPS}
+            switch SchedStrategy.toId(self.schedStrategy)
+                case {SchedStrategy.ID_DPS, SchedStrategy.ID_GPS}
                     if value ~= 1
                         line_error(mfilename,'Cannot use multi-server stations with %s scheduling.', self.schedStrategy);
                     end
@@ -109,15 +109,17 @@ classdef Queue < Station
             % SETSERVICE(CLASS, DISTRIBUTION, WEIGHT)
             if ~exist('weight','var')
                 weight=1.0;
-            end
+            end            
             resetInitState = false;
-            if length(self.server.serviceProcess) >= class.index
-                if length(self.server.serviceProcess{1,class.index})>= 3
+            if length(self.server.serviceProcess) >= class.index % this is to enable the next if
+                if length(self.server.serviceProcess{1,class.index})<= 3 % if the distribution was already configured
+                    % this is a forced state reset in case for example the number of phases changes
                     resetInitState = true; % must be carried out at the end
                     self.state=[]; % reset the state vector
                 end
             end
             self.serviceProcess{class.index} = distribution;
+            self.input.inputJobClasses{class.index} = {class, self.schedPolicy, DropStrategy.WaitingQueue};
             self.server.serviceProcess{1, class.index}{2} = ServiceStrategy.LI;                        
             if distribution.isImmediate()
                 self.server.serviceProcess{1, class.index}{3} = Immediate();
@@ -132,6 +134,9 @@ classdef Queue < Station
                 %self.model.initDefault(self.model.getNodeIndex(self));
                 self.model.setInitialized(false); % this is a better way to invalidate to avoid that sequential calls to setService all trigger an initDefault
             end
+            %if self.model.hasStruct()
+                %self.model.refreshService(self.stationIndex,class.index);
+            %end
         end
         
         function sections = getSections(self)

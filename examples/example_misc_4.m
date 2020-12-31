@@ -38,12 +38,12 @@ node{3}.setRouting(jobclass{2},RoutingStrategy.RAND);
 solver={};
 options = Solver.defaultOptions;
 options.seed = 23000;
-%solver{end+1} = SolverCTMC(model,options);
+solver{end+1} = SolverCTMC(model,options);
 solver{end+1} = SolverJMT(model,options);
-%solver{end+1} = SolverSSA(model,options);
-%solver{end+1} = SolverFluid(model,options);
-%solver{end+1} = SolverMVA(model,options);
-%solver{end+1} = SolverNC(model,options);
+solver{end+1} = SolverSSA(model,options);
+solver{end+1} = SolverFluid(model,options);
+solver{end+1} = SolverMVA(model,options);
+solver{end+1} = SolverNC(model,options);
 
 for s=1:length(solver)
     fprintf(1,'SOLVER: %s\n',solver{s}.getName());

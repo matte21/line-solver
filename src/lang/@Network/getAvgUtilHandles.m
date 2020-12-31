@@ -8,8 +8,8 @@ function [U] = getAvgUtilHandles(self)
 % The method returns the handles to the performance indices but
 % they are optional to collect
 if isempty(self.handles) || ~isfield(self.handles,'U')
-    M = self.getNumberOfStations();
-    K = self.getNumberOfClasses();
+    M = getNumberOfStations(self);
+    K = getNumberOfClasses(self);
     
     U = cell(M,1); % utilizations
     for i=1:M
