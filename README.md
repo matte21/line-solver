@@ -33,11 +33,16 @@ To get started, retrieve the LINE container:
 ```
 docker pull linemcr/cli
 ```
-After downloading [example_openModel_3.jsimg](https://raw.githubusercontent.com/line-solver/line/master/examples/example_openModel_3.jsimg) to a local directory, run from the linux command line
+After downloading a [JMT](http://jmt.sf.net) example model [example_openModel_3.jsimg](https://raw.githubusercontent.com/line-solver/line/master/examples/example_openModel_3.jsimg) to a local directory, run from the linux command line
 ```
 cat example_openModel_3.jsimg | docker run -i --rm linemcr/cli -i jsimg -s mva -a all -o json
 ```
 The command will print the results of getAvgTable and getAvgSysTable in JSON format.
+
+To solve a layered queueing network (LQN), after downloading a LQN example model [ofbizExample.xml](https://raw.githubusercontent.com/imperial-qore/line/master/examples/ofbizExample.xml) run 
+```
+cat ofBizExample.xml | docker run -i --rm linemcr/cli -i xml -s ln -a all -o json
+```
 
 Further help can be obtained as follows
 ```
