@@ -8,7 +8,7 @@ if self.enableChecks && ~self.supports(self.model)
     ME = MException('Line:FeatureNotSupportedBySolver', 'This model contains features not supported by the solver.');
     throw(ME);
 end
-if ~exist('options','var')
+if nargin<2 %~exist('options','var')
     options=Solver.defaultOptions();
 end
 if ~isfield(options,'samples')

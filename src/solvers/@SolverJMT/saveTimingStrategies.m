@@ -18,7 +18,7 @@ for m=1:numOfModes
     if qn.firingid{ind}(m) == TimingStrategy.ID_IMMEDIATE
         timimgStrategyNode.setAttribute('classPath', 'jmt.engine.NetStrategies.ServiceStrategies.ZeroServiceTimeStrategy');
         timimgStrategyNode.setAttribute('name', 'ZeroServiceTimeStrategy');
-    elseif qn.firingprocid{ind}(m) == ProcessType.ID_APH|| qn.firingprocid{ind}(m) == ProcessType.ID_COXIAN || (qn.firingphases{ind}(m)>2 && qn.timingprocid{ind}(m) == ProcessType.ID_HYPEREXP) %|| (qn.phases(i,r)>2 && qn.procid(i,r) == ProcessType.ID_COXIAN) || (qn.phases(i,r)>2 && qn.procid(i,r) == ProcessType.ID_HYPEREXP)
+    elseif qn.firingprocid{ind}(m) == ProcessType.ID_APH|| qn.firingprocid{ind}(m) == ProcessType.ID_COXIAN || (qn.firingphases{ind}(m)>2 && qn.firingprocid{ind}(m) == ProcessType.ID_HYPEREXP) %|| (qn.phases(i,r)>2 && qn.procid(i,r) == ProcessType.ID_COXIAN) || (qn.phases(i,r)>2 && qn.procid(i,r) == ProcessType.ID_HYPEREXP)
         % Coxian and HyperExp have 2 parameters when they have a {mu, p} input specification
         timimgStrategyNode.setAttribute('classPath', 'jmt.engine.NetStrategies.ServiceStrategies.ServiceTimeStrategy');
         timimgStrategyNode.setAttribute('name', 'timingStrategy');

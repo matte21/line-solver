@@ -30,7 +30,7 @@ classdef Queue < Station
             self.setModel(model);
             self.model.addNode(self);
             
-            if exist('schedStrategy','var')
+            if nargin>=3 %exist('schedStrategy','var')
                 self.schedStrategy = schedStrategy;
                 switch SchedStrategy.toId(self.schedStrategy)
                     case {SchedStrategy.ID_PS, SchedStrategy.ID_DPS,SchedStrategy.ID_GPS}
@@ -86,7 +86,7 @@ classdef Queue < Station
             % DISTRIBUTION = GETSERVICE(CLASS)
             
             % return the service distribution assigned to the given class
-            if ~exist('class','var')
+            if nargin<2 %~exist('class','var')
                 for s = 1:length(self.model.classes)
                     distribution{s} = self.server.serviceProcess{1, self.model.classes{s}}{3};
                 end                
@@ -107,7 +107,7 @@ classdef Queue < Station
         
         function setService(self, class, distribution, weight)
             % SETSERVICE(CLASS, DISTRIBUTION, WEIGHT)
-            if ~exist('weight','var')
+            if nargin<4 %~exist('weight','var')
                 weight=1.0;
             end            
             resetInitState = false;

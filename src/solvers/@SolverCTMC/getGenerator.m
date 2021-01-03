@@ -22,8 +22,3 @@ else
 end
 ev = self.getStruct.sync;
 end
-
-tstate = sampleSys(self, numevents);
-sampleAggr = sampleAggr(self, node, numSamples);
-
-end

@@ -6,9 +6,9 @@ function [a,i]=at(A,r,i)
 % All rights reserved.
 
 if ~iscell(A)
-a=A(r);
+    a=A(r);
 elseif iscell(A)
-a=A{r};
+    a=A{r};
 end
 if nargin==3
     a=A(r,i);

@@ -64,7 +64,9 @@ classdef Uniform < ContinuousDistrib
             % X = SAMPLE(N)
             
             % Get n samples from the distribution
-            if ~exist('n','var'), n = 1; end
+            if nargin<2 %~exist('n','var'), 
+                n = 1; 
+            end
             minVal = self.getParam(1).paramValue;
             maxVal = self.getParam(2).paramValue;
             X = minVal + (maxVal-minVal)*rand(n,1);

@@ -5,17 +5,17 @@ function CDc = getCdfPT(self)
 % All rights reserved.
 
 T0 = tic;
-if ~exist('R','var')
-    R = self.getAvgRespTHandles;
-end
+%if ~exist('R','var')
+R = self.getAvgRespTHandles;
+%end
 qn = self.getStruct;
-if ~exist('withRefStat','var')
-    withRefStat = false(1,qn.nclasses);
-elseif numel(withRefStat) == 1
-    val = withRefStat;
-    withRefStat = false(1,qn.nclasses);
-    withRefStat(:) = val;
-end
+%if ~exist('withRefStat','var')
+withRefStat = false(1,qn.nclasses);
+%elseif numel(withRefStat) == 1
+%    val = withRefStat;
+%    withRefStat = false(1,qn.nclasses);
+%    withRefStat(:) = val;
+%end
 % ptSpec = struct(); % passage time specification
 % ptSpec.starts = false(qn.nnodes,qn.nclasses,qn.nnodes,qn.nclasses);
 % ptSpec.completes = false(qn.nnodes,qn.nclasses,qn.nnodes,qn.nclasses);

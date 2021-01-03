@@ -38,20 +38,20 @@ classdef ActivityPrecedence
         function obj = ActivityPrecedence(preActs, postActs, preType, postType, preParams, postParams)
             % OBJ = ACTIVITYPRECEDENCE(PREACTS, POSTACTS, PRETYPE, POSTTYPE, PREPARAMS, POSTPARAMS)
             
-            if ~exist('preActs','var') || ~exist('postActs','var')
+            if nargin<2 %~exist('preActs','var') || ~exist('postActs','var')
                 line_error(mfilename,'Constructor requires to specify at least pre and post activities.');
             end
             
-            if ~exist('preType','var')
+            if nargin<3 %~exist('preType','var')
                 preType = ActivityPrecedence.PRE_SEQ;
             end
-            if ~exist('postType','var')
+            if nargin<4 %~exist('postType','var')
                 postType = ActivityPrecedence.POST_SEQ;
             end
-            if ~exist('preParams','var')
+            if nargin<5 %~exist('preParams','var')
                 preParams = [];
             end
-            if ~exist('postParams','var')
+            if nargin<6 %~exist('postParams','var')
                 postParams = [];
             end
             
@@ -121,7 +121,7 @@ classdef ActivityPrecedence
             if isa(postAct,'Activity')
                 postAct = postAct.name;
             end
-            if ~exist('quorum','var')
+            if nargin<3 %~exist('quorum','var')
                 quorum = [];
             end
             ap = ActivityPrecedence(preActs,{postAct},ActivityPrecedence.PRE_AND,ActivityPrecedence.POST_SEQ,quorum,[]);

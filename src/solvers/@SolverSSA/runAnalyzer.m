@@ -2,7 +2,7 @@ function [runtime, tranSysState, tranSync] = run(self, options)
 % [RUNTIME, TRANSYSSTATE] = RUN()
 
 T0=tic;
-if ~exist('options','var')
+if nargin<2 %~exist('options','var')
     options = self.getOptions;
 end
 

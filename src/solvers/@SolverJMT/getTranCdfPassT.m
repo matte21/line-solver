@@ -1,7 +1,7 @@
 function RD = getTranCdfPassT(self, R)
 % RD = GETTRANCDFPASST(R)
 
-if ~exist('R','var')
+if nargin<2 %~exist('R','var')
     R = getAvgRespTHandles(self);
 end
 RD = cell(qn.nstations, qn.nclasses);

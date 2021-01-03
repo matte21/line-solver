@@ -245,21 +245,21 @@ classdef SolverLQNS < LayeredNetworkSolver
             runAnalyzer(self);
                     
             lqn = self.getStruct;
-            Node = categorical(lqn.names);
+            Node = label(lqn.names);
             O = length(Node);
-            NodeType = categorical(O,1);
+            NodeType = label(O,1);
             for o = 1:O
                 switch lqn.type(o)
                     case LayeredNetworkElement.PROCESSOR
-                        NodeType(o,1) = categorical({'Processor'});
+                        NodeType(o,1) = label({'Processor'});
                     case LayeredNetworkElement.TASK
-                        NodeType(o,1) = categorical({'Task'});
+                        NodeType(o,1) = label({'Task'});
                     case LayeredNetworkElement.ENTRY
-                        NodeType(o,1) = categorical({'Entry'});
+                        NodeType(o,1) = label({'Entry'});
                     case LayeredNetworkElement.ACTIVITY
-                        NodeType(o,1) = categorical({'Activity'});
+                        NodeType(o,1) = label({'Activity'});
                     case LayeredNetworkElement.CALL
-                        NodeType(o,1) = categorical({'Call'});
+                        NodeType(o,1) = label({'Call'});
                 end
             end
             Utilization = self.result.RawAvg.Nodes.Utilization;
@@ -280,17 +280,17 @@ classdef SolverLQNS < LayeredNetworkSolver
             %EndNodes = self.model.lqnGraph.Edges.EndNodes(CallIndices,:);
             %EndNodes = lqn.callpair(:,2);
             %SourceIndices = findnode(self.model.lqnGraph,EndNodes(:,1));
-            %SourceNode = categorical(self.model.lqnGraph.Nodes.Node(SourceIndices));
+            %SourceNode = label(self.model.lqnGraph.Nodes.Node(SourceIndices));
             %TargetIndices = findnode(self.model.lqnGraph,EndNodes(:,2));
-            %TargetNode = categorical(self.model.lqnGraph.Nodes.Node(TargetIndices));
+            %TargetNode = label(self.model.lqnGraph.Nodes.Node(TargetIndices));
             
             %CallTypeMap = [CallType.SYNC;CallType.ASYNC;CallType.FWD];
-            %Type = categorical(CallTypeMap(self.model.lqnGraph.Edges.Type(CallIndices)));
+            %Type = label(CallTypeMap(self.model.lqnGraph.Edges.Type(CallIndices)));
             if lqn.ncalls == 0                
                 CallAvgTable = Table();
             else
-                SourceNode = categorical({lqn.names{lqn.callpair(:,1)}})';
-                TargetNode = categorical({lqn.names{lqn.callpair(:,2)}})';
+                SourceNode = label({lqn.names{lqn.callpair(:,1)}})';
+                TargetNode = label({lqn.names{lqn.callpair(:,2)}})';
                 Type = lqn.calltype;
                 Waiting = self.result.RawAvg.Edges.Waiting(1:lqn.ncalls);
                 CallAvgTable = Table(SourceNode, TargetNode, Type, Waiting);            

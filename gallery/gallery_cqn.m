@@ -1,7 +1,11 @@
 function model = gallery_cqn(M, useDelay)
 model = Network('Single-class CQN');
 %% Block 1: nodes
-if nargin==1
+
+if nargin==0
+    M=2;
+end
+if nargin<1
     useDelay = false;
 end
 for i=1:M

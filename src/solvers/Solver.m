@@ -25,7 +25,7 @@ classdef Solver < handle
         %Constructor
         function self = Solver(model, name, options)
             % SELF = SOLVER(MODEL, NAME, OPTIONS)
-            if ~exist('options','var')
+            if nargin<3 %~exist('options','var')
                 options = self.defaultOptions;
             end
             self.model = model;

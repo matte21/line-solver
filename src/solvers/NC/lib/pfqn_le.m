@@ -26,7 +26,7 @@ function [Gn,lGn]=pfqn_le(L,N,Z)
 if isempty(L) || isempty(N) || sum(N)==0 || sum(L(:))<1e-4
     lGn = - sum(factln(N)) + sum(N.*log(sum(Z,1)));
     Gn=exp(lGn);
-elseif ~exist('Z','var')
+elseif nargin<3%~exist('Z','var')
     umax=pfqn_le_fpi(L,N);
     A=pfqn_le_hessian(L,N,umax'); % slightly faster than pfqn_le_hessianZ
     S=0; for r=1:R S=S+N(r)*log(umax'*L(:,r)); end

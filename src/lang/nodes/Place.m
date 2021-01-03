@@ -30,7 +30,6 @@ classdef Place < Station
 
             self.classCap = [];
             self.cap = [];
-            %self.dropid = categorical([]);
             self.schedStrategies = [];
         end
 

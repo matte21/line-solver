@@ -1,5 +1,5 @@
 function MMAP = mmap_compress(MMAP, config)
-if ~exist('config','var')
+if nargin<1%~exist('config','var')
     config = struct;
 end
 if ~isfield(config,'method')

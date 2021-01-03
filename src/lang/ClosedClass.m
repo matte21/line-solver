@@ -18,7 +18,7 @@ classdef ClosedClass < JobClass
             self.type = JobClassType.CLOSED;
             self.population = njobs;
             self.priority = 0;
-            if exist('prio','var')
+            if nargin>=5 %exist('prio','var')
                 self.priority = prio;
             end
             model.addJobClass(self);

@@ -1,7 +1,7 @@
 function RD = getCdfRespT(self, R)
 % RD = GETCDFRESPT(R)
 
-if ~exist('R','var')
+if nargin<2 %~exist('R','var')
     R = getAvgRespTHandles(self);
 end
 qn = self.getStruct;

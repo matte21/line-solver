@@ -27,14 +27,18 @@ classdef MarkovianDistribution < ContinuousDistrib
             % X = SAMPLE(N)
             
             % Get n samples from the distribution
-            if ~exist('n','var'), n = 1; end
+            if nargin<2 %~exist('n','var'), 
+                n = 1; 
+            end
             X = map_sample(self.getRepresentation,n);
         end
         
         function EXn = getRawMoments(self, n)
             % EXN = GETRAWMOMENTS(N)
             
-            if ~exist('n','var'), n = 3; end
+            if nargin<2 %~exist('n','var'), 
+                n = 3; 
+            end
             PH = self.getRepresentation;
             EXn = map_moment(PH,1:n);
         end

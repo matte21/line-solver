@@ -3,7 +3,7 @@ function model = QN2LINE(qn, modelName)
 
 % Copyright (c) 2012-2021, Imperial College London
 % All rights reserved.
-if ~exist('modelName','var')
+if nargin<2%~exist('modelName','var')
     modelName = 'qn';
 end
 %%

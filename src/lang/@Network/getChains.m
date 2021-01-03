@@ -4,7 +4,7 @@ function [qnchains,chains] = getChains(self, rt)
 % Copyright (c) 2012-2021, Imperial College London
 % All rights reserved.
 
-if ~exist('rt','var')
+if nargin<2 %~exist('rt','var')
     rt = getRoutingMatrix(self);
 end
 

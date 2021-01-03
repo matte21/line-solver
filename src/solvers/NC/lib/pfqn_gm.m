@@ -31,7 +31,7 @@ if nargin<4
     order=ceil((sum(N)-1)/2);
 end
 
-if ~exist('Z','var')
+if nargin<3%~exist('Z','var')
     Nt=sum(N);
     beta=N/Nt;
     f=@(x) ([x(:);1-sum(x)]'*L);

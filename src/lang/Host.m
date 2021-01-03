@@ -20,21 +20,21 @@ classdef Host  < LayeredNetworkElement
         function self = Host(model, name, multiplicity, scheduling, quantum, speedFactor)
             % self = HOST(MODEL, NAME, MULTIPLICITY, SCHEDULING, QUANTUM, SPEEDFACTOR)
             
-            if ~exist('name','var')
+            if nargin<2 %~exist('name','var')
                 line_error(mfilename,'Constructor requires to specify at least a name.');
             end
             self@LayeredNetworkElement(name);
             
-            if ~exist('multiplicity','var')
+            if nargin<3 %~exist('multiplicity','var')
                 multiplicity = 1;
             end
-            if ~exist('scheduling','var')
+            if nargin<4 %~exist('scheduling','var')
                 scheduling = SchedStrategy.PS;
             end
-            if ~exist('quantum','var')
+            if nargin<5 %~exist('quantum','var')
                 quantum = 0.001;
             end
-            if ~exist('speedFactor','var')
+            if nargin<6 %~exist('speedFactor','var')
                 speedFactor = 1;
             end
             self.replication = 1;            

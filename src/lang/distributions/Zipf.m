@@ -10,7 +10,7 @@ classdef Zipf < DiscreteDistrib
             
             % Construct a Zipf-like distribution on n items with given
             % shape parameter s
-            if ~exist('n','var')
+            if nargin<2 %~exist('n','var')
                 n = Distrib.Inf;
             end
             self@DiscreteDistrib('Zipf',4,[1,n]);
@@ -70,7 +70,7 @@ classdef Zipf < DiscreteDistrib
             
             s = self.getParam(3).paramValue;
             n = self.getParam(4).paramValue;
-            if ~exist('k','var')
+            if nargin<2 %~exist('k','var')
                 k = 1:n;
             end
             Hns = Zipf.genHarmonic(s,n);

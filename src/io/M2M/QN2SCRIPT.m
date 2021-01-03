@@ -3,10 +3,10 @@ function QN2SCRIPT(model, modelName, fid)
 
 % Copyright (c) 2012-2021, Imperial College London
 % All rights reserved.
-if ~exist('modelName','var')
+if nargin<2%~exist('modelName','var')
     modelName='myModel';
 end
-if ~exist('fid','var')
+if nargin<3%~exist('fid','var')
     fid=1;
 end
 if ischar(fid)

@@ -58,13 +58,13 @@ for m=1:(numOfModes)
             
             valueNode2 = simDoc.createElement('value');
             
-            if isinf(qn.enabling{i}(k,r,m))
+            if isinf(qn.enabling{i}{m}(k,r))
                 valueNode2.appendChild(simDoc.createTextNode(int2str(-1)));
                 exists = true;
-            elseif qn.enabling{i}(k,r,m) > 0
-                valueNode2.appendChild(simDoc.createTextNode(int2str(qn.enabling{i}(k,r,m))));
+            elseif qn.enabling{i}{m}(k,r) > 0
+                valueNode2.appendChild(simDoc.createTextNode(int2str(qn.enabling{i}{m}(k,r))));
                 exists = true;
-            elseif ~isinf(qn.inhibiting{i}(k,r,m)) && qn.inhibiting{i}(k,r,m) > 0
+            elseif ~isinf(qn.inhibiting{i}{m}(k,r)) && qn.inhibiting{i}{m}(k,r) > 0
                 valueNode2.appendChild(simDoc.createTextNode(int2str(0)));
                 exists = true;
             end

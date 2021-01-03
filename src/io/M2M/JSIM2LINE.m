@@ -270,9 +270,9 @@ for i=1:length(node_name)
                 end
                 timingSt = xsection_i{1, i}(2).parameter(3).subParameter(m).ATTRIBUTE.classPath;
                 if strcmp(timingSt,'jmt.engine.NetStrategies.ServiceStrategies.ZeroServiceTimeStrategy')
-                    node{i}.setTimingStrategy(m,TimingStrategy.Immediate);
+                    node{i}.setTimingStrategy(m,TimingStrategy.ID_IMMEDIATE);
                 else
-                    node{i}.setTimingStrategy(m,TimingStrategy.Timed);
+                    node{i}.setTimingStrategy(m,TimingStrategy.ID_TIMED);
                     distribution = xsection_i{1, i}(2).parameter(3).subParameter(m).subParameter(1).ATTRIBUTE.name;
                     lambda = xsection_i{1, i}(2).parameter(3).subParameter(m).subParameter(2).subParameter(1).value;
                     switch distribution
@@ -331,9 +331,9 @@ for i=1:length(node_name)
                     for k=1:nclasses
                         outcome = xsection_i{1, i}(3).parameter(1).subParameter(m).subParameter.subParameter(j).subParameter(2).subParameter(k).value;
                         if outcome == -1
-                            node{i}.setFiringOutcome(m,k,ind,Inf);
+                            node{i}.setFiringOutcome(k,m,ind,Inf);
                         else
-                            node{i}.setFiringOutcome(m,k,ind,outcome);
+                            node{i}.setFiringOutcome(k,m,ind,outcome);
                         end
                     end
                 end

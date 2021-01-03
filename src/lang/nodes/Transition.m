@@ -54,15 +54,20 @@ classdef Transition < Node
             nnodes = length(self.model.nodes);
             self.nmodes = length(self.modeNames);
 
-            self.enablingConditions = zeros(nnodes,nclasses,self.nmodes);
-            self.inhibitingConditions = zeros(nnodes,nclasses,self.nmodes);
+            self.enablingConditions = cell(self.nmodes);
+            self.inhibitingConditions = cell(self.nmodes);
+            self.firingOutcomes = cell(self.nmodes);
+            for m=1:self.nmodes
+                self.enablingConditions{m} = zeros(nnodes,nclasses);            
+                self.inhibitingConditions{m} = zeros(nnodes,nclasses);            
+                self.firingOutcomes{m} = zeros(nnodes,nclasses);                            
+            end
             self.numbersOfServers = Inf(1,self.nmodes);
             self.timingStrategies = repmat(TimingStrategy.ID_TIMED,1,self.nmodes);
             self.firingWeights = ones(1,self.nmodes);
             self.firingPriorities = ones(1,self.nmodes);
             self.distributions = cell(1, self.nmodes);
             self.distributions(:) = {Exp(1)};
-            self.firingOutcomes = zeros(nnodes,nclasses,self.nmodes);
         end
         
         function self = addMode(self, modeName)
@@ -84,9 +89,9 @@ classdef Transition < Node
             nnodes = length(self.model.nodes);
             if isa(node, 'Place')
                 node = self.model.getNodeIndex(node.name);
-                self.enablingConditions(node,class,mode) = enablingCondition;
+                self.enablingConditions{mode}(node,class) = enablingCondition;
             elseif isnumeric(node) && node <= nnodes && isa(self.model.nodes{node}, 'Place')
-                self.enablingConditions(node,class,mode) = enablingCondition;
+                self.enablingConditions{mode}(node,class) = enablingCondition;
             else
                 error('Node must be a Place node or index of a Place node.');
             end
@@ -98,9 +103,9 @@ classdef Transition < Node
             nnodes = length(self.model.nodes);
             if isa(node, 'Place')
                 node = self.model.getNodeIndex(node.name);
-                self.inhibitingConditions(node,class,mode) = inhibitingCondition;
+                self.inhibitingConditions{mode}(node,class) = inhibitingCondition;
             elseif isa(node, 'double') && node <= nnodes && isa(self.model.nodes{node}, 'Place')
-                self.inhibitingConditions(node,class,mode) = inhibitingCondition;
+                self.inhibitingConditions{mode}(node,class) = inhibitingCondition;
             else
                 error('Node must be a Place node or index of a Place node.');
             end
@@ -142,9 +147,9 @@ classdef Transition < Node
             nnodes = length(self.model.nodes);
             if isa(node, 'Node')
                 node = self.model.getNodeIndex(node.name);
-                self.firingOutcomes(node,class,mode) = firingOutcome;
+                self.firingOutcomes{mode}(node,class) = firingOutcome;
             elseif isa(node, 'double') && node <= nnodes && isa(self.model.nodes{node}, 'Node')
-                self.firingOutcomes(node,class,mode) = firingOutcome;
+                self.firingOutcomes{mode}(node,class) = firingOutcome;
             else
                 error('Node is not valid.');
             end

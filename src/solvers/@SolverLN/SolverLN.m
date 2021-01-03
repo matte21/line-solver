@@ -62,13 +62,13 @@ classdef SolverLN < LayeredNetworkSolver & EnsembleSolver
             if nargin>1 && isstruct(solverFactory)
                 options = solverFactory;
                 self.setOptions(options);
-                solverFactory = @(m) SolverNC(m,'method','comom','verbose',false);
+                solverFactory = @(m) SolverNC(m,'method','adaptive','verbose',false);
             else
                 self.setOptions(SolverLN.defaultOptions);
                 if nargin>2
                     if ischar(solverFactory)
                         inputvar = {solverFactory,varargin{:}};
-                        solverFactory = @(m) SolverNC(m,'method','comom','verbose',false);
+                        solverFactory = @(m) SolverNC(m,'method','adaptive','verbose',false);
                     else
                         inputvar = varargin;
                     end
@@ -98,7 +98,7 @@ classdef SolverLN < LayeredNetworkSolver & EnsembleSolver
             
             for e=1:self.getNumberOfModels
                 if nargin == 1
-                    solverFactory = @(m) SolverNC(m,'method','comom','verbose',false);
+                    solverFactory = @(m) SolverNC(m,'method','adaptive','verbose',false);
                 end
                 self.setSolver(solverFactory(self.ensemble{e}),e);
             end

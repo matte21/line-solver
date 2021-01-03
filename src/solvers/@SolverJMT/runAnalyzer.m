@@ -1,11 +1,11 @@
-function runtime = run(self)
+function runtime = runAnalyzer(self, options)
 % TSIM = RUN()
 
 % Copyright (c) 2012-2021, Imperial College London
 % All rights reserved.
 
 Tstart=tic;
-if ~exist('options','var')
+if nargin<2 %%~exist('options','var')
     options = self.getOptions;
 end
 

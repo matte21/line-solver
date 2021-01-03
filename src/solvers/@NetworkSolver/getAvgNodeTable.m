@@ -4,7 +4,7 @@ function [AvgTable,QT,UT,RT,TT,AT] = getAvgNodeTable(self,Q,U,R,T,keepDisabled)
 %
 % Copyright (c) 2012-2021, Imperial College London
 % All rights reserved.
-if ~exist('keepDisabled','var')
+if nargin<6 %~exist('keepDisabled','var')
     keepDisabled = false;
 end
 qn = self.model.getStruct;
@@ -41,8 +41,8 @@ elseif ~keepDisabled
             end
         end
     end
-    Node = categorical(Node);
-    JobClass = categorical(JobClass);    
+    Node = label(Node);
+    JobClass = label(JobClass);    
     QLen = Qval(:); % we need to save first in a variable named like the column
     QT = Table(Node,JobClass,QLen);
     Util = Uval(:); % we need to save first in a variable named like the column
@@ -70,8 +70,8 @@ else
             Aval((i-1)*K+k) = AN(i,k);
         end
     end
-    Node = categorical(Node);
-    JobClass = categorical(JobClass);    
+    Node = label(Node);
+    JobClass = label(JobClass);    
     QLen = Qval(:); % we need to save first in a variable named like the column
     QT = Table(Node,JobClass,QLen);
     Util = Uval(:); % we need to save first in a variable named like the column

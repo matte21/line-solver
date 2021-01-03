@@ -4,7 +4,7 @@ function name = getNodeName(self,node,useNode)
 % Copyright (c) 2012-2021, Imperial College London
 % All rights reserved.
 G = self.lqnGraph;
-if ~exist('useNode','var') || useNode == false
+if nargin<3 || useNode == false  %~exist('useNode','var')
     name = G.Nodes.Name{node};
 else
     name = G.Nodes.Node{node};

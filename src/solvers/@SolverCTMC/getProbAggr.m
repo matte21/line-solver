@@ -1,8 +1,12 @@
 function Pnir = getProbAggr(self, ist)
 % PNIR = GETPROBSTATEAGGR(IST)
 
+if ~isnumeric(ist) % station object
+    ist = ist.index; 
+end
+
 qn = self.getStruct;
-if ~exist('ist','var')
+if nargin<2 %~exist('ist','var')
     line_error(mfilename,'getProb requires to pass a parameter the station of interest.');
 end
 if ist > qn.nstations

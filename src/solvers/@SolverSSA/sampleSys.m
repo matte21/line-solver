@@ -1,7 +1,8 @@
 function tranSysState = sampleSys(self, numSamples)
 % TRANSYSSTATE = SAMPLESYS(NUMSAMPLES)
 options = self.getOptions;
-if exist('numSamples','var')
+
+if nargin>=2 %exist('numSamples','var')
     options.samples = numSamples;
 else
     numSamples = options.samples;

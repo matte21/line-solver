@@ -2,7 +2,7 @@ function sampleNodeState = sample(self, node, numSamples)
 % TRANNODESTATE = SAMPLE(NODE)
 
 options = self.getOptions;
-if exist('numSamples','var')
+if nargin>=3 %exist('numSamples','var')
     options.samples = numSamples;
 else
     numSamples = options.samples;

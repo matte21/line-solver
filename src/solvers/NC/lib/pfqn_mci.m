@@ -21,13 +21,13 @@ function [G,lG,lZ] = pfqn_mci(D,N,Z,I,variant)
 %
 % Implementation: Giuliano Casale (g.casale@imperial.ac.uk), 16-Aug-2013
 
-if ~exist('Z','var')
+if nargin<3%~exist('Z','var')
     Z=0*N;
 end
-if ~exist('I','var')
+if nargin<4%~exist('I','var')
     I=1e5;
 end
-if ~exist('variant','var')
+if nargin<5%~exist('variant','var')
     variant='imci';
 end
 

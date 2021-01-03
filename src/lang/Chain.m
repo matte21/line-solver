@@ -37,7 +37,7 @@ classdef Chain < NetworkElement
         function self = addClass(self, class, v, index)
             % SELF = ADDCLASS(CLASS, V, INDEX)
             
-            if ~exist('v','var')
+            if nargin<3%~exist('v','var')
                 v = [];
             end
             idx  = self.getClass(class.name);

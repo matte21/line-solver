@@ -14,7 +14,7 @@ classdef DiscreteSampler < DiscreteDistrib
             % p(i) is the probability of item i
             % x(i) is the value of item i
             n = length(p);
-            if ~exist('x','var')
+            if nargin<2 %~exist('x','var')
                 x=1:n;
             end
             self@DiscreteDistrib('DiscreteSampler',3,[min(x),max(x)]);
@@ -71,7 +71,7 @@ classdef DiscreteSampler < DiscreteDistrib
             
             p = self.getParam(1).paramValue;
             x = self.getParam(2).paramValue;
-            if ~exist('v','var')
+            if nargin<2 %~exist('v','var')
                 pk = p;
                 return
             end

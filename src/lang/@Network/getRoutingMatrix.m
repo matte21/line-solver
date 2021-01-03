@@ -4,7 +4,7 @@ function [rt,rtNodes,connMatrix,rtNodesByClass,rtNodesByStation] = getRoutingMat
 % Copyright (c) 2012-2021, Imperial College London
 % All rights reserved.
 
-if ~exist('arvRates','var')
+if nargin<2 %~exist('arvRates','var')
     for r=self.getIndexOpenClasses
         arvRates(r) = 1 / self.getSource.input.sourceClasses{r}{end}.getMean;
     end
@@ -18,11 +18,6 @@ self.qn.connmatrix = connMatrix;
 rtNodesByClass = {};
 rtNodesByStation = {};
 hasOpen = hasOpenClasses(self);
-if ~exist('arvRates','var')
-    if hasOpen
-        line_error(mfilename,'getRoutingMatrix requires arrival rates for open classes.');
-    end
-end
 
 M = self.getNumberOfNodes;
 K = self.getNumberOfClasses;

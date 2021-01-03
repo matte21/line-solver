@@ -5,7 +5,7 @@ function [AvgTable,UT] = getAvgUtilTable(self,U,keepDisabled)
 %
 % Copyright (c) 2012-2021, Imperial College London
 % All rights reserved.
-if ~exist('keepDisabled','var')
+if nargin<3 %~exist('keepDisabled','var')
     keepDisabled = false;
 end
 
@@ -31,8 +31,8 @@ elseif ~keepDisabled
             end
         end
     end
-    Station = categorical(Station);
-    JobClass = categorical(JobClass);
+    Station = label(Station);
+    JobClass = label(JobClass);
     Util = Uval(:); % we need to save first in a variable named like the column
     UT = Table(Station,JobClass,Util);
     AvgTable = Table(Station,JobClass,Util);
@@ -47,8 +47,8 @@ else
             Uval((i-1)*K+k) = UN(i,k);
         end
     end
-    Station = categorical(Station);
-    JobClass = categorical(JobClass);
+    Station = label(Station);
+    JobClass = label(JobClass);
     Util = Uval(:); % we need to save first in a variable named like the column
     UT = Table(Station,JobClass,Util);
     AvgTable = Table(Station,JobClass,Util);

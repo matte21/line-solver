@@ -17,7 +17,9 @@ classdef MarkovModulated < PointProcess
         function X = sample(self, n)
             % X = SAMPLE(N)
             
-            if ~exist('n','var'), n = 1; end
+            if nargin<2 %~exist('n','var'), 
+                n = 1; 
+            end
             MAP = self.getRepresentation;
             if map_isfeasible(MAP)
                 X = map_sample(MAP,n);

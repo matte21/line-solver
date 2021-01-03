@@ -19,7 +19,7 @@ classdef CacheClassSwitcher < StatefulClassSwitcher
         function self = CacheClassSwitcher(classes, items, capacity, levels)
             % SELF = CACHECLASSSWITCHER(CLASSES, ITEMS, CAPACITY, LEVELS)
             
-            if ~exist('levels','var')
+            if nargin<4 %~exist('levels','var')
                 levels = 1;
             end
             self@StatefulClassSwitcher(classes, 'Cache');

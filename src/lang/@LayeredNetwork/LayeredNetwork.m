@@ -70,7 +70,7 @@ classdef LayeredNetwork < Model & Ensemble
             % SELF = LAYEREDNETWORK(NAME, FILENAME)
             
             self@Ensemble({})
-            if ~exist('name','var')
+            if nargin<1 %~exist('name','var')
                 [~,name]=fileparts(tempname);
             end
             self@Model(name);
@@ -94,7 +94,7 @@ classdef LayeredNetwork < Model & Ensemble
             self.param.Edges.RespT = [];
             self.param.Edges.Tput = [];
             
-            if exist('filename','var')
+            if nargin>=2 %exist('filename','var')
                 self = LayeredNetwork.parseXML(filename, false);
                 self.init;
             end

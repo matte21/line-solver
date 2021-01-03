@@ -5,9 +5,9 @@ function s = sumfinite(v, dim)
 % Copyright (c) 2012-2021, Imperial College London
 % All rights reserved.
 
-v(~isfinite(v)) = 0; 
+v(~isfinite(v)) = 0;
 if nargin>1
-s = sum(v,dim);
+    s = sum(v,dim);
 else
-s = sum(v);
+    s = sum(v);
 end

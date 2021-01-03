@@ -125,10 +125,13 @@ end
 if hasReferenceNodes
     simXMLElem.appendChild(preloadNode);
 end
+
 fname = getJSIMTempPath(self);
+
 try
     xmlwrite(fname, simXMLDoc);
-catch
+catch ME
+    ME
     javaaddpath(which('xercesImpl-2.11.0.jar'));
     javaaddpath(which('xml-apis-2.11.0.jar'));
     pkg load io;

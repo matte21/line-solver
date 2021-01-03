@@ -4,7 +4,7 @@ function space = fromMarginal(qn, ind, n, options)
 % Copyright (c) 2012-2021, Imperial College London
 % All rights reserved.
 
-if ~exist('options','var')
+if nargin<4 %~exist('options','var')
     options.force = false;
 end
 if isa(qn,'Network')

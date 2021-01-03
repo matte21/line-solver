@@ -1,6 +1,6 @@
 function Pnir = getProb(self, node, state)
 % PNIR = GETPROB(NODE, STATE)
-if ~exist('state','var')
+if nargin<3 %~exist('state','var')
     state = qn.state{qn.nodeToStateful(node.index)};
 end
 T0 = tic;

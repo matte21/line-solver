@@ -41,7 +41,9 @@ classdef Disabled < ContinuousDistrib & DiscreteDistrib
             % X = SAMPLE(N)
             
             % Get n samples from the distribution
-            if ~exist('n','var'), n = 1; end
+            if nargin<2 %~exist('n','var'), 
+                n = 1; 
+            end
             X = nan(n,1);
         end
         

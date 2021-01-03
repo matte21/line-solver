@@ -26,7 +26,7 @@ samples=[];
 
 if isempty(L) || sum(L(:))<1e-4 || isempty(N) || sum(N)==0
     lGn = - sum(factln(N)) + sum(N.*log(sum(Z,1)));
-elseif ~exist('Z','var') || isempty(Z)
+elseif nargin<3 || isempty(Z) %~exist('Z','var') || isempty(Z)
     umax=pfqn_le_fpi(L,N);
     A = pfqn_le_hessian(L,N,umax'); % slightly faster than pfqn_le_hessianZ
     A = (A+A')/2; % let's get rid of small numerical perturbations

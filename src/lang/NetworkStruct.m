@@ -74,4 +74,4 @@ function qn=NetworkStruct()
  qn.stationToNode=[];
  qn.stationToStateful=[];
  qn.statefulToNode=[];
- end
+end

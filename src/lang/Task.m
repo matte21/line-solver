@@ -25,18 +25,18 @@ classdef Task < LayeredNetworkElement
         function self = Task(model, name, multiplicity, scheduling, thinkTime)
             % self = TASK(MODEL, NAME, MULTIPLICITY, SCHEDULING, THINKTIME)
             
-            if ~exist('name','var')
+            if nargin<2%~exist('name','var')
                 line_error(mfilename,'Constructor requires to specify at least a name.');
             end
             self@LayeredNetworkElement(name);
             
-            if ~exist('multiplicity','var')
+            if nargin<3%~exist('multiplicity','var')
                 multiplicity = 1;
             end
-            if ~exist('scheduling','var')
+            if nargin<4%~exist('scheduling','var')
                 scheduling = SchedStrategy.INF;
             end
-            if ~exist('thinkTime','var')
+            if nargin<5%~exist('thinkTime','var')
                 thinkTime = Distrib.Zero;
             end
             self.replication = 1;

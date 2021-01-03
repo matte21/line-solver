@@ -44,6 +44,7 @@ RT = 0;
 lastSol= [];
 Q = zeros(M,K); R = zeros(M,K); T = zeros(M,K);
 U = zeros(M,K); C = zeros(1,K); X = zeros(1,K);
+Qt=[];
 s0 = qn.state;
 s0prior = qn.stateprior;
 s0_sz = cellfun(@(x) size(x,1), s0)';
@@ -73,7 +74,7 @@ while s0_id>=0 % for all possible initial states
                 end
             end
         else
-            if isempty(self.result) && ~exist('Qt','var')
+            if isempty(self.result) && max(size(Qt))==0 %~exist('Qt','var')
                 Q = Qfull*s0prior_val;
                 R = Rfull*s0prior_val;
                 T = Tfull*s0prior_val;

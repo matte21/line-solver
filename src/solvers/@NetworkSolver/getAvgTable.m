@@ -7,7 +7,7 @@ function [AvgTable,QT,UT,RT,TT] = getAvgTable(self,Q,U,R,T,keepDisabled)
 
 qn = getStruct(self);
 
-if ~exist('keepDisabled','var')
+if nargin<6 %~exist('keepDisabled','var')
     keepDisabled = false;
 end
 M = qn.nstations();
@@ -74,8 +74,8 @@ elseif ~keepDisabled
             end
         end
     end
-    Station = categorical(Station);
-    JobClass = categorical(JobClass);
+    Station = label(Station);
+    JobClass = label(JobClass);
     QLen = Qval(:); % we need to save first in a variable named like the column
     QT = Table(Station,JobClass,QLen);
     Util = Uval(:); % we need to save first in a variable named like the column
@@ -122,8 +122,8 @@ else
             Tval((i-1)*K+k) = TN(i,k);
         end
     end
-    Station = categorical(Station);
-    JobClass = categorical(JobClass);
+    Station = label(Station);
+    JobClass = label(JobClass);
     QLen = Qval(:); % we need to save first in a variable named like the column
     QT = Table(Station,JobClass,QLen);
     Util = Uval(:); % we need to save first in a variable named like the column

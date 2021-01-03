@@ -2,7 +2,7 @@ function tranSysState = sampleSysAggr(self, numSamples)
 % TRANSYSSTATEAGGR = sampleSysAggr(NUMSAMPLES)
 options = self.getOptions;
 
-if ~exist('numSamples','var')
+if nargin<2 %~exist('numSamples','var')
     numSamples = options.samples;
 end
 

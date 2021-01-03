@@ -4,6 +4,7 @@ function C=circul(c)
 %
 % Copyright (c) 2012-2021, Imperial College London
 % All rights reserved.
+v=[];
 if length(c)==1
     if c==1
         C=1;

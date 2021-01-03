@@ -5,7 +5,7 @@ function [XN,QN,UN,pqueue,R,eta,G,A_1,A0,A1]=qbd_mapmap1(MAPa,MAPs,util)
 na = length(MAPa{1});
 ns = length(MAPs{1});
 
-if exist('util','var')
+if nargin>=3%exist('util','var')
     MAPs = map_scale(MAPs,util/map_lambda(MAPa));
 end
 

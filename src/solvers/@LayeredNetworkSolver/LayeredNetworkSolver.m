@@ -11,7 +11,9 @@ classdef LayeredNetworkSolver < Solver
         function self = LayeredNetworkSolver(model, name, options)
             % SELF = LAYEREDNETWORKSOLVER(MODEL, NAME, OPTIONS)
             self@Solver(model,name);
-            if exist('options','var'), self.setOptions(options); end
+            if nargin>=3 %exist('options','var'), 
+                self.setOptions(options); 
+            end
             if ~isa(model,'LayeredNetwork')
                 line_error(mfilename,'Model is not a LayeredNetwork.');
             end
@@ -32,26 +34,26 @@ classdef LayeredNetworkSolver < Solver
     methods
         function [AvgTable,QT,UT,RT,TT,PT,ST] = getAvgTable(self, useLQNSnaming)
             % [AVGTABLE,QT,UT,RT,TT,PT,ST] = GETAVGTABLE(USELQNSNAMING)
-            if ~exist('wantLQNSnaming','var')
+            if nargin<2 %~exist('wantLQNSnaming','var')
                 useLQNSnaming = false;
             end
             [QN,UN,RN,TN] = getAvg(self);
             lqn = self.model.getStruct;
-            Node = categorical(lqn.names);
+            Node = label(lqn.names);
             O = length(Node);
-            NodeType = categorical(O,1);
+            NodeType = label(O,1);
             for o = 1:O
                 switch lqn.type(o)
                     case LayeredNetworkElement.PROCESSOR
-                        NodeType(o,1) = categorical({'Processor'});
+                        NodeType(o,1) = label({'Processor'});
                     case LayeredNetworkElement.TASK
-                        NodeType(o,1) = categorical({'Task'});
+                        NodeType(o,1) = label({'Task'});
                     case LayeredNetworkElement.ENTRY
-                        NodeType(o,1) = categorical({'Entry'});
+                        NodeType(o,1) = label({'Entry'});
                     case LayeredNetworkElement.ACTIVITY
-                        NodeType(o,1) = categorical({'Activity'});
+                        NodeType(o,1) = label({'Activity'});
                     case LayeredNetworkElement.CALL
-                        NodeType(o,1) = categorical({'Call'});
+                        NodeType(o,1) = label({'Call'});
                 end
             end            
             if useLQNSnaming

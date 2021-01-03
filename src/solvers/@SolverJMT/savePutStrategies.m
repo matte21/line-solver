@@ -16,7 +16,7 @@ for r=1:numOfClasses
     refClassNode2.appendChild(simDoc.createTextNode(qn.classnames{r}));
     queuePutStrategyNode.appendChild(refClassNode2);
     % Different to savePutStrategy.    
-    switch qn.schedid(i,r)
+    switch qn.schedid(i) %contrary to JMT, we assume identical across classes
         case SchedStrategy.ID_SIRO
             subParameterNode2 = simDoc.createElement('subParameter');
             subParameterNode2.setAttribute('classPath', 'jmt.engine.NetStrategies.QueuePutStrategies.RandStrategy');

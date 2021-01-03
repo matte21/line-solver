@@ -3,7 +3,7 @@ function Pnir = getProbAggr(self, node, state_a)
 
 T0 = tic;
 qn = self.getStruct;
-if ~exist('state_a','var')
+if nargin<3 %~exist('state_a','var')
     state_a = qn.state{qn.nodeToStateful(node.index)};
 end
 % now compute marginal probability

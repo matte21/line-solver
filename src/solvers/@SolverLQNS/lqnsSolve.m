@@ -3,10 +3,10 @@ function lqnsSolve(filename, maxIter, wantExact)
 
 % Copyright (c) 2012-2021, Imperial College London
 % All rights reserved.
-if ~exist('wantExact','var')
+if nargin<3 %~exist('wantExact','var')
     wantExact = false;
 end
-if ~exist('maxIter','var') || isempty(maxIter)
+if nargin<2  || isempty(maxIter) %~exist('maxIter','var')
     if wantExact
         system(['lqns -Playering=srvn -Pmva=exact -x ',filename]);
     else

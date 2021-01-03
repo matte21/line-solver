@@ -3,10 +3,10 @@ function [pi,kmax]=ctmc_uniformization(pi0,Q,t,tol,maxiter)
 
 % Copyright (c) 2012-2021, Imperial College London
 % All rights reserved.
-if ~exist('tol','var')
+if nargin<4%~exist('tol','var')
     tol = 1e-12;
 end
-if ~exist('maxiter','var')
+if nargin<5%~exist('maxiter','var')
     maxiter = 100;
 end
 q=1.1*max(abs(diag(Q)));

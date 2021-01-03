@@ -5,7 +5,7 @@ function [AvgTable,TT] = getAvgTputTable(self,T,keepDisabled)
 %
 % Copyright (c) 2012-2021, Imperial College London
 % All rights reserved.
-if ~exist('keepDisabled','var')
+if if nargin<3 %~exist('keepDisabled','var')
     keepDisabled = false;
 end
 
@@ -31,8 +31,8 @@ elseif ~keepDisabled
             end
         end
     end
-    Station = categorical(Station);
-    JobClass = categorical(JobClass);
+    Station = label(Station);
+    JobClass = label(JobClass);
     Tput = Tval(:); % we need to save first in a variable named like the column
     TT = Table(Station,JobClass,Tput);
     AvgTable = Table(Station,JobClass,Tput);
@@ -47,8 +47,8 @@ else
             Tval((i-1)*K+k) = TN(i,k);
         end
     end
-    Station = categorical(Station);
-    JobClass = categorical(JobClass);
+    Station = label(Station);
+    JobClass = label(JobClass);
     Tput = Tval(:); % we need to save first in a variable named like the column
     TT = Table(Station,JobClass,Tput);
     AvgTable = Table(Station,JobClass,Tput);

@@ -1,7 +1,7 @@
 function sysStateAggr = sampleSysAggr(self, numEvents)
 % SYSSTATEAGGR = SAMPLESYSAGGR(NUMEVENTS)
 
-if ~exist('numEvents','var')
+if nargin<2 %~exist('numEvents','var')
     numEvents = self.options.samples;
 end
 

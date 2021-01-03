@@ -1,10 +1,10 @@
 function stationStateAggr = sampleAggr(self, node, numEvents)
 % STATIONSTATEAGGR = SAMPLEAGGR(NODE, NUMEVENTS)
 
-if ~exist('node','var')
+if nargin<2 %~exist('node','var')
     line_error(mfilename,'sampleAggr requires to specify a node.');
 end
-if ~exist('numEvents','var')
+if nargin<3 %~exist('numEvents','var')
     numEvents = -1;
 else
     line_warning(mfilename,'JMT does not allow to fix the number of events for individual nodes. The number of returned events may be inaccurate.');

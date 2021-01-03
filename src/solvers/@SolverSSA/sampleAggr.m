@@ -1,6 +1,7 @@
 function stationStateAggr = sampleAggr(self, node, numSamples)
 % SAMPLE = SAMPLEAGGR(NODE, NUMSAMPLES)
-if ~exist('node','var')
+
+if nargin<2 %~exist('node','var')
     line_error(mfilename,'sampleAggr requires to specify a station.');
 end
 

@@ -4,7 +4,7 @@ function [init_sol, state] = solver_fluid_initsol(qn, options) %#ok<INUSD>
 % Copyright (c) 2012-2021, Imperial College London
 % All rights reserved.
 
-if ~exist('options','var')
+if nargin<2 %~exist('options','var')
     options = Solver.defaultOptions; %#ok<NASGU>
 end
 

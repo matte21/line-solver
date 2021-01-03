@@ -4,7 +4,7 @@ function space = fromMarginalAndStarted(qn, ind, n, s, options)
 % Copyright (c) 2012-2021, Imperial College London
 % All rights reserved.
 
-if ~exist('options','var')
+if nargin<5 %~exist('options','var')
     options.force = true;
 end
 if isa(qn,'Network')

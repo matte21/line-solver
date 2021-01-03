@@ -1,5 +1,5 @@
 classdef (Sealed) ProcessType
-    % Enumeration of process types
+    % Enumeration of process ts
     %
     % Copyright (c) 2012-2021, Imperial College London
     % All rights reserved.
@@ -42,46 +42,46 @@ classdef (Sealed) ProcessType
         ID_COX2 = 15;
     end
     
-    methods (Static)
-        
-        function type = fromId(id)
+    methods (Static)        
+        function t = fromId(id)
             % ID = TOID(TYPE)
             switch id
-                case 0
-                    type = ProcessType.EXP;;
-                case 1
-                    type = ProcessType.ERLANG;
-                case 2
-                    type = ProcessType.HYPEREXP;
-                case 3
-                    type = ProcessType.PH;
-                case 4
-                    type = ProcessType.APH;
-                case 5
-                    type = ProcessType.MAP;
-                case 6
-                    type = ProcessType.UNIFORM;
-                case 7
-                    type = ProcessType.DET;
-                case 8
-                    type = ProcessType.COXIAN;
-                case 9
-                    type = ProcessType.GAMMA;
-                case 10
-                    type = ProcessType.PARETO;
-                case 11
-                    type = ProcessType.MMPP2;
-                case 12
-                    type = ProcessType.TRACE;
-                case 13
-                    type = ProcessType.IMMEDIATE;
-                case 14
-                    type = ProcessType.DISABLED;
+                case ProcessType.ID_EXP
+                    t = ProcessType.EXP;
+                case ProcessType.ID_ERLANG
+                    t = ProcessType.ERLANG;
+                case ProcessType.ID_HYPEREXP
+                    t = ProcessType.HYPEREXP;
+                case ProcessType.ID_PH
+                    t = ProcessType.PH;
+                case ProcessType.ID_APH
+                    t = ProcessType.APH;
+                case ProcessType.ID_MAP
+                    t = ProcessType.MAP;
+                case ProcessType.ID_UNIFORM
+                    t = ProcessType.UNIFORM;
+                case ProcessType.ID_DET
+                    t = ProcessType.DET;
+                case ProcessType.ID_COXIAN
+                    t = ProcessType.COXIAN;
+                case ProcessType.ID_GAMMA
+                    t = ProcessType.GAMMA;
+                case ProcessType.ID_PARETO
+                    t = ProcessType.PARETO;
+                case ProcessType.ID_MMPP2
+                    t = ProcessType.MMPP2;
+                case ProcessType.ID_TRACE
+                    t = ProcessType.TRACE;
+                case ProcessType.ID_IMMEDIAYE
+                    t = ProcessType.IMMEDIATE;
+                case ProcessType.ID_DISABLED
+                    t = ProcessType.DISABLED;
             end
         end
-        function id = toId(type)
-            % ID = TOID(TYPE)
-            switch type
+        
+        function id = toId(t)
+            % ID = TOID(TYPE)            
+            switch t
                 case ProcessType.EXP
                     id = 0;
                 case ProcessType.ERLANG
@@ -115,47 +115,47 @@ classdef (Sealed) ProcessType
             end
         end
         
-        function type = fromText(text)
+        function t = fromText(text)
             % TIMMEDIATE = TOID(TYPE)
             switch text
                 case 'Exp'
-                    type = ProcessType.EXP;
+                    t = ProcessType.EXP;
                 case 'Erlang'
-                    type = ProcessType.ERLANG;
+                    t = ProcessType.ERLANG;
                 case 'HyperExp'
-                    type = ProcessType.HYPEREXP;
+                    t = ProcessType.HYPEREXP;
                 case 'PH'
-                    type = ProcessType.PH;
+                    t = ProcessType.PH;
                 case 'APH'
-                    type = ProcessType.APH;
+                    t = ProcessType.APH;
                 case 'MAP'
-                    type = ProcessType.MAP;
+                    t = ProcessType.MAP;
                 case 'Uniform'
-                    type = ProcessType.UNIFORM;
+                    t = ProcessType.UNIFORM;
                 case 'Det'
-                    type = ProcessType.DET;
+                    t = ProcessType.DET;
                 case 'Coxian'
-                    type = ProcessType.COXIAN;
+                    t = ProcessType.COXIAN;
                 case 'Gamma'
-                    type = ProcessType.GAMMA;
+                    t = ProcessType.GAMMA;
                 case 'Pareto'
-                    type = ProcessType.PARETO;
+                    t = ProcessType.PARETO;
                 case 'MMPP2'
-                    type = ProcessType.MMPP2;
+                    t = ProcessType.MMPP2;
                 case 'Replayer'
-                    type = ProcessType.TRACE;
+                    t = ProcessType.TRACE;
                 case 'Immediate'
-                    type = ProcessType.IMMEDIATE;
+                    t = ProcessType.IMMEDIATE;
                 case 'Disabled'
-                    type = ProcessType.DISABLED;
+                    t = ProcessType.DISABLED;
                 case 'Cox2'
-                    type = ProcessType.COX2;
+                    t = ProcessType.COX2;
             end
         end
         
-        function text = toText(type)
+        function text = toText(t)
             % TEXT = TOTEXT(TYPE)
-            switch type
+            switch t
                 case ProcessType.EXP
                     text = 'Exp';
                 case ProcessType.ERLANG

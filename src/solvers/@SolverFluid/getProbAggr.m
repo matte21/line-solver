@@ -1,7 +1,7 @@
 function [Pnir,logPnir] = getProbAggr(self, ist)
 % [PNIR,LOGPNIR] = GETPROBSTATEAGGR(IST)
 
-if ~exist('ist','var')
+if nargin<2 %~exist('ist','var')
     line_error(mfilename,'getProbAggr requires to pass a parameter the station of interest.');
 end
 if ist > qn.nstations

@@ -220,7 +220,6 @@ classdef (Sealed) SchedStrategy
                 case 'ext'
                     property = 'EXT';
             end
-            %property = categorical({property});
         end
         
         function text = toFeature(type)

@@ -7,7 +7,7 @@ qn = self.getStruct;
 isf = qn.nodeToStateful(node.index);
 TSS = cell2mat({TranSysStateAggr.t,TranSysStateAggr.state{isf}});
 TSS(:,1)=[TSS(1,1);diff(TSS(:,1))];
-if ~exist('state','var')
+if nargin<3 %~exist('state','var')
     state = qn.state{isf};
 end
 rows = findrows(TSS(:,2:end), state);

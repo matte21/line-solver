@@ -1,7 +1,7 @@
 function nvars = refreshPetriNetNodes(self)
 % NVARS = REFRESHPETRINETNODES()
 
-nvars = zeros(self.getNumberOfNodes, 1); 
+nvars = zeros(self.getNumberOfNodes, 1);
 
 for ind=1:self.getNumberOfNodes
     node = self.getNodeByIndex(ind);
@@ -11,9 +11,14 @@ for ind=1:self.getNumberOfNodes
         case 'Transition'
             self.qn.nmodes(ind) = length(node.modeNames);
             self.qn.modenames{ind,1} = node.modeNames;
-            self.qn.enabling{ind,1} = node.enablingConditions;
-            self.qn.inhibiting{ind,1} = node.inhibitingConditions;
-            self.qn.firing{ind,1} = node.firingOutcomes;
+            self.qn.enabling{ind,1} = {};
+            self.qn.inhibiting{ind,1} = {};
+            self.qn.firing{ind,1} = {};
+            for m = 1:self.qn.nmodes(ind)
+                self.qn.enabling{ind,1}{m} = node.enablingConditions{m};
+                self.qn.inhibiting{ind,1}{m} = node.inhibitingConditions{m};
+                self.qn.firing{ind,1}{m} = node.firingOutcomes{m};
+            end
             self.qn.nmodeservers{ind,1} = node.numbersOfServers;
             self.qn.fireprio{ind,1} = node.firingPriorities;
             self.qn.fireweight{ind,1} = node.firingWeights;

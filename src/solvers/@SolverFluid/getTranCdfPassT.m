@@ -2,7 +2,7 @@ function RD = getTranCdfPassT(self, R)
 % RD = GETTRANCDFPASST(R)
 
 T0 = tic;
-if ~exist('R','var')
+if nargin<2 %~exist('R','var')
     R = self.getAvgRespTHandles;
 end
 qn = self.getStruct;

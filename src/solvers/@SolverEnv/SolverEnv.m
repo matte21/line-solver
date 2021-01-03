@@ -311,7 +311,7 @@ classdef SolverEnv < EnsembleSolver
             % [AVGTABLE,QT,UT,TT] = GETAVGTABLE(SELF,KEEPDISABLED)
             % Return table of average station metrics
             
-            if ~exist('keepDisabled','var')
+            if nargin<2 %if ~exist('keepDisabled','var')
                 keepDisabled = false;
             end
             

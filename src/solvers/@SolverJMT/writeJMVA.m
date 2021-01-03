@@ -23,7 +23,7 @@ end
 
 mvaElem.setAttribute('xmlns:xsi', self.xmlnsXsi);
 mvaElem.setAttribute('xsi:noNamespaceSchemaLocation', 'JMTmodel.xsd');
-if ~exist('outFileName','var')
+if nargin<2 %~exist('outFileName','var')
     outputFileName = getJMVATempPath(self);
 end
 

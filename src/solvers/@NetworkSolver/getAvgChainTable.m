@@ -33,7 +33,7 @@ else
     for i=1:M
         for k=1:K
             Chain{(i-1)*K+k} = ChainName{k};
-            JobClasses((i-1)*K+k,1) = {categorical(ChainClasses{k}(:))};
+            JobClasses((i-1)*K+k,1) = {label(ChainClasses{k}(:))};
             Station{(i-1)*K+k} = Q{i,k}.station.name;
             Qval((i-1)*K+k) = QNc(i,k);
             Uval((i-1)*K+k) = UNc(i,k);
@@ -41,8 +41,8 @@ else
             Tval((i-1)*K+k) = TNc(i,k);
         end
     end
-    Chain = categorical(Chain);
-    Station = categorical(Station);
+    Chain = label(Chain);
+    Station = label(Station);
     QLen = Qval(:); % we need to save first in a variable named like the column
     QTc = Table(Station,Chain,JobClasses,QLen);
     Util = Uval(:); % we need to save first in a variable named like the column

@@ -16,8 +16,7 @@ numOfInputs = length(connections);
 
 numOfClasses = qn.nclasses;
 numOfModes = qn.nmodes(ind);
-for m=1:numOfModes
-    
+for m=1:numOfModes    
     subInhibitingConditionNode = simDoc.createElement('subParameter');
     subInhibitingConditionNode.setAttribute('classPath', 'jmt.engine.NetStrategies.TransitionUtilities.TransitionMatrix');
     subInhibitingConditionNode.setAttribute('name', 'inhibitingCondition');
@@ -27,7 +26,7 @@ for m=1:numOfModes
     subInhibitingVectorsNode.setAttribute('classPath', 'jmt.engine.NetStrategies.TransitionUtilities.TransitionVector');
     subInhibitingVectorsNode.setAttribute('name', 'inhibitingVectors');
     
-    for k=1:(numOfInputs)
+    for k=1:numOfInputs
         subInhibitingVectorNode = simDoc.createElement('subParameter');
         subInhibitingVectorNode.setAttribute('classPath', 'jmt.engine.NetStrategies.TransitionUtilities.TransitionVector');
         subInhibitingVectorNode.setAttribute('name', 'inhibitingVector');
@@ -47,7 +46,7 @@ for m=1:numOfModes
         subInhibitingEntriesNode.setAttribute('classPath', 'java.lang.Integer');
         subInhibitingEntriesNode.setAttribute('name', 'inhibitingEntries');
         
-        for r=1:(numOfClasses)
+        for r=1:numOfClasses
             refClassNode = simDoc.createElement('refClass');
             refClassNode.appendChild(simDoc.createTextNode(qn.classnames{r}));
             subInhibitingEntriesNode.appendChild(refClassNode);
@@ -58,10 +57,10 @@ for m=1:numOfModes
             
             valueNode2 = simDoc.createElement('value');
             
-            if isinf(qn.inhibiting{ind}(k,r,m))
+            if isinf(qn.inhibiting{ind}{m}(k,r))
                 valueNode2.appendChild(simDoc.createTextNode(int2str(-1)));
             else
-                valueNode2.appendChild(simDoc.createTextNode(int2str(qn.inhibiting{ind}(inputs(k),r,m))));
+                valueNode2.appendChild(simDoc.createTextNode(int2str(qn.inhibiting{ind}{m}(inputs(k),r))));
             end
             
             subParameterNode.appendChild(valueNode2);

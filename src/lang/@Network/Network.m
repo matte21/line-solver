@@ -201,7 +201,7 @@ classdef Network < Model
         
         function resetPerfIndexes(self)
             self.perfIndex.Avg = {};
-            self.perfIndex.Tran = {};            
+            self.perfIndex.Tran = {};
         end
         
         function resetHandles(self)
@@ -229,7 +229,7 @@ classdef Network < Model
             % RESETMODEL(RESETSTATE, RESETHANDLES)
             %
             % If RESETSTATE is true, the model requires re-initialization
-            % of its state            
+            % of its state
             %if nargin>=3 && wantResetHandles
             resetHandles(self);
             %end
@@ -237,7 +237,7 @@ classdef Network < Model
             self.ag = [];
             if nargin == 2 && resetState
                 self.isInitialized = false;
-            end            
+            end
             for ind = 1:length(self.getNodes)
                 self.nodes{ind}.reset();
             end
@@ -408,7 +408,7 @@ classdef Network < Model
                 ind = name.index;
                 return
             end
-            ind = find(cellfun(@(c) strcmp(c,name),self.getNodeNames));            
+            ind = find(cellfun(@(c) strcmp(c,name),self.getNodeNames));
         end
         
         function stationIndex = getStationIndex(self, name)
@@ -765,7 +765,7 @@ classdef Network < Model
             % JSIMWVIEW()
             
             [Q,U,R,T,A] = getAvgHandles(self); % create measures
-            s=SolverJMT(self,Solver.defaultOptions,jmtGetPath); 
+            s=SolverJMT(self,Solver.defaultOptions,jmtGetPath);
             s.jsimwView;
         end
         
@@ -789,7 +789,7 @@ classdef Network < Model
         end
         
         function [isvalid] = isStateValid(self)
-            % [ISVALID] = ISSTATEVALID()            
+            % [ISVALID] = ISSTATEVALID()
             qn = self.getStruct;
             nir = [];
             sir = [];
@@ -870,7 +870,7 @@ classdef Network < Model
             qn = self.getStruct(false);
             N = qn.njobs';
             if nargin < 2
-                nodes = 1:self.getNumberOfNodes;               
+                nodes = 1:self.getNumberOfNodes;
             end
             
             for i=nodes
@@ -889,7 +889,7 @@ classdef Network < Model
                     switch qn.nodetype(i)
                         case NodeType.Cache
                             state_i = [state_i, 1:qn.nvars(i)];
-                        case NodeType.Place                            
+                        case NodeType.Place
                             state_i = 0; % for now PNs are single class
                     end
                     switch qn.routing(i)
@@ -921,7 +921,7 @@ classdef Network < Model
             end
             
             if self.isStateValid % problem with example_initState_2
-            self.isInitialized = true;
+                self.isInitialized = true;
             else
                 line_error(mfilename,'Default initialization failed.');
             end
@@ -931,7 +931,7 @@ classdef Network < Model
             % INITFROMMARGINAL(N, OPTIONS) % N(I,R) : NUMBER OF JOBS OF CLASS R IN NODE I
             
             qn = getStruct(self);
-            if ~exist('options','var')
+            if nargin<3 %~exist('options','var')
                 options = Solver.defaultOptions;
             end
             [isvalidn] = State.isValid(qn, n, [], options);
@@ -1020,11 +1020,11 @@ classdef Network < Model
             K = self.getNumberOfClasses;
             qn = self.getStruct;
             [P,Pnodes] = getRoutingMatrix(self);
-            name = {}; sched = categorical([]); type = {}; nservers = [];
+            name = {}; sched = {}; type = {}; nservers = [];
             for i=1:M
                 name{end+1} = self.nodes{i}.name;
                 type{end+1} = class(self.nodes{i});
-                sched(end+1) = self.nodes{i}.schedStrategy;
+                sched{end+1} = self.nodes{i}.schedStrategy;
                 if isa(self.nodes{i},'Station')
                     nservers(end+1) = self.nodes{i}.getNumberOfServers;
                 else
@@ -1047,11 +1047,11 @@ classdef Network < Model
             end
             H = digraph(); TH = Table();
             I = self.getNumberOfStations;
-            name = {}; sched = categorical([]); type = {}; jobs = zeros(I,1); nservers = [];
+            name = {}; sched = {}; type = {}; jobs = zeros(I,1); nservers = [];
             for i=1:I
                 name{end+1} = self.stations{i}.name;
                 type{end+1} = class(self.stations{i});
-                sched(end+1) = self.stations{i}.schedStrategy;
+                sched{end+1} = self.stations{i}.schedStrategy;
                 for k=1:K
                     if qn.refstat(k)==i
                         jobs(i) = jobs(i) + qn.njobs(k);
@@ -1363,7 +1363,7 @@ classdef Network < Model
             
             bool = self.getNumberOfClasses > 1;
         end
-                
+        
         function bool = hasProductFormSolution(self)
             % BOOL = HASPRODUCTFORMSOLUTION()
             
@@ -1421,7 +1421,7 @@ classdef Network < Model
         function model = tandemPsInf(lambda,D,Z)
             % MODEL = TANDEMPSINF(LAMBDA,D,Z)
             
-            if ~exist('Z','var')
+            if nargin<3%~exist('Z','var')
                 Z = [];
             end
             M  = size(D,1);
@@ -1445,7 +1445,7 @@ classdef Network < Model
         function model = tandemFcfsInf(lambda,D,Z)
             % MODEL = TANDEMFCFSINF(LAMBDA,D,Z)
             
-            if ~exist('Z','var')
+            if nargin<3%~exist('Z','var')
                 Z = [];
             end
             M  = size(D,1);
@@ -1506,7 +1506,7 @@ classdef Network < Model
         end
         
         function model = cyclicPsInf(N,D,Z)
-            % MODEL = CYCLICPSINF(N,D,Z)            
+            % MODEL = CYCLICPSINF(N,D,Z)
             if nargin<3
                 Z = [];
             end
@@ -1531,7 +1531,7 @@ classdef Network < Model
         function model = cyclicFcfsInf(N,D,Z)
             % MODEL = CYCLICFCFSINF(N,D,Z)
             
-            if ~exist('Z','var')
+            if nargin<3%~exist('Z','var')
                 Z = [];
             end
             M  = size(D,1);
@@ -1606,6 +1606,28 @@ classdef Network < Model
         function printEventFilt(sync,D,SS,myevents)
             % PRINTEVENTFILT(SYNC,D,SS,MYEVENTS)
             SolverCTMC.printEventFilt(sync,D,SS,myevents);
+        end
+        
+        
+        function ret = exportNetworkStruct(qn, language)
+            % @todo unfinished
+            
+            ret = javaObject('java.util.HashMap');
+            switch language
+                case {'java','Java'}
+                    fieldNames = fields(qn);
+                    for f=1:length(fieldNames)
+                        switch fieldNames{f}
+                            case 'sync'
+                                %noop
+                            otherwise
+                                field = qn.(fieldNames{f});
+                                
+                        end
+                        ret.put(fieldNames{f},exportJava(field));
+                    end
+            end
+            
         end
         
     end

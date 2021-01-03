@@ -5,8 +5,8 @@ classdef (Sealed) TimingStrategy
     % All rights reserved.
     
     properties (Constant)
-        Timed = categorical({'timed'});
-        Immediate = categorical({'immediate'});
+        Timed = {'timed'};
+        Immediate = {'immediate'};
         
         ID_TIMED = 0;
         ID_IMMEDIATE = 1;

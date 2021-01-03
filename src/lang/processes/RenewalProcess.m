@@ -23,7 +23,7 @@ classdef RenewalProcess < SinkProcess
             % MT = GETMEANT(T, STEPS)
             
             distrib =  self.getParam(1).paramValue;
-            if ~exist('steps','var')
+            if nargin<3 %~exist('steps','var')
                 steps = t/distrib.getMean()*20;
             end
             tmax = max(t);

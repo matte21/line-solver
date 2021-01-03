@@ -17,9 +17,9 @@ ChainObj = self.model.getChains();
 Chain = cellfun(@(c) c.name,ChainObj,'UniformOutput',false)';
 JobClasses = cell(0,1);
 for c=1:length(Chain)    
-    JobClasses(c,1) = {categorical(ChainObj{c}.classnames)};
+    JobClasses(c,1) = {label(ChainObj{c}.classnames)};
 end
-Chain = categorical(Chain);
+Chain = label(Chain);
 CT = Table(Chain, JobClasses, SysRespT);
 XT = Table(Chain, JobClasses, SysTput);
 AvgSysChainTable = Table(Chain, JobClasses, SysRespT, SysTput);

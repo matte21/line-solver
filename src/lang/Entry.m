@@ -17,7 +17,7 @@ classdef Entry < LayeredNetworkElement
         function self = Entry(model, name)
             % SELF = ENTRY(MODEL, NAME)
             
-            if ~exist('name','var')
+            if nargin<2 %~exist('name','var')
                 line_error(mfilename,'Constructor requires to specify at least a name.');
             end
             self@LayeredNetworkElement(name);

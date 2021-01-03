@@ -25,18 +25,18 @@ classdef Activity < LayeredNetworkElement
         function obj = Activity(model, name, hostDemand, boundToEntry, callOrder)
             % OBJ = ACTIVITY(MODEL, NAME, HOSTDEMAND, BOUNDTOENTRY, CALLORDER)
             
-            if ~exist('name','var')
+            if nargin<2 %~exist('name','var')
                 line_error(mfilename,'Constructor requires to specify at least a name.');
             end
             obj@LayeredNetworkElement(name);
             
-            if ~exist('hostDemand','var')
+            if nargin<3 %~exist('hostDemand','var')
                 hostDemand = Distrib.Zero;
             end
-            if ~exist('boundToEntry','var')
+            if nargin<4 %~exist('boundToEntry','var')
                 boundToEntry = '';
             end
-            if ~exist('callOrder','var')
+            if nargin<5 %~exist('callOrder','var')
                 callOrder = 'STOCHASTIC';
             end
             
@@ -126,7 +126,7 @@ classdef Activity < LayeredNetworkElement
         function obj = synchCall(obj, synchCallDest, synchCallMean)
             % OBJ = SYNCHCALL(OBJ, SYNCHCALLDEST, SYNCHCALLMEAN)
             
-            if ~exist('synchCallMean','var')
+            if nargin<3 %~exist('synchCallMean','var')
                 synchCallMean = 1.0;
             end
             if ischar(synchCallDest)
@@ -141,7 +141,7 @@ classdef Activity < LayeredNetworkElement
         function obj = asynchCall(obj, asynchCallDest, asynchCallMean)
             % OBJ = ASYNCHCALL(OBJ, ASYNCHCALLDEST, ASYNCHCALLMEAN)
             
-            if ~exist('asynchCallMean','var')
+            if nargin<3 %~exist('asynchCallMean','var')
                 asynchCallMean = 1.0;
             end
             if ischar(asynchCallDest)

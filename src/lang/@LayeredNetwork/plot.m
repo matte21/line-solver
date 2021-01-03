@@ -3,10 +3,10 @@ function plot(self,useNodes, showProcs)
 
 % Copyright (c) 2012-2021, Imperial College London
 % All rights reserved.
-if ~exist('useNodes','var')
+if nargin<2 %~exist('useNodes','var')
     useNodes = true;
 end
-if ~exist('showProcs','var')
+if nargin<3 %~exist('showProcs','var')
     showProcs = true;
 end
 

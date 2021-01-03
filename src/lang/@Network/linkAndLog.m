@@ -35,7 +35,7 @@ if ~isempty(self.getSource)
     end
 end
 
-if exist('logPath','var')
+if nargin>=4 %exist('logPath','var')
     self.setLogPath(logPath);
 else
     logPath = getLogPath(self);

@@ -18,7 +18,7 @@ import LayeredNetwork.*;
 % LQN
 myLN = LayeredNetwork(filename);
 
-if ~exist('verbose','var')
+if nargin<2%~exist('verbose','var')
     verbose = 0;
 end
 

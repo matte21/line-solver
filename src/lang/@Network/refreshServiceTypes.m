@@ -47,7 +47,9 @@ for i=statSet
                     elseif stations{i}.server.serviceProcess{r}{end}.isImmediate
                         procid(i,r) = ProcessType.ID_IMMEDIATE;
                     else
-                        procid(i,r) = ProcessType.toId(ProcessType.fromText(class(stations{i}.server.serviceProcess{r}{end})));
+                        processtype = class(stations{i}.server.serviceProcess{r}{end});
+                        processtypeid = ProcessType.fromText(processtype);
+                        procid(i,r) = ProcessType.toId(processtypeid);
                     end
                 end
         end

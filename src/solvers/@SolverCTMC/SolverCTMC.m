@@ -29,6 +29,8 @@ classdef SolverCTMC < NetworkSolver
         [infGen, eventFilt, ev] = getSymbolicGenerator(self)
         [infGen, eventFilt, ev] = getInfGen(self)        
         [infGen, eventFilt, ev] = getGenerator(self, force)
+        tstate = sampleSys(self, numevents)
+        sampleAggr = sampleAggr(self, node, numSamples)
     end
            
     methods (Static)
@@ -88,7 +90,7 @@ classdef SolverCTMC < NetworkSolver
         function printEventFilt(sync,D,SS,myevents)
             % PRINTEVENTFILT(SYNC,D,SS,MYEVENTS)
             
-            if ~exist('events','var')
+            if nargin<4 %~exist('events','var')
                 myevents = 1:length(sync);
             end
             SS=full(SS);

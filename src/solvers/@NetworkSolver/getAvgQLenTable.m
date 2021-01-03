@@ -5,7 +5,7 @@ function [AvgTable,QT] = getAvgQLenTable(self,Q,keepDisabled)
 %
 % Copyright (c) 2012-2021, Imperial College London
 % All rights reserved.
-if ~exist('keepDisabled','var')
+if if nargin<3 %~exist('keepDisabled','var')
     keepDisabled = false;
 end
 
@@ -31,8 +31,8 @@ elseif ~keepDisabled
             end
         end
     end
-    Station = categorical(Station);
-    JobClass = categorical(JobClass);    
+    Station = label(Station);
+    JobClass = label(JobClass);    
     QLen = Qval(:); % we need to save first in a variable named like the column
     QT = Table(Station,JobClass,QLen);
     AvgTable = Table(Station,JobClass,QLen);
@@ -47,8 +47,8 @@ else
             Qval((i-1)*K+k) = QN(i,k);
         end
     end
-    Station = categorical(Station);
-    JobClass = categorical(JobClass);    
+    Station = label(Station);
+    JobClass = label(JobClass);    
     QLen = Qval(:); % we need to save first in a variable named like the column
     QT = Table(Station,JobClass,QLen);
     AvgTable = Table(Station,JobClass,QLen);

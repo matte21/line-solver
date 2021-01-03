@@ -59,7 +59,7 @@ for m=1:numOfModes
             subParameterNode.setAttribute('name', 'firingEntry');
             
             valueNode2 = simDoc.createElement('value');
-            valueNode2.appendChild(simDoc.createTextNode(int2str(qn.firing{ind}(outputs(k),j,m))));
+            valueNode2.appendChild(simDoc.createTextNode(int2str(qn.firing{ind}{m}(outputs(k),j))));
             
             subParameterNode.appendChild(valueNode2);
             subFiringEntriesNode.appendChild(subParameterNode);

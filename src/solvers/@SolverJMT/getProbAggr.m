@@ -2,7 +2,7 @@ function Pr = getProbAggr(self, node, state_a)
 % PR = GETPROBSTATEAGGR(NODE, STATE_A)
 
 qn = self.getStruct;
-if ~exist('state_a','var')
+if nargin<3 %~exist('state_a','var')
     state_a = qn.state{qn.nodeToStation(node.index)};
 end
 stationStateAggr = self.sampleAggr(node);

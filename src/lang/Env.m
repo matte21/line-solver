@@ -53,7 +53,7 @@ classdef Env < Ensemble
            e = self.envGraph.findnode(fromName);
            h = self.envGraph.findnode(toName);
            self.env{e,h} = distrib;
-           if ~exist('resetFun','var')
+           if nargin<5 %~exist('resetFun','var')
                 self.resetFun{e,h} = @(q) q;
            else
                 self.resetFun{e,h} = resetFun;

@@ -5,7 +5,7 @@ empty = cellfun(@isempty, MMAP);
 MMAP(empty)=[];
 n = length(MMAP);
 
-if ~exist('config','var')
+if nargin<2%~exist('config','var')
     config = struct('merge','default');
 end
 

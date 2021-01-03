@@ -5,7 +5,7 @@ function [AvgTable,T] = getAvgRespTTable(self,R,keepDisabled)
 %
 % Copyright (c) 2012-2021, Imperial College London
 % All rights reserved.
-if ~exist('keepDisabled','var')
+if nargin<3 %~exist('keepDisabled','var')
     keepDisabled = false;
 end
 
@@ -31,8 +31,8 @@ elseif ~keepDisabled
             end
         end
     end
-    Station = categorical(Station);
-    JobClass = categorical(JobClass);    
+    Station = label(Station);
+    JobClass = label(JobClass);    
     RespT = Rval(:); % we need to save first in a variable named like the column
     RT = Table(Station,JobClass,RespT);
     AvgTable = Table(Station,JobClass,RespT);
@@ -47,8 +47,8 @@ else
             Rval((i-1)*K+k) = RN(i,k);
         end
     end
-    Station = categorical(Station);
-    JobClass = categorical(JobClass);    
+    Station = label(Station);
+    JobClass = label(JobClass);    
     RespT = Rval(:); % we need to save first in a variable named like the column
     RT = Table(Station,JobClass,RespT);
     AvgTable = Table(Station,JobClass,RespT);

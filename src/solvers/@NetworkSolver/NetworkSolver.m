@@ -19,7 +19,9 @@ classdef NetworkSolver < Solver
             if isempty(model)
                 line_error(mfilename,'The model supplied in input is empty');
             end
-            if exist('options','var'), self.setOptions(options); end
+            if nargin>=3 %exist('options','var'),
+                self.setOptions(options);
+            end
             self.result = [];
             
             [Q,U,R,T,A] = model.getAvgHandles;
@@ -31,7 +33,7 @@ classdef NetworkSolver < Solver
             if ~model.hasStruct()
                 self.model.refreshStruct(); % force model to refresh
             end
-        end        
+        end
         
         function self = setTranHandles(self,Qt,Ut,Tt)
             self.handles.Qt = Qt;
@@ -77,7 +79,7 @@ classdef NetworkSolver < Solver
             T = self.handles.T;
         end
     end
-        
+    
     
     methods (Access = 'protected')
         function bool = hasAvgResults(self)
@@ -115,7 +117,7 @@ classdef NetworkSolver < Solver
                 bool = isfield(self.result.Distrib,'C');
             end
         end
-    end       
+    end
     
     methods
         
@@ -140,7 +142,7 @@ classdef NetworkSolver < Solver
             % Get agent representation
             ag = self.model.getAG();
         end
-                
+        
         function QN = getAvgQLen(self)
             % QN = GETAVGQLEN()
             
@@ -166,7 +168,7 @@ classdef NetworkSolver < Solver
         end
         
         function WN = getAvgWaitT(self)
-            % RN = GETAVGWAITT()           
+            % RN = GETAVGWAITT()
             % Compute average waiting time in queue excluding service
             R = getAvgRespTHandles(self);
             [~,~,RN,~] = self.getAvg([],[],R,[]);
@@ -245,10 +247,10 @@ classdef NetworkSolver < Solver
         [QNt,UNt,TNt]       = getTranAvg(self,Qt,Ut,Tt);
         
         function self = setAvgResults(self,Q,U,R,T,C,X,runtime,method)
-            % SELF = SETAVGRESULTS(SELF,Q,U,R,T,C,X,RUNTIME,METHOD)            
+            % SELF = SETAVGRESULTS(SELF,Q,U,R,T,C,X,RUNTIME,METHOD)
             % Store average metrics at steady-state
             self.result.('solver') = getName(self);
-            if ~exist('method','var')
+            if nargin<9 %~exist('method','var')
                 method = getOptions(self).method;
             end
             self.result.Avg.('method') = method;
@@ -380,12 +382,12 @@ classdef NetworkSolver < Solver
             % Return joint state probability
             line_error(mfilename,'sampleSysAggr is not supported by this solver.');
         end
-                
+        
         function RD = getCdfRespT(self, R)
             % RD = GETCDFRESPT(R)
             
             % Return cumulative distribution of response times at steady-state
-            line_error(mfilename,'getCdfRespT is not supported by this solver.');            
+            line_error(mfilename,'getCdfRespT is not supported by this solver.');
         end
         
         function RD = getTranCdfRespT(self, R)
@@ -400,15 +402,15 @@ classdef NetworkSolver < Solver
             
             % Return cumulative distribution of passage times at steady-state
             line_error(mfilename,'getCdfPassT is not supported by this solver.');
-        end        
+        end
         
         function RD = getTranCdfPassT(self, R)
             % RD = GETTRANCDFPASST(R)
             
             % Return cumulative distribution of passage times during transient
             line_error(mfilename,'getTranCdfPassT is not supported by this solver.');
-        end        
-       
+        end
+        
     end
     
     methods (Static)
@@ -416,7 +418,7 @@ classdef NetworkSolver < Solver
             % SOLVERS = GETALLSOLVERS(MODEL, OPTIONS)
             
             % Return a cell array with all Network solvers
-            if ~exist('options','var')
+            if nargin<2 %~exist('options','var')
                 options = Solver.defaultOptions;
             end
             solvers = {};
@@ -434,7 +436,7 @@ classdef NetworkSolver < Solver
             
             % Return a cell array with all Network solvers feasible for
             % this model
-            if ~exist('options','var')
+            if nargin<2 %~exist('options','var')
                 options = Solver.defaultOptions;
             end
             solvers = {};

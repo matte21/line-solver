@@ -22,7 +22,7 @@ else % inputs are strings
         if isempty(ret)
             ret = AvgTable( AvgTable.JobClass == inputstring,:);
         end
-    else        
+    else
         ret = AvgTable(AvgTable.Station == station & AvgTable.JobClass == class,:);
     end
 end

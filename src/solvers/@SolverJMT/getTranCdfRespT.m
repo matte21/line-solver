@@ -3,7 +3,7 @@ function RD = getTranCdfRespT(self, R)
 
 qn = self.getStruct;
 
-if ~exist('R','var')
+if nargin<2 %~exist('R','var')
     R = getAvgRespTHandles(self);
 end
 RD = cell(qn.nstations, qn.nclasses);

@@ -24,7 +24,7 @@ classdef Model < Copyable
             %    lineSplashScreenShown = true;
                 %line_printf('LINE solver 2.0 initialized.');
             %end
-            lineVersion = strip(lineVersion);
+            lineVersion = strtrim(lineVersion);
             self.setVersion(lineVersion);
             self.setName(name);            
         end

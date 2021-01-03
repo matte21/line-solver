@@ -108,7 +108,7 @@ function [lG,X,Q] = sub_method(L,N,Z,options)
 % LG = SUB_METHOD(L,N,Z,OPTIONS)
 [M,R] = size(L);
 X=[];Q=[];
-switch options.method
+    switch options.method
     case {'ca'}
         [~,lG] = pfqn_ca(L,N,sum(Z,1));
     case {'exact'}
@@ -122,7 +122,7 @@ switch options.method
             if R <= 3 && sum(N)<50
                 [~,~,~,~,lG] = pfqn_mva(L,N,sum(Z,1));
             else
-                if M>R
+                if M>R                    
                     [~,lG] = pfqn_kt(L,N,sum(Z,1));
                 else
                     [~,lG] = pfqn_le(L,N,sum(Z,1));

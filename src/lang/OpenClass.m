@@ -24,7 +24,7 @@ classdef OpenClass < JobClass
             
             self.type = JobClassType.OPEN;
             self.priority = 0;
-            if exist('prio','var')
+            if nargin>=3 %exist('prio','var')
                 self.priority = prio;
             end
             addJobClass(model, self);

@@ -41,9 +41,6 @@ else
 end
 
 
-if ~exist('tol','var')
-    tol = 1e-6;
-end
 Nt = sum(N(isfinite(N)));
 delta  = (Nt - 1) / Nt;
 deltar = (N - 1) ./ N;

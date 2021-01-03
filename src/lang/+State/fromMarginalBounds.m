@@ -4,7 +4,7 @@ function space = fromMarginalBounds(qn, ind, lb, ub, cap, options)
 % Copyright (c) 2012-2021, Imperial College London
 % All rights reserved.
 
-if ~exist('options','var')
+if nargin<6 %~exist('options','var')
     options = Solver.defaultOptions;
 end
 

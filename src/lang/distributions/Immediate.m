@@ -23,7 +23,9 @@ classdef Immediate < Distrib
         function X = sample(self, n)
             % X = SAMPLE(N)
             
-            if ~exist('n','var'), n = 1; end
+            if nargin<2 %~exist('n','var'), 
+                n = 1; 
+            end
             X = zeros(n,1);
         end
         

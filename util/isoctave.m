@@ -8,5 +8,5 @@ function r = isoctave ()
   if (isempty (x))
     x = exist('OCTAVE_VERSION', 'builtin');
   end
-  r = x;
+  r = x;  
 end

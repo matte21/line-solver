@@ -22,9 +22,6 @@ classdef Cache < StatefulNode
             % SELF = CACHE(MODEL, NAME, NITEMS, ITEMLEVELCAP, REPLPOLICY)
             
             self@StatefulNode(name);
-            if ~exist('levels','var')
-                levels = 1;
-            end
             classes = model.classes;
             self.input = Buffer(classes);
             self.output = Dispatcher(classes);
@@ -39,7 +36,7 @@ classdef Cache < StatefulNode
                 line_error(mfilename,'The number of items is smaller than the capacity of %s.',name);
             end
             self.replacementPolicy = ReplacementStrategy.toId(replPolicy);
-            self.server =  CacheClassSwitcher(classes, levels, itemLevelCap); % replace Server created by Queue
+            self.server =  CacheClassSwitcher(classes, self.nLevels, itemLevelCap); % replace Server created by Queue
             self.popularity = {};
             self.setModel(model);
             self.model.addNode(self);

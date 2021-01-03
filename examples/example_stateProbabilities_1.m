@@ -6,7 +6,6 @@ node{2} = Queue(model, 'Queue1', SchedStrategy.PS);
 node{3} = Queue(model, 'Queue2', SchedStrategy.PS);
 node{3}.setNumServers(2);
 
-
 N=[2,0];
 jobclass{1} = ClosedClass(model, 'Class1', N(1), node{1}, 0);
 jobclass{2} = ClosedClass(model, 'Class2', N(2), node{1}, 0);

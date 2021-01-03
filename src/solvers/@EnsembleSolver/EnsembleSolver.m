@@ -15,7 +15,7 @@ classdef EnsembleSolver < Solver
             % SELF = ENSEMBLESOLVER(MODEL, NAME, OPTIONS)
             
             self@Solver(ensmodel, name);
-            if exist('options','var')
+            if nargin>=3 %exist('options','var')
                 self.setOptions(options);
             else
                 self.setOptions(EnsembleSolver.defaultOptions);
@@ -113,7 +113,7 @@ classdef EnsembleSolver < Solver
             if iscell(solver)
                 self.solvers = solver;
             else
-                if ~exist('e','var')
+                if nargin<3 %~exist('e','var')
                     for e=1:self.getNumberOfModels
                         self.solvers{e} = solver;
                     end
