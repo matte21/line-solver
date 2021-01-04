@@ -257,7 +257,6 @@ for r=1:R
     end
 end
 self.nodes = nodes;
-self.modifiedRoutingTable = P;
 
 % check if the probability out of any node sums to >1.0
 pSum = cellsum(P);

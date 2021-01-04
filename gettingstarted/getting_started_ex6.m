@@ -29,7 +29,7 @@ P{missClass, missClass}(cacheNode, cacheDelay)=1;
 P{hitClass, clientClass}(cacheDelay, clientDelay)=1;
 P{missClass, clientClass}(cacheDelay, clientDelay)=1;
 % routing from cacheNode
-model.linkNetwork(P);
+model.link(P);
 
 % Block 4: solution
 ssaAvgTable = SolverSSA(model,'samples',2e4,'seed',1,'verbose',true).getAvgTable

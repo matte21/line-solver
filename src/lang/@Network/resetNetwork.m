@@ -19,8 +19,7 @@ for i = 1:M
     self.stations{i}.output.initDispatcherJobClasses(self.classes);
 end
 
-self.links = {};
 self.handles = {};
-self.connMatrix = zeros(self.getNumberOfNodes);
+self.connections = zeros(self.getNumberOfNodes);
 nodes = self.getNodes;
 end

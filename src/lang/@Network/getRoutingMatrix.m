@@ -1,4 +1,4 @@
-function [rt,rtNodes,connMatrix,rtNodesByClass,rtNodesByStation] = getRoutingMatrix(self, arvRates)
+function [rt,rtNodes,connections,rtNodesByClass,rtNodesByStation] = getRoutingMatrix(self, arvRates)
 % [RT,RTNODES,CONNMATRIX,RTNODESBYCLASS,RTNODESBYSTATION] = GETROUTINGMATRIX(ARVRATES)
 
 % Copyright (c) 2012-2021, Imperial College London
@@ -13,8 +13,8 @@ nodes = self.nodes;
 
 %nodeNames = getNodeNames(self);
 % connection matrix
-connMatrix = self.getConnectionMatrix;
-self.qn.connmatrix = connMatrix;
+connections = self.getConnectionMatrix;
+self.qn.connmatrix = connections;
 rtNodesByClass = {};
 rtNodesByStation = {};
 hasOpen = hasOpenClasses(self);
@@ -31,12 +31,12 @@ for i=1:M
         case 'Forker'
             for j=1:M
                 for k=1:K
-                    if connMatrix(i,j)>0
+                    if connections(i,j)>0
                         rtNodes((i-1)*K+k,(j-1)*K+k)=1.0;
                         outputStrategy_k = node_i.output.outputStrategy{k};
                         switch outputStrategy_k{2}
                             case RoutingStrategy.PROB
-                                if length(outputStrategy_k{end}) ~= sum(connMatrix(i,:))
+                                if length(outputStrategy_k{end}) ~= sum(connections(i,:))
                                     line_error(mfilename,'Fork must have 1.0 routing probability towards all outgoing links.');
                                 end
                                 for t=1:length(outputStrategy_k{end}) % for all outgoing links
@@ -55,7 +55,6 @@ for i=1:M
                 switch outputStrategy_k{2}
                     case RoutingStrategy.PROB
                         if isinf(NK(k)) || ~isSink_i
-                            %rtNodes((i-1)*K+k,(j-1)*K+k) = self.modifiedRoutingTable{k,k}(i,j);
                             for t=1:length(outputStrategy_k{end}) % for all outgoing links
                                 %j = findstring(nodeNames, outputStrategy_k{end}{t}{1}.name);
                                 j = outputStrategy_k{end}{t}{1}.index;
@@ -66,31 +65,31 @@ for i=1:M
                         % set a small numerical tolerance to avoid messing
                         % up with routing chain CTMC solution
                         for j=1:M
-                            if connMatrix(i,j)>0
+                            if connections(i,j)>0
                                 %rtNodes((i-1)*K+k,(j-1)*K+k) = Distrib.Zero;
                             end
                         end
                     case {RoutingStrategy.RAND, RoutingStrategy.RRB, RoutingStrategy.JSQ}
                         if isinf(NK(k)) % open class
                             for j=1:M
-                                if connMatrix(i,j)>0
-                                    rtNodes((i-1)*K+k,(j-1)*K+k)=1/sum(connMatrix(i,:));
+                                if connections(i,j)>0
+                                    rtNodes((i-1)*K+k,(j-1)*K+k)=1/sum(connections(i,:));
                                 end
                             end
                         elseif ~isa(node_i,'Source') && ~isSink_i % don't route closed classes out of source nodes
-                            connMatrixClosed = connMatrix;
-                            if connMatrixClosed(i,self.getNodeIndex(self.getSink))
-                                connMatrixClosed(i,self.getNodeIndex(self.getSink)) = 0;
+                            connectionsClosed = connections;
+                            if connectionsClosed(i,self.getNodeIndex(self.getSink))
+                                connectionsClosed(i,self.getNodeIndex(self.getSink)) = 0;
                             end
                             for j=1:M
-                                if connMatrixClosed(i,j)>0
-                                    rtNodes((i-1)*K+k,(j-1)*K+k)=1/(sum(connMatrixClosed(i,:)));
+                                if connectionsClosed(i,j)>0
+                                    rtNodes((i-1)*K+k,(j-1)*K+k)=1/(sum(connectionsClosed(i,:)));
                                 end
                             end
                         end
                     otherwise
                         for j=1:M
-                            if connMatrix(i,j)>0
+                            if connections(i,j)>0
                                 rtNodes((i-1)*K+k,(j-1)*K+k) = Distrib.Zero;
                             end
                         end

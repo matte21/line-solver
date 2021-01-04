@@ -11,11 +11,31 @@ nodenames = getNodeNames(self);
 njobs = getNumberOfJobs(self);
 numservers = getStationServers(self);
 refstat = getReferenceStations(self);
-routing = getRoutingStrategies(self);
 
+%% init minimal structure
 qn = NetworkStruct(); % create in self to ensure propagation
 qn.nnodes = numel(nodenames);
 qn.nclasses = length(classnames);
+
+%% get routing strategies
+routing = zeros(qn.nnodes, qn.nclasses);
+for ind=1:qn.nnodes
+    for r=1:qn.nclasses
+        switch self.nodes{ind}.output.outputStrategy{r}{2}
+            case RoutingStrategy.RAND
+                routing(ind,r) = RoutingStrategy.ID_RAND;
+            case RoutingStrategy.PROB
+                routing(ind,r) = RoutingStrategy.ID_PROB;
+            case RoutingStrategy.RRB
+                routing(ind,r) = RoutingStrategy.ID_RRB;
+            case RoutingStrategy.JSQ
+                routing(ind,r) = RoutingStrategy.ID_JSQ;
+            case RoutingStrategy.DISABLED
+                routing(ind,r) = RoutingStrategy.ID_DISABLED;
+        end
+    end
+end
+
 qn.nclosedjobs = sum(njobs(isfinite(njobs)));
 qn.nservers = numservers;
 qn.isstation = NodeType.isStation(nodetypes);

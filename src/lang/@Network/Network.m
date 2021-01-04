@@ -4,16 +4,14 @@ classdef Network < Model
     % Copyright (c) 2012-2021, Imperial College London
     % All rights reserved.
     
-    properties (GetAccess = 'private', SetAccess='private')
+    properties (Access=private)
         usedFeatures; % structure of booleans listing the used classes
         % it must be accessed via getUsedLangFeatures that updates
         % the Distribution classes dynamically
         logPath;
         linkedRoutingTable;
-        modifiedRoutingTable;
         isInitialized;
         doChecks;
-        connMatrix;
     end
     
     properties (Access=protected)
@@ -22,12 +20,8 @@ classdef Network < Model
     end
     
     properties (Hidden)
-        ag;
-        env;
         handles;
-        perfIndex;
-        links;
-        
+        perfIndex;        
         stationidxs;
         sourceidx;
         sinkidx;
@@ -37,31 +31,24 @@ classdef Network < Model
         classes;
         stations;
         nodes;
+        connections;
     end
     
     methods % public methods in class folder
-        refreshAG(self) % get agent representation
         
         sa = getStruct(self, structType, wantState) % get abritrary representation
-        %        cn = getCN(self, wantState) % wrapper of getStruct for cache network representation
-        %        ag = getAG(self) % get agent representation
         
         used = getUsedLangFeatures(self) % get used features
         
         ft = getForks(self, rt) % get fork table
         [chainsObj,chainsMatrix] = getChains(self, rt) % get chain table
         
-        [rt,rtNodes,connMatrix,rtNodesByClass,rtNodesByStation] = getRoutingMatrix(self, arvRates) % get routing matrix
+        [rt,rtNodes,connections,rtNodesByClass,rtNodesByStation] = getRoutingMatrix(self, arvRates) % get routing matrix
         
         nodes = resetNetwork(self)
         
         self = link(self, P)
-        [loggerBefore,loggerAfter] = linkAndLog(self, nodes, classes, P, wantLogger, logPath)
-        function self = linkNetwork(self, P) % obsolete - old name
-            % SELF = LINKNETWORK(P) % OBSOLETE - OLD NAME
-            
-            self = link(self,  P);
-        end
+        [loggerBefore,loggerAfter] = linkAndLog(self, nodes, classes, P, wantLogger, logPath)        
         
         function [loggerBefore,loggerAfter] = linkNetworkAndLog(self, nodes, classes, P, wantLogger, logPath)% obsolete - old name
             % [LOGGERBEFORE,LOGGERAFTER] = LINKNETWORKANDLOG(NODES, CLASSES, P, WANTLOGGER, LOGPATH)% OBSOLETE - OLD NAME
@@ -76,129 +63,11 @@ classdef Network < Model
         R = getAvgRespTHandles(self);
         U = getAvgUtilHandles(self);
         [Qt,Ut,Tt] = getTranHandles(self)
-    end
-    
-    methods %(Access = protected)
-        [rates, scv, hasRateChanged, hasSCVChanged] = refreshRates(self, statSet, classSet);
-        [ph, mu, phi, phases] = refreshServicePhases(self, statSet, classSet);
-        proctypes = refreshServiceTypes(self);
-        [rt, rtfun, rtnodes] = refreshRoutingMatrix(self, rates);
-        [lt] = refreshLST(self, statSet, classSet);
+        connections = getConnectionMatrix(self);
         sanitize(self);
     end
     
-    methods
-        connMatrix = getConnectionMatrix(self);
-        sync = refreshSync(self);
-        classprio = refreshPriorities(self);
-        [sched, schedid, schedparam] = refreshScheduling(self);
-        function setInitialized(self, bool)
-            self.isInitialized = bool;
-        end
-        function [rates, mu, phi, phases] = refreshArrival(self) % LINE treats arrival distributions as service distributions of the Source object
-            % [RATES, MU, PHI, PHASES] = REFRESHARRIVAL() % LINE TREATS ARRIVAL DISTRIBUTIONS AS SERVICE DISTRIBUTIONS OF THE SOURCE OBJECT
-            
-            [rates, mu, phi, phases, lt, proctype] = refreshService(self);
-        end
-        [rates, scv, mu, phi, phases] = refreshService(self, statSet, classSet);
-        [chains, visits, rt] = refreshChains(self, propagate)
-        [visits, nodevisits] = refreshVisits(self, chains, rt, rtNodes)
-        [cap, classcap] = refreshCapacity(self);
-        nvars = refreshLocalVars(self);
-    end
-    
-    % PUBLIC METHODS
-    methods (Access=public)
-        
-        function bool = hasStruct(self)
-            bool = ~isempty(self.qn);
-        end
-        
-        %Constructor
-        function self = Network(modelName)
-            % SELF = NETWORK(MODELNAME)
-            self@Model(modelName);
-            self.nodes = {};
-            self.stations = {};
-            self.classes = {};
-            self.connMatrix = [];
-            self.perfIndex = struct();
-            self.perfIndex.('Avg') = {};
-            self.perfIndex.('Tran') = {};
-            self.links = {};
-            initUsedFeatures(self);
-            self.qn = [];
-            self.linkedRoutingTable = {};
-            self.ag = [];
-            self.isInitialized = false;
-            self.logPath = '';
-            self.items = {};
-            self.env = {};
-            self.stationidxs = [];
-            self.sourceidx = [];
-            self.sinkidx = [];
-            self.setChecks(true);
-        end
-        
-        function self = setChecks(self, bool)
-            self.doChecks = bool;
-        end
-        
-        function env = getEnvironment(self)
-            % ENV = GETENVIRONMENT()
-            env = self.env;
-        end
-        
-        function self = setEnvironment(self, env)
-            % SELF = SETENVIRONMENT(ENV)
-            self.env = env;
-        end
-        
-        function nodes = getNodes(self)
-            % NODES = GETNODES()
-            nodes = self.nodes;
-        end
-        
-        function P = getLinkedRoutingMatrix(self)
-            % P = GETLINKEDROUTINGMATRIX()
-            if isempty(self.linkedRoutingTable)
-                line_warning(mfilename,'Unsupported: getLinkedRoutingMatrix() reqyires that the model topology has been instantiated with the link() method. Attempting auto-recovery.');
-                fname = tempname;
-                QN2SCRIPT(self,self.name,fname);
-                run(fname);
-                delete(fname);
-                P = model.getLinkedRoutingMatrix();
-                % THE MODEL TOPOLOGY MUST HAVE BEEN LINKED WITH THE LINK() METHOD.');
-            else
-                P = self.linkedRoutingTable;
-            end
-        end
-        
-        function logPath = getLogPath(self)
-            % LOGPATH = GETLOGPATH()
-            
-            logPath = self.logPath;
-        end
-        
-        function setLogPath(self, logPath)
-            % SETLOGPATH(LOGPATH)
-            
-            self.logPath = logPath;
-        end
-        
-        function bool = hasInitState(self)
-            % BOOL = HASINITSTATE()
-            
-            bool = true;
-            if ~self.isInitialized % check if all stations are initialized
-                for ind=1:self.getNumberOfNodes
-                    if isa(self.nodes{ind},'StatefulNode') && isempty(self.nodes{ind}.state)
-                        bool = false;
-                    end
-                end
-            end
-        end
-        
+    methods %refresh methods
         function resetPerfIndexes(self)
             self.perfIndex.Avg = {};
             self.perfIndex.Tran = {};
@@ -225,16 +94,15 @@ classdef Network < Model
             self.qn = [];
         end
         
-        function resetModel(self, resetState, wantResetHandles)
+        function resetModel(self, resetState)
             % RESETMODEL(RESETSTATE, RESETHANDLES)
             %
             % If RESETSTATE is true, the model requires re-initialization
             % of its state
-            %if nargin>=3 && wantResetHandles
+            
             resetHandles(self);
-            %end
             self.qn = [];
-            self.ag = [];
+            
             if nargin == 2 && resetState
                 self.isInitialized = false;
             end
@@ -242,12 +110,99 @@ classdef Network < Model
                 self.nodes{ind}.reset();
             end
             self.stationidxs = [];
-            % self.resetNetwork;
-            %            self.sourceidx = [];
-            %            self.sinkidx = [];
         end
         
+        self = removeClass(self, jobclass);           
+        
         refreshStruct(self);
+        [rates, scv, hasRateChanged, hasSCVChanged] = refreshRates(self, statSet, classSet);
+        [ph, mu, phi, phases] = refreshServicePhases(self, statSet, classSet);
+        proctypes = refreshServiceTypes(self);
+        [rt, rtfun, rtnodes] = refreshRoutingMatrix(self, rates);
+        [lt] = refreshLST(self, statSet, classSet);
+        sync = refreshSync(self);
+        classprio = refreshPriorities(self);
+        [sched, schedid, schedparam] = refreshScheduling(self);
+        function [rates, mu, phi, phases] = refreshArrival(self) % LINE treats arrival distributions as service distributions of the Source object
+            % [RATES, MU, PHI, PHASES] = REFRESHARRIVAL() % LINE TREATS ARRIVAL DISTRIBUTIONS AS SERVICE DISTRIBUTIONS OF THE SOURCE OBJECT
+            
+            [rates, mu, phi, phases, ~, ~] = refreshService(self);
+        end
+        [rates, scv, mu, phi, phases] = refreshService(self, statSet, classSet);
+        [chains, visits, rt] = refreshChains(self, propagate)
+        [visits, nodevisits] = refreshVisits(self, chains, rt, rtNodes)
+        [cap, classcap] = refreshCapacity(self);
+        nvars = refreshLocalVars(self);
+    end
+    
+    % PUBLIC METHODS
+    methods (Access=public)
+        
+        %Constructor
+        function self = Network(modelName)
+            % SELF = NETWORK(MODELNAME)
+            self@Model(modelName);
+            self.nodes = {};
+            self.stations = {};
+            self.classes = {};
+            self.connections = [];
+            self.perfIndex = struct();
+            self.perfIndex.('Avg') = {};
+            self.perfIndex.('Tran') = {};
+            initUsedFeatures(self);
+            self.qn = [];
+            self.linkedRoutingTable = {};
+            self.isInitialized = false;
+            self.logPath = '';
+            self.items = {};
+            self.stationidxs = [];
+            self.sourceidx = [];
+            self.sinkidx = [];
+            self.setChecks(true);
+        end
+        
+        setInitialized(self, bool);        
+        
+        function bool = hasStruct(self)
+            bool = ~isempty(self.qn);
+        end
+        
+        function self = setChecks(self, bool)
+            self.doChecks = bool;
+        end
+        
+        function nodes = getNodes(self)
+            % NODES = GETNODES()
+            
+            nodes = self.nodes;
+        end
+        
+        P = getLinkedRoutingMatrix(self)
+        
+        function logPath = getLogPath(self)
+            % LOGPATH = GETLOGPATH()
+            
+            logPath = self.logPath;
+        end
+        
+        function setLogPath(self, logPath)
+            % SETLOGPATH(LOGPATH)
+            
+            self.logPath = logPath;
+        end
+        
+        function bool = hasInitState(self)
+            % BOOL = HASINITSTATE()
+            
+            bool = true;
+            if ~self.isInitialized % check if all stations are initialized
+                for ind=1:self.getNumberOfNodes
+                    if isa(self.nodes{ind},'StatefulNode') && isempty(self.nodes{ind}.state)
+                        bool = false;
+                    end
+                end
+            end
+        end       
         
         function [M,R] = getSize(self)
             % [M,R] = GETSIZE()
@@ -509,20 +464,9 @@ classdef Network < Model
                 class = NaN;
             end
         end
-        
-        
+                
         function [stateSpace,nodeStateSpace] = getStateSpace(self, varargin)
             line_error(mfilename,'This method is no longer supported. Use SolverCTMC(model,...).getStateSpace(...) instead.');
-            %             try
-            %                 [stateSpace,nodeStateSpace] = SolverCTMC(self,'force',true,'verbose',false,varargin{:}).getStateSpace;
-            %             catch ME
-            %                 switch ME.identifier
-            %                     case 'Line:NoCutoff'
-            %                         line_error(mfilename,'Line:NoCutoff','The model has open chains, it is mandatory to specify a finite cutoff value, e.g., model.getStateSpace(''cutoff'',1).');
-            %                     otherwise
-            %                         rethrow ME
-            %                 end
-            %             end
         end
         
         function summary(self)
@@ -534,7 +478,9 @@ classdef Network < Model
         end
         
         function [D,Z] = getDemands(self)
-            [~,D,~,Z,~,~]=self.getProductFormParameters;
+            % [D,Z]= GETDEMANDS()            
+            
+            [~,D,~,Z,~,~] = snGetProductFormParams(self.getStruct); 
         end
         
         function [lambda,D,N,Z,mu,S]= getProductFormParameters(self)
@@ -542,39 +488,8 @@ classdef Network < Model
             
             % mu also returns max(S) elements after population |N| as this is
             % required by MVALDMX
-            qn = self.getStruct;
-            R = qn.nclasses;
-            N = qn.njobs;
-            queueIndices = find(qn.nodetype == NodeType.Queue);
-            delayIndices = find(qn.nodetype == NodeType.Delay);
-            sourceIndex = find(qn.nodetype == NodeType.Source);
-            Mq = length(queueIndices); % number of queues
-            Mz = length(delayIndices); % number of delays
-            lambda = zeros(1,R);
-            S = qn.nservers(queueIndices);
-            for r=1:R
-                if isinf(N(r))
-                    lambda(r) = qn.rates(sourceIndex,r);
-                end
-            end
             
-            D = zeros(Mq,R);
-            Nct = sum(N(isfinite(N)));
-            mu = ones(Mq, Nct+max(S(isfinite(S))));
-            for i=1:Mq
-                for r=1:R
-                    c = find(qn.chains(:,r));
-                    D(i,r) = qn.visits{c}(queueIndices(i),r) / qn.rates(queueIndices(i),r);
-                end
-                mu(i,1:size(mu,2)) = min(1:size(mu,2), qn.nservers(queueIndices(i)));
-            end
-            Z = zeros(max(1,Mz),R);
-            for i=1:Mz
-                for r=1:R
-                    c = find(qn.chains(:,r));
-                    Z(i,r) = qn.visits{c}(delayIndices(i),r) / qn.rates(delayIndices(i),r);
-                end
-            end
+            [lambda,D,N,Z,mu,S] = snGetProductFormParams(self.getStruct); 
         end
         
         function statefulnodes = getStatefulNodes(self)
@@ -629,61 +544,8 @@ classdef Network < Model
         end
         
         function Dchain = getDemandsChain(self)
-            % DCHAIN = GETDEMANDSCHAIN()
-            
-            qn = self.getStruct;
-            M = qn.nstations;    %number of stations
-            K = qn.nclasses;    %number of classes
-            C = qn.nchains;
-            
-            PH=qn.proc;
-            
-            % determine service times
-            ST = zeros(M,K);
-            for k = 1:K
-                for i=1:M
-                    ST(i,k) = 1 ./ map_lambda(PH{i,k});
-                end
-            end
-            ST(isnan(ST))=0;
-            
-            alpha = zeros(qn.nstations,qn.nclasses);
-            Vchain = zeros(qn.nstations,qn.nchains);
-            for c=1:qn.nchains
-                inchain = find(qn.chains(c,:));
-                for i=1:qn.nstations
-                    Vchain(i,c) = sum(qn.visits{c}(i,inchain)) / sum(qn.visits{c}(qn.refstat(inchain(1)),inchain));
-                    for k=inchain
-                        alpha(i,k) = alpha(i,k) + qn.visits{c}(i,k) / sum(qn.visits{c}(i,inchain));
-                    end
-                end
-            end
-            Vchain(~isfinite(Vchain))=0;
-            alpha(~isfinite(alpha))=0;
-            
-            Dchain = zeros(M,C);
-            STchain = zeros(M,C);
-            
-            refstatchain = zeros(C,1);
-            for c=1:qn.nchains
-                inchain = find(qn.chains(c,:));
-                isOpenChain = any(isinf(qn.njobs(inchain)));
-                for i=1:qn.nstations
-                    % we assume that the visits in L(i,inchain) are equal to 1
-                    STchain(i,c) = ST(i,inchain) * alpha(i,inchain)';
-                    if isOpenChain && i == qn.refstat(inchain(1)) % if this is a source ST = 1 / arrival rates
-                        STchain(i,c) = 1 / sumfinite(qn.rates(i,inchain)); % ignore degenerate classes with zero arrival rates
-                    else
-                        STchain(i,c) = ST(i,inchain) * alpha(i,inchain)';
-                    end
-                    Dchain(i,c) = Vchain(i,c) * STchain(i,c);
-                end
-                refstatchain(c) = qn.refstat(inchain(1));
-                if any((qn.refstat(inchain(1))-refstatchain(c))~=0)
-                    line_error(sprintf('Classes in chain %d have different reference station.',c));
-                end
-            end
-            Dchain(~isfinite(Dchain))=0;
+            % DCHAIN = GETDEMANDSCHAIN()            
+           snGetDemandsChain(self.getStruct);
         end
         
         % setUsedFeatures : records that a certain language feature has been used
@@ -698,7 +560,7 @@ classdef Network < Model
         addNode(self, node);
         addLink(self, nodeA, nodeB);
         addLinks(self, nodeList);
-        
+        addItemSet(self, itemSet);                
         addMetric(self, performanceIndex);
         self = disableMetric(self, Y);
         self = enableMetric(self, Y);
@@ -729,29 +591,6 @@ classdef Network < Model
             list = find(cellisa(self.nodes, 'StatefulNode'))';
         end
         
-        %% Analysis of model features and available solvers
-        
-        %         function listAvailableSolvers(self)
-        % LISTAVAILABLESOLVERS()
-        
-        %             line_printf('This model can be analyzed by the following solvers:\n');
-        %             if SolverMVA.supports(self)
-        %                 line_printf('SolverMVA\n');
-        %             end
-        %             if SolverCTMC.supports(self)
-        %                 line_printf('SolverCTMC\n');
-        %             end
-        %             if SolverFluid.supports(self)
-        %                 line_printf('SolverFluid\n');
-        %             end
-        %             if SolverJMT.supports(self)
-        %                 line_printf('SolverJMT\n');
-        %             end
-        %             if SolverSSA.supports(self)
-        %                 line_printf('SolverSSA\n');
-        %             end
-        %         end
-        
         index = getIndexSourceStation(self);
         index = getIndexSourceNode(self);
         index = getIndexSinkNode(self);
@@ -779,41 +618,19 @@ classdef Network < Model
         function [ni, nir, sir, kir] = initToMarginal(self)
             % [NI, NIR, SIR, KIR] = INITTOMARGINAL()
             
-            ni = {}; nir = {}; sir = {}; kir = {};
-            qn = self.getStruct;
-            for ist=1:length(self.stations)
-                if ~isempty(self.stations{ist}.getState())
-                    [ni{ist,1}, nir{ist,1}, sir{ist,1}, kir{ist,1}] = State.toMarginal(qn,qn.stationToNode(ist),state);
-                end
-            end
+            [ni, nir, sir, kir] = snInitToMarginal(self.getStruct);
         end
         
         function [isvalid] = isStateValid(self)
             % [ISVALID] = ISSTATEVALID()
-            qn = self.getStruct;
-            nir = [];
-            sir = [];
-            for ist=1:qn.nstations
-                isf = qn.stationToStateful(ist);
-                if size(qn.state{isf},1)>1
-                    line_warning(mfilename,sprintf('isStateValid will ignore some node %d states, define a unique initial state to address this problem.',ist));
-                    qn.state{isf} = qn.state{isf}(1,:);
-                end
-                [~, nir(ist,:), sir(ist,:), ~] = State.toMarginal(qn, qn.stationToNode(ist), qn.state{isf});
-            end
-            isvalid = State.isValid(qn, nir, sir);
+            
+            isvalid = snIsStateValid(self.getStruct);
         end
         
         function [initialStateAggr] = getStateAggr(self) % get initial state
             % [INITIALSTATEAGGR] = GETSTATEAGGR() % GET INITIAL STATE
             
-            initialState = getState(self);
-            initialStateAggr = cell(size(initialState));
-            qn = self.getStruct;
-            for isf=1:length(initialStateAggr)
-                ind = qn.statefulToNode(isf);
-                [~,initialStateAggr{isf}] = State.toMarginalAggr(qn, ind, initialState{isf});
-            end
+            initialStateAggr = snGetStateAggr(self.getStruct);
         end
         
         function [initialState, priorInitialState] = getState(self) % get initial state
@@ -1000,18 +817,6 @@ classdef Network < Model
             self.isInitialized = true;
         end
         
-        %         function setState(self, state)
-        %             for ind=1:self.getNumberOfNodes
-        %                 if self.nodes{ind}.isStateful
-        %                     ist = qn.nodeToStation(ind);
-        %                     self.nodes{ind}.setState(state{ind});
-        %                     if isempty(self.nodes{ind}.getState)
-        %                         line_error(sprintf('Invalid state assignment for station %d\n',ind));
-        %                     end
-        %                 end
-        %             end
-        %         end
-        
         function [H,G] = getGraph(self)
             % [H,G] = GETGRAPH()
             
@@ -1109,82 +914,8 @@ classdef Network < Model
         function printRoutingMatrix(self)
             % PRINTROUTINGMATRIX()
             
-            node_names = self.getNodeNames;
-            classnames = self.getClassNames;
-            [~,Pnodes] = getRoutingMatrix(self); % get routing matrix
-            M = self.getNumberOfNodes;
-            K = self.getNumberOfClasses;
-            for i=1:M
-                for r=1:K
-                    for j=1:M
-                        for s=1:K
-                            if Pnodes((i-1)*K+r,(j-1)*K+s)>0
-                                if isa(self.nodes{i},'Cache')
-                                    pr = 'state-dependent';
-                                else
-                                    pr = num2str(Pnodes((i-1)*K+r,(j-1)*K+s),'%f');
-                                end
-                                line_printf('\n%s [%s] => %s [%s] : Pr=%s',node_names{i}, classnames{r}, node_names{j}, classnames{s}, pr);
-                            end
-                        end
-                    end
-                end
-            end
-        end
-        
-        
-        function self = removeClass(self, jobclass)
-            % SELF = REMOVECLASS(SELF, CLASS)
-            %
-            % Remove the specified CLASS from the model
-            
-            if hasSingleClass(self)
-                if self.classes{1}.name == jobclass.name
-                    line_error(mfilename,'The network has a single class, it cannot be removed from the model.');
-                else
-                    % no changes
-                end
-            else
-                nClasses = length(self.classes);
-                r = self.getClassByName(jobclass.name).index; % class to remove
-                remaining = setdiff(1:nClasses, r);
-                if ~isnan(r)
-                    % check with SEPT/LEPT
-                    for i=1:length(self.nodes)
-                        switch class(self.nodes{i})
-                            case {'Delay','DelayStation','Queue'}
-                                self.nodes{i}.schedStrategyPar = self.nodes{i}.schedStrategyPar(remaining);
-                                self.nodes{i}.serviceProcess = self.nodes{i}.serviceProcess(remaining);
-                                self.nodes{i}.classCap = self.nodes{i}.classCap(remaining);
-                                if length(self.nodes{i}.input.inputJobClasses) >= max(remaining)
-                                    self.nodes{i}.input.inputJobClasses = self.nodes{i}.input.inputJobClasses(remaining);
-                                end
-                                self.nodes{i}.server.serviceProcess = self.nodes{i}.server.serviceProcess(remaining);
-                                self.nodes{i}.output.outputStrategy = self.nodes{i}.output.outputStrategy(remaining);
-                            case 'ClassSwitch'
-                                if length(self.nodes{i}.input.inputJobClasses) >= max(remaining)
-                                    self.nodes{i}.input.inputJobClasses = self.nodes{i}.input.inputJobClasses(remaining);
-                                end
-                                self.nodes{i}.server.updateClassSwitch(self.nodes{i}.server.csFun(remaining,remaining));
-                                self.nodes{i}.output.outputStrategy = self.nodes{i}.output.outputStrategy(remaining);
-                            case 'Cache'
-                                line_error(mfilename,'Cannot dynamically remove classes in models with caches. You need to re-instantiate the model.');
-                            case 'Source'
-                                self.nodes{i}.arrivalProcess = self.nodes{i}.arrivalProcess(remaining);
-                                self.nodes{i}.classCap = self.nodes{i}.classCap(remaining);
-                                self.nodes{i}.input.sourceClasses = self.nodes{i}.input.sourceClasses(remaining);
-                                %self.nodes{i}.server.serviceProcess = self.nodes{i}.server.serviceProcess(remaining);
-                                self.nodes{i}.output.outputStrategy = self.nodes{i}.output.outputStrategy(remaining);
-                            case 'Sink'
-                                self.nodes{i}.output.outputStrategy = self.nodes{i}.output.outputStrategy(remaining);
-                        end
-                    end
-                    self.classes = self.classes(remaining);
-                    self.reset(true); % require a complete re-initialization including state
-                end
-            end
-        end
-        
+            snPrintRoutingMatrix(self.getStruct);
+        end                        
     end
     
     % Private methods
@@ -1222,16 +953,7 @@ classdef Network < Model
                 if isa(clone.nodes{i},'Station')
                     clone.stations{i} = clone.nodes{i};
                 end
-                for l=1:length(self.links)
-                    for j=1:length(self.links{l})
-                        if strcmp(self.links{l}{1}.name, self.nodes{i}.name)
-                            clone.links{l}{1} = clone.nodes{i};
-                        end
-                        if strcmp(self.links{l}{2}.name, self.nodes{i}.name)
-                            clone.links{l}{2} = clone.nodes{i};
-                        end
-                    end
-                end
+                clone.connections = self.connections;
             end
             
             % Metric objects do not contain object handles
@@ -1248,120 +970,113 @@ classdef Network < Model
         function bool = hasFCFS(self)
             % BOOL = HASFCFS()
             
-            bool = any(self.getStruct.schedid==SchedStrategy.ID_FCFS);
+            bool = snHasFCFS(self.getStruct);
         end
         
         function bool = hasHomogeneousScheduling(self, strategy)
             % BOOL = HASHOMOGENEOUSSCHEDULING(STRATEGY)
             
-            bool = length(findstring(self.getStruct.sched,strategy)) == self.getStruct.nstations;
+            bool = snHasHomogeneousScheduling(self.getStruct, strategy);
         end
         
         function bool = hasDPS(self)
             % BOOL = HASDPS()
             
-            bool = any(self.getStruct.schedid==SchedStrategy.ID_DPS);
+            bool = snHasDPS(self.getStruct);
         end
         
         function bool = hasGPS(self)
             % BOOL = HASGPS()
             
-            bool = any(self.getStruct.schedid==SchedStrategy.ID_GPS);
+            bool = snHasGPS(self.getStruct);
         end
         
         function bool = hasINF(self)
             % BOOL = HASINF()
             
-            bool = any(self.getStruct.schedid==SchedStrategy.ID_INF);
+            bool = snHasINF(self.getStruct);
         end
         
         function bool = hasPS(self)
             % BOOL = HASPS()
             
-            bool = any(self.getStruct.schedid==SchedStrategy.ID_PS);
+            bool = snHasPS(self.getStruct);
         end
         
         function bool = hasRAND(self)
             % BOOL = HASRAND()
             
-            bool = any(self.getStruct.schedid==SchedStrategy.ID_SIRO);
+            bool = snHasRAND(self.getStruct);
         end
         
         function bool = hasHOL(self)
             % BOOL = HASHOL()
             
-            bool = any(self.getStruct.schedid==SchedStrategy.ID_HOL);
+            bool = snHasHOL(self.getStruct);
         end
         
         function bool = hasLCFS(self)
             % BOOL = HASLCFS()
             
-            bool = any(self.getStruct.schedid==SchedStrategy.ID_LCFS);
+            bool = snHasLCFS(self.getStruct);
         end
         
         function bool = hasSEPT(self)
             % BOOL = HASSEPT()
             
-            bool = any(self.getStruct.schedid==SchedStrategy.ID_SEPT);
+            bool = snHasSEPT(self.getStruct);
         end
         
         function bool = hasLEPT(self)
             % BOOL = HASLEPT()
             
-            bool = any(self.getStruct.schedid==SchedStrategy.ID_LEPT);
+            bool = snHasLEPT(self.getStruct);
         end
         
         function bool = hasSJF(self)
             % BOOL = HASSJF()
             
-            bool = any(self.getStruct.schedid==SchedStrategy.ID_SJF);
+            bool = snHasSJF(self.getStruct);
         end
         
         function bool = hasLJF(self)
             % BOOL = HASLJF()
             
-            bool = any(self.getStruct.schedid==SchedStrategy.ID_LJF);
+            bool = snHasLJF(self.getStruct);
         end
         
         function bool = hasMultiClassFCFS(self)
             % BOOL = HASMULTICLASSFCFS()
             
-            i = find(self.getStruct.schedid == SchedStrategy.ID_FCFS);
-            if i > 0
-                bool = range([self.getStruct.rates(i,:)])>0;
-            else
-                bool = false;
-            end
+            bool = snHasMultiClassFCFS(self.getStruct);           
         end
         
         function bool = hasMultiServer(self)
-            % BOOL = HASMULTISERVER()
-            
-            bool = any(self.getStruct.nservers(isfinite(self.getStruct.nservers)) > 1);
+            bool = snHasMultiServer(self.getStruct);           
         end
         
         function bool = hasSingleChain(self)
             % BOOL = HASSINGLECHAIN()
             
-            bool = self.getNumberOfChains == 1;
+            bool = snHasSingleChain(self.getStruct);
         end
         
         function bool = hasMultiChain(self)
             % BOOL = HASMULTICHAIN()
             
-            bool = self.getNumberOfChains > 1;
+             bool = snHasMultiChain(self.getStruct);
         end
         
         function bool = hasSingleClass(self)
             % BOOL = HASSINGLECLASS()
             
-            bool = self.getNumberOfClasses == 1;
+             bool = snHasSingleClass(self.getStruct);
         end
         
         function bool = hasMultiClass(self)
             % BOOL = HASMULTICLASS()
             
-            bool = self.getNumberOfClasses > 1;
+            bool = snHasMultiClass(self.getStruct);
         end
         
         function bool = hasProductFormSolution(self)
@@ -1390,20 +1105,7 @@ classdef Network < Model
             % modelling features
             if self.hasMultiClassFCFS, bool = false; end
         end
-        
-        
-        function addItemSet(self, itemSet)
-            % ADDITEMSET(ITEMSET)
-            
-            if sum(cellfun(@(x) strcmp(x.name, itemSet.name), self.items))>0
-                line_error(mfilename,'An item type with name %s already exists.\n', itemSet.name);
-            end
-            nItemSet = size(self.items,1);
-            itemSet.index = nItemSet+1;
-            self.items{end+1,1} = itemSet;
-            self.setUsedFeatures(class(itemSet));
-        end
-        
+                       
         
         function print(self)
             LINE2SCRIPT(self)
@@ -1553,7 +1255,6 @@ classdef Network < Model
             % N(r) - number of jobs of class r
             % strategy(i) - scheduling strategy at station i
             model = Network('Model');
-            options = Solver.defaultOptions;
             [M,R] = size(D);
             node = {};
             nQ = 0; nD = 0;
@@ -1629,6 +1330,6 @@ classdef Network < Model
             end
             
         end
-        
+                
     end
 end

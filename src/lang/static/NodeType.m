@@ -17,6 +17,19 @@ classdef (Sealed) NodeType
         Queue = 0;
         Sink = -1;
         Join = -2;
+        
+        ID_TRANSITION = 9;
+        ID_PLACE = 8;
+        ID_FORK = 7;
+        ID_ROUTER = 6;
+        ID_CACHE = 5;
+        ID_LOGGER = 4;
+        ID_CLASSSWITCH = 3;
+        ID_DELAY = 2;
+        ID_SOURCE = 1;
+        ID_QUEUE = 0;
+        ID_SINK = -1;
+        ID_JOIN = -2;        
     end
     
     methods (Static)

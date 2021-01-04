@@ -9,11 +9,11 @@ import org.java_websocket.handshake.ServerHandshake;
  * This example demonstrates how to create a websocket connection to a server. Only the most
  * important callbacks are overloaded.
  */
-public class LINEWebSocketClient extends WebSocketClient {
+public class lineclient extends WebSocketClient {
   
  public String message;
 
-  public LINEWebSocketClient(URI serverURI, String msg) {
+  public lineclient(URI serverURI, String msg) {
     super(serverURI);
     this.message = msg;
   }
@@ -39,7 +39,7 @@ public class LINEWebSocketClient extends WebSocketClient {
             message = message + "\n" + sc.nextLine();
         }
 
-    LINEWebSocketClient c = new LINEWebSocketClient(new URI("ws://"+args[0]+":"+args[1]), message); 
+    lineclient c = new lineclient(new URI("ws://"+args[0]+":"+args[1]), message); 
     c.connect();
   }
 

@@ -6,9 +6,7 @@ if nargin<2 %~exist('R','var')
     R = self.getAvgRespTHandles;
 end
 qn = self.getStruct;
-%self.getAvg; % get steady-state solution
-%options = self.getOptions;
-[~,D,N,Z,~,S]= self.model.getProductFormParameters;
+[~,D,N,Z,~,S]= networkstruct_getpfparams(qn);
 fcfsNodes = find(qn.schedid(qn.schedid ~= SchedStrategy.ID_INF) == SchedStrategy.ID_FCFS);
 T = sum(N) * mean(1./qn.rates(fcfsNodes,:));
 %tset = [0:T/100000:2.5*T/1000, T/1000:T/1000:T];

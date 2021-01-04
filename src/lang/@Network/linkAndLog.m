@@ -7,7 +7,7 @@ function [loggerBefore,loggerAfter] = linkAndLog(self, P, isNodeLogged, logPath)
 
 self.resetStruct; % important to regenerate the qn with the loggers
 
-if ~isempty(self.links)
+if ~isempty(self.connections)
     line_warning(mfilename,'Network topology already instantiated. Calling resetNetwork automatically before adding loggers.');
     self.resetNetwork;
 end

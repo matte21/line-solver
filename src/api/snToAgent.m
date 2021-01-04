@@ -1,14 +1,10 @@
-function refreshAG(self, cutoffs)
-% REFRESHAG()
-% Export network as a collection of interacting stochastic agents
-
+function ag = snToAgent(qn)
+% AG = SNTOAGENT()
+% Export the model in agent representation
 
 % Copyright (c) 2012-2021, Imperial College London
 % All rights reserved.
 
-% We now generate the global state space
-% parses all but the service processes
-qn = self.getStruct;
 nnodes = qn.nnodes;
 nstateful = qn.nstateful;
 S = length(qn.sync);
@@ -21,7 +17,6 @@ end
 if nargin==1 || (nargin>1 && length(cutoffs(:))==1)
     cutoffs = defaultCutoff * ones(qn.nnodes,qn.nclasses);
 end
-qn = self.getStruct;
 space = State.spaceGeneratorNodes(qn, cutoffs);
 %%
 active = 1; % column of active actions
@@ -106,9 +101,8 @@ for a=1:size(RL,1)-1 % don't delete local events row
 end
 RL(inactiveSync,:)=[];
 AP(inactiveSync,:)=[];
-self.ag = struct();
-self.ag.space = space;
-self.ag.actions = RL;
-self.ag.role = AP;
-%[x, pi, Q, stats, xls, xus] = autocat(ag.rate, ag.role, 'linprog', 'lpr')
+ag = struct();
+ag.space = space;
+ag.actions = RL;
+ag.role = AP;
 end
