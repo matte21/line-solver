@@ -12,7 +12,7 @@ LINE is a MATLAB toolbox for performance and reliability analysis of systems and
 
 Supported models include *extended queueing networks*, both open and closed, and *layered queueing networks*. Models can be solved with either native or external solvers, the latter include [JMT](http://jmt.sourceforge.net/) and [LQNS](http://www.sce.carleton.ca/rads/lqns/). Native solvers are based on continuous-time Markov chains (CTMC), fluid ordinary differential equations, matrix analytic methods (MAM), normalizing constant analysis, and mean-value analysis (MVA). 
 
-### Getting started (MATLAB SOURCE RELEASE)
+### Getting started (MATLAB SOURCE)
 
 To get started, expand the archive (or clone the repository) in the chosen installation folder.
 
@@ -25,23 +25,34 @@ Finally, run the LINE demonstrators using
 allExamples
 ```
 
-### Getting started (DOCKER BINARY RELEASE)
+### Getting started (DOCKER SERVER)
 
-This version uses the royalty-free MATLAB compiler runtime to allow users without a MATLAB license to use LINE. This release can only solve JMT or LQNS models using the LINE solvers.
+This binary release uses the royalty-free [MATLAB compiler runtime](https://www.mathworks.com/products/compiler/matlab-runtime.html) to enable users without a MATLAB license to use the main features of LINE. This release can only solve models specified using the [JMT](http://jmt.sf.net) or [LQNS](http://www.sce.carleton.ca/rads/lqns/) input file formats.
 
 To get started, retrieve the LINE container:
 ```
 docker pull linemcr/cli
 ```
-After downloading a [JMT](http://jmt.sf.net) example model [example_openModel_3.jsimg](https://raw.githubusercontent.com/line-solver/line/master/examples/example_openModel_3.jsimg) to a local directory, run from the linux command line
+Let us first run the linemcr in client-server model 
+```
+docker run -i -p 127.0.0.1:5463:5463/tcp  --rm linemcr/cli -p 5463
+```
+bootstraps the server. To solve a layered queueing network (LQN), after downloading a LQN example model [ofbizExample.xml](https://raw.githubusercontent.com/imperial-qore/line/master/examples/ofbizExample.xml), we issue a request to the engine using LINE's [websocket client](https://github.com/imperial-qore/line-solver/raw/master/src/cli/websocket/lineclient.jar). 
+```
+cat ofbizExample.xml | java -jar lineclient.jar 127.0.0.1 5463
+```
+
+### Getting started (DOCKER CLI)
+
+It is also possible to run LINE in direct CLI mode, but incurring a longer bootstrap time due to the MCR startup, for example:
+```
+cat ofbizExample.xml | docker run -i --rm linemcr/cli -i xml -s ln -a all -o json
+```
+The command will print in JSON format the results of the mean performance metrics calculation functions of LINE, getAvgTable and getAvgSysTable.
+
+To solve a [JMT](http://jmt.sf.net) example model, we first download [example_openModel_3.jsimg](https://raw.githubusercontent.com/line-solver/line/master/examples/example_openModel_3.jsimg) to a local directory and then run
 ```
 cat example_openModel_3.jsimg | docker run -i --rm linemcr/cli -i jsimg -s mva -a all -o json
-```
-The command will print the results of getAvgTable and getAvgSysTable in JSON format.
-
-To solve a layered queueing network (LQN), after downloading a LQN example model [ofbizExample.xml](https://raw.githubusercontent.com/imperial-qore/line/master/examples/ofbizExample.xml) run 
-```
-cat ofBizExample.xml | docker run -i --rm linemcr/cli -i xml -s ln -a all -o json
 ```
 
 Further help can be obtained as follows
