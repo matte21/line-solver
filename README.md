@@ -33,7 +33,7 @@ To get started, retrieve the LINE container:
 ```
 docker pull linemcr/cli
 ```
-Let us first run the linemcr in client-server model 
+Let us first run the line container in client-server model 
 ```
 docker run -i -p 127.0.0.1:5463:5463/tcp  --rm linemcr/cli -p 5463
 ```
@@ -41,27 +41,35 @@ bootstraps the server. To solve a layered queueing network (LQN), after download
 ```
 cat ofbizExample.xml | java -jar lineclient.jar 127.0.0.1 5463
 ```
+Note that the first invocation tends to be slightly slower than the following ones.
+
+The command will print in JSON format the results of the mean performance metrics calculation functions of LINE, getAvgTable and getAvgSysTable.
 
 ### Getting started (DOCKER CLI)
 
-It is also possible to run LINE in direct CLI mode, but incurring a longer bootstrap time due to the MCR startup, for example:
+It is also possible to run LINE in direct CLI mode, but incurring a longer bootstrap time due to the MATLAB compiler runtime startup, for example:
 ```
 cat ofbizExample.xml | docker run -i --rm linemcr/cli -i xml -s ln -a all -o json
 ```
-The command will print in JSON format the results of the mean performance metrics calculation functions of LINE, getAvgTable and getAvgSysTable.
-
-To solve a [JMT](http://jmt.sf.net) example model, we first download [example_openModel_3.jsimg](https://raw.githubusercontent.com/line-solver/line/master/examples/example_openModel_3.jsimg) to a local directory and then run
+We can also solve [JMT](http://jmt.sf.net) example models. We first download [example_openModel_3.jsimg](https://raw.githubusercontent.com/line-solver/line/master/examples/example_openModel_3.jsimg) to a local directory and then run
 ```
 cat example_openModel_3.jsimg | docker run -i --rm linemcr/cli -i jsimg -s mva -a all -o json
 ```
 
-Further help can be obtained as follows
+### Documentation
+Getting started examples and detailed instructions on how to use LINE are provided in the [User Manual](https://github.com/line-solver/line/raw/master/doc/LINE.pdf) and on the [Wiki](https://github.com/line-solver/line/wiki).
+
+A number of functions in MATLAB document their I/O behavior, e.g.:
+```
+>> help Solver.accurateOdeSolver
+  FUN = accurateOdeSolver()
+  Return default high-accuracy non-stiff solver
+```
+
+Further help on the Docker container options can instead be obtained as follows
 ```
 docker run -i --rm linemcr/cli -h
 ```
-
-### Documentation
-Getting started examples and detailed instructions on how to use LINE are provided in the [User Manual](https://github.com/line-solver/line/raw/master/doc/LINE.pdf) and on the [Wiki](https://github.com/line-solver/line/wiki).
 
 ### License
 LINE is released as open source under the BSD-3 license: https://raw.githubusercontent.com/line-solver/line/master/LICENSE
