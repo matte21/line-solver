@@ -23,16 +23,16 @@ if self.enableChecks && ~self.supports(self.model)
     throw(ME);
 end
 
-qn = getStruct(self);
-M = qn.nstations;
-K = qn.nclasses;
-NK = qn.njobs;
+sn = getStruct(self);
+M = sn.nstations;
+K = sn.nclasses;
+NK = sn.njobs;
 sizeEstimator = 0;
 for k=1:K
     sizeEstimator = sizeEstimator + gammaln(1+NK(k)+M-1) - gammaln(1+M-1) - gammaln(1+NK(k)); % worst-case estimate of the state space
 end
 
-if any(isinf(qn.njobs))
+if any(isinf(sn.njobs))
     if isinf(options.cutoff)
         line_warning(mfilename,sprintf('The model has open chains, it is recommended to specify a finite cutoff value, e.g., SolverCTMC(model,''cutoff'',1).'));
         self.options.cutoff= ceil(6000^(1/(M*K)));
@@ -53,63 +53,63 @@ end
 % we compute all metrics anyway because CTMC has essentially
 % the same cost
 if isinf(options.timespan(1))
-    s0 = qn.state;
-    s0prior = qn.stateprior;
-    for ind=1:qn.nnodes
-        if qn.isstateful(ind)
-            isf = qn.nodeToStateful(ind);
-            qn.state{isf} = s0{isf}(maxpos(s0prior{1}),:); % pick one particular initial state
+    s0 = sn.state;
+    s0prior = sn.stateprior;
+    for ind=1:sn.nnodes
+        if sn.isstateful(ind)
+            isf = sn.nodeToStateful(ind);
+            sn.state{isf} = s0{isf}(maxpos(s0prior{1}),:); % pick one particular initial state
         end
     end
-    [QN,UN,RN,TN,CN,XN,Q,SS,SSq,Dfilt,~,~,qn] = solver_ctmc_analyzer(qn, options);
+    [QN,UN,RN,TN,CN,XN,Q,SS,SSq,Dfilt,~,~,sn] = solver_ctmc_analyzer(sn, options);
     % update initial state if this has been corrected by the state space
     % generator
-    for isf=1:qn.nstateful
-        ind = qn.statefulToNode(isf);
-        self.model.nodes{ind}.setState(qn.state{isf});
-        switch class(self.model.nodes{qn.statefulToNode(isf)})
+    for isf=1:sn.nstateful
+        ind = sn.statefulToNode(isf);
+        self.model.nodes{ind}.setState(sn.state{isf});
+        switch class(self.model.nodes{sn.statefulToNode(isf)})
             case 'Cache'
                 try
-            self.model.nodes{qn.statefulToNode(isf)}.setResultHitProb(qn.varsparam{ind}.actualhitprob);
-            self.model.nodes{qn.statefulToNode(isf)}.setResultMissProb(qn.varsparam{ind}.actualmissprob);
+            self.model.nodes{sn.statefulToNode(isf)}.setResultHitProb(sn.varsparam{ind}.actualhitprob);
+            self.model.nodes{sn.statefulToNode(isf)}.setResultMissProb(sn.varsparam{ind}.actualmissprob);
                     self.model.refreshChains();
                 catch
                     keyboard
                 end
         end
     end
-    %qn.space = SS;
+    %sn.space = SS;
     self.result.infGen = Q;
     self.result.space = SS;
     self.result.spaceAggr = SSq;
-    self.result.nodeSpace = qn.space;
+    self.result.nodeSpace = sn.space;
     self.result.eventFilt = Dfilt;
     runtime = toc(T0);
-    qn.space = {};
+    sn.space = {};
     self.setAvgResults(QN,UN,RN,TN,CN,XN,runtime,options.method);
 else
     lastSol= [];
-    s0 = qn.state;
-    s0prior = qn.stateprior;
+    s0 = sn.state;
+    s0prior = sn.stateprior;
     
     s0_sz = cellfun(@(x) size(x,1), s0)';
     s0_id = pprod(s0_sz-1);
     while s0_id>=0 % for all possible initial states
         s0prior_val = 1;
-        for ind=1:qn.nnodes
-            if qn.isstateful(ind)
-                isf = qn.nodeToStateful(ind);
+        for ind=1:sn.nnodes
+            if sn.isstateful(ind)
+                isf = sn.nodeToStateful(ind);
                 s0prior_val = s0prior_val * s0prior{isf}(1+s0_id(isf)); % update prior
-                qn.state{isf} = s0{isf}(1+s0_id(isf),:); % assign initial state to network
+                sn.state{isf} = s0{isf}(1+s0_id(isf),:); % assign initial state to network
             end
         end
         if s0prior_val > 0
-            [t,pit,QNt,UNt,~,TNt,~,~,Q,SS,SSq,Dfilt,runtime_t] = solver_ctmc_transient_analyzer(qn, options);
+            [t,pit,QNt,UNt,~,TNt,~,~,Q,SS,SSq,Dfilt,runtime_t] = solver_ctmc_transient_analyzer(sn, options);
             self.result.space = SS;
             self.result.spaceAggr = SSq;
             self.result.infGen = Q;
             self.result.eventFilt = Dfilt;
-            %qn.space = SS;
+            %sn.space = SS;
             setTranProb(self,t,pit,SS,runtime_t);
             if isempty(self.result) || ~isfield(self.result,'Tran') || ~isfield(self.result.Tran,'Avg') || ~isfield(self.result.Tran.Avg,'Q')
                 self.result.Tran.Avg.Q = cell(M,K);
@@ -143,7 +143,7 @@ else
         s0_id=pprod(s0_id,s0_sz-1); % update initial state
     end
     runtime = toc(T0);
-    qn.space = {};
+    sn.space = {};
     self.result.('solver') = getName(self);
     self.result.runtime = runtime;
     self.result.solverSpecific = lastSol;

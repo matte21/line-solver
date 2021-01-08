@@ -1,30 +1,30 @@
-function [Pr,G,runtime] = solver_nc_jointaggr(qn, options)
+function [Pr,G,runtime] = solver_nc_jointaggr(sn, options)
 % [PR,G,RUNTIME] = SOLVER_NC_JOINTAGGR(QN, OPTIONS)
 
 % Copyright (c) 2012-2021, Imperial College London
 % All rights reserved.
 
 method = options.method;
-M = qn.nstations;    %number of stations
-nservers = qn.nservers;
-NK = qn.njobs';  % initial population per class
-schedid = qn.schedid;
-%chains = qn.chains;
-SCV = qn.scv;
-ST = 1 ./ qn.rates;
+M = sn.nstations;    %number of stations
+nservers = sn.nservers;
+NK = sn.njobs';  % initial population per class
+schedid = sn.schedid;
+%chains = sn.chains;
+SCV = sn.scv;
+ST = 1 ./ sn.rates;
 ST(isnan(ST))=0;
 ST0=ST;
 
-alpha = zeros(qn.nstations,qn.nclasses);
-Vchain = zeros(qn.nstations,qn.nchains);
-V = zeros(qn.nstations,qn.nclasses);
-for c=1:qn.nchains
-    inchain = find(qn.chains(c,:));
-    for i=1:qn.nstations
-        Vchain(i,c) = sum(qn.visits{c}(i,inchain)) / sum(qn.visits{c}(qn.refstat(inchain(1)),inchain));
+alpha = zeros(sn.nstations,sn.nclasses);
+Vchain = zeros(sn.nstations,sn.nchains);
+V = zeros(sn.nstations,sn.nclasses);
+for c=1:sn.nchains
+    inchain = find(sn.chains(c,:));
+    for i=1:sn.nstations
+        Vchain(i,c) = sum(sn.visits{c}(i,inchain)) / sum(sn.visits{c}(sn.refstat(inchain(1)),inchain));
         for k=inchain
-            V(i,k) = qn.visits{c}(i,k);
-            alpha(i,k) = alpha(i,k) + qn.visits{c}(i,k) / sum(qn.visits{c}(i,inchain));
+            V(i,k) = sn.visits{c}(i,k);
+            alpha(i,k) = alpha(i,k) + sn.visits{c}(i,k) / sum(sn.visits{c}(i,inchain));
         end
     end
 end
@@ -41,9 +41,9 @@ it = 0;
 while max(abs(1-eta./eta_1)) > options.iter_tol && it <= options.iter_max
     it = it + 1;
     eta_1 = eta;
-    M = qn.nstations;    %number of stations
-    K = qn.nclasses;    %number of classes
-    C = qn.nchains;
+    M = sn.nstations;    %number of stations
+    K = sn.nclasses;    %number of classes
+    C = sn.nchains;
     Lchain = zeros(M,C);
     STchain = zeros(M,C);
     
@@ -51,13 +51,13 @@ while max(abs(1-eta./eta_1)) > options.iter_tol && it <= options.iter_max
     Nchain = zeros(1,C);
     refstatchain = zeros(C,1);
     for c=1:C
-        inchain = find(qn.chains(c,:));
-        isOpenChain = any(isinf(qn.njobs(inchain)));
+        inchain = find(sn.chains(c,:));
+        isOpenChain = any(isinf(sn.njobs(inchain)));
         for i=1:M
             % we assume that the visits in L(i,inchain) are equal to 1
             Lchain(i,c) = Vchain(i,c) * ST(i,inchain) * alpha(i,inchain)';
             STchain(i,c) = ST(i,inchain) * alpha(i,inchain)';
-            if isOpenChain && i == qn.refstat(inchain(1)) % if this is a source ST = 1 / arrival rates
+            if isOpenChain && i == sn.refstat(inchain(1)) % if this is a source ST = 1 / arrival rates
                 STchain(i,c) = sumfinite(ST(i,inchain)); % ignore degenerate classes with zero arrival rates
             else
                 STchain(i,c) = ST(i,inchain) * alpha(i,inchain)';
@@ -65,8 +65,8 @@ while max(abs(1-eta./eta_1)) > options.iter_tol && it <= options.iter_max
             SCVchain(i,c) = SCV(i,inchain) * alpha(i,inchain)';
         end
         Nchain(c) = sum(NK(inchain));
-        refstatchain(c) = qn.refstat(inchain(1));
-        if any((qn.refstat(inchain(1))-refstatchain(c))~=0)
+        refstatchain(c) = sn.refstat(inchain(1));
+        if any((sn.refstat(inchain(1))-refstatchain(c))~=0)
             line_error(mfilename,'Classes in chain %d have different reference station.',c);
         end
     end
@@ -143,28 +143,28 @@ while max(abs(1-eta./eta_1)) > options.iter_tol && it <= options.iter_max
     Rchain(:,Nchain==0)=0;
     Tchain(:,Nchain==0)=0;
     
-    for c=1:qn.nchains
-        inchain = find(qn.chains(c,:));
+    for c=1:sn.nchains
+        inchain = find(sn.chains(c,:));
         for k=inchain(:)'
-            X(k) = Xchain(c) * alpha(qn.refstat(k),k);
-            for i=1:qn.nstations
+            X(k) = Xchain(c) * alpha(sn.refstat(k),k);
+            for i=1:sn.nstations
                 if isinf(nservers(i))
-                    U(i,k) = ST(i,k) * (Xchain(c) * Vchain(i,c) / Vchain(qn.refstat(k),c)) * alpha(i,k);
+                    U(i,k) = ST(i,k) * (Xchain(c) * Vchain(i,c) / Vchain(sn.refstat(k),c)) * alpha(i,k);
                 else
-                    U(i,k) = ST(i,k) * (Xchain(c) * Vchain(i,c) / Vchain(qn.refstat(k),c)) * alpha(i,k) / nservers(i);
+                    U(i,k) = ST(i,k) * (Xchain(c) * Vchain(i,c) / Vchain(sn.refstat(k),c)) * alpha(i,k) / nservers(i);
                 end
                 if Lchain(i,c) > 0
-                    Q(i,k) = Rchain(i,c) * ST(i,k) / STchain(i,c) * Xchain(c) * Vchain(i,c) / Vchain(qn.refstat(k),c) * alpha(i,k);
+                    Q(i,k) = Rchain(i,c) * ST(i,k) / STchain(i,c) * Xchain(c) * Vchain(i,c) / Vchain(sn.refstat(k),c) * alpha(i,k);
                     T(i,k) = Tchain(i,c) * alpha(i,k);
                     R(i,k) = Q(i,k) / T(i,k);
-                    % R(i,k) = Rchain(i,c) * ST(i,k) / STchain(i,c) * alpha(i,k) / sum(alpha(qn.refstat(k),inchain)');
+                    % R(i,k) = Rchain(i,c) * ST(i,k) / STchain(i,c) * alpha(i,k) / sum(alpha(sn.refstat(k),inchain)');
                 else
                     T(i,k) = 0;
                     R(i,k) = 0;
                     Q(i,k) = 0;
                 end
             end
-            C(k) = qn.njobs(k) / X(k);
+            C(k) = sn.njobs(k) / X(k);
         end
     end
     
@@ -182,7 +182,7 @@ while max(abs(1-eta./eta_1)) > options.iter_tol && it <= options.iter_max
                         if ST0(j,r)>0
                             for s=1:K
                                 if ST0(i,s)>0 && ST0(j,r)>0
-                                    pji_rs = qn.rt((j-1)*qn.nclasses + r, (i-1)*qn.nclasses + s);
+                                    pji_rs = sn.rt((j-1)*sn.nclasses + r, (i-1)*sn.nclasses + s);
                                     ca(i) = ca(i) + (T(j,r)*pji_rs/sum(T(i,sd)))*(1 - pji_rs + pji_rs*((1-rho(j)^2)*ca_1(j) + rho(j)^2*SCV(j,r)));
                                 end
                             end
@@ -221,7 +221,7 @@ while max(abs(1-eta./eta_1)) > options.iter_tol && it <= options.iter_max
     end
 end
 
-C = qn.nchains;
+C = sn.nchains;
 Lchain = zeros(M,C);
 mu = ones(M,sum(Nchain));
 for i=1:M
@@ -233,7 +233,7 @@ for i=1:M
     end
 end
 
-state = qn.state;
+state = sn.state;
 G = exp(lG);
 
 if strcmpi(method,'exact')
@@ -241,10 +241,10 @@ if strcmpi(method,'exact')
 end
 Pr = 1;
 for ist=1:M
-    isf = qn.stationToStateful(ist);
-    [~,nivec] = State.toMarginal(qn, ist, state{isf});
+    isf = sn.stationToStateful(ist);
+    [~,nivec] = State.toMarginal(sn, ist, state{isf});
     nivec = unique(nivec,'rows');
-    nivec_chain = nivec * qn.chains';
+    nivec_chain = nivec * sn.chains';
     if any(nivec_chain>0)
         % note that these terms have just one station so fast to compute
         %F_i = pfqn_gmvald(Lchain(i,:), nivec_chain, mu(i,:));

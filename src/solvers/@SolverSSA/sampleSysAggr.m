@@ -10,7 +10,7 @@ switch options.method
     case {'default','serial'}
         options.samples = numSamples;
         options.force = true;
-        qn = self.getStruct;
+        sn = self.getStruct;
         
         [~, tranSystemState, tranSync] = self.runAnalyzer(options);
         tranSysState = struct();
@@ -20,23 +20,23 @@ switch options.method
         tranSysState.event = tranSync;
         event = tranSync;
                 
-        for isf=1:qn.nstateful
+        for isf=1:sn.nstateful
             if size(tranSysState.state{isf},1) > numSamples
                 tranSysState.t = tranSystemState(1:numSamples);
                 tranSysState.state{isf} = tranSysState.state{isf}(1:numSamples,:);
             end
-            [~,tranSysState.state{isf}] = State.toMarginal(qn,qn.statefulToNode(isf),tranSysState.state{isf});
+            [~,tranSysState.state{isf}] = State.toMarginal(sn,sn.statefulToNode(isf),tranSysState.state{isf});
         end
         
-        qn = self.getStruct;
+        sn = self.getStruct;
         tranSysState.event = {};
         for e = 1:length(event)
-            for a=1:length(qn.sync{event(e)}.active)
-                tranSysState.event{end+1} = qn.sync{event(e)}.active{a};
+            for a=1:length(sn.sync{event(e)}.active)
+                tranSysState.event{end+1} = sn.sync{event(e)}.active{a};
                 tranSysState.event{end}.t = tranSysState.t(e);
             end
-            for p=1:length(qn.sync{event(e)}.passive)
-                tranSysState.event{end+1} = qn.sync{event(e)}.passive{p};
+            for p=1:length(sn.sync{event(e)}.passive)
+                tranSysState.event{end+1} = sn.sync{event(e)}.passive{p};
                 tranSysState.event{end}.t = tranSysState.t(e);
             end
         end

@@ -1,13 +1,13 @@
 function myLN = fromNetwork(model)
 
 % myLN = LayeredNetwork('LQN1');
-% qn = model.getStruct;
+% sn = model.getStruct;
 % 
 % P={}; T={}; E={};
-% for i=1:qn.nstations
+% for i=1:sn.nstations
 %     P{i} = Processor(myLN,['P',num2str(i)], 1, SchedStrategy.INF);
-%     T{i} = Task(myLN,['T',num2str(i)], 1, qn.sched{i}).on(P{i});
-%     for r=1:qn.nclasses
+%     T{i} = Task(myLN,['T',num2str(i)], 1, sn.sched{i}).on(P{i});
+%     for r=1:sn.nclasses
 %         E{i,r} = Entry(myLN,['E',num2str(i),num2str()]).on(T{i});
 %     end
 % end

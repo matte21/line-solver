@@ -1,4 +1,4 @@
-function space = fromMarginalAndRunning(qn, ind, n, s, options)
+function space = fromMarginalAndRunning(sn, ind, n, s, options)
 % SPACE = FROMMARGINALANDRUNNING(QN, IND, N, S, OPTIONS)
 
 % Copyright (c) 2012-2021, Imperial College London
@@ -7,51 +7,51 @@ function space = fromMarginalAndRunning(qn, ind, n, s, options)
 if nargin<5 %~exist('options','var')
     options.force = false;
 end
-if isa(qn,'Network')
-    qn=qn.getStruct();
+if isa(sn,'Network')
+    sn=sn.getStruct();
 end
 % ind: node index
-ist = qn.nodeToStation(ind);
-isf = qn.nodeToStateful(ind);
+ist = sn.nodeToStation(ind);
+isf = sn.nodeToStateful(ind);
 
 % generate one initial state such that the marginal queue-lengths are as in vector n
 % n(r): number of jobs at the station in class r
 % s(r): jobs of class r that are running
-R = qn.nclasses;
-S = qn.nservers;
+R = sn.nclasses;
+S = sn.nservers;
 K = zeros(1,R);
 for r=1:R
-    if isempty(qn.proc{ist,r})
+    if isempty(sn.proc{ist,r})
         K(r) = 0;
     else
-        K(r) = length(qn.proc{ist,r}{1});
+        K(r) = length(sn.proc{ist,r}{1});
     end
 end
 state = [];
 space = [];
-if any(n>qn.classcap(ist,:))
-    exceeded = n>qn.classcap(ist,:);
+if any(n>sn.classcap(ist,:))
+    exceeded = n>sn.classcap(ist,:);
     for r=find(exceeded)
-        if ~isempty(qn.proc) && ~isempty(qn.proc{ist,r}) && any(any(isnan(qn.proc{ist,r}{1})))
-            line_warning(mfilename,'State vector at station %d (n=%s) exceeds the class capacity (classcap=%s). Some service classes are disabled.\n',ist,mat2str(n(ist,:)),mat2str(qn.classcap(ist,:)));
+        if ~isempty(sn.proc) && ~isempty(sn.proc{ist,r}) && any(any(isnan(sn.proc{ist,r}{1})))
+            line_warning(mfilename,'State vector at station %d (n=%s) exceeds the class capacity (classcap=%s). Some service classes are disabled.\n',ist,mat2str(n(ist,:)),mat2str(sn.classcap(ist,:)));
         else
-            line_warning(mfilename,'State vector at station %d (n=%s) exceeds the class capacity (classcap=%s).\n',ist,mat2str(n(ist,:)),mat2str(qn.classcap(ist,:)));
+            line_warning(mfilename,'State vector at station %d (n=%s) exceeds the class capacity (classcap=%s).\n',ist,mat2str(n(ist,:)),mat2str(sn.classcap(ist,:)));
         end
     end
     return
 end
-if (qn.nservers(ist)>0 && sum(s) > qn.nservers(ist))
+if (sn.nservers(ist)>0 && sum(s) > sn.nservers(ist))
     return
 end
 % generate local-state space
-switch qn.nodetype(ind)
+switch sn.nodetype(ind)
     case {NodeType.Queue, NodeType.Delay, NodeType.Source}
-        switch qn.schedid(ist)
+        switch sn.schedid(ist)
             case SchedStrategy.ID_EXT
                 for r=1:R
                     init = State.spaceClosedSingle(K(r),0);
-                    if isinf(qn.njobs(r))
-                        if isnan(qn.rates(ist,r))
+                    if isinf(sn.njobs(r))
+                        if isnan(sn.rates(ist,r))
                             init(1) = 0; % class is not processed at this source
                         else
                             init(1) = 1;
@@ -154,7 +154,7 @@ switch qn.nodetype(ind)
                 line_warning(mfilename,'The scheduling policy does not admit a discrete state space.');
         end
     case NodeType.Cache
-        switch qn.schedid(ist)
+        switch sn.schedid(ist)
             case SchedStrategy.ID_INF
                 % in this policies we only track the jobs in the servers
                 for r=1:R

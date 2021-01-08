@@ -9,8 +9,8 @@ if nargin<3 %~exist('keepDisabled','var')
     keepDisabled = false;
 end
 
-M = qn.nstations();
-K = qn.nclasses();
+M = sn.nstations();
+K = sn.nclasses();
 if nargin == 1
     R = getAvgRespTHandles(self);
 end

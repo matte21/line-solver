@@ -16,12 +16,12 @@ elseif nargin == 2
 end
 [QN,UN,RN,TN] = self.getAvg(Q,U,R,T);
 
-qn = self.model.getStruct; % must be called after getAvg
+sn = self.model.getStruct; % must be called after getAvg
 
-I = qn.nnodes;
-M = qn.nstations;
-R = qn.nclasses;
-C = qn.nchains;
+I = sn.nnodes;
+M = sn.nstations;
+R = sn.nclasses;
+C = sn.nchains;
 QNn = zeros(I,R);
 UNn = zeros(I,R);
 RNn = zeros(I,R);
@@ -29,7 +29,7 @@ TNn = zeros(I,R);
 ANn = zeros(I,R);
 
 for ist=1:M
-    ind = qn.stationToNode(ist);
+    ind = sn.stationToNode(ist);
     QNn(ind,:) = QN(ist,:);
     UNn(ind,:) = UN(ist,:);
     RNn(ind,:) = RN(ist,:);
@@ -37,7 +37,7 @@ for ist=1:M
     %ANn(ind,:) = TN(ist,:);
 end
 
-%if any(qn.isstatedep(:,3)) || any(qn.nodetype == NodeType.Cache)
+%if any(sn.isstatedep(:,3)) || any(sn.nodetype == NodeType.Cache)
 %    line_warning(mfilename,'Node-level metrics not available in models with state-dependent routing. Returning station-level metrics only.');
 %    return
 %end
@@ -45,17 +45,17 @@ end
 % update tputs for all nodes but the sink and the joins
 for ind=1:I
     for c = 1:C
-        inchain = find(qn.chains(c,:));
+        inchain = find(sn.chains(c,:));
         for r = inchain
-            %anystat = find(qn.visits{c}(:,r));
-            refstat = qn.refstat(c);
+            %anystat = find(sn.visits{c}(:,r));
+            refstat = sn.refstat(c);
             %if ~isempty(anystat)
-            if qn.nodetype(ind) ~= NodeType.Source
-                %if qn.isstation(ind)
-                %    ist = qn.nodeToStation(ind);
+            if sn.nodetype(ind) ~= NodeType.Source
+                %if sn.isstation(ind)
+                %    ist = sn.nodeToStation(ind);
                 %    ANn(ind, r) =  TN(ist,r);
                 %else
-                ANn(ind, r) =  (qn.nodevisits{c}(ind,r) / sum(qn.visits{c}(refstat,inchain))) * TN(refstat,r);
+                ANn(ind, r) =  (sn.nodevisits{c}(ind,r) / sum(sn.visits{c}(refstat,inchain))) * TN(refstat,r);
                 %end
             end
             %end
@@ -65,17 +65,17 @@ end
 
 for ind=1:I
     for c = 1:C
-        inchain = find(qn.chains(c,:));
+        inchain = find(sn.chains(c,:));
         for r = inchain
-            anystat = find(qn.visits{c}(:,r));
+            anystat = find(sn.visits{c}(:,r));
             if ~isempty(anystat)
-                if qn.nodetype(ind) ~= NodeType.Sink && qn.nodetype(ind) ~= NodeType.Join
+                if sn.nodetype(ind) ~= NodeType.Sink && sn.nodetype(ind) ~= NodeType.Join
                     for s = inchain
                         for jnd=1:I
-                            if qn.nodetype(ind) ~= NodeType.Source
-                                TNn(ind, s) = TNn(ind, s) + ANn(ind, r) * qn.rtnodes((ind-1)*R+r, (jnd-1)*R+s);
+                            if sn.nodetype(ind) ~= NodeType.Source
+                                TNn(ind, s) = TNn(ind, s) + ANn(ind, r) * sn.rtnodes((ind-1)*R+r, (jnd-1)*R+s);
                             else
-                                ist = qn.nodeToStation(ind);
+                                ist = sn.nodeToStation(ind);
                                 TNn(ind, s) = TN(ist,s);
                             end
                         end

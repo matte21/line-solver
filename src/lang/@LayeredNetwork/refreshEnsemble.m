@@ -173,8 +173,8 @@ end
 myself.setEnsemble(ensemble);
 end
 
-%qn.rates(1,jobclass{class_synchcall}) = destEntryObj.getRate;
-%qn.mu{1,jobclass{class_synchcall}} = destEntryObj.getMu;
-%qn.phi{1,jobclass{class_synchcall}} = destEntryObj.getPhi;
-%qn.proc{1,jobclass{class_synchcall}} = destEntryObj.getRepresentation;
-%qn.phases(1,jobclass{class_synchcall}) = length(%qn.phases(1,jobclass{class_synchcall}));
+%sn.rates(1,jobclass{class_synchcall}) = destEntryObj.getRate;
+%sn.mu{1,jobclass{class_synchcall}} = destEntryObj.getMu;
+%sn.phi{1,jobclass{class_synchcall}} = destEntryObj.getPhi;
+%sn.proc{1,jobclass{class_synchcall}} = destEntryObj.getRepresentation;
+%sn.phases(1,jobclass{class_synchcall}) = length(%sn.phases(1,jobclass{class_synchcall}));

@@ -30,7 +30,7 @@ elseif nargin==3
     end
 end
 
-if isempty(self.qn.schedid) || any(self.qn.schedid == SchedStrategy.ID_SEPT | self.qn.schedid == SchedStrategy.ID_LEPT)
+if isempty(self.sn.schedid) || any(self.sn.schedid == SchedStrategy.ID_SEPT | self.sn.schedid == SchedStrategy.ID_LEPT)
     refreshScheduling(self); % SEPT and LEPT may be affected
 end
 end

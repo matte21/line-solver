@@ -9,13 +9,13 @@ inhibitingConditionsNode.setAttribute('array', 'true');
 inhibitingConditionsNode.setAttribute('classPath', 'jmt.engine.NetStrategies.TransitionUtilities.TransitionMatrix');
 inhibitingConditionsNode.setAttribute('name', 'inhibitingConditions');
 
-qn = self.getStruct;
-inputs = [find(qn.connmatrix(:,ind))];
-connections = {qn.nodenames{inputs}};    
+sn = self.getStruct;
+inputs = [find(sn.connmatrix(:,ind))];
+connections = {sn.nodenames{inputs}};    
 numOfInputs = length(connections);
 
-numOfClasses = qn.nclasses;
-numOfModes = qn.nmodes(ind);
+numOfClasses = sn.nclasses;
+numOfModes = sn.nmodes(ind);
 for m=1:numOfModes    
     subInhibitingConditionNode = simDoc.createElement('subParameter');
     subInhibitingConditionNode.setAttribute('classPath', 'jmt.engine.NetStrategies.TransitionUtilities.TransitionMatrix');
@@ -48,7 +48,7 @@ for m=1:numOfModes
         
         for r=1:numOfClasses
             refClassNode = simDoc.createElement('refClass');
-            refClassNode.appendChild(simDoc.createTextNode(qn.classnames{r}));
+            refClassNode.appendChild(simDoc.createTextNode(sn.classnames{r}));
             subInhibitingEntriesNode.appendChild(refClassNode);
             
             subParameterNode = simDoc.createElement('subParameter');
@@ -57,10 +57,10 @@ for m=1:numOfModes
             
             valueNode2 = simDoc.createElement('value');
             
-            if isinf(qn.inhibiting{ind}{m}(k,r))
+            if isinf(sn.inhibiting{ind}{m}(k,r))
                 valueNode2.appendChild(simDoc.createTextNode(int2str(-1)));
             else
-                valueNode2.appendChild(simDoc.createTextNode(int2str(qn.inhibiting{ind}{m}(inputs(k),r))));
+                valueNode2.appendChild(simDoc.createTextNode(int2str(sn.inhibiting{ind}{m}(inputs(k),r))));
             end
             
             subParameterNode.appendChild(valueNode2);

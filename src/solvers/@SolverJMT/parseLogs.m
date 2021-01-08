@@ -6,12 +6,12 @@ function logData = parseLogs(model,isNodeLogged, metric)
 
 line_printf('\nJMT log parsing...');
 T0=tic;
-qn = model.getStruct;
-nclasses = qn.nclasses;
-logData = cell(qn.nnodes,qn.nclasses);
+sn = model.getStruct;
+nclasses = sn.nclasses;
+logData = cell(sn.nnodes,sn.nclasses);
 nodePreload = model.getStateAggr;
-for ind=1:qn.nnodes
-    if qn.isstateful(ind) && isNodeLogged(ind)
+for ind=1:sn.nnodes
+    if sn.isstateful(ind) && isNodeLogged(ind)
         logFileArv = [model.getLogPath,sprintf('%s-Arv.csv',model.getNodeNames{ind})];
         logFileDep = [model.getLogPath,sprintf('%s-Dep.csv',model.getNodeNames{ind})];
         %% load arrival process
@@ -60,7 +60,7 @@ for ind=1:qn.nnodes
             logFileDepMat = [model.getLogPath,filesep,sprintf('%s-Dep.mat',model.getNodeNames{ind})];
             save(logFileDepMat,'jobDepTS','jobDepID','jobDepClass','jobDepClasses','jobDepClassID');
             
-            nodeState = cell(qn.nnodes,1);
+            nodeState = cell(sn.nnodes,1);
             
             switch metric
                 case MetricType.QLen

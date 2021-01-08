@@ -5,17 +5,17 @@ function [UN] = getAvgUtilChain(self,U)
 % Copyright (c) 2012-2021, Imperial College London
 % All rights reserved.
 
-qn = self.model.getStruct();
+sn = self.model.getStruct();
 %if nargin == 1
 %    [Q] = getAvgHandles(self);
 %end
 [UNclass] = getAvgUtil(self);
 
 % compute average chain metrics
-UN = zeros(qn.nstations, qn.nchains);
-for c=1:qn.nchains
-    inchain = find(qn.chains(c,:));
-    for i=1:qn.nstations
+UN = zeros(sn.nstations, sn.nchains);
+for c=1:sn.nchains
+    inchain = find(sn.chains(c,:));
+    for i=1:sn.nstations
         if ~isempty(UNclass)
             UN(i,c) = sum(UNclass(i,inchain)); %#ok<FNDSB>
         end

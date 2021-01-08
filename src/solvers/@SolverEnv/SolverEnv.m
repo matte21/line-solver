@@ -8,7 +8,7 @@ classdef SolverEnv < EnsembleSolver
     properties
         env; % user-supplied representation of each stage transition
         envObj;
-        qn;
+        sn;
         resetFromMarginal;
     end
     
@@ -21,7 +21,7 @@ classdef SolverEnv < EnsembleSolver
             env = renv.getEnv;
             self.env = env;
             for e=1:length(self.env)
-                self.qn{e} = self.ensemble{e}.getStruct;
+                self.sn{e} = self.ensemble{e}.getStruct;
                 self.setSolver(solverFactory(self.ensemble{e}),e);
             end
             
@@ -333,8 +333,8 @@ classdef SolverEnv < EnsembleSolver
                 for i=1:M
                     for k=1:K
                         if any(sum([QN(i,k),UN(i,k),TN(i,k)])>0)
-                            JobClass{end+1,1} = self.qn{1}.classnames{k}; 
-                            Station{end+1,1} = self.qn{1}.nodenames{self.qn{1}.stationToNode(i)}; 
+                            JobClass{end+1,1} = self.sn{1}.classnames{k}; 
+                            Station{end+1,1} = self.sn{1}.nodenames{self.sn{1}.stationToNode(i)}; 
                             Qval(end+1) = QN(i,k);
                             Uval(end+1) = UN(i,k);
                             Tval(end+1) = TN(i,k);

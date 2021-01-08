@@ -1,5 +1,5 @@
-function bool = snHasMultiChain(qn)
+function bool = snHasMultiChain(sn)
 % BOOL = HASMULTICHAIN()
 
-bool = qn.nchains > 1;
+bool = sn.nchains > 1;
 end

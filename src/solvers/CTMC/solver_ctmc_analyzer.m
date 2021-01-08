@@ -1,26 +1,26 @@
-function [QN,UN,RN,TN,CN,XN,InfGen,StateSpace,StateSpaceAggr,EventFiltration,runtime,fname,qnc] = solver_ctmc_analyzer(qn, options)
-% [QN,UN,RN,TN,CN,XN,INFGEN,STATESPACE,STATESPACEAGGR,EVENTFILTRATION,RUNTIME,FNAME,qn] = SOLVER_CTMC_ANALYZER(qn, OPTIONS)
+function [QN,UN,RN,TN,CN,XN,InfGen,StateSpace,StateSpaceAggr,EventFiltration,runtime,fname,qnc] = solver_ctmc_analyzer(sn, options)
+% [QN,UN,RN,TN,CN,XN,INFGEN,STATESPACE,STATESPACEAGGR,EVENTFILTRATION,RUNTIME,FNAME,sn] = SOLVER_CTMC_ANALYZER(sn, OPTIONS)
 %
 % Copyright (c) 2012-2021, Imperial College London
 % All rights reserved.
 
 %if options.remote
-%    qn.rtfun = {};
-%    qn.lst = {};
-%    qn_json = jsonencode(qn);
-%    qn = NetworkStruct.fromJSON(qn_json)
+%    sn.rtfun = {};
+%    sn.lst = {};
+%    qn_json = jsonencode(sn);
+%    sn = NetworkStruct.fromJSON(qn_json)
     %return
 %end
 
-M = qn.nstations;    %number of stations
-K = qn.nclasses;    %number of classes
-rt = qn.rt;
-S = qn.nservers;
-NK = qn.njobs';  % initial population per class
-schedid = qn.schedid;
+M = sn.nstations;    %number of stations
+K = sn.nclasses;    %number of classes
+rt = sn.rt;
+S = sn.nservers;
+NK = sn.njobs';  % initial population per class
+schedid = sn.schedid;
 
 Tstart = tic;
-PH = qn.proc;
+PH = sn.proc;
 
 myP = cell(K,K);
 for k = 1:K
@@ -40,23 +40,23 @@ for i=1:M
     end
 end
 
-if any(qn.nodetype == NodeType.Cache)
+if any(sn.nodetype == NodeType.Cache)
     options.hide_immediate = false;
 end
 
-[InfGen,StateSpace,StateSpaceAggr,EventFiltration,arvRates,depRates,qn] = solver_ctmc(qn, options); % qn is updated with the state space
+[InfGen,StateSpace,StateSpaceAggr,EventFiltration,arvRates,depRates,sn] = solver_ctmc(sn, options); % sn is updated with the state space
 
 % if the initial state does not reflect the final state of the state
 % vectors, attempt to correct it
-for isf=1:qn.nstateful
-    if size(qn.state{isf},2) < size(qn.space{isf},2)
-        row = matchrow(qn.space{isf}(:,end-length(qn.state{isf})+1:end),qn.state{isf});
+for isf=1:sn.nstateful
+    if size(sn.state{isf},2) < size(sn.space{isf},2)
+        row = matchrow(sn.space{isf}(:,end-length(sn.state{isf})+1:end),sn.state{isf});
         if row > 0
-            qn.state{isf} = qn.space{isf}(row,:);
+            sn.state{isf} = sn.space{isf}(row,:);
         end
     end
 end
-qnc = qn;
+qnc = sn;
 
 if options.keep
     fname = tempname;
@@ -75,7 +75,7 @@ wset = 1:length(InfGen);
 if any(isnan(pi))
     if nConnComp > 1
         % the matrix was reducible
-        initState = matchrow(StateSpace, cell2mat(qn.state'));
+        initState = matchrow(StateSpace, cell2mat(sn.state'));
         % determine the weakly connected component associated to the initial state
         wset = find(connComp == connComp(initState));
         pi = ctmc_solve(InfGen(wset, wset), options);
@@ -96,10 +96,10 @@ CN = NaN*zeros(1,K);
 
 
 for k=1:K
-    refsf = qn.stationToStateful(qn.refstat(k));
+    refsf = sn.stationToStateful(sn.refstat(k));
     XN(k) = pi*arvRates(wset,refsf,k);
     for i=1:M
-        isf = qn.stationToStateful(i);
+        isf = sn.stationToStateful(i);
         TN(i,k) = pi*depRates(wset,isf,k);
         QN(i,k) = pi*StateSpaceAggr(wset,(i-1)*K+k);       
         switch schedid(i)
@@ -135,8 +135,8 @@ runtime = toc(Tstart);
 
 % now update the routing probabilities in nodes with state-dependent routing
 for k=1:K
-    for isf=1:qn.nstateful
-        if qn.nodetype(isf) == NodeType.Cache            
+    for isf=1:sn.nstateful
+        if sn.nodetype(isf) == NodeType.Cache            
             TNcache(isf,k) = pi*depRates(wset,isf,k);
         end
     end

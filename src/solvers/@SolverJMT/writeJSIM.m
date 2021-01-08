@@ -6,10 +6,10 @@ function fname = writeJSIM(self)
 [simXMLElem, simXMLDoc] = saveXMLHeader(self, self.model.getLogPath);
 [simXMLElem, simXMLDoc] = saveClasses(self, simXMLElem, simXMLDoc);
 
-qn = self.getStruct;
+sn = self.getStruct;
 
-numOfClasses = qn.nclasses;
-numOfNodes = qn.nnodes;
+numOfClasses = sn.nclasses;
+numOfNodes = sn.nnodes;
 for i=1:numOfNodes
     ind = i;
     currentNode = self.model.nodes{i,1};
@@ -92,27 +92,27 @@ end
 
 hasReferenceNodes = false;
 preloadNode = simXMLDoc.createElement('preload');
-s0 = qn.state;
-numOfStations = qn.nstations;
+s0 = sn.state;
+numOfStations = sn.nstations;
 for i=1:numOfStations
     isReferenceNode = false;
-    if qn.nodetype(qn.stationToNode(i))~=NodeType.Source && qn.nodetype(qn.stationToNode(i))~=NodeType.Join
-        [~, nir] = State.toMarginal(qn, qn.stationToNode(i), s0{qn.stationToStateful(i)});
+    if sn.nodetype(sn.stationToNode(i))~=NodeType.Source && sn.nodetype(sn.stationToNode(i))~=NodeType.Join
+        [~, nir] = State.toMarginal(sn, sn.stationToNode(i), s0{sn.stationToStateful(i)});
         stationPopulationsNode = simXMLDoc.createElement('stationPopulations');
-        stationPopulationsNode.setAttribute('stationName', qn.nodenames{qn.stationToNode(i)});
+        stationPopulationsNode.setAttribute('stationName', sn.nodenames{sn.stationToNode(i)});
         for r=1:numOfClasses
             classPopulationNode = simXMLDoc.createElement('classPopulation');
-            if isinf(qn.njobs(r))
+            if isinf(sn.njobs(r))
                 % case 'open'
                 isReferenceNode = true;
                 classPopulationNode.setAttribute('population', sprintf('%d',round(nir(r))));
-                classPopulationNode.setAttribute('refClass', qn.classnames{r});
+                classPopulationNode.setAttribute('refClass', sn.classnames{r});
                 stationPopulationsNode.appendChild(classPopulationNode);
             else
                 % case 'closed'
                 isReferenceNode = true;
                 classPopulationNode.setAttribute('population', sprintf('%d',round(nir(r))));
-                classPopulationNode.setAttribute('refClass', qn.classnames{r});
+                classPopulationNode.setAttribute('refClass', sn.classnames{r});
                 stationPopulationsNode.appendChild(classPopulationNode);
             end
         end

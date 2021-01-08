@@ -8,11 +8,11 @@ visitsNode.setAttribute('array', 'true');
 visitsNode.setAttribute('classPath', 'java.lang.Integer');
 visitsNode.setAttribute('name', 'numberOfVisits');
 
-qn = self.getStruct;
-numOfClasses = qn.nclasses;
+sn = self.getStruct;
+numOfClasses = sn.nclasses;
 for r=1:numOfClasses    
     refClassNode = simDoc.createElement('refClass');
-    refClassNode.appendChild(simDoc.createTextNode(qn.classnames{r}));
+    refClassNode.appendChild(simDoc.createTextNode(sn.classnames{r}));
     visitsNode.appendChild(refClassNode);
     
     subParameterNode = simDoc.createElement('subParameter');

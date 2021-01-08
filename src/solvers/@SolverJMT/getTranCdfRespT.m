@@ -1,12 +1,12 @@
 function RD = getTranCdfRespT(self, R)
 % RD = GETTRANCDFRESPT(R)
 
-qn = self.getStruct;
+sn = self.getStruct;
 
 if nargin<2 %~exist('R','var')
     R = getAvgRespTHandles(self);
 end
-RD = cell(qn.nstations, qn.nclasses);
+RD = cell(sn.nstations, sn.nclasses);
 cdfmodel = self.model.copy;
 cdfmodel.resetNetwork;
 isNodeClassLogged = false(cdfmodel.getNumberOfNodes, cdfmodel.getNumberOfClasses);
@@ -18,7 +18,7 @@ for i= 1:cdfmodel.getNumberOfStations
         end
     end
 end
-Plinked = qn.rtorig;
+Plinked = sn.rtorig;
 isNodeLogged = max(isNodeClassLogged,[],2);
 logpath = tempdir;
 cdfmodel.linkAndLog(Plinked, isNodeLogged, logpath);

@@ -5,10 +5,10 @@ if nargin<2 %~exist('numEvents','var')
     numEvents = self.options.samples;
 end
 
-qn = self.getStruct;
+sn = self.getStruct;
 numEvents = numEvents - 1; % we include the initialization as an event
 Q = getAvgQLenHandles(self);
-statStateAggr = cell(qn.nstations,1);
+statStateAggr = cell(sn.nstations,1);
 % create a temp model
 modelCopy = self.model.copy;
 modelCopy.resetNetwork;
@@ -17,7 +17,7 @@ modelCopy.resetNetwork;
 isNodeClassLogged = false(modelCopy.getNumberOfNodes, modelCopy.getNumberOfClasses);
 for i= 1:modelCopy.getNumberOfStations
     ind = self.model.getNodeIndex(modelCopy.getStationNames{i});
-    if qn.nodetype(ind) ~= NodeType.Source
+    if sn.nodetype(ind) ~= NodeType.Source
         for r=1:modelCopy.getNumberOfClasses
             if ~Q{i,r}.disabled || nargin == 1
                 isNodeClassLogged(ind,r) = true;
@@ -28,7 +28,7 @@ for i= 1:modelCopy.getNumberOfStations
     end
 end
 % apply logging to the copied model
-Plinked = qn.rtorig;
+Plinked = sn.rtorig;
 isNodeLogged = max(isNodeClassLogged,[],2);
 logpath = tempdir;
 modelCopy.linkAndLog(Plinked, isNodeLogged, logpath);
@@ -42,17 +42,17 @@ logData = SolverJMT.parseLogs(modelCopy, isNodeLogged, MetricType.QLen);
 
 % from here convert from nodes in logData to stations
 event = {};
-qn = modelCopy.getStruct;
-for ist= 1:qn.nstations
-    isf = qn.stationToStateful(ist);
-    ind = qn.stationToNode(ist);
+sn = modelCopy.getStruct;
+for ist= 1:sn.nstations
+    isf = sn.stationToStateful(ist);
+    ind = sn.stationToNode(ist);
     t = [];
-    nir = cell(1,qn.nclasses);
+    nir = cell(1,sn.nclasses);
     event{isf,r} = {};
-    if qn.nodetype(ind) == NodeType.Source
+    if sn.nodetype(ind) == NodeType.Source
         nir{r} = [];
     else
-        for r=1:qn.nclasses
+        for r=1:sn.nclasses
             if ~isempty(logData{isf,r})
                 [~,uniqTSi] = unique(logData{isf,r}.t);
                 if isNodeClassLogged(isf,r)
@@ -88,10 +88,10 @@ for ist= 1:qn.nstations
     sysStateAggr.dep_job_id = logData{2}.depID;
 end
 
-tranSysStateAggr = cell(1,1+qn.nstations);
+tranSysStateAggr = cell(1,1+sn.nstations);
 
 tranSysStateAggr{1} = []; % timestamps
-for i=1:qn.nstations % stations
+for i=1:sn.nstations % stations
     if isempty(tranSysStateAggr{1})
         tranSysStateAggr{1} = statStateAggr{i}.t;
     else
@@ -102,12 +102,12 @@ for i=1:qn.nstations % stations
     end
 end
 
-for i=1:qn.nstations % stations
-    ind = qn.stationToNode(i);
+for i=1:sn.nstations % stations
+    ind = sn.stationToNode(i);
     tranSysStateAggr{1+i} = [];
     [~,uniqTSi] = unique(statStateAggr{i}.t);
-    if qn.nodetype(ind) ~= NodeType.Source
-        for j=1:qn.nclasses % classes
+    if sn.nodetype(ind) ~= NodeType.Source
+        for j=1:sn.nclasses % classes
             % we floor the interpolation as we hold the last state
             if ~isempty(uniqTSi)
                 Qijt = interp1(statStateAggr{i}.t(uniqTSi), statStateAggr{i}.state(uniqTSi,j), tranSysStateAggr{1},'previous');
@@ -131,9 +131,9 @@ sysStateAggr.t = tranSysStateAggr{1};
 sysStateAggr.state = {tranSysStateAggr{2:end}};
 
 % % % now put the events in the .event cell
-% eventSysStateAggr = cell(qn.nstations, qn.nclasses); % timestamps
-% for i=1:qn.nstations % stations
-%     for r=1:qn.nclasses
+% eventSysStateAggr = cell(sn.nstations, sn.nclasses); % timestamps
+% for i=1:sn.nstations % stations
+%     for r=1:sn.nclasses
 %         if isempty(statStateAggr{i}.event)
 %             eventSysStateAggr{i,r} = struct();
 %         else

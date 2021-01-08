@@ -46,13 +46,13 @@ for i=1:M
     end
 end
 
-if ~isempty(self.qn)
-    self.qn.sched = sched;
-    self.qn.schedparam = schedparam;
-    schedid = zeros(self.qn.nstations,1);
-    for i=1:self.qn.nstations
+if ~isempty(self.sn)
+    self.sn.sched = sched;
+    self.sn.schedparam = schedparam;
+    schedid = zeros(self.sn.nstations,1);
+    for i=1:self.sn.nstations
 		schedid(i) = SchedStrategy.toId(sched{i});
     end
-	self.qn.schedid = schedid;
+	self.sn.schedid = schedid;
 end
 end

@@ -1,4 +1,4 @@
-function [QN,UN,RN,TN,CN,XN] = solver_mam(qn, options, config)
+function [QN,UN,RN,TN,CN,XN] = solver_mam(sn, options, config)
 %[Q,U,R,T,C,X] = SOLVER_MAM(QN, PH, OPTIONS)
 
 %Copyright (c) 2012-2021, Imperial College London
@@ -8,13 +8,13 @@ global BuToolsVerbose;
 global BuToolsCheckInput;
 global BuToolsCheckPrecision;
 
-PH = qn.proc;
-I = qn.nnodes;
-M = qn.nstations;
-K = qn.nclasses;
-C = qn.nchains;
-N = qn.njobs';
-V = cellsum(qn.visits);
+PH = sn.proc;
+I = sn.nnodes;
+M = sn.nstations;
+K = sn.nclasses;
+C = sn.nchains;
+N = sn.njobs';
+V = cellsum(sn.visits);
 
 QN = zeros(M,K);
 UN = zeros(M,K);
@@ -25,18 +25,18 @@ XN = zeros(1,K);
 
 lambda = zeros(1,K);
 for c=1:C
-    inchain = find(qn.chains(c,:));
-    lambdas_inchain = qn.rates(qn.refstat(inchain(1)),inchain);
+    inchain = find(sn.chains(c,:));
+    lambdas_inchain = sn.rates(sn.refstat(inchain(1)),inchain);
     lambdas_inchain = lambdas_inchain(isfinite(lambdas_inchain));
     lambda(inchain) = sum(lambdas_inchain);
 end
 
 chain = zeros(1,K);
 for k=1:K
-    chain(k) = find(qn.chains(:,k));
+    chain(k) = find(sn.chains(:,k));
 end
 
-if all(isinf(qn.njobs)) % is open 
+if all(isinf(sn.njobs)) % is open 
     %    open queueing system (one node is the external world)
     BuToolsVerbose = false;
     BuToolsCheckInput = false;
@@ -45,15 +45,15 @@ if all(isinf(qn.njobs)) % is open
     pie = {};
     D0 = {};
     for ist=1:M
-        switch qn.schedid(ist)
+        switch sn.schedid(ist)
             case SchedStrategy.ID_EXT
-                TN(ist,:) = qn.rates(ist,:);
+                TN(ist,:) = sn.rates(ist,:);
                 TN(ist,isnan(TN(ist,:)))=0;
             case {SchedStrategy.ID_FCFS, SchedStrategy.ID_HOL, SchedStrategy.ID_PS}
                 for k=1:K
                     %                    divide service time by number of servers and put
                     %                    later a surrogate delay server in tandem to compensate
-                    PH{ist,k} = map_scale(PH{ist,k}, map_mean(PH{ist,k})/qn.nservers(ist));
+                    PH{ist,k} = map_scale(PH{ist,k}, map_mean(PH{ist,k})/sn.nservers(ist));
                     pie{ist,k} = map_pie(PH{ist,k});
                     D0{ist,k} = PH{ist,k}{1};
                 end
@@ -69,20 +69,20 @@ if all(isinf(qn.njobs)) % is open
             DEP = PH;
             for ind=1:M
                 for r=1:K
-                    ist = qn.nodeToStation(ind);
+                    ist = sn.nodeToStation(ind);
                     DEP{ind,r} = map_scale(PH{ist,r}, 1 / (lambda(r) * V(ind,r)) );
                 end
             end
         end
         
         
-        ARV = solver_mam_estflows(qn, DEP, config);
+        ARV = solver_mam_estflows(sn, DEP, config);
         
         QN_1 = QN;
         
         for ist=1:M
-            ind = qn.stationToNode(ist);
-            switch qn.nodetype(ind)
+            ind = sn.stationToNode(ist);
+            switch sn.nodetype(ind)
                 case NodeType.Queue
                     if length(ARV{ind}{1}) > config.space_max
                         line_printf('\nArrival process at node %d is now at %d states. Compressing.',ind,length(ARV{ind}{1}));
@@ -97,7 +97,7 @@ if all(isinf(qn.njobs)) % is open
             for k=1:K
                 UN(ist,k) = TN(ist,k) * map_mean(PH{ist,k});
                 %add number of jobs at the surrogate delay server
-                QN(ist,k) = QN(ist,k) + TN(ist,k)*(map_mean(PH{ist,k})*qn.nservers(ist)) * (qn.nservers(ist)-1)/qn.nservers(ist);
+                QN(ist,k) = QN(ist,k) + TN(ist,k)*(map_mean(PH{ist,k})*sn.nservers(ist)) * (sn.nservers(ist)-1)/sn.nservers(ist);
                 RN(ist,k) = QN(ist,k) ./ TN(ist,k);
             end
         end
@@ -107,8 +107,8 @@ if all(isinf(qn.njobs)) % is open
         end
         
         for ist=1:M
-            ind = qn.stationToNode(ist);
-            switch qn.nodetype(ind)
+            ind = sn.stationToNode(ist);
+            switch sn.nodetype(ind)
                 case NodeType.Queue
                     [Ret{1:2*K}] = MMAPPH1FCFS({ARV{ind}{[1,3:end]}}, {pie{ist,:}}, {D0{ist,:}}, 'stDistrPH');
                     for r=1:K

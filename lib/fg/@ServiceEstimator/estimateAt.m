@@ -1,6 +1,6 @@
 function estVal = estimateAt(self, node)
 
-qn = self.model.getStruct;
+sn = self.model.getStruct;
 
 switch self.options.method
     case 'ubr' % utilization based regression
@@ -15,7 +15,7 @@ end
 estVal = estVal(:)';
 % update the model parameters
 svcProc = node.getService;
-for r=1:qn.nclasses
+for r=1:sn.nclasses
     svcProc{r}.updateMean(estVal(r));
 end
 end

@@ -8,13 +8,13 @@ strategyNode.setAttribute('array', 'true');
 strategyNode.setAttribute('classPath', 'jmt.engine.NetStrategies.JoinStrategy');
 strategyNode.setAttribute('name', 'JoinStrategy');
 
-qn = self.getStruct;
-numOfClasses = qn.nclasses;
+sn = self.getStruct;
+numOfClasses = sn.nclasses;
 for r=1:numOfClasses    
-    switch qn.varsparam{ind}.joinStrategy{r}
+    switch sn.varsparam{ind}.joinStrategy{r}
         case JoinStrategy.STD
             refClassNode2 = simDoc.createElement('refClass');
-            refClassNode2.appendChild(simDoc.createTextNode(qn.classnames{r}));
+            refClassNode2.appendChild(simDoc.createTextNode(sn.classnames{r}));
             strategyNode.appendChild(refClassNode2);
             
             joinStrategyNode = simDoc.createElement('subParameter');
@@ -24,14 +24,14 @@ for r=1:numOfClasses
             reqNode.setAttribute('classPath', 'java.lang.Integer');
             reqNode.setAttribute('name', 'numRequired');
             valueNode = simDoc.createElement('value');
-            valueNode.appendChild(simDoc.createTextNode(int2str(qn.varsparam{ind}.joinRequired{r})));
+            valueNode.appendChild(simDoc.createTextNode(int2str(sn.varsparam{ind}.joinRequired{r})));
             reqNode.appendChild(valueNode);
             joinStrategyNode.appendChild(reqNode);
             strategyNode.appendChild(joinStrategyNode);
             section.appendChild(strategyNode);
         case JoinStrategy.Quorum
             refClassNode2 = simDoc.createElement('refClass');
-            refClassNode2.appendChild(simDoc.createTextNode(qn.classnames{r}));
+            refClassNode2.appendChild(simDoc.createTextNode(sn.classnames{r}));
             strategyNode.appendChild(refClassNode2);
             
             joinStrategyNode = simDoc.createElement('subParameter');
@@ -41,14 +41,14 @@ for r=1:numOfClasses
             reqNode.setAttribute('classPath', 'java.lang.Integer');
             reqNode.setAttribute('name', 'numRequired');
             valueNode = simDoc.createElement('value');
-            valueNode.appendChild(simDoc.createTextNode(int2str(qn.varsparam{ind}.joinRequired{r})));
+            valueNode.appendChild(simDoc.createTextNode(int2str(sn.varsparam{ind}.joinRequired{r})));
             reqNode.appendChild(valueNode);
             joinStrategyNode.appendChild(reqNode);
             strategyNode.appendChild(joinStrategyNode);
             section.appendChild(strategyNode);
         case JoinStrategy.Guard
             refClassNode2 = simDoc.createElement('refClass');
-            refClassNode2.appendChild(simDoc.createTextNode(qn.classnames{r}));
+            refClassNode2.appendChild(simDoc.createTextNode(sn.classnames{r}));
             strategyNode.appendChild(refClassNode2);
             
             joinStrategyNode = simDoc.createElement('subParameter');
@@ -58,7 +58,7 @@ for r=1:numOfClasses
             reqNode.setAttribute('classPath', 'java.lang.Integer');
             reqNode.setAttribute('name', 'numRequired');
             valueNode = simDoc.createElement('value');
-            valueNode.appendChild(simDoc.createTextNode(int2str(qn.varsparam{ind}.joinRequired{r})));
+            valueNode.appendChild(simDoc.createTextNode(int2str(sn.varsparam{ind}.joinRequired{r})));
             reqNode.appendChild(valueNode);
             joinStrategyNode.appendChild(reqNode);
             strategyNode.appendChild(joinStrategyNode);

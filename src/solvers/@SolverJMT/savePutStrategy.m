@@ -8,21 +8,21 @@ queuePutStrategyNode.setAttribute('array', 'true');
 queuePutStrategyNode.setAttribute('classPath', 'jmt.engine.NetStrategies.QueuePutStrategy');
 queuePutStrategyNode.setAttribute('name', 'QueuePutStrategy');
 
-qn = self.getStruct;
-numOfClasses = qn.nclasses;
+sn = self.getStruct;
+numOfClasses = sn.nclasses;
 for r=1:numOfClasses
     refClassNode2 = simDoc.createElement('refClass');
-    refClassNode2.appendChild(simDoc.createTextNode(qn.classnames{r}));
+    refClassNode2.appendChild(simDoc.createTextNode(sn.classnames{r}));
     
     queuePutStrategyNode.appendChild(refClassNode2);
     %                switch currentNode.input.inputJobClasses{i}{2}
     
-    if ~qn.isstation(ind) % if not a station treat as FCFS
+    if ~sn.isstation(ind) % if not a station treat as FCFS
         subParameterNode2 = simDoc.createElement('subParameter');
         subParameterNode2.setAttribute('classPath', 'jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy');
         subParameterNode2.setAttribute('name', 'TailStrategy');
     else % if a station
-        switch qn.schedid(qn.nodeToStation(ind))
+        switch sn.schedid(sn.nodeToStation(ind))
             case SchedStrategy.ID_SIRO
                 subParameterNode2 = simDoc.createElement('subParameter');
                 subParameterNode2.setAttribute('classPath', 'jmt.engine.NetStrategies.QueuePutStrategies.RandStrategy');

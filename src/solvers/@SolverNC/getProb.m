@@ -1,21 +1,21 @@
 function Pnir = getProb(self, node, state)
 % PNIR = GETPROB(NODE, STATE)
 if nargin<3 %~exist('state','var')
-    state = qn.state{qn.nodeToStateful(node.index)};
+    state = sn.state{sn.nodeToStateful(node.index)};
 end
 T0 = tic;
-qn = self.getStruct;
+sn = self.getStruct;
 % now compute marginal probability
 if isa(node,'Node')
-    ist = qn.nodeToStation(node.index);
+    ist = sn.nodeToStation(node.index);
 else
     ist = node;    
 end
-qn.state{ist} = state;
+sn.state{ist} = state;
 if isfield(self.result.Prob,'logNormConstAggr') && isfinite(self.result.Prob.logNormConstAggr)
-    [Pnir,lG] = solver_nc_marg(qn, self.options, self.result.Prob.logNormConstAggr);
+    [Pnir,lG] = solver_nc_marg(sn, self.options, self.result.Prob.logNormConstAggr);
 else
-    [Pnir,lG] = solver_nc_marg(qn, self.options);
+    [Pnir,lG] = solver_nc_marg(sn, self.options);
     self.result.Prob.logNormConstAggr = lG;
 end
 self.result.('solver') = getName(self);

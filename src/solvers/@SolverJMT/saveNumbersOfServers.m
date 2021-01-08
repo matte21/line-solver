@@ -9,8 +9,8 @@ numbersOfServersNode.setAttribute('classPath', 'java.lang.Integer');
 numbersOfServersNode.setAttribute('name', 'numbersOfServers');
 numbersOfServersNode.setAttribute('array', 'true');
 
-qn = self.getStruct;
-numOfModes = qn.nmodes(ind);
+sn = self.getStruct;
+numOfModes = sn.nmodes(ind);
 for m=1:(numOfModes)
     
     subNumberOfServersNode = simDoc.createElement('subParameter');
@@ -19,7 +19,7 @@ for m=1:(numOfModes)
     
     valueNode = simDoc.createElement('value');
     
-    nmodeservers = qn.nmodeservers{ind}(m);
+    nmodeservers = sn.nmodeservers{ind}(m);
     if isinf(nmodeservers)
         valueNode.appendChild(simDoc.createTextNode(int2str(-1)));
     else

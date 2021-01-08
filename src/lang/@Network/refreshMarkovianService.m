@@ -45,7 +45,7 @@ for i=1:M
         end
     end
 end
-if ~isempty(self.qn) %&& isprop(self.qn,'mu')
+if ~isempty(self.sn) %&& isprop(self.sn,'mu')
 	proc = ph;
 	pie = cell(size(ph));
 	for i=1:size(ph,1)
@@ -60,11 +60,11 @@ if ~isempty(self.qn) %&& isprop(self.qn,'mu')
     	    end
     	end
 	end
-	self.qn.proc = proc;
-	self.qn.pie = pie;
-	self.qn.phases = phases;
-	self.qn.phasessz = max(self.qn.phases,ones(size(self.qn.phases)));
-	self.qn.phasessz(self.qn.nodeToStation(self.qn.nodetype == NodeType.Join),:)=phases(self.qn.nodeToStation(self.qn.nodetype == NodeType.Join),:);
-	self.qn.phaseshift = [zeros(size(phases,1),1),cumsum(self.qn.phasessz,2)];	
+	self.sn.proc = proc;
+	self.sn.pie = pie;
+	self.sn.phases = phases;
+	self.sn.phasessz = max(self.sn.phases,ones(size(self.sn.phases)));
+	self.sn.phasessz(self.sn.nodeToStation(self.sn.nodetype == NodeType.Join),:)=phases(self.sn.nodeToStation(self.sn.nodetype == NodeType.Join),:);
+	self.sn.phaseshift = [zeros(size(phases,1),1),cumsum(self.sn.phasessz,2)];	
 end
 end

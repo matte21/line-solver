@@ -7,17 +7,17 @@ function [simDoc, section] = saveDropStrategy(self, simDoc, section, ind)
 % @todo unfinished
 
 % This is just creating an empty drop node
-qn = self.getStruct;
-numOfClasses = qn.nclasses;
+sn = self.getStruct;
+numOfClasses = sn.nclasses;
 
 schedStrategyNode = simDoc.createElement('parameter');
 schedStrategyNode.setAttribute('array', 'true');
 schedStrategyNode.setAttribute('classPath', 'java.lang.String');
 schedStrategyNode.setAttribute('name', 'dropStrategies');
-i = qn.nodeToStation(ind);
+i = sn.nodeToStation(ind);
 for r=1:numOfClasses
     refClassNode = simDoc.createElement('refClass');
-    refClassNode.appendChild(simDoc.createTextNode(qn.classnames{r}));
+    refClassNode.appendChild(simDoc.createTextNode(sn.classnames{r}));
     schedStrategyNode.appendChild(refClassNode);
     
     subParameterNode = simDoc.createElement('subParameter');
@@ -25,11 +25,11 @@ for r=1:numOfClasses
     subParameterNode.setAttribute('name', 'dropStrategy');
     
     valueNode2 = simDoc.createElement('value');
-    if isnan(i) || qn.dropid(i,r)==0
+    if isnan(i) || sn.dropid(i,r)==0
         % JMT sets the field to 'drop' for nodes without a buffer
         valueNode2.appendChild(simDoc.createTextNode('drop'));
     else
-        valueNode2.appendChild(simDoc.createTextNode(DropStrategy.toText(DropStrategy.fromId(qn.dropid(i,r)))));
+        valueNode2.appendChild(simDoc.createTextNode(DropStrategy.toText(DropStrategy.fromId(sn.dropid(i,r)))));
     end
     
     subParameterNode.appendChild(valueNode2);

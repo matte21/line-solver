@@ -1,12 +1,12 @@
-function qn = getStruct(self, wantInitialState)
+function sn = getStruct(self, wantInitialState)
 % QN = GETSTRUCT(WANTINITSTATE)
-if isempty(self.qn)
+if isempty(self.sn)
     refreshStruct(self);
 end
 if nargin == 1 || wantInitialState
     [s0, s0prior] = self.getState;
-    self.qn.state = s0;
-    self.qn.stateprior = s0prior;
+    self.sn.state = s0;
+    self.sn.stateprior = s0prior;
 end
-qn = self.qn;
+sn = self.sn;
 end

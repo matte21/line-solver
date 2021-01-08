@@ -3,7 +3,7 @@ function nvars = refreshLocalVars(self)
 
 nvars = zeros(self.getNumberOfNodes, 1);
 varsparam = cell(self.getNumberOfNodes, 1);
-rtnodes = self.qn.rtnodes;
+rtnodes = self.sn.rtnodes;
 
 for ind=1:self.getNumberOfNodes
     node = self.getNodeByIndex(ind);
@@ -62,19 +62,19 @@ for ind=1:self.getNumberOfNodes
             end
         end
     end
-    switch self.qn.routing(ind)
+    switch self.sn.routing(ind)
         case RoutingStrategy.ID_RRB
             nvars(ind) = nvars(ind) + 1;
             % save indexes of outgoing links
             if isempty(varsparam) % reinstantiate if not a cache
                 varsparam{ind} = struct();
             end
-            varsparam{ind}.outlinks = find(sum(reshape(rtnodes(ind,:)>0,self.qn.nnodes,self.qn.nclasses),2)');
+            varsparam{ind}.outlinks = find(sum(reshape(rtnodes(ind,:)>0,self.sn.nnodes,self.sn.nclasses),2)');
     end
 end
 
-if ~isempty(self.qn) %&& isprop(self.qn,'nvars')
-    self.qn.nvars = nvars;
-    self.qn.varsparam = varsparam;
+if ~isempty(self.sn) %&& isprop(self.sn,'nvars')
+    self.sn.nvars = nvars;
+    self.sn.varsparam = varsparam;
 end
 end

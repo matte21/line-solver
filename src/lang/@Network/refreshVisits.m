@@ -76,10 +76,10 @@ for c=1:nchains
     nodevisits{c} = nodevisits{c} / sum(nodevisits{c}(refstat(inchain{c}(1)),inchain{c}));
     nodevisits{c}(nodevisits{c}<0) = 0; % remove small numerical perturbations
 end
-self.qn.visits = nodevisits;
+self.sn.visits = nodevisits;
 
-for c=1:self.qn.nchains
-    self.qn.visits{c}(isnan(self.qn.visits{c})) = 0;
+for c=1:self.sn.nchains
+    self.sn.visits{c}(isnan(self.sn.visits{c})) = 0;
 end
 
 end

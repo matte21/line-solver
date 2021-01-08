@@ -1,5 +1,5 @@
-function bool = snHasHOL(qn)
+function bool = snHasHOL(sn)
 % BOOL = HASHOL()
 
-bool = any(qn.schedid==SchedStrategy.ID_HOL);
+bool = any(sn.schedid==SchedStrategy.ID_HOL);
 end

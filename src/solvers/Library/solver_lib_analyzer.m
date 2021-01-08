@@ -1,4 +1,4 @@
-function [QN,UN,RN,TN,CN,XN,runtime] = solver_lib_analyzer(qn, options)
+function [QN,UN,RN,TN,CN,XN,runtime] = solver_lib_analyzer(sn, options)
 % [QN,UN,RN,TN,CN,XN,RUNTIME] = SOLVER_LIB_ANALYZER(QN, OPTIONS)
 
 % Copyright (c) 2012-2021, Imperial College London
@@ -6,7 +6,7 @@ function [QN,UN,RN,TN,CN,XN,runtime] = solver_lib_analyzer(qn, options)
 
 Tstart = tic;
 
-[QN,UN,RN,TN,CN,XN] = solver_lib(qn, options);
+[QN,UN,RN,TN,CN,XN] = solver_lib(sn, options);
 
 QN(isnan(QN))=0;
 CN(isnan(CN))=0;

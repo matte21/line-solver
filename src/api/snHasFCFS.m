@@ -1,5 +1,5 @@
-function bool = snHasFCFS(qn)
+function bool = snHasFCFS(sn)
 % BOOL = HASFCFS()
 
-bool = any(qn.schedid==SchedStrategy.ID_FCFS);
+bool = any(sn.schedid==SchedStrategy.ID_FCFS);
 end

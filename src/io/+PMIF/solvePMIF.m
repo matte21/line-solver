@@ -34,25 +34,25 @@ end
 for j = 1:size(allFilenames,1)
     myPath = allFilenames{j};
     % obtain CQN model from PMIF model
-    qn = PMIF2QN(myPath, verbose);
+    sn = PMIF2QN(myPath, verbose);
     
-    if ~isempty(qn)
+    if ~isempty(sn)
         % check solver
         myRT=RT;
         % compute performance measures
         %iter_max = 1000;
         options=Solver.defaultOptions;
-        [~, U, R, X, ~, RT_CDF, ~] = QN_fluid_analyzer(qn, [], [], [], myRT, RTrange, options);
+        [~, U, R, X, ~, RT_CDF, ~] = QN_fluid_analyzer(sn, [], [], [], myRT, RTrange, options);
         
-        for i = 1:qn.nstations
-            if qn.schedid(i)==SchedStrategy.ID_INF
-                meanRT = sum(R([1:i-1 i+1:qn.nstations],:),1);
+        for i = 1:sn.nstations
+            if sn.schedid(i)==SchedStrategy.ID_INF
+                meanRT = sum(R([1:i-1 i+1:sn.nstations],:),1);
                 break;
             end
         end
         
         % write results to output file
         outPath = [options.outputFolder, '/', shortNames{j}];
-        writeXMLresults(outPath, '', qn, U, X, meanRT, R, [], RT_CDF, [], verbose );
+        writeXMLresults(outPath, '', sn, U, X, meanRT, R, [], RT_CDF, [], verbose );
     end
 end

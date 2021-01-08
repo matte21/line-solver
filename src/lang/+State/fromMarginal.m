@@ -1,4 +1,4 @@
-function space = fromMarginal(qn, ind, n, options)
+function space = fromMarginal(sn, ind, n, options)
 % SPACE = FROMMARGINAL(QN, IND, N, OPTIONS)
 
 % Copyright (c) 2012-2021, Imperial College London
@@ -7,21 +7,21 @@ function space = fromMarginal(qn, ind, n, options)
 if nargin<4 %~exist('options','var')
     options.force = false;
 end
-if isa(qn,'Network')
-    qn=qn.getStruct();
+if isa(sn,'Network')
+    sn=sn.getStruct();
 end
 % generate states such that the marginal queue-lengths are as in vector n
 %  n(r): number of jobs at the station in class r
-R = qn.nclasses;
-S = qn.nservers;
+R = sn.nclasses;
+S = sn.nservers;
 state = [];
 space = [];
 
 % ind: node index
-ist = qn.nodeToStation(ind);
-isf = qn.nodeToStateful(ind);
+ist = sn.nodeToStation(ind);
+isf = sn.nodeToStateful(ind);
 
-if qn.isstateful(ind) && ~qn.isstation(ind)
+if sn.isstateful(ind) && ~sn.isstation(ind)
     for r=1:R
         init = State.spaceClosedSingle(1,n(r));
         state = State.decorate(state,init);
@@ -32,23 +32,23 @@ end
 
 K = zeros(1,R);
 for r=1:R
-    if isempty(qn.proc{ist,r})
+    if isempty(sn.proc{ist,r})
         K(r) = 0;
     else
-        K(r) = length(qn.proc{ist,r}{1});
+        K(r) = length(sn.proc{ist,r}{1});
     end
 end
-if (qn.schedid(ist) ~= SchedStrategy.ID_EXT) && any(n>qn.classcap(ist,:))
+if (sn.schedid(ist) ~= SchedStrategy.ID_EXT) && any(n>sn.classcap(ist,:))
     return
 end
 
 % generate local-state space
-switch qn.nodetype(ind)
+switch sn.nodetype(ind)
     case {NodeType.Queue, NodeType.Delay, NodeType.Source}
-        switch qn.schedid(ist)
+        switch sn.schedid(ist)
             case SchedStrategy.ID_EXT
                 for r=1:R
-                    if ~isempty(qn.proc) && ~isempty(qn.proc{ist,r}) && any(any(isnan(qn.proc{ist,r}{1}))) % disabled
+                    if ~isempty(sn.proc) && ~isempty(sn.proc{ist,r}) && any(any(isnan(sn.proc{ist,r}{1}))) % disabled
                         init = 0*ones(1,K(r));
                     else
                         init = State.spaceClosedSingle(K(r),1);
@@ -89,7 +89,7 @@ switch qn.nodetype(ind)
                     end
                 end
             case {SchedStrategy.ID_FCFS, SchedStrategy.ID_HOL, SchedStrategy.ID_LCFS}
-                sizeEstimator = multinomialln(n) - gammaln(sum(n)) + gammaln(1+qn.cap(ist));
+                sizeEstimator = multinomialln(n) - gammaln(sum(n)) + gammaln(1+sn.cap(ist));
                 sizeEstimator = round(sizeEstimator/log(10));
                 if sizeEstimator > 2
                     if ~isfield(options,'force') || options.force == false
@@ -119,10 +119,10 @@ switch qn.nodetype(ind)
                     state = zeros(1,R);
                     state = State.decorate(state,[mi_buf,state]);
                 else                    
-                    mi = mi(:,(end-min(sum(n),qn.cap(ist))+1):end); % n(r) may count more than once elements within the same chain
+                    mi = mi(:,(end-min(sum(n),sn.cap(ist))+1):end); % n(r) may count more than once elements within the same chain
                     mi = unique(mi,'rows');
                     % mi_buf: class of job in buffer position i (0=empty)
-                    mi_buf = [zeros(size(mi,1),min(sum(n),qn.cap(ist))-S(ist)-size(mi(:,1:end-S(ist)),2)), mi(:,1:end-S(ist))];
+                    mi_buf = [zeros(size(mi,1),min(sum(n),sn.cap(ist))-S(ist)-size(mi(:,1:end-S(ist)),2)), mi(:,1:end-S(ist))];
                     if isempty(mi_buf)
                         mi_buf = zeros(size(mi,1),1);
                     end
@@ -151,12 +151,12 @@ switch qn.nodetype(ind)
                 % random variables for the service times
                 line_error(mfilename,'The scheduling policy does not admit a discrete state space.\n');
         end
-        switch qn.routing(ind)
+        switch sn.routing(ind)
             case RoutingStrategy.ID_RRB
-                space = State.decorate(space, qn.varsparam{ind}.outlinks(:));
+                space = State.decorate(space, sn.varsparam{ind}.outlinks(:));
         end
     case NodeType.Cache
-        switch qn.schedid(ist)
+        switch sn.schedid(ist)
             case SchedStrategy.ID_INF
                 % in this policies we only track the jobs in the servers
                 for r=1:R
@@ -165,9 +165,9 @@ switch qn.nodetype(ind)
                 end
                 space = State.decorate(space,state);
         end
-        switch qn.routing(ind)
+        switch sn.routing(ind)
             case RoutingStrategy.ID_RRB
-                space = State.decorate(space, qn.varsparam{ind}.outlinks(:));
+                space = State.decorate(space, sn.varsparam{ind}.outlinks(:));
         end
 end
 space = unique(space,'rows'); % do not comment, required to sort empty state as first

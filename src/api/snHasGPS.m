@@ -1,5 +1,5 @@
-function bool = snHasGPS(qn)
+function bool = snHasGPS(sn)
 % BOOL = HASGPS()
 
-bool = any(qn.schedid==SchedStrategy.ID_GPS);
+bool = any(sn.schedid==SchedStrategy.ID_GPS);
 end

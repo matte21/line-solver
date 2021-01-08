@@ -48,7 +48,7 @@ switch solverName
         options.verbose = 0;    
     case 'Fluid'
         options = Solver.defaultOptions();
-        options.iter_max = 50;
+        options.iter_max = 200;
         options.stiff = true;
         options.timespan = [0,Inf];
     case 'JMT'

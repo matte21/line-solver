@@ -14,11 +14,11 @@ if nargin<3
 end
 
 %% obtain routing matrix
-rates = self.qn.rates;
+rates = self.sn.rates;
 [rt,~,rtnodes] = self.refreshRoutingMatrix(rates);
-self.qn.rt = rt;
-self.qn.rtnodes = rtnodes;
-self.qn.rtorig = self.linkedRoutingTable;
+self.sn.rt = rt;
+self.sn.rtnodes = rtnodes;
+self.sn.rtorig = self.linkedRoutingTable;
 
 %% determine class switching mask
 K = getNumberOfClasses(self);
@@ -43,8 +43,8 @@ end
 for isf=1:length(stateful) % source
     % this is to ensure that also stateful cs like caches
     % are accounted
-    ind = self.qn.statefulToNode(isf);
-    isCS = self.qn.nodetype(ind) == NodeType.Cache | self.qn.nodetype(ind) == NodeType.ClassSwitch;
+    ind = self.sn.statefulToNode(isf);
+    isCS = self.sn.nodetype(ind) == NodeType.Cache | self.sn.nodetype(ind) == NodeType.ClassSwitch;
     for r=1:K
         csmask(r,r) = true;
         for s=1:K
@@ -58,7 +58,7 @@ for isf=1:length(stateful) % source
         end
     end
 end
-self.qn.csmask = csmask;
+self.sn.csmask = csmask;
 
 %% compute chains
 [C,inChain] = weaklyconncomp(csmask+csmask');
@@ -81,21 +81,21 @@ end
 
 %% call dependent visits refresh
 
-%if ~isempty(self.qn)
-self.qn.chains = logical(chains);
-self.qn.nchains = size(chains,1);
+%if ~isempty(self.sn)
+self.sn.chains = logical(chains);
+self.sn.nchains = size(chains,1);
 
 if propagate
     [visits, nodevisits] = self.refreshVisits(chains, rt, rtnodes);
-    self.qn.visits = visits;
-    self.qn.nodevisits = nodevisits;
+    self.sn.visits = visits;
+    self.sn.nodevisits = nodevisits;
 end
 %end
 
-self.qn.isslc = false(self.qn.nchains,1);
-for c=1:self.qn.nchains
-    if nnz(self.qn.visits{c}) == 1
-        self.qn.isslc(c) = true;
+self.sn.isslc = false(self.sn.nchains,1);
+for c=1:self.sn.nchains
+    if nnz(self.sn.visits{c}) == 1
+        self.sn.isslc(c) = true;
     end
 end
 

@@ -7,7 +7,7 @@ function self = link(self, P)
 sanitize(self);
 
 isReset = false;
-if ~isempty(self.qn)
+if ~isempty(self.sn)
     isReset = true;
     self.resetNetwork; % remove artificial class switch nodes
 end

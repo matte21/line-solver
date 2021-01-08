@@ -1,4 +1,4 @@
-function isValid = isValid(qn, n, s, options)
+function isValid = isValid(sn, n, s, options)
 % ISVALID = ISVALID(QN, N, S, OPTIONS)
 
 % Copyright (c) 2012-2021, Imperial College London
@@ -11,8 +11,8 @@ if nargin==3
     options = Solver.defaultOptions;
 end
 isValid = true;
-if isa(qn,'Network')
-    qn=qn.getStruct();
+if isa(sn,'Network')
+    sn=sn.getStruct();
 end
 
 if isempty(n) & ~isempty(s)
@@ -24,26 +24,26 @@ if iscell(n) %then n is a cell array of states
     ncell = n;
     n = [];
     for isf=1:length(ncell)
-        ist = qn.statefulToStation(isf);
-        ind = qn.statefulToNode(isf);
-        [~, n(ist,:), s(ist,:), ~] = State.toMarginal(qn, ind, ncell{isf}, options);
+        ist = sn.statefulToStation(isf);
+        ind = sn.statefulToNode(isf);
+        [~, n(ist,:), s(ist,:), ~] = State.toMarginal(sn, ind, ncell{isf}, options);
     end
 end
 
-R = qn.nclasses;
+R = sn.nclasses;
 K = zeros(1,R);
-for ist=1:qn.nstations
+for ist=1:sn.nstations
     for r=1:R
-        K(r) = qn.phases(ist,r);
-        if qn.nodetype(qn.stationToNode(ist)) ~= NodeType.Place
-            if ~isempty(qn.proc) && ~isempty(qn.proc{ist,r}) && any(any(isnan(qn.proc{ist,r}{1}))) && n(ist,r)>0 % if disabled
+        K(r) = sn.phases(ist,r);
+        if sn.nodetype(sn.stationToNode(ist)) ~= NodeType.Place
+            if ~isempty(sn.proc) && ~isempty(sn.proc{ist,r}) && any(any(isnan(sn.proc{ist,r}{1}))) && n(ist,r)>0 % if disabled
                 isValid = false;
                 %            line_error(mfilename,sprintf('Chain %d is initialized with an incorrect number of jobs: %f instead of %d.', nc, statejobs_chain, njobs_chain));
                 return
             end
         end
     end
-    if any(n(ist,:)>qn.classcap(ist,:))
+    if any(n(ist,:)>sn.classcap(ist,:))
         line_warning(mfilename,'Station %d is in a state with more jobs than its allowed capacity');
         isValid = false;
         return
@@ -51,11 +51,11 @@ for ist=1:qn.nstations
 end
 
 if nargin > 2 && ~isempty(s)
-    for ist=1:qn.nstations
-        if qn.nservers(ist)>0
+    for ist=1:sn.nstations
+        if sn.nservers(ist)>0
             % if more running jobs than servers
-            if sum(s(ist,:)) > qn.nservers(ist)
-                switch qn.schedid(ist) % don't flag invalid if ps
+            if sum(s(ist,:)) > sn.nservers(ist)
+                switch sn.schedid(ist) % don't flag invalid if ps
                     case {SchedStrategy.ID_FCFS,SchedStrategy.ID_SIRO,SchedStrategy.ID_LCFS,SchedStrategy.ID_HOL}
                         isValid = false;
                         return
@@ -67,7 +67,7 @@ if nargin > 2 && ~isempty(s)
                 return
             end
             % non-idling condition
-            if sum(s(ist,:)) ~= min(sum(n(ist,:)), qn.nservers(ist))
+            if sum(s(ist,:)) ~= min(sum(n(ist,:)), sn.nservers(ist))
                 % commented because in ps queues s are in service as well
                 % isValid = false;
                 %return
@@ -76,10 +76,10 @@ if nargin > 2 && ~isempty(s)
     end
 end
 
-for nc=1:qn.nchains
-    njobs_chain = sum(qn.njobs(find(qn.chains(nc,:))));
+for nc=1:sn.nchains
+    njobs_chain = sum(sn.njobs(find(sn.chains(nc,:))));
     if ~isinf(njobs_chain)
-        statejobs_chain = sum(sum(n(:,find(qn.chains(nc,:))),2),1);
+        statejobs_chain = sum(sum(n(:,find(sn.chains(nc,:))),2),1);
         %if ~options.force && abs(1-njobs_chain/statejobs_chain) > options.iter_tol
         if abs(1-njobs_chain/statejobs_chain) > 1e-4
             isValid = false;

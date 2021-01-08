@@ -1,4 +1,4 @@
-function [pi,SSq,arvRates,depRates,tranSysState,tranSync,qn]=solver_ssa(qn,options)
+function [pi,SSq,arvRates,depRates,tranSysState,tranSync,sn]=solver_ssa(sn,options)
 % [PI,SSQ,ARVRATES,DEPRATES,TRANSYSSTATE,QN]=SOLVER_SSA(QN,OPTIONS)
 
 % Copyright (c) 2012-2021, Imperial College London
@@ -12,45 +12,45 @@ end
 Solver.resetRandomGeneratorSeed(options.seed+labindex-1);
 
 %% generate local state spaces
-%nstations = qn.nstations;
-nstateful = qn.nstateful;
-%init_nserver = qn.nservers; % restore Inf at delay nodes
-R = qn.nclasses;
-N = qn.njobs';
-sync = qn.sync;
-csmask = qn.csmask;
+%nstations = sn.nstations;
+nstateful = sn.nstateful;
+%init_nserver = sn.nservers; % restore Inf at delay nodes
+R = sn.nclasses;
+N = sn.njobs';
+sync = sn.sync;
+csmask = sn.csmask;
 
 cutoff = options.cutoff;
 if prod(size(cutoff))==1
-    cutoff = cutoff * ones(qn.nstations, qn.nclasses);
+    cutoff = cutoff * ones(sn.nstations, sn.nclasses);
 end
 
 %%
 Np = N';
-capacityc = zeros(qn.nnodes, qn.nclasses);
-for ind=1:qn.nnodes
-    if qn.isstation(ind) % place jobs across stations
-        ist = qn.nodeToStation(ind);
-        %isf = qn.nodeToStateful(ind);
-        for r=1:qn.nclasses %cut-off open classes to finite capacity
-            c = find(qn.chains(:,r));
-            if ~isempty(qn.visits{c}) && qn.visits{c}(ist,r) == 0
+capacityc = zeros(sn.nnodes, sn.nclasses);
+for ind=1:sn.nnodes
+    if sn.isstation(ind) % place jobs across stations
+        ist = sn.nodeToStation(ind);
+        %isf = sn.nodeToStateful(ind);
+        for r=1:sn.nclasses %cut-off open classes to finite capacity
+            c = find(sn.chains(:,r));
+            if ~isempty(sn.visits{c}) && sn.visits{c}(ist,r) == 0
                 capacityc(ind,r) = 0;
-            elseif ~isempty(qn.proc) && ~isempty(qn.proc{ist,r}) && any(any(isnan(qn.proc{ist,r}{1}))) % disabled
+            elseif ~isempty(sn.proc) && ~isempty(sn.proc{ist,r}) && any(any(isnan(sn.proc{ist,r}{1}))) % disabled
                 capacityc(ind,r) = 0;
             else
                 if isinf(N(r))
-                    capacityc(ind,r) =  min(cutoff(ist,r), qn.classcap(ist,r));
+                    capacityc(ind,r) =  min(cutoff(ist,r), sn.classcap(ist,r));
                 else
-                    capacityc(ind,r) =  sum(qn.njobs(qn.chains(c,:)));
+                    capacityc(ind,r) =  sum(sn.njobs(sn.chains(c,:)));
                 end
             end
         end
-        if isinf(qn.nservers(ist))
-            qn.nservers(ist) = sum(capacityc(ind,:));
+        if isinf(sn.nservers(ist))
+            sn.nservers(ist) = sum(capacityc(ind,:));
         end
-        qn.cap(ist,:) = sum(capacityc(ind,:));
-        qn.classcap(ist,:) = capacityc(ind,:);
+        sn.cap(ist,:) = sum(capacityc(ind,:));
+        sn.classcap(ist,:) = capacityc(ind,:);
     end
 end
 
@@ -69,13 +69,13 @@ samples_collected = 1;
 state = init_state_hashed;
 stateCell = cell(nstateful,1);
 nir = {};
-for ind=1:qn.nnodes
-    if qn.isstateful(ind)
-        isf = qn.nodeToStateful(ind);
-        stateCell{isf} = qn.space{isf}(state(isf),:);
-        if qn.isstation(ind)
-            ist = qn.nodeToStation(ind);
-            [~,nir{ist}] = State.toMarginal(qn, ind, qn.space{isf}(state(isf),:));
+for ind=1:sn.nnodes
+    if sn.isstateful(ind)
+        isf = sn.nodeToStateful(ind);
+        stateCell{isf} = sn.space{isf}(state(isf),:);
+        if sn.isstation(ind)
+            ist = sn.nodeToStation(ind);
+            [~,nir{ist}] = State.toMarginal(sn, ind, sn.space{isf}(state(isf),:));
             nir{ist} = nir{ist}(:);
         end
     end
@@ -88,7 +88,7 @@ tranState = zeros(1+length(state),samples_collected);
 tranState(1:(1+length(state)),1) = [0, state]';
 samples_collected = 1;
 SSq = cell2mat(nir');
-local = qn.nnodes+1;
+local = sn.nnodes+1;
 last_node_a = 0;
 last_node_p = 0;
 for act=1:A
@@ -114,16 +114,16 @@ while samples_collected < options.samples && cur_time <= options.timespan(2)
         update_cond_a = true; %((node_a{act} == last_node_a || node_a{act} == last_node_p));
         newStateCell{act} = stateCell;
         if update_cond_a || isempty(outprob_a{act})
-            isf = qn.nodeToStateful(node_a{act});
-            [newStateCell{act}{qn.nodeToStateful(node_a{act})}, rate_a{act}, outprob_a{act}] =  State.afterEvent(qn, node_a{act}, stateCell{isf}, event_a{act}, class_a{act}, isSimulation);
+            isf = sn.nodeToStateful(node_a{act});
+            [newStateCell{act}{sn.nodeToStateful(node_a{act})}, rate_a{act}, outprob_a{act}] =  State.afterEvent(sn, node_a{act}, stateCell{isf}, event_a{act}, class_a{act}, isSimulation);
         end
         
-        if isempty(newStateCell{act}{qn.nodeToStateful(node_a{act})}) || isempty(rate_a{act}) % state not found
+        if isempty(newStateCell{act}{sn.nodeToStateful(node_a{act})}) || isempty(rate_a{act}) % state not found
             continue
         end
         
-        for ia=1:size(newStateCell{act}{qn.nodeToStateful(node_a{act})},1) % for all possible new states
-            if newStateCell{act}{qn.nodeToStateful(node_a{act})}(ia,:) == -1 % hash not found
+        for ia=1:size(newStateCell{act}{sn.nodeToStateful(node_a{act})},1) % for all possible new states
+            if newStateCell{act}{sn.nodeToStateful(node_a{act})}(ia,:) == -1 % hash not found
                 continue
             end
             %update_cond_p = ((node_p{act} == last_node_a || node_p{act} == last_node_p)) || isempty(outprob_p{act});
@@ -132,15 +132,15 @@ while samples_collected < options.samples && cur_time <= options.timespan(2)
                 if node_p{act} ~= local
                     if node_p{act} == node_a{act} %self-loop
                         if update_cond
-                            [newStateCell{act}{qn.nodeToStateful(node_p{act})}, ~, outprob_p{act}] =  State.afterEvent(qn, node_p{act}, newStateCell{act}{qn.nodeToStateful(node_a{act})}, event_p{act}, class_p{act}, isSimulation);
+                            [newStateCell{act}{sn.nodeToStateful(node_p{act})}, ~, outprob_p{act}] =  State.afterEvent(sn, node_p{act}, newStateCell{act}{sn.nodeToStateful(node_a{act})}, event_p{act}, class_p{act}, isSimulation);
                         end
                     else % departure
                         if update_cond
-                            [newStateCell{act}{qn.nodeToStateful(node_p{act})}, ~, outprob_p{act}] =  State.afterEvent(qn, node_p{act}, newStateCell{act}{qn.nodeToStateful(node_p{act})}, event_p{act}, class_p{act}, isSimulation);
+                            [newStateCell{act}{sn.nodeToStateful(node_p{act})}, ~, outprob_p{act}] =  State.afterEvent(sn, node_p{act}, newStateCell{act}{sn.nodeToStateful(node_p{act})}, event_p{act}, class_p{act}, isSimulation);
                         end
                     end
-                    if ~isempty(newStateCell{act}{qn.nodeToStateful(node_p{act})})
-                        if qn.isstatedep(node_a{act},3)
+                    if ~isempty(newStateCell{act}{sn.nodeToStateful(node_p{act})})
+                        if sn.isstatedep(node_a{act},3)
                             prob_sync_p{act} = sync{act}.passive{1}.prob(stateCell, newStateCell{act}); %state-dependent
                         else
                             prob_sync_p{act} = sync{act}.passive{1}.prob;
@@ -149,22 +149,22 @@ while samples_collected < options.samples && cur_time <= options.timespan(2)
                         prob_sync_p{act} = 0;
                     end
                 end
-                if ~isempty(newStateCell{act}{qn.nodeToStateful(node_a{act})})
+                if ~isempty(newStateCell{act}{sn.nodeToStateful(node_a{act})})
                     if node_p{act} == local
                         prob_sync_p{act} = 1; %outprob_a{act}; % was 1
                     end
                     if ~isnan(rate_a{act})
                         if all(~cellfun(@isempty,newStateCell{act}))
                             if event_a{act} == EventType.ID_DEP
-                                node_a_sf{act} = qn.nodeToStateful(node_a{act});
-                                node_p_sf{act} = qn.nodeToStateful(node_p{act});
+                                node_a_sf{act} = sn.nodeToStateful(node_a{act});
+                                node_p_sf{act} = sn.nodeToStateful(node_p{act});
                                 depRatesSamples(samples_collected,node_a_sf{act},class_a{act}) = depRatesSamples(samples_collected,node_a_sf{act},class_a{act}) + outprob_a{act} * outprob_p{act} * rate_a{act}(ia) * prob_sync_p{act};
                                 arvRatesSamples(samples_collected,node_p_sf{act},class_p{act}) = arvRatesSamples(samples_collected,node_p_sf{act},class_p{act}) + outprob_a{act} * outprob_p{act} * rate_a{act}(ia) * prob_sync_p{act};
                             end
                             % simulate also self-loops as we need to log them
                             %if any(~cellfun(@isequal,newStateCell{act},stateCell))
-                            if node_p{act} < local && ~csmask(class_a{act}, class_p{act}) && qn.nodetype(node_p{act})~=NodeType.Source && (rate_a{act}(ia) * prob_sync_p{act} >0)
-                                line_error(mfilename,'Error: state-dependent routing at node %d (%s) violates the class switching mask (node %d -> node %d, class %d -> class %d).', node_a{act}, qn.nodenames{node_a{act}}, node_a{act}, node_p{act}, class_a{act}, class_p{act});
+                            if node_p{act} < local && ~csmask(class_a{act}, class_p{act}) && sn.nodetype(node_p{act})~=NodeType.Source && (rate_a{act}(ia) * prob_sync_p{act} >0)
+                                line_error(mfilename,'Error: state-dependent routing at node %d (%s) violates the class switching mask (node %d -> node %d, class %d -> class %d).', node_a{act}, sn.nodenames{node_a{act}}, node_a{act}, node_p{act}, class_a{act}, class_p{act});
                             end
                             enabled_rates(ctr) = rate_a{act}(ia) * prob_sync_p{act};
                             enabled_sync{ctr} = act;
@@ -186,9 +186,9 @@ while samples_collected < options.samples && cur_time <= options.timespan(2)
 
     % this part is needed to ensure that when the state vector grows the
     % padding of zero is done on the left
-    for ind=1:qn.nnodes
-        if qn.isstation(ind)
-            isf = qn.nodeToStateful(ind);                        
+    for ind=1:sn.nnodes
+        if sn.isstation(ind)
+            isf = sn.nodeToStateful(ind);                        
             deltalen = length(stateCell{isf}) > statelen(isf);
             if deltalen>0
                 statelen(isf) = length(stateCell{isf});
@@ -211,11 +211,11 @@ while samples_collected < options.samples && cur_time <= options.timespan(2)
     tranState(1:(1+length(state)),samples_collected) = [dt, state]';
     tranSync(samples_collected,1) = enabled_sync{firing_ctr};
     
-    for ind=1:qn.nnodes
-        if qn.isstation(ind)
-            isf = qn.nodeToStateful(ind);
-            ist = qn.nodeToStation(ind);
-            [~,nir{ist}] = State.toMarginal(qn, ind, stateCell{isf});
+    for ind=1:sn.nnodes
+        if sn.isstation(ind)
+            isf = sn.nodeToStateful(ind);
+            ist = sn.nodeToStation(ind);
+            [~,nir{ist}] = State.toMarginal(sn, ind, stateCell{isf});
             nir{ist}=nir{ist}(:);
         end
     end
@@ -250,8 +250,8 @@ tranSysState{1} = cumsum(tranState(:,1));
 for j=1:length(statesz)
     tranSysState{1+j} = tranState(:,1+(1+sum(statesz(1:(j-1)))):(1+sum(statesz(1:j))));
 end
-arvRates = zeros(size(u,1),qn.nstateful,R);
-depRates = zeros(size(u,1),qn.nstateful,R);
+arvRates = zeros(size(u,1),sn.nstateful,R);
+depRates = zeros(size(u,1),sn.nstateful,R);
 
 pi = zeros(1,size(u,1));
 for s=1:size(u,1)
@@ -259,13 +259,13 @@ for s=1:size(u,1)
 end
 SSq = SSq(:,ui)';
 
-for ind=1:qn.nnodes
-    if qn.isstateful(ind)
-        isf = qn.nodeToStateful(ind);
-        if qn.isstation(ind)
-            ist = qn.nodeToStation(ind);
-            K = qn.phasessz(ist,:);
-            Ks = qn.phaseshift(ist,:);
+for ind=1:sn.nnodes
+    if sn.isstateful(ind)
+        isf = sn.nodeToStateful(ind);
+        if sn.isstation(ind)
+            ist = sn.nodeToStation(ind);
+            K = sn.phasessz(ist,:);
+            Ks = sn.phaseshift(ist,:);
         end
         for s=1:size(u,1)
             for r=1:R
@@ -276,5 +276,5 @@ for ind=1:qn.nnodes
     end
 end
 pi = pi/sum(pi);
-%qn.nservers = init_nserver; % restore Inf at delay nodes
+%sn.nservers = init_nserver; % restore Inf at delay nodes
 end

@@ -1,7 +1,7 @@
 function estVal = estimatorUBR(self, node)
 % rescale utilization to be mean number of busy serveers
 
-qn = self.model.getStruct;
+sn = self.model.getStruct;
 
 if isfinite(node.getNumberOfServers())
     U = self.getAggrUtil(node);
@@ -11,8 +11,8 @@ if isfinite(node.getNumberOfServers())
 end
 
 % obtain per class metrics
-isUtilKnown = false(1,qn.nclasses);
-for r=1:qn.nclasses
+isUtilKnown = false(1,sn.nclasses);
+for r=1:sn.nclasses
     Ur=self.getUtil(node, self.model.classes{r});
     if isempty(Ur)
         avgUtil{r} = [];
@@ -37,7 +37,7 @@ catch me
     end
 end
 
-estVal = zeros(1,qn.nclasses);
+estVal = zeros(1,sn.nclasses);
 % for known pairs arrival rate - per-class utilization
 % do separate inference of the demand
 for r = find(isUtilKnown)

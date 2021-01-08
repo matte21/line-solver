@@ -20,7 +20,7 @@ if isfield(options,'timespan')  && isfinite(options.timespan(2))
     
     %                self.options.seed = initSeed; % in case of interruption
     %                jnd = node.index;
-    %                SSnode_a = SSa(:,(jnd-1)*qn.nclasses+1:jnd*qn.nclasses);
+    %                SSnode_a = SSa(:,(jnd-1)*sn.nclasses+1:jnd*sn.nclasses);
     %                Pi_t = [t, pi_t];
     SSnode_a = [];
     Pi_t = [];

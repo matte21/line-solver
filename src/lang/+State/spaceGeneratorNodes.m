@@ -1,39 +1,39 @@
-function [nodeStateSpace, qn, capacityc] = spaceGeneratorNodes(qn, cutoff, options)
+function [nodeStateSpace, sn, capacityc] = spaceGeneratorNodes(sn, cutoff, options)
 if nargin<3
     options = Solver.defaultOptions;
 end
-N = qn.njobs';
-qn.space = {};
-capacityc = zeros(qn.nnodes, qn.nclasses);
-for ind=1:qn.nnodes
-    if qn.isstation(ind) % place jobs across stations
-        ist = qn.nodeToStation(ind);
-        isf = qn.nodeToStateful(ind);
-        for r=1:qn.nclasses %cut-off open classes to finite capacity
-            c = find(qn.chains(:,r));
-            if ~isempty(qn.visits{c}) && qn.visits{c}(ist,r) == 0
+N = sn.njobs';
+sn.space = {};
+capacityc = zeros(sn.nnodes, sn.nclasses);
+for ind=1:sn.nnodes
+    if sn.isstation(ind) % place jobs across stations
+        ist = sn.nodeToStation(ind);
+        isf = sn.nodeToStateful(ind);
+        for r=1:sn.nclasses %cut-off open classes to finite capacity
+            c = find(sn.chains(:,r));
+            if ~isempty(sn.visits{c}) && sn.visits{c}(ist,r) == 0
                 capacityc(ind,r) = 0;
-            elseif ~isempty(qn.proc) && ~isempty(qn.proc{ist,r}) && any(any(isnan(qn.proc{ist,r}{1}))) % disabled
+            elseif ~isempty(sn.proc) && ~isempty(sn.proc{ist,r}) && any(any(isnan(sn.proc{ist,r}{1}))) % disabled
                 capacityc(ind,r) = 0;
             else
                 if isinf(N(r))
-                    capacityc(ind,r) =  min(cutoff(ist,r), qn.classcap(ist,r));
+                    capacityc(ind,r) =  min(cutoff(ist,r), sn.classcap(ist,r));
                 else
-                    capacityc(ind,r) =  sum(qn.njobs(qn.chains(c,:)));
+                    capacityc(ind,r) =  sum(sn.njobs(sn.chains(c,:)));
                 end
             end
         end
-        qn.space{isf} = State.fromMarginalBounds(qn, ind, [], capacityc(ind,:), qn.cap(ist), options);
-        if isinf(qn.nservers(ist))
-            qn.nservers(ist) = sum(capacityc(ind,:));
+        sn.space{isf} = State.fromMarginalBounds(sn, ind, [], capacityc(ind,:), sn.cap(ist), options);
+        if isinf(sn.nservers(ist))
+            sn.nservers(ist) = sum(capacityc(ind,:));
         end
-    elseif qn.isstateful(ind) % generate state space of other stateful nodes that are not stations
-        %ist = qn.nodeToStation(ind);
-        isf = qn.nodeToStateful(ind);
-        switch qn.nodetype(ind)
+    elseif sn.isstateful(ind) % generate state space of other stateful nodes that are not stations
+        %ist = sn.nodeToStation(ind);
+        isf = sn.nodeToStateful(ind);
+        switch sn.nodetype(ind)
             case NodeType.Cache
-                for r=1:qn.nclasses % restrict state space generation to immediate events
-                    if isnan(qn.varsparam{ind}.pref{r})
+                for r=1:sn.nclasses % restrict state space generation to immediate events
+                    if isnan(sn.varsparam{ind}.pref{r})
                         capacityc(ind,r) =  1; %
                     else
                         capacityc(ind,r) =  1; %
@@ -42,10 +42,10 @@ for ind=1:qn.nnodes
             otherwise
                 capacityc(ind,:) =  1; %
         end
-        state_var = State.spaceLocalVars(qn, ind);
-        state_bufsrv = State.fromMarginalBounds(qn, ind, [], capacityc(ind,:), 1, options);
-        qn.space{isf} = State.decorate(state_bufsrv,state_var); % generate all possible states for local variables
+        state_var = State.spaceLocalVars(sn, ind);
+        state_bufsrv = State.fromMarginalBounds(sn, ind, [], capacityc(ind,:), 1, options);
+        sn.space{isf} = State.decorate(state_bufsrv,state_var); % generate all possible states for local variables
     end
 end
-nodeStateSpace = qn.space;
+nodeStateSpace = sn.space;
 end

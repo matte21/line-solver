@@ -56,12 +56,12 @@ classdef Station < StatefulNode
         function setChainCapacity(self, values)
             % SETCHAINCAPACITY(VALUES)
             
-            qn = self.model.getStruct;
-            if numel(values) ~= qn.nchains
+            sn = self.model.getStruct;
+            if numel(values) ~= sn.nchains
                 line_error(mfilename,'The method requires in input a capacity value for each chain.');
             end
-            for c = 1:qn.nchains
-                inchain = find(qn.chains(c,:));
+            for c = 1:sn.nchains
+                inchain = find(sn.chains(c,:));
                 for r = inchain
                     if ~self.isServiceDisabled(r)
                         self.classCap(r) = values(c);

@@ -10,7 +10,7 @@ else
     line_warning(mfilename,'JMT does not allow to fix the number of events for individual nodes. The number of returned events may be inaccurate.');
     numEvents = numEvents - 1; % we include the initialization as an event
 end
-qn = self.getStruct;
+sn = self.getStruct;
 
 Q = getAvgQLenHandles(self);
 % create a temp model
@@ -24,14 +24,14 @@ for r=1:modelCopy.getNumberOfClasses
     isNodeClassLogged(ind,r) = true;
 end
 % apply logging to the copied model
-Plinked = qn.rtorig;
+Plinked = sn.rtorig;
 isNodeLogged = max(isNodeClassLogged,[],2);
 logpath = tempdir;
 modelCopy.linkAndLog(Plinked, isNodeLogged, logpath);
 % simulate the model copy and retrieve log data
 solverjmt = SolverJMT(modelCopy, self.getOptions);
 if numEvents > 0
-    solverjmt.maxEvents = numEvents*qn.nnodes*qn.nclasses;
+    solverjmt.maxEvents = numEvents*sn.nnodes*sn.nclasses;
 else
     solverjmt.maxEvents = -1;
     numEvents = self.getOptions.samples;
@@ -40,15 +40,15 @@ solverjmt.getAvg(); % log data
 logData = SolverJMT.parseLogs(modelCopy, isNodeLogged, MetricType.QLen);
 
 % from here convert from nodes in logData to stations
-qn = modelCopy.getStruct;
+sn = modelCopy.getStruct;
 ind = self.model.getNodeIndex(node.getName);
-isf = qn.nodeToStateful(ind);
+isf = sn.nodeToStateful(ind);
 t = [];
-nir = cell(1,qn.nclasses);
-event = cell(1,qn.nclasses);
-%ids = cell(1,qn.nclasses);
+nir = cell(1,sn.nclasses);
+event = cell(1,sn.nclasses);
+%ids = cell(1,sn.nclasses);
 
-for r=1:qn.nclasses
+for r=1:sn.nclasses
     if isempty(logData{ind,r})
         nir{r} = [];
     else

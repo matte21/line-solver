@@ -1,4 +1,4 @@
-function space = spaceLocalVars(qn, ind)
+function space = spaceLocalVars(sn, ind)
 % SPACE = SPACELOCALVARS(QN, IND)
 
 % Copyright (c) 2012-2021, Imperial College London
@@ -7,18 +7,18 @@ function space = spaceLocalVars(qn, ind)
 % Generate state space for local state variables
 
 %ind: node index
-%ist = qn.nodeToStation(ind);
-%isf = qn.nodeToStateful(ind);
+%ist = sn.nodeToStation(ind);
+%isf = sn.nodeToStateful(ind);
 
 space = [];
 
-switch qn.nodetype(ind)
+switch sn.nodetype(ind)
     case NodeType.Cache
-        space = State.spaceCache(qn.varsparam{ind}.nitems,qn.varsparam{ind}.cap);
+        space = State.spaceCache(sn.varsparam{ind}.nitems,sn.varsparam{ind}.cap);
 end
 
-switch qn.routing(ind)
+switch sn.routing(ind)
     case RoutingStrategy.ID_RRB
-        space = State.decorate(space, qn.varsparam{ind}.outlinks(:));
+        space = State.decorate(space, sn.varsparam{ind}.outlinks(:));
 end
 end

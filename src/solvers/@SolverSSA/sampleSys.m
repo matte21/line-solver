@@ -23,15 +23,15 @@ switch options.method
                 tranSysState.state = tranSysState.state{i}(1:numSamples,:);
             end
         end
-        qn = self.getStruct;
+        sn = self.getStruct;
         tranSysState.event = {};
         for e = 1:length(event)
-            for a=1:length(qn.sync{event(e)}.active)
-                tranSysState.event{end+1} = qn.sync{event(e)}.active{a};
+            for a=1:length(sn.sync{event(e)}.active)
+                tranSysState.event{end+1} = sn.sync{event(e)}.active{a};
                 tranSysState.event{end}.t = tranSysState.t(e);
             end
-            for p=1:length(qn.sync{event(e)}.passive)
-                tranSysState.event{end+1} = qn.sync{event(e)}.passive{p};
+            for p=1:length(sn.sync{event(e)}.passive)
+                tranSysState.event{end+1} = sn.sync{event(e)}.passive{p};
                 tranSysState.event{end}.t = tranSysState.t(e);
             end
         end

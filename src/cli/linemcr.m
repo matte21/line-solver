@@ -81,7 +81,7 @@ for v=1:2:length(varargin)
 end
 
 if serverMode
-    LINEWebSocketServer(serverPort);  % start LINE server mode
+    lineserver(serverPort);  % start LINE server mode
     fprintf('--------------------------------------------------------------------\n');
     fprintf('LINE Solver - Command Line Interface\n');
     fprintf('Copyright (c) 2012-2021, QORE group, Imperial College London\n');

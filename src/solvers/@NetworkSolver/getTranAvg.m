@@ -22,8 +22,8 @@ UNclass_t={};
 %RNclass_t={};
 TNclass_t={};
 
-qn = self.model.getStruct;
-minrate = min(qn.rates(isfinite(qn.rates)));
+sn = self.model.getStruct;
+minrate = min(sn.rates(isfinite(sn.rates)));
 if ~hasTranResults(self)
     if isinf(self.options.timespan(1)) && isinf(self.options.timespan(2))
         self.options.timespan = [0,30/minrate];
@@ -40,8 +40,8 @@ if ~hasTranResults(self)
     runAnalyzer(self);
 end
 
-M = qn.nstations();
-K = qn.nclasses();
+M = sn.nstations();
+K = sn.nclasses();
 if ~isempty(Qt)
     QNclass_t = cell(M,K);
     UNclass_t = cell(M,K);

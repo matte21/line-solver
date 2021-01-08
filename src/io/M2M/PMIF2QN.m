@@ -1,4 +1,4 @@
-function qn = PMIF2QN(filename,verbose)
+function sn = PMIF2QN(filename,verbose)
 % QN = PMIF2QN(FILENAME,VERBOSE)
 
 % Copyright (c) 2012-2021, Imperial College London
@@ -136,61 +136,61 @@ if ~isempty(parsed)
         end
     end
             
-    qn = NetworkStruct();
-    qn.nnodes = numel(nodenames);
-    qn.nclasses = length(classnames);
-    qn.nclosedjobs = sum(njobs(isfinite(njobs)));
-    qn.nservers = numservers;
-    qn.nodetype = -1*ones(qn.nstations,1);
-    qn.scv = ones(qn.nstations,qn.nclasses);
-    %qn.forks = zeros(M,K);
-    qn.njobs = njobs(:)';
-    qn.refstat = refstat;
-    qn.space = cell(qn.nstations,1);
-    qn.dropid = -1* ones(qn.nstations,qn.nclasses);
-    qn.routing = routing;
-    qn.chains = [];
-    qn.lst = {};
-    qn.nodetype = nodetype;
-    qn.isstation = NodeType.isStation(nodetype);
-    qn.nstations = sum(qn.isstation);
-    qn.isstateful = NodeType.isStateful(nodetype);
-    qn.isstatedep = false(qn.nnodes,3); % col 1: buffer, col 2: srv, col 3: routing
-    for ind=1:qn.nnodes
-        switch qn.nodetype(ind)
+    sn = NetworkStruct();
+    sn.nnodes = numel(nodenames);
+    sn.nclasses = length(classnames);
+    sn.nclosedjobs = sum(njobs(isfinite(njobs)));
+    sn.nservers = numservers;
+    sn.nodetype = -1*ones(sn.nstations,1);
+    sn.scv = ones(sn.nstations,sn.nclasses);
+    %sn.forks = zeros(M,K);
+    sn.njobs = njobs(:)';
+    sn.refstat = refstat;
+    sn.space = cell(sn.nstations,1);
+    sn.dropid = -1* ones(sn.nstations,sn.nclasses);
+    sn.routing = routing;
+    sn.chains = [];
+    sn.lst = {};
+    sn.nodetype = nodetype;
+    sn.isstation = NodeType.isStation(nodetype);
+    sn.nstations = sum(sn.isstation);
+    sn.isstateful = NodeType.isStateful(nodetype);
+    sn.isstatedep = false(sn.nnodes,3); % col 1: buffer, col 2: srv, col 3: routing
+    for ind=1:sn.nnodes
+        switch sn.nodetype(ind)
             case NodeType.Cache
-                qn.isstatedep(ind,2) = true; % state dependent service
-                %                            qn.isstatedep(ind,3) = true; % state dependent routing
+                sn.isstatedep(ind,2) = true; % state dependent service
+                %                            sn.isstatedep(ind,3) = true; % state dependent routing
         end
-        for r=1:qn.nclasses
-            switch qn.routing(ind,r)
+        for r=1:sn.nclasses
+            switch sn.routing(ind,r)
                 case {RoutingStrategy.ID_RRB, RoutingStrategy.ID_JSQ}
-                    qn.isstatedep(ind,3) = true; % state dependent routing
+                    sn.isstatedep(ind,3) = true; % state dependent routing
             end
         end
     end
-    qn.nstateful = sum(qn.isstateful);
-    qn.state = cell(qn.nstations,1); for i=1:qn.nstateful qn.state{i} = []; end
-    qn.nodenames = nodenames;
-    qn.classnames = classnames;
-    %qn.reindex();
-    qn.schedid = schedid;
-    qn.phi = ones(size(rates));
-    qn.pie = ones(size(rates));
-    qn.proc = cell(size(rates));
-    qn.rt = P;
+    sn.nstateful = sum(sn.isstateful);
+    sn.state = cell(sn.nstations,1); for i=1:sn.nstateful sn.state{i} = []; end
+    sn.nodenames = nodenames;
+    sn.classnames = classnames;
+    %sn.reindex();
+    sn.schedid = schedid;
+    sn.phi = ones(size(rates));
+    sn.pie = ones(size(rates));
+    sn.proc = cell(size(rates));
+    sn.rt = P;
     for i=1:size(rates,1)
-        qn.sched{i} = SchedStrategy.fromId(qn.schedid(i));
+        sn.sched{i} = SchedStrategy.fromId(sn.schedid(i));
         for r=1:size(rates,2)
             if rates(i,r) == 0
                 rates(i,r) = NaN;
-                qn.proc{i,r} = {[NaN],[NaN]};
+                sn.proc{i,r} = {[NaN],[NaN]};
             else
-                qn.proc{i,r} = map_exponential(1/rates(i,r));
+                sn.proc{i,r} = map_exponential(1/rates(i,r));
             end
         end
     end
-    qn.rates = rates;
+    sn.rates = rates;
 else
     line_printf('Error: XML file empty or nonexistent');
     parsed = [];

@@ -1,5 +1,5 @@
-function bool = snHasLEPT(qn)
+function bool = snHasLEPT(sn)
 % BOOL = HASLEPT()
 
-bool = any(qn.schedid==SchedStrategy.ID_LEPT);
+bool = any(sn.schedid==SchedStrategy.ID_LEPT);
 end

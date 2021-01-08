@@ -1,4 +1,4 @@
-function RTret = solver_fluid_passage_time(qn, options)
+function RTret = solver_fluid_passage_time(sn, options)
 % RTRET = SOLVER_FLUID_PASSAGE_TIME(QN, OPTIONS)
 
 % Copyright (c) 2012-2021, Imperial College London
@@ -9,14 +9,14 @@ tol = options.tol;
 y0 = options.init_sol;
 stiff = options.stiff;
 T0 = 0;
-M = qn.nstations;    %number of stations
-K = qn.nclasses;    %number of classes
-N = qn.nclosedjobs;    %population
-Lambda = qn.mu;
-Pi = qn.phi;
-PH = qn.proc;
-rt = qn.rt;
-S = qn.nservers;
+M = sn.nstations;    %number of stations
+K = sn.nclasses;    %number of classes
+N = sn.nclosedjobs;    %population
+Lambda = sn.mu;
+Pi = sn.phi;
+PH = sn.proc;
+rt = sn.rt;
+S = sn.nservers;
 
 for j = 1:M
     %Set number of servers in delay station = population
@@ -26,7 +26,7 @@ for j = 1:M
 end
 
 %% initialization
-phases = qn.phases;
+phases = sn.phases;
 slowrate = zeros(M,K);
 for j = 1:M
     for k = 1:K
@@ -37,11 +37,11 @@ end
 
 %% response time analysis - starting from fixed point found
 %stiff = 1;
-chains = qn.chains;
+chains = sn.chains;
 nChains = size(chains,1);
 
 RT = [];
-for i = 1:qn.nstations
+for i = 1:sn.nstations
     for k = 1:nChains %once for each chain
         idxClassesInChain = find(chains(k,:)==1);
         for c = idxClassesInChain
@@ -111,8 +111,8 @@ for i = 1:qn.nstations
 end
 
 RTret = {};
-for i=1:qn.nstations
-    for c=1:qn.nclasses
+for i=1:sn.nstations
+    for c=1:sn.nclasses
         RTret{i,c} = [RT{i,c,2},RT{i,c,1}];
     end
 end
@@ -128,7 +128,7 @@ return
         new_rt = zeros(M*Kc, M*Kc); % new routing table
         new_proc = PH;
         
-        for j=1:qn.nstations
+        for j=1:sn.nstations
             % service rates
             newLambda(j,1:K) = Lambda(j,:);
             newLambda(j,K+1) = Lambda(j,c);
@@ -173,7 +173,7 @@ return
         for s = completingClassesInChain' % for each completing class
             %routing matrix from a transient class that completes is diverted back into the original classes
             for l = idxClassesInChain
-                for j = 1:qn.nstations
+                for j = 1:sn.nstations
                     % return fluid to original class
                     new_rt((i-1)*Kc+idxTranCl(c), (j-1)*Kc+l) = rt((i-1)*K+c, (j-1)*K+l);
                     % delete corresponding transition among transient classes
@@ -184,13 +184,13 @@ return
         
         % setup the ODEs for the new QN
         %        options.method  = 'statedep'; % default doesn't seem to work in some models
-        [ode_h_c, ~] = solver_fluid_odes(N, reshape({newLambda{:,:}},M,Kc), reshape({new_pi{:,:}},M,Kc), new_proc, new_rt, S, qn.sched, qn.schedparam, options);
+        [ode_h_c, ~] = solver_fluid_odes(N, reshape({newLambda{:,:}},M,Kc), reshape({new_pi{:,:}},M,Kc), new_proc, new_rt, S, sn.sched, sn.schedparam, options);
         
         % setup initial point
         y0_c = zeros(1, sum(sum(phases_c(:,:))));
         fluid_c = 0;
-        for j = 1:qn.nstations
-            for l = 1:qn.nclasses
+        for j = 1:sn.nstations
+            for l = 1:sn.nclasses
                 idxNew_jl = sum(sum(phases_c(1:j-1,:))) + sum(phases_c(j,1:l-1));
                 idxNew_jt = sum(sum(phases_c(1:j-1,:))) + sum(phases_c(j,1:idxTranCl(l)-1));
                 idx_jl = sum(sum(phases(1:j-1,:))) + sum(phases(j,1:l-1));

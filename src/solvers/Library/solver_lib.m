@@ -1,15 +1,15 @@
-function [QN,UN,RN,TN,CN,XN] = solver_lib(qn, options)
+function [QN,UN,RN,TN,CN,XN] = solver_lib(sn, options)
 % [Q,U,R,T,C,X] = SOLVER_LIB(QN, OPTIONS)
 
 % Copyright (c) 2012-2021, Imperial College London
 % All rights reserved.
 
 %% generate local state spaces
-M = qn.nstations;
-K = qn.nclasses;
-N = qn.njobs';
-rt = qn.rt;
-V = qn.visits;
+M = sn.nstations;
+K = sn.nclasses;
+N = sn.njobs';
+rt = sn.rt;
+V = sn.visits;
 
 QN = zeros(M,K);
 UN = zeros(M,K);

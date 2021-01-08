@@ -1,4 +1,4 @@
-function [t,pit,QNt,UNt,RNt,TNt,CNt,XNt,InfGen,StateSpace,StateSpaceAggr,EventFiltration,runtime,fname] = solver_ctmc_transient_analyzer(qn, options)
+function [t,pit,QNt,UNt,RNt,TNt,CNt,XNt,InfGen,StateSpace,StateSpaceAggr,EventFiltration,runtime,fname] = solver_ctmc_transient_analyzer(sn, options)
 % [T,PIT,QNT,UNT,RNT,TNT,CNT,XNT,INFGEN,STATESPACE,STATESPACEAGGR,EVENTFILTRATION,RUNTIME,FNAME] = SOLVER_CTMC_TRANSIENT_ANALYZER(QN, OPTIONS)
 %
 % Copyright (c) 2012-2021, Imperial College London
@@ -6,17 +6,17 @@ function [t,pit,QNt,UNt,RNt,TNt,CNt,XNt,InfGen,StateSpace,StateSpaceAggr,EventFi
 
 RNt=[]; CNt=[];  XNt=[];
 
-M = qn.nstations;    %number of stations
-K = qn.nclasses;    %number of classes
+M = sn.nstations;    %number of stations
+K = sn.nclasses;    %number of classes
 fname = '';
-rt = qn.rt;
-S = qn.nservers;
-NK = qn.njobs';  % initial population per class
-schedid = qn.schedid;
+rt = sn.rt;
+S = sn.nservers;
+NK = sn.njobs';  % initial population per class
+schedid = sn.schedid;
 
 Tstart = tic;
 
-PH = qn.proc;
+PH = sn.proc;
 
 myP = cell(K,K);
 for k = 1:K
@@ -36,7 +36,7 @@ for i=1:M
     end
 end
 
-[InfGen,StateSpace,StateSpaceAggr,EventFiltration,~,depRates,qn] = solver_ctmc(qn, options); % qn is updated with the state space
+[InfGen,StateSpace,StateSpaceAggr,EventFiltration,~,depRates,sn] = solver_ctmc(sn, options); % sn is updated with the state space
 
 
 if options.keep
@@ -47,10 +47,10 @@ if options.keep
 end
 
 state = [];
-for i=1:qn.nnodes
-    if qn.isstateful(i)
-        isf = qn.nodeToStateful(i);
-        state = [state,zeros(1,size(qn.space{isf},2)-length(qn.state{isf})),qn.state{isf}];
+for i=1:sn.nnodes
+    if sn.isstateful(i)
+        isf = sn.nodeToStateful(i);
+        state = [state,zeros(1,size(sn.space{isf},2)-length(sn.state{isf})),sn.state{isf}];
     end
 end
 pi0 = zeros(1,length(InfGen));
@@ -83,7 +83,7 @@ if t(1) == 0
     t(1) = 1e-8;
 end
 for k=1:K
-    %    XNt(k) = pi*arvRates(:,qn.refstat(k),k);
+    %    XNt(k) = pi*arvRates(:,sn.refstat(k),k);
     for i=1:M        
         %occupancy_t = cumsum(pit.*[0;diff(t)],1)./t;        
         occupancy_t = pit;
@@ -105,14 +105,14 @@ for k=1:K
                 %UNt{i,k} = cumsum(utilAt_t.*[0;diff(t)])./t;
                 UNt{i,k} = utilAt_t;
             case SchedStrategy.ID_DPS
-                w = qn.schedparam(i,:);
+                w = sn.schedparam(i,:);
                 nik = S(i) * w(k) * StateSpaceAggr(:,(i-1)*K+k) ./ sum(repmat(w,size(StateSpaceAggr,1),1).*StateSpaceAggr(:,((i-1)*K+1):(i*K)),2);
                 nik(isnan(nik))=0;
                 UNt{i,k} = occupancy_t*nik;
             otherwise
                 if ~isempty(PH{i,k})
-                    ind = qn.stationToNode(i);
-                    line_warning(mfilename,'Transient utilization not support yet for station %s, returning an approximation.',qn.nodenames{ind});
+                    ind = sn.stationToNode(i);
+                    line_warning(mfilename,'Transient utilization not support yet for station %s, returning an approximation.',sn.nodenames{ind});
                     UNt{i,k} = occupancy_t*min(StateSpaceAggr(:,(i-1)*K+k),S(i))/S(i);
                 end
         end

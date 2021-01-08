@@ -1,5 +1,5 @@
-function bool = snHasMultiServer(qn)
+function bool = snHasMultiServer(sn)
 % BOOL = SNHASMULTISERVER()
 
-bool = any(qn.nservers(isfinite(qn.nservers)) > 1);
+bool = any(sn.nservers(isfinite(sn.nservers)) > 1);
 end

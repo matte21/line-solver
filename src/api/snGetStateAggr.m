@@ -1,10 +1,10 @@
-function [initialStateAggr] = snGetStateAggr(qn) % get initial state
+function [initialStateAggr] = snGetStateAggr(sn) % get initial state
 % [INITIALSTATEAGGR] = GETSTATEAGGR() % GET INITIAL STATE
 
-initialState = qn.state;
+initialState = sn.state;
 initialStateAggr = cell(size(initialState));
 for isf=1:length(initialStateAggr)
-    ind = qn.statefulToNode(isf);
-    [~,initialStateAggr{isf}] = State.toMarginalAggr(qn, ind, initialState{isf});
+    ind = sn.statefulToNode(isf);
+    [~,initialStateAggr{isf}] = State.toMarginalAggr(sn, ind, initialState{isf});
 end
 end

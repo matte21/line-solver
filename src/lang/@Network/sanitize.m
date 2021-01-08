@@ -6,7 +6,7 @@ function sanitize(self)
 % Copyright (c) 2012-2021, Imperial College London
 % All rights reserved.
 
-if isempty(self.qn)
+if isempty(self.sn)
     M = getNumberOfStations(self);
     K = getNumberOfClasses(self);
     for i=1:self.getNumberOfNodes

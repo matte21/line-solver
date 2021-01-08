@@ -13,22 +13,22 @@ end
 
 Solver.resetRandomGeneratorSeed(options.seed);
 
-qn = getStruct(self);
+sn = getStruct(self);
 
 % TODO: add priors on initial state
-qn.state = qn.state; % not used internally by SSA
+sn.state = sn.state; % not used internally by SSA
 
-[Q,U,R,T,C,X,~, tranSysState, tranSync, qn] = solver_ssa_analyzer(qn, options);
-for isf=1:qn.nstateful
-    ind = qn.statefulToNode(isf);
-    switch qn.nodetype(qn.statefulToNode(isf))
+[Q,U,R,T,C,X,~, tranSysState, tranSync, sn] = solver_ssa_analyzer(sn, options);
+for isf=1:sn.nstateful
+    ind = sn.statefulToNode(isf);
+    switch sn.nodetype(sn.statefulToNode(isf))
         case NodeType.Cache
-            self.model.nodes{qn.statefulToNode(isf)}.setResultHitProb(qn.varsparam{ind}.actualhitprob);
-            self.model.nodes{qn.statefulToNode(isf)}.setResultMissProb(qn.varsparam{ind}.actualmissprob);
+            self.model.nodes{sn.statefulToNode(isf)}.setResultHitProb(sn.varsparam{ind}.actualhitprob);
+            self.model.nodes{sn.statefulToNode(isf)}.setResultMissProb(sn.varsparam{ind}.actualmissprob);
             self.model.refreshChains();
     end
 end
 runtime = toc(T0);
 self.setAvgResults(Q,U,R,T,C,X,runtime);
-self.result.space = qn.space;
+self.result.space = sn.space;
 end

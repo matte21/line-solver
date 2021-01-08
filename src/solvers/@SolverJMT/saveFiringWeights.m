@@ -9,8 +9,8 @@ firingWeightsNode.setAttribute('classPath', 'java.lang.Double');
 firingWeightsNode.setAttribute('name', 'firingWeights');
 firingWeightsNode.setAttribute('array', 'true');
 
-qn = self.getStruct;
-numOfModes = qn.nmodes(ind);
+sn = self.getStruct;
+numOfModes = sn.nmodes(ind);
 for m=1:(numOfModes)
     
     subFiringWeightNode = simDoc.createElement('subParameter');
@@ -18,7 +18,7 @@ for m=1:(numOfModes)
     subFiringWeightNode.setAttribute('name', 'firingWeight');
     
     valueNode = simDoc.createElement('value');
-    firingWeights = qn.fireweight{ind}(m);
+    firingWeights = sn.fireweight{ind}(m);
     
     if isinf(firingWeights)
         valueNode.appendChild(simDoc.createTextNode(int2str(-1)));

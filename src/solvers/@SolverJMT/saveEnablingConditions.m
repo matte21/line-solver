@@ -9,11 +9,11 @@ enablingNode.setAttribute('array', 'true');
 enablingNode.setAttribute('classPath', 'jmt.engine.NetStrategies.TransitionUtilities.TransitionMatrix');
 enablingNode.setAttribute('name', 'enablingConditions');
 
-qn = self.getStruct;
-numOfNodes = qn.nnodes;
-numOfClasses = qn.nclasses;
+sn = self.getStruct;
+numOfNodes = sn.nnodes;
+numOfClasses = sn.nclasses;
 i = ind;
-numOfModes = qn.nmodes(ind);
+numOfModes = sn.nmodes(ind);
 for m=1:(numOfModes)
     
     subEnablingConditionNode = simDoc.createElement('subParameter');
@@ -35,7 +35,7 @@ for m=1:(numOfModes)
         subStationNameNode.setAttribute('name', 'stationName');
         
         placeNameValueNode = simDoc.createElement('value');
-        placeNameValueNode.appendChild(simDoc.createTextNode(qn.nodenames{k}));
+        placeNameValueNode.appendChild(simDoc.createTextNode(sn.nodenames{k}));
         subStationNameNode.appendChild(placeNameValueNode);
         
         subEnablingVectorNode.appendChild(subStationNameNode);
@@ -49,7 +49,7 @@ for m=1:(numOfModes)
         
         for r=1:(numOfClasses)
             refClassNode = simDoc.createElement('refClass');
-            refClassNode.appendChild(simDoc.createTextNode(qn.classnames{r}));
+            refClassNode.appendChild(simDoc.createTextNode(sn.classnames{r}));
             subEnablingEntriesNode.appendChild(refClassNode);
             
             subParameterNode = simDoc.createElement('subParameter');
@@ -58,13 +58,13 @@ for m=1:(numOfModes)
             
             valueNode2 = simDoc.createElement('value');
             
-            if isinf(qn.enabling{i}{m}(k,r))
+            if isinf(sn.enabling{i}{m}(k,r))
                 valueNode2.appendChild(simDoc.createTextNode(int2str(-1)));
                 exists = true;
-            elseif qn.enabling{i}{m}(k,r) > 0
-                valueNode2.appendChild(simDoc.createTextNode(int2str(qn.enabling{i}{m}(k,r))));
+            elseif sn.enabling{i}{m}(k,r) > 0
+                valueNode2.appendChild(simDoc.createTextNode(int2str(sn.enabling{i}{m}(k,r))));
                 exists = true;
-            elseif ~isinf(qn.inhibiting{i}{m}(k,r)) && qn.inhibiting{i}{m}(k,r) > 0
+            elseif ~isinf(sn.inhibiting{i}{m}(k,r)) && sn.inhibiting{i}{m}(k,r) > 0
                 valueNode2.appendChild(simDoc.createTextNode(int2str(0)));
                 exists = true;
             end

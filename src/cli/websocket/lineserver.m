@@ -1,12 +1,10 @@
-classdef LINEWebSocketServer < WebSocketServer
-    %ECHOSERVER Summary of this class goes here
-    %   Detailed explanation goes here
+classdef lineserver < WebSocketServer
     
     properties
     end
     
     methods
-        function obj = LINEWebSocketServer(varargin)
+        function obj = lineserver(varargin)
             %Constructor
             obj@WebSocketServer(varargin{:});
         end
@@ -24,7 +22,7 @@ classdef LINEWebSocketServer < WebSocketServer
             fprintf(fid, '%s', strtrim(message));
             fclose(fid);
             fprintf('Client model saved in: %s\n',fname);
-            ret = LINECLI('--file',fname,'--input','xml');
+            ret = linemcr('--file',fname,'--input','xml');
             conn.send(ret);
             conn.close();
         end
@@ -40,6 +38,7 @@ classdef LINEWebSocketServer < WebSocketServer
         
         function onClose(obj,conn,message)
             fprintf('%s\n',message)
+            fprintf('Press Q to stop the server at any time.\n')   
         end
     end
 end

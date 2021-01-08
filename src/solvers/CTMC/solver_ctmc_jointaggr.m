@@ -1,24 +1,24 @@
-function [Pnir,runtime,fname] = solver_ctmc_jointaggr(qn, options)
+function [Pnir,runtime,fname] = solver_ctmc_jointaggr(sn, options)
 % [PNIR,RUNTIME,FNAME] = SOLVER_CTMC_JOINTAGGR(QN, OPTIONS)
 %
 % Copyright (c) 2012-2021, Imperial College London
 % All rights reserved.
 
-M = qn.nstations;    %number of stations
-K = qn.nclasses;    %number of classes
+M = sn.nstations;    %number of stations
+K = sn.nclasses;    %number of classes
 fname = '';
-rt = qn.rt;
+rt = sn.rt;
 Tstart = tic;
 
 myP = cell(K,K);
 for k = 1:K
     for c = 1:K
-        myP{k,c} = zeros(qn.nstations);
+        myP{k,c} = zeros(sn.nstations);
     end
 end
 
-for i=1:qn.nstations
-    for j=1:qn.nstations
+for i=1:sn.nstations
+    for j=1:sn.nstations
         for k = 1:K
             for c = 1:K
                 % routing table for each class
@@ -28,7 +28,7 @@ for i=1:qn.nstations
     end
 end
 
-[Q,~,SSq,~,~,~,qn] = solver_ctmc(qn, options);
+[Q,~,SSq,~,~,~,sn] = solver_ctmc(sn, options);
 % SSq is an aggregate state space
 if options.keep
     fname = tempname;
@@ -39,12 +39,12 @@ end
 pi = ctmc_solve(Q);
 pi(pi<1e-14)=0;
 
-state = qn.state;
+state = sn.state;
 nvec = [];
-for i=1:qn.nstations
-    if qn.isstateful(i)
-        isf = qn.stationToStateful(i);
-        [~,nir,~,~] = State.toMarginal(qn, isf, state{isf}, options);
+for i=1:sn.nstations
+    if sn.isstateful(i)
+        isf = sn.stationToStateful(i);
+        [~,nir,~,~] = State.toMarginal(sn, isf, state{isf}, options);
         nvec = [nvec, nir(:)'];
     end
 end

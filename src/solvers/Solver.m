@@ -41,11 +41,11 @@ classdef Solver < handle
             model = self.model;
         end
         
-        function qn = getStruct(self)
+        function sn = getStruct(self)
             % QN = GETSTRUCT()
             
             % Get data structure summarizing the model
-            qn = self.model.getStruct();
+            sn = self.model.getStruct();
         end        
         
         function bool = supports(self,model)

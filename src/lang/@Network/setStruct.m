@@ -1,3 +1,3 @@
-function self = setStruct(self, qn)
-self.qn = qn;
+function self = setStruct(self, sn)
+self.sn = sn;
 end

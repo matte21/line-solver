@@ -27,42 +27,42 @@ if nargin<2 %~exist('outFileName','var')
     outputFileName = getJMVATempPath(self);
 end
 
-qn = getStruct(self);
+sn = getStruct(self);
 
 algTypeElement = mvaDoc.createElement('algType');
 switch self.options.method
     case {'jmva.recal'}
-        if max(qn.nservers(isfinite(qn.nservers))) > 1
+        if max(sn.nservers(isfinite(sn.nservers))) > 1
             line_error(sprintf('%s does not support multi-server stations.',self.options.method));
         end
         algTypeElement.setAttribute('name','RECAL');
     case {'jmva.comom'}
-        if max(qn.nservers(isfinite(qn.nservers))) > 1
+        if max(sn.nservers(isfinite(sn.nservers))) > 1
             line_error(sprintf('%s does not support multi-server stations.',self.options.method));
         end
         algTypeElement.setAttribute('name','CoMoM');
     case {'jmva.chow'}
-        if max(qn.nservers(isfinite(qn.nservers))) > 1
+        if max(sn.nservers(isfinite(sn.nservers))) > 1
             line_error(sprintf('%s does not support multi-server stations.',self.options.method));
         end
         algTypeElement.setAttribute('name','Chow');
     case {'jmva.bs','jmva.amva'}
-        if max(qn.nservers(isfinite(qn.nservers))) > 1
+        if max(sn.nservers(isfinite(sn.nservers))) > 1
             line_error(sprintf('%s does not support multi-server stations.',self.options.method));
         end
         algTypeElement.setAttribute('name','Bard-Schweitzer');
     case {'jmva.aql'}
-        if max(qn.nservers(isfinite(qn.nservers))) > 1
+        if max(sn.nservers(isfinite(sn.nservers))) > 1
             line_error(sprintf('%s does not support multi-server stations.',self.options.method));
         end
         algTypeElement.setAttribute('name','AQL');
     case {'jmva.lin'}
-        if max(qn.nservers(isfinite(qn.nservers))) > 1
+        if max(sn.nservers(isfinite(sn.nservers))) > 1
             line_error(sprintf('%s does not support multi-server stations.',self.options.method));
         end
         algTypeElement.setAttribute('name','Linearizer');
     case {'jmva.dmlin'}
-        if max(qn.nservers(isfinite(qn.nservers))) > 1
+        if max(sn.nservers(isfinite(sn.nservers))) > 1
             line_error(sprintf('%s does not support multi-server stations.',self.options.method));
         end
         algTypeElement.setAttribute('name','De Souza-Muntz Linearizer');
@@ -75,24 +75,24 @@ algTypeElement.setAttribute('tolerance','1.0E-7');
 algTypeElement.setAttribute('maxSamples',num2str(self.options.samples));
 
 %%%%%%%%%%
-M = qn.nstations;    %number of stations
-NK = qn.njobs';  % initial population per class
-C = qn.nchains;
-SCV = qn.scv;
+M = sn.nstations;    %number of stations
+NK = sn.njobs';  % initial population per class
+C = sn.nchains;
+SCV = sn.scv;
 
 % determine service times
-ST = 1./qn.rates;
-ST(isnan(qn.rates))=0;
+ST = 1./sn.rates;
+ST(isnan(sn.rates))=0;
 SCV(isnan(SCV))=1;
 
-alpha = zeros(qn.nstations,qn.nclasses);
-Vchain = zeros(qn.nstations,qn.nchains);
-for c=1:qn.nchains
-    inchain = find(qn.chains(c,:));
-    for i=1:qn.nstations
-        Vchain(i,c) = sum(qn.visits{c}(i,inchain)) / sum(qn.visits{c}(qn.refstat(inchain(1)),inchain));
+alpha = zeros(sn.nstations,sn.nclasses);
+Vchain = zeros(sn.nstations,sn.nchains);
+for c=1:sn.nchains
+    inchain = find(sn.chains(c,:));
+    for i=1:sn.nstations
+        Vchain(i,c) = sum(sn.visits{c}(i,inchain)) / sum(sn.visits{c}(sn.refstat(inchain(1)),inchain));
         for k=inchain
-            alpha(i,k) = alpha(i,k) + qn.visits{c}(i,k) / sum(qn.visits{c}(i,inchain));
+            alpha(i,k) = alpha(i,k) + sn.visits{c}(i,k) / sum(sn.visits{c}(i,inchain));
         end
     end
 end
@@ -106,23 +106,23 @@ STchain = zeros(M,C);
 SCVchain = zeros(M,C);
 Nchain = zeros(1,C);
 refstatchain = zeros(C,1);
-for c=1:qn.nchains
-    inchain = find(qn.chains(c,:));
-    isOpenChain = any(isinf(qn.njobs(inchain)));
-    for i=1:qn.nstations
+for c=1:sn.nchains
+    inchain = find(sn.chains(c,:));
+    isOpenChain = any(isinf(sn.njobs(inchain)));
+    for i=1:sn.nstations
         % we assume that the visits in L(i,inchain) are equal to 1
         Lchain(i,c) = Vchain(i,c) * ST(i,inchain) * alpha(i,inchain)';
         STchain(i,c) = ST(i,inchain) * alpha(i,inchain)';
-        if isOpenChain && i == qn.refstat(inchain(1)) % if this is a source ST = 1 / arrival rates
-            STchain(i,c) = 1 / sumfinite(qn.rates(i,inchain)); % ignore degenerate classes with zero arrival rates
+        if isOpenChain && i == sn.refstat(inchain(1)) % if this is a source ST = 1 / arrival rates
+            STchain(i,c) = 1 / sumfinite(sn.rates(i,inchain)); % ignore degenerate classes with zero arrival rates
         else
             STchain(i,c) = ST(i,inchain) * alpha(i,inchain)';
         end
         SCVchain(i,c) = SCV(i,inchain) * alpha(i,inchain)';
     end
     Nchain(c) = sum(NK(inchain));
-    refstatchain(c) = qn.refstat(inchain(1));
-    if any((qn.refstat(inchain(1))-refstatchain(c))~=0)
+    refstatchain(c) = sn.refstat(inchain(1));
+    if any((sn.refstat(inchain(1))-refstatchain(c))~=0)
         line_error(sprintf('Classes in chain %d have different reference station.',c));
     end
 end
@@ -131,50 +131,50 @@ Lchain(~isfinite(Lchain))=0;
 %%%%%%%%%%
 parametersElem = mvaDoc.createElement('parameters');
 classesElem = mvaDoc.createElement('classes');
-classesElem.setAttribute('number',num2str(qn.nchains));
+classesElem.setAttribute('number',num2str(sn.nchains));
 stationsElem = mvaDoc.createElement('stations');
-stationsElem.setAttribute('number',num2str(qn.nstations - sum(self.getStruct.nodetype == NodeType.Source)));
+stationsElem.setAttribute('number',num2str(sn.nstations - sum(self.getStruct.nodetype == NodeType.Source)));
 refStationsElem = mvaDoc.createElement('ReferenceStation');
-refStationsElem.setAttribute('number',num2str(qn.nchains));
+refStationsElem.setAttribute('number',num2str(sn.nchains));
 algParamsElem = mvaDoc.createElement('algParams');
 
 sourceid = self.getStruct.nodetype == NodeType.Source;
-for c=1:qn.nchains
-    if isfinite(sum(qn.njobs(qn.chains(c,:))))
+for c=1:sn.nchains
+    if isfinite(sum(sn.njobs(sn.chains(c,:))))
         classElem = mvaDoc.createElement('closedclass');
         classElem.setAttribute('population',num2str(Nchain(c)));
         classElem.setAttribute('name',sprintf('Chain%02d',c));
     else
         classElem = mvaDoc.createElement('openclass');
-        classElem.setAttribute('rate',num2str(sum(qn.rates(sourceid,qn.chains(c,:)))));
+        classElem.setAttribute('rate',num2str(sum(sn.rates(sourceid,sn.chains(c,:)))));
         classElem.setAttribute('name',sprintf('Chain%02d',c));
     end
     classesElem.appendChild(classElem);
 end
 
-isLoadDep = false(1,qn.nstations);
-for i=1:qn.nstations
+isLoadDep = false(1,sn.nstations);
+for i=1:sn.nstations
     switch self.getStruct.nodetype(self.getStruct.stationToNode(i))
         case NodeType.Delay
             statElem = mvaDoc.createElement('delaystation');
-            statElem.setAttribute('name',qn.nodenames{self.getStruct.stationToNode(i)});
+            statElem.setAttribute('name',sn.nodenames{self.getStruct.stationToNode(i)});
         case NodeType.Queue
-            if qn.nservers(i) == 1
+            if sn.nservers(i) == 1
                 isLoadDep(i) = false;
                 statElem = mvaDoc.createElement('listation');
-                statElem.setAttribute('name',qn.nodenames{self.getStruct.stationToNode(i)});
+                statElem.setAttribute('name',sn.nodenames{self.getStruct.stationToNode(i)});
                 statElem.setAttribute('servers',num2str(1));
             else
                 isLoadDep(i) = true;
                 statElem = mvaDoc.createElement('ldstation');
-                statElem.setAttribute('name',qn.nodenames{self.getStruct.stationToNode(i)});
+                statElem.setAttribute('name',sn.nodenames{self.getStruct.stationToNode(i)});
                 statElem.setAttribute('servers',num2str(1));
             end
         otherwise
             continue
     end
     srvTimesElem = mvaDoc.createElement('servicetimes');
-    for c=1:qn.nchains
+    for c=1:sn.nchains
         if isLoadDep(i)
             statSrvTimeElem = mvaDoc.createElement('servicetimes');
             statSrvTimeElem.setAttribute('customerclass',sprintf('Chain%02d',c));
@@ -184,7 +184,7 @@ for i=1:qn.nstations
             end
             
             for n=2:sum(NK)
-                ldSrvString = sprintf('%s;%s',ldSrvString,num2str(STchain(i,c)/min( n, qn.nservers(i) )));
+                ldSrvString = sprintf('%s;%s',ldSrvString,num2str(STchain(i,c)/min( n, sn.nservers(i) )));
             end
             statSrvTimeElem.appendChild(mvaDoc.createTextNode(ldSrvString));
             srvTimesElem.appendChild(statSrvTimeElem);
@@ -197,7 +197,7 @@ for i=1:qn.nstations
     end
     statElem.appendChild(srvTimesElem);
     visitsElem = mvaDoc.createElement('visits');
-    for c=1:qn.nchains
+    for c=1:sn.nchains
         statVisitElem = mvaDoc.createElement('visit');
         statVisitElem.setAttribute('customerclass',sprintf('Chain%02d',c));
         if STchain(i,c) > 0
@@ -213,10 +213,10 @@ for i=1:qn.nstations
     stationsElem.appendChild(statElem);
 end
 
-for c=1:qn.nchains
+for c=1:sn.nchains
     classRefElem = mvaDoc.createElement('Class');
     classRefElem.setAttribute('name',sprintf('Chain%d',c));
-    classRefElem.setAttribute('refStation',qn.nodenames{qn.stationToNode(refstatchain(c))});
+    classRefElem.setAttribute('refStation',sn.nodenames{sn.stationToNode(refstatchain(c))});
     refStationsElem.appendChild(classRefElem);
 end
 

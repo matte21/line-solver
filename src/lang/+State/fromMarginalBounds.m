@@ -1,4 +1,4 @@
-function space = fromMarginalBounds(qn, ind, lb, ub, cap, options)
+function space = fromMarginalBounds(sn, ind, lb, ub, cap, options)
 % SPACE = FROMMARGINALBOUNDS(QN, IND, LB, UB, CAP, OPTIONS)
 
 % Copyright (c) 2012-2021, Imperial College London
@@ -9,23 +9,23 @@ if nargin<6 %~exist('options','var')
 end
 
 % ind: node index
-ist = qn.nodeToStation(ind);
-%isf = qn.nodeToStateful(ind);
+ist = sn.nodeToStation(ind);
+%isf = sn.nodeToStateful(ind);
 
 % returns all states lb<= x<= ub, where ub/lb are either a scalar (total
 % number of jobs) or a vector (per-class number of jobs)
 space =[];
 if isempty(lb), lb=0*ub; end
-R = qn.nclasses;
+R = sn.nclasses;
 if length(lb) == 1, isVectorLB =0; else, isVectorLB = 1; end
 if length(ub) == 1, isVectorUB =0; else, isVectorUB = 1; end
 if isVectorLB~=isVectorUB, line_error(mfilename,'Bounds must either be both vectors or both scalars'); end
 
 if isVectorUB && isVectorLB
-    nmax = State.fromMarginal(qn, ind, ub, options);
+    nmax = State.fromMarginal(sn, ind, ub, options);
     n = pprodcon(lb,ub);
     while n ~= -1
-        state = State.fromMarginal(qn, ind, n, options);
+        state = State.fromMarginal(sn, ind, n, options);
         space(end+1:end+size(state,1),(size(nmax,2)-size(state,2)+1):size(nmax,2)) = state;
         n = pprodcon(n,lb,ub);
     end
@@ -34,7 +34,7 @@ else % both scalar
         for bi=ub:-1:lb % reverse order so that largest vector determines size(space,2)
             nset = multichoose(R,bi);
             for j=1:size(nset,1)
-                state = State.fromMarginal(qn, ind, nset(j,:));
+                state = State.fromMarginal(sn, ind, nset(j,:));
                 if bi==ub && j==1
                     space(end+1:end+size(state,1),:) = state;
                 else
@@ -46,12 +46,12 @@ else % both scalar
 end
 space = unique(space,'rows');
 % now we remove states that are not reachable
-if qn.isstateful(ind)
+if sn.isstateful(ind)
     keep = [];
     for s=1:size(space,1)
-        [ni,nir] = State.toMarginal(qn,ind,space(s,:));
-        if qn.isstation(ind)
-            if all(nir <= qn.classcap(ist,:)) && ni <= cap
+        [ni,nir] = State.toMarginal(sn,ind,space(s,:));
+        if sn.isstation(ind)
+            if all(nir <= sn.classcap(ist,:)) && ni <= cap
                 keep = [keep; s];
             end
         else

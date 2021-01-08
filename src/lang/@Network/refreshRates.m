@@ -17,17 +17,17 @@ if nargin<2
     hasSCVChanged = true;
 elseif nargin==2
     classSet = 1:K;
-    rates = self.qn.rates;
-    scv = self.qn.scv;
-    rates_orig = self.qn.rates;
-    scv_orig = self.qn.scv;
-elseif nargin==3 % this is used only to update self.qn
+    rates = self.sn.rates;
+    scv = self.sn.scv;
+    rates_orig = self.sn.rates;
+    scv_orig = self.sn.scv;
+elseif nargin==3 % this is used only to update self.sn
     % we are only updating selected stations and classes so use the
     % existing ones for the others
-    rates = self.qn.rates;
-    scv = self.qn.scv;
-    rates_orig = self.qn.rates;
-    scv_orig = self.qn.scv;
+    rates = self.sn.rates;
+    scv = self.sn.scv;
+    rates_orig = self.sn.rates;
+    scv_orig = self.sn.scv;
 end
 hasOpenClasses = self.hasOpenClasses;
 
@@ -83,12 +83,12 @@ if ~hasSCVChanged
     end
 end
 
-if ~isempty(self.qn)
+if ~isempty(self.sn)
     if hasRateChanged
-        self.qn.rates = rates;
+        self.sn.rates = rates;
     end
     if hasSCVChanged
-        self.qn.scv = scv;
+        self.sn.scv = scv;
     end
 end
 

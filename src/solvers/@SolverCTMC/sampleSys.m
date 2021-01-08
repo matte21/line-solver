@@ -9,7 +9,7 @@ end
 stateSpace = getStateSpace(self);
 stateSpaceAggr = getStateSpaceAggr(self);
 
-initState = qn.state;
+initState = sn.state;
 nst = cumsum([1,cellfun(@length,initState)']);
 s0 = cell2mat(initState(:)');
 
@@ -25,7 +25,7 @@ MMAP = mmap_normalize([{D0},{D1},eventFilt(:)']);
 % now sampel the MMAP
 [sjt,event,~,~,sts] = mmap_sample(MMAP,numSamples, pi0);
 
-qn = self.getStruct;
+sn = self.getStruct;
 tranSysState = struct();
 tranSysState.handle = self.model.getStatefulNodes';
 tranSysState.t = cumsum([0,sjt(1:end-1)']');
@@ -35,12 +35,12 @@ end
 
 tranSysState.event = {};
 for e = 1:length(event)    
-    for a=1:length(qn.sync{event(e)}.active)
-        tranSysState.event{end+1} = qn.sync{event(e)}.active{a};
+    for a=1:length(sn.sync{event(e)}.active)
+        tranSysState.event{end+1} = sn.sync{event(e)}.active{a};
         tranSysState.event{end}.t = tranSysState.t(e);
     end
-    for p=1:length(qn.sync{event(e)}.passive)
-        tranSysState.event{end+1} = qn.sync{event(e)}.passive{p};
+    for p=1:length(sn.sync{event(e)}.passive)
+        tranSysState.event{end+1} = sn.sync{event(e)}.passive{p};
         tranSysState.event{end}.t = tranSysState.t(e);
     end
 end

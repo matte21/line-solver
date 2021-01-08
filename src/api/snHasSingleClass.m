@@ -1,5 +1,5 @@
-function bool = snHasSingleClass(qn)
+function bool = snHasSingleClass(sn)
 % BOOL = HASSINGLECLASS()
 
-bool = qn.mclasses == 1;
+bool = sn.mclasses == 1;
 end

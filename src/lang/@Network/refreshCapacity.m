@@ -5,7 +5,7 @@ function [capacity, classcap, dropid] = refreshCapacity(self)
 % All rights reserved.
 M = getNumberOfStations(self);
 K = getNumberOfClasses(self);
-C = self.qn.nchains;
+C = self.sn.nchains;
 % set zero buffers for classes that are disabled
 classcap = Inf*ones(M,K);
 chaincap = Inf*ones(M,C);
@@ -17,12 +17,12 @@ for i=1:M
         if isa(station, 'Place')
             classcap(i,r) = min(station.classCap(r), station.cap);
             dropid(i,r) = DropStrategy.toId(station.input.inputJobClasses{r}{3});
-        elseif isnan(self.qn.rates(i,r))
+        elseif isnan(self.sn.rates(i,r))
             classcap(i,r) = 0;
             chaincap(i,r) = 0;
         else
-            c = find(self.qn.chains(:,r),1,'first'); % chain of class r
-            chaincap(i,c) = sum(self.qn.njobs(self.qn.chains(c,:)>0));
+            c = find(self.sn.chains(:,r),1,'first'); % chain of class r
+            chaincap(i,c) = sum(self.sn.njobs(self.sn.chains(c,:)>0));
             classcap(i,r) = chaincap(i,c);
             if station.classCap(r) >= 0
                 classcap(i,r) = min(classcap(i,r), station.classCap(r));
@@ -37,9 +37,9 @@ for i=1:M
     end
     capacity(i,1) = min([sum(chaincap(i,:)),sum(classcap(i,:))]);
 end
-if ~isempty(self.qn) %&& isprop(self.qn,'cap')
-    self.qn.cap = capacity;
-    self.qn.classcap = classcap;
-    self.qn.dropid = dropid;
+if ~isempty(self.sn) %&& isprop(self.sn,'cap')
+    self.sn.cap = capacity;
+    self.sn.classcap = classcap;
+    self.sn.dropid = dropid;
 end
 end

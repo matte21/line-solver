@@ -16,7 +16,7 @@ classdef Network < Model
     
     properties (Access=protected)
         items;
-        qn;
+        sn;
     end
     
     properties (Hidden)
@@ -91,7 +91,7 @@ classdef Network < Model
         end
         
         function resetStruct(self)
-            self.qn = [];
+            self.sn = [];
         end
         
         function resetModel(self, resetState)
@@ -101,7 +101,7 @@ classdef Network < Model
             % of its state
             
             resetHandles(self);
-            self.qn = [];
+            self.sn = [];
             
             if nargin == 2 && resetState
                 self.isInitialized = false;
@@ -150,7 +150,7 @@ classdef Network < Model
             self.perfIndex.('Avg') = {};
             self.perfIndex.('Tran') = {};
             initUsedFeatures(self);
-            self.qn = [];
+            self.sn = [];
             self.linkedRoutingTable = {};
             self.isInitialized = false;
             self.logPath = '';
@@ -164,7 +164,7 @@ classdef Network < Model
         setInitialized(self, bool);        
         
         function bool = hasStruct(self)
-            bool = ~isempty(self.qn);
+            bool = ~isempty(self.sn);
         end
         
         function self = setChecks(self, bool)
@@ -263,8 +263,8 @@ classdef Network < Model
         
         function classNames = getClassNames(self)
             % CLASSNAMES = GETCLASSNAMES()
-            if ~isempty(self.qn)
-                classNames = self.qn.classnames;
+            if ~isempty(self.sn)
+                classNames = self.sn.classnames;
             else
                 for r=1:getNumberOfClasses(self)
                     classNames{r,1}=self.classes{r}.name;
@@ -277,8 +277,8 @@ classdef Network < Model
             
             % The commented block causes issues with Logger nodes
             % see e.g., getting_started_ex7
-            if ~isempty(self.qn)
-                nodeNames = self.qn.nodenames;
+            if ~isempty(self.sn)
+                nodeNames = self.sn.nodenames;
             else
                 M = getNumberOfNodes(self);
                 nodeNames = cell(M,1);
@@ -399,7 +399,7 @@ classdef Network < Model
             % STATIONNAMES = GETSTATIONNAMES()
             
             if self.hasStruct
-                stationnames = {self.qn.nodenames{self.qn.isstation}}';
+                stationnames = {self.sn.nodenames{self.sn.isstation}}';
             else
                 stationnames = {};
                 for i=self.getIndexStations
@@ -539,8 +539,8 @@ classdef Network < Model
         function C = getNumberOfChains(self)
             % C = GETNUMBEROFCHAINS()
             
-            qn = self.getStruct;
-            C = qn.nchains;
+            sn = self.getStruct;
+            C = sn.nchains;
         end
         
         function Dchain = getDemandsChain(self)
@@ -684,35 +684,35 @@ classdef Network < Model
             
             %refreshStruct(self);  % we force update of the model before we initialize
             
-            qn = self.getStruct(false);
-            N = qn.njobs';
+            sn = self.getStruct(false);
+            N = sn.njobs';
             if nargin < 2
                 nodes = 1:self.getNumberOfNodes;
             end
             
             for i=nodes
-                if qn.isstation(i)
+                if sn.isstation(i)
                     n0 = zeros(1,length(N));
                     s0 = zeros(1,length(N));
-                    s = qn.nservers(qn.nodeToStation(i)); % allocate
+                    s = sn.nservers(sn.nodeToStation(i)); % allocate
                     for r=find(isfinite(N))' % for all closed classes
-                        if qn.nodeToStation(i) == qn.refstat(r)
+                        if sn.nodeToStation(i) == sn.refstat(r)
                             n0(r) = N(r);
                         end
                         s0(r) = min(n0(r),s);
                         s = s - s0(r);
                     end
-                    state_i = State.fromMarginalAndStarted(qn,i,n0(:)',s0(:)');
-                    switch qn.nodetype(i)
+                    state_i = State.fromMarginalAndStarted(sn,i,n0(:)',s0(:)');
+                    switch sn.nodetype(i)
                         case NodeType.Cache
-                            state_i = [state_i, 1:qn.nvars(i)];
+                            state_i = [state_i, 1:sn.nvars(i)];
                         case NodeType.Place
                             state_i = 0; % for now PNs are single class
                     end
-                    switch qn.routing(i)
+                    switch sn.routing(i)
                         case RoutingStrategy.ID_RRB
                             % start from first connected queue
-                            state_i = [state_i, find(qn.rt(i,:),1)];
+                            state_i = [state_i, find(sn.rt(i,:),1)];
                     end
                     if isempty(state_i)
                         line_error(mfilename,sprintf('Default initialization failed on station %d.',i));
@@ -722,7 +722,7 @@ classdef Network < Model
                         prior_state_i = zeros(1,size(state_i,1)); prior_state_i(1) = 1;
                         self.nodes{i}.setStatePrior(prior_state_i);
                     end
-                elseif qn.isstateful(i) % not a station
+                elseif sn.isstateful(i) % not a station
                     switch class(self.nodes{i})
                         case 'Cache'
                             state_i = zeros(1,self.getNumberOfClasses);
@@ -747,28 +747,28 @@ classdef Network < Model
         function initFromMarginal(self, n, options) % n(i,r) : number of jobs of class r in node i
             % INITFROMMARGINAL(N, OPTIONS) % N(I,R) : NUMBER OF JOBS OF CLASS R IN NODE I
             
-            qn = getStruct(self);
+            sn = getStruct(self);
             if nargin<3 %~exist('options','var')
                 options = Solver.defaultOptions;
             end
-            [isvalidn] = State.isValid(qn, n, [], options);
+            [isvalidn] = State.isValid(sn, n, [], options);
             if ~isvalidn
                 %         line_error(mfilename,'The specified state does not have the correct number of jobs.');
                 line_warning(mfilename,'Initial state not contained in the state space. Trying to recover.');
                 n = round(n);
-                [isvalidn] = State.isValid(qn, n, [], options);
+                [isvalidn] = State.isValid(sn, n, [], options);
                 if ~isvalidn
                     line_error(mfilename,'Cannot recover - stopping.');
                 end
             end
-            for ind=1:qn.nnodes
-                if qn.isstateful(ind)
-                    ist = qn.nodeToStation(ind);
-                    switch qn.nodetype(ind)
+            for ind=1:sn.nnodes
+                if sn.isstateful(ind)
+                    ist = sn.nodeToStation(ind);
+                    switch sn.nodetype(ind)
                         case NodeType.Place
                             self.nodes{ind}.setState(sum(n(ist,:))); % must be single class token
                         otherwise
-                            self.nodes{ind}.setState(State.fromMarginal(qn,ind,n(ist,:)));
+                            self.nodes{ind}.setState(State.fromMarginal(sn,ind,n(ist,:)));
                     end
                     if isempty(self.nodes{ind}.getState)
                         line_error(sprintf('Invalid state assignment for station %d.',ind));
@@ -781,14 +781,14 @@ classdef Network < Model
         function initFromMarginalAndRunning(self, n, s, options) % n(i,r) : number of jobs of class r in node i
             % INITFROMMARGINALANDRUNNING(N, S, OPTIONS) % N(I,R) : NUMBER OF JOBS OF CLASS R IN NODE I
             
-            qn = getStruct(self);
-            [isvalidn] = State.isValid(qn, n, s);
+            sn = getStruct(self);
+            [isvalidn] = State.isValid(sn, n, s);
             if ~isvalidn
                 line_error(mfilename,'Initial state is not valid.');
             end
             for i=1:self.getNumberOfNodes
                 if self.nodes{i}.isStateful
-                    self.nodes{i}.setState(State.fromMarginalAndRunning(qn,i,n(i,:),s(i,:)));
+                    self.nodes{i}.setState(State.fromMarginalAndRunning(sn,i,n(i,:),s(i,:)));
                     if isempty(self.nodes{i}.getState)
                         line_error(sprintf('Invalid state assignment for station %d\n',i));
                     end
@@ -800,15 +800,15 @@ classdef Network < Model
         function initFromMarginalAndStarted(self, n, s, options) % n(i,r) : number of jobs of class r in node i
             % INITFROMMARGINALANDSTARTED(N, S, OPTIONS) % N(I,R) : NUMBER OF JOBS OF CLASS R IN NODE I
             
-            qn = getStruct(self);
-            [isvalidn] = State.isValid(qn, n, s);
+            sn = getStruct(self);
+            [isvalidn] = State.isValid(sn, n, s);
             if ~isvalidn
                 line_error(mfilename,'Initial state is not valid.');
             end
             for ind=1:self.getNumberOfNodes
                 if self.nodes{ind}.isStateful
-                    ist = qn.nodeToStation(ind);
-                    self.nodes{ind}.setState(State.fromMarginalAndStarted(qn,ind,n(ist,:),s(ist,:)));
+                    ist = sn.nodeToStation(ind);
+                    self.nodes{ind}.setState(State.fromMarginalAndStarted(sn,ind,n(ist,:),s(ist,:)));
                     if isempty(self.nodes{ind}.getState)
                         line_error(sprintf('Invalid state assignment for station %d\n',ind));
                     end
@@ -823,7 +823,7 @@ classdef Network < Model
             G = digraph(); TG = Table();
             M = self.getNumberOfNodes;
             K = self.getNumberOfClasses;
-            qn = self.getStruct;
+            sn = self.getStruct;
             [P,Pnodes] = getRoutingMatrix(self);
             name = {}; sched = {}; type = {}; nservers = [];
             for i=1:M
@@ -858,8 +858,8 @@ classdef Network < Model
                 type{end+1} = class(self.stations{i});
                 sched{end+1} = self.stations{i}.schedStrategy;
                 for k=1:K
-                    if qn.refstat(k)==i
-                        jobs(i) = jobs(i) + qn.njobs(k);
+                    if sn.refstat(k)==i
+                        jobs(i) = jobs(i) + sn.njobs(k);
                     end
                 end
                 if isa(self.nodes{i},'Station')
@@ -880,7 +880,7 @@ classdef Network < Model
                 for j=1:I
                     for k=1:K
                         if P((i-1)*K+k,(j-1)*K+k) > 0
-                            rate(end+1) = qn.rates(i,k);
+                            rate(end+1) = sn.rates(i,k);
                             classes{end+1} = self.classes{k}.name;
                             H = H.addedge(self.stations{i}.name, self.stations{j}.name, P((i-1)*K+k,(j-1)*K+k));
                         end
@@ -1310,19 +1310,19 @@ classdef Network < Model
         end
         
         
-        function ret = exportNetworkStruct(qn, language)
+        function ret = exportNetworkStruct(sn, language)
             % @todo unfinished
             
             ret = javaObject('java.util.HashMap');
             switch language
                 case {'java','Java'}
-                    fieldNames = fields(qn);
+                    fieldNames = fields(sn);
                     for f=1:length(fieldNames)
                         switch fieldNames{f}
                             case 'sync'
                                 %noop
                             otherwise
-                                field = qn.(fieldNames{f});
+                                field = sn.(fieldNames{f});
                                 
                         end
                         ret.put(fieldNames{f},exportJava(field));

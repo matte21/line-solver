@@ -1,5 +1,5 @@
-function bool = snHasSJF(qn)
+function bool = snHasSJF(sn)
 % BOOL = HASSJF()
 
-bool = any(qn.schedid==SchedStrategy.ID_SJF);
+bool = any(sn.schedid==SchedStrategy.ID_SJF);
 end

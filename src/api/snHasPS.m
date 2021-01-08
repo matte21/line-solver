@@ -1,5 +1,5 @@
-function bool = snHasPS(qn)
+function bool = snHasPS(sn)
 % BOOL = HASPS()
 
-bool = any(qn.schedid==SchedStrategy.ID_PS);
+bool = any(sn.schedid==SchedStrategy.ID_PS);
 end

@@ -11,21 +11,21 @@ switch options.method
     case {'default','serial'}
         [~, tranSystemState, tranSync] = self.runAnalyzer(options);
         event = tranSync;
-        isf = qn.nodeToStateful(node.index);
+        isf = sn.nodeToStateful(node.index);
         sampleNodeState = struct();
         sampleNodeState.handle = node;
         sampleNodeState.t = tranSystemState{1};
         sampleNodeState.state = tranSystemState{1+isf};
         
-        qn = self.getStruct;
+        sn = self.getStruct;
         sampleNodeState.event = {};
         for e = 1:length(event)
-            for a=1:length(qn.sync{event(e)}.active)
-                sampleNodeState.event{end+1} = qn.sync{event(e)}.active{a};
+            for a=1:length(sn.sync{event(e)}.active)
+                sampleNodeState.event{end+1} = sn.sync{event(e)}.active{a};
                 sampleNodeState.event{end}.t = sampleNodeState.t(e);
             end
-            for p=1:length(qn.sync{event(e)}.passive)
-                sampleNodeState.event{end+1} = qn.sync{event(e)}.passive{p};
+            for p=1:length(sn.sync{event(e)}.passive)
+                sampleNodeState.event{end+1} = sn.sync{event(e)}.passive{p};
                 sampleNodeState.event{end}.t = sampleNodeState.t(e);
             end
         end

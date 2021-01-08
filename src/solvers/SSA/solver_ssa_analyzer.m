@@ -1,26 +1,26 @@
-function [QN,UN,RN,TN,CN,XN,runtime,tranSysState,tranSync, qn] = solver_ssa_analyzer(qn, options)
+function [QN,UN,RN,TN,CN,XN,runtime,tranSysState,tranSync, sn] = solver_ssa_analyzer(sn, options)
 % [QN,UN,RN,TN,CN,XN,RUNTIME,TRANSYSSTATE] = SOLVER_SSA_ANALYZER(QN, OPTIONS)
 
 % Copyright (c) 2012-2021, Imperial College London
 % All rights reserved.
 
-M = qn.nstations;    %number of stations
-K = qn.nclasses;    %number of classes
+M = sn.nstations;    %number of stations
+K = sn.nclasses;    %number of classes
 
-S = qn.nservers;
-NK = qn.njobs';  % initial population per class
-schedid = qn.schedid;
+S = sn.nservers;
+NK = sn.njobs';  % initial population per class
+schedid = sn.schedid;
 Tstart = tic;
 
-PH = qn.proc;
+PH = sn.proc;
 tranSysState = [];
 tranSync = [];
 
-qn.space = qn.state; % SSA progressively grows this cell array into the simulated state space
+sn.space = sn.state; % SSA progressively grows this cell array into the simulated state space
 switch options.method
     case {'serial.hash','serial.hashed','hashed'}
         options.samples = options.samples + 1;
-        [probSysState,SSq,arvRates,depRates,qn] = solver_ssa_hashed(qn, options);
+        [probSysState,SSq,arvRates,depRates,sn] = solver_ssa_hashed(sn, options);
         XN = NaN*zeros(1,K);
         UN = NaN*zeros(M,K);
         QN = NaN*zeros(M,K);
@@ -28,10 +28,10 @@ switch options.method
         TN = NaN*zeros(M,K);
         CN = NaN*zeros(1,K);
         for k=1:K
-            refsf = qn.stationToStateful(qn.refstat(k));
+            refsf = sn.stationToStateful(sn.refstat(k));
             XN(k) = probSysState*arvRates(:,refsf,k);
             for ist=1:M
-                isf = qn.stationToStateful(ist);
+                isf = sn.stationToStateful(ist);
                 TN(ist,k) = probSysState*depRates(:,isf,k);
                 QN(ist,k) = probSysState*SSq(:,(ist-1)*K+k);
                 switch schedid(ist)
@@ -69,9 +69,9 @@ switch options.method
         
         % now update the routing probabilities in nodes with state-dependent routing
         for k=1:K
-            for isf=1:qn.nstateful
-                if qn.nodetype(isf) == NodeType.Cache
-                    ind = qn.statefulToNode(isf);
+            for isf=1:sn.nstateful
+                if sn.nodetype(isf) == NodeType.Cache
+                    ind = sn.statefulToNode(isf);
                     TNcache(isf,k) = probSysState*depRates(:,isf,k);
                 end
             end
@@ -79,22 +79,22 @@ switch options.method
         
         % updates cache actual hit and miss data
         for k=1:K
-            for isf=1:qn.nstateful
-                if qn.nodetype(isf) == NodeType.Cache
-                    ind = qn.statefulToNode(isf);
-                    if length(qn.varsparam{ind}.hitclass)>=k
-                        h = qn.varsparam{ind}.hitclass(k);
-                        m = qn.varsparam{ind}.missclass(k);
-                        qn.varsparam{ind}.actualhitprob(k) = TNcache(isf,h)/sum(TNcache(isf,[h,m]));
-                        qn.varsparam{ind}.actualmissprob(k) = TNcache(isf,m)/sum(TNcache(isf,[h,m]));
+            for isf=1:sn.nstateful
+                if sn.nodetype(isf) == NodeType.Cache
+                    ind = sn.statefulToNode(isf);
+                    if length(sn.varsparam{ind}.hitclass)>=k
+                        h = sn.varsparam{ind}.hitclass(k);
+                        m = sn.varsparam{ind}.missclass(k);
+                        sn.varsparam{ind}.actualhitprob(k) = TNcache(isf,h)/sum(TNcache(isf,[h,m]));
+                        sn.varsparam{ind}.actualmissprob(k) = TNcache(isf,m)/sum(TNcache(isf,[h,m]));
                     end
                 end
             end
         end
     case {'default','serial'}
         options.samples = options.samples + 1;
-        [probSysState,SSq,arvRates,depRates,tranSysState, tranSync] = solver_ssa(qn, options);
-        qn.space = qn.space;
+        [probSysState,SSq,arvRates,depRates,tranSysState, tranSync] = solver_ssa(sn, options);
+        sn.space = sn.space;
         XN = NaN*zeros(1,K);
         UN = NaN*zeros(M,K);
         QN = NaN*zeros(M,K);
@@ -102,10 +102,10 @@ switch options.method
         TN = NaN*zeros(M,K);
         CN = NaN*zeros(1,K);
         for k=1:K
-            refsf = qn.stationToStateful(qn.refstat(k));
+            refsf = sn.stationToStateful(sn.refstat(k));
             XN(k) = probSysState*arvRates(:,refsf,k);
             for ist=1:M
-                isf = qn.stationToStateful(ist);
+                isf = sn.stationToStateful(ist);
                 TN(ist,k) = probSysState*depRates(:,isf,k);
                 QN(ist,k) = probSysState*SSq(:,(ist-1)*K+k);
                 switch schedid(ist)
@@ -142,9 +142,9 @@ switch options.method
         
         % now update the routing probabilities in nodes with state-dependent routing
         for k=1:K
-            for isf=1:qn.nstateful
-                if qn.nodetype(isf) == NodeType.Cache
-                    ind = qn.statefulToNode(isf);
+            for isf=1:sn.nstateful
+                if sn.nodetype(isf) == NodeType.Cache
+                    ind = sn.statefulToNode(isf);
                     TNcache(isf,k) = probSysState*depRates(:,isf,k);
                 end
             end
@@ -152,18 +152,18 @@ switch options.method
         
         % updates cache actual hit and miss data
         for k=1:K
-            for isf=1:qn.nstateful
-                if qn.nodetype(isf) == NodeType.Cache
-                    ind = qn.statefulToNode(isf);
-                    if length(qn.varsparam{ind}.hitclass)>=k
-                        h = qn.varsparam{ind}.hitclass(k);
-                        m = qn.varsparam{ind}.missclass(k);
+            for isf=1:sn.nstateful
+                if sn.nodetype(isf) == NodeType.Cache
+                    ind = sn.statefulToNode(isf);
+                    if length(sn.varsparam{ind}.hitclass)>=k
+                        h = sn.varsparam{ind}.hitclass(k);
+                        m = sn.varsparam{ind}.missclass(k);
                         if h==0 || m==0
-                            qn.varsparam{ind}.actualhitprob(k) = NaN;
-                            qn.varsparam{ind}.actualmissprob(k) = NaN;
+                            sn.varsparam{ind}.actualhitprob(k) = NaN;
+                            sn.varsparam{ind}.actualmissprob(k) = NaN;
                         else
-                            qn.varsparam{ind}.actualhitprob(k) = TNcache(isf,h)/sum(TNcache(isf,[h,m]));
-                            qn.varsparam{ind}.actualmissprob(k) = TNcache(isf,m)/sum(TNcache(isf,[h,m]));
+                            sn.varsparam{ind}.actualhitprob(k) = TNcache(isf,h)/sum(TNcache(isf,[h,m]));
+                            sn.varsparam{ind}.actualmissprob(k) = TNcache(isf,m)/sum(TNcache(isf,[h,m]));
                         end
                     end
                 end
@@ -174,7 +174,7 @@ switch options.method
             line_error(mfilename,'parallel SSA is available only under MATLAB.');
         end
         laboptions = options;        
-        [XN,UN,QN,RN,TN,CN,qn] = solver_ssa_analyzer_spmd(laboptions, qn, PH);
+        [XN,UN,QN,RN,TN,CN,sn] = solver_ssa_analyzer_spmd(laboptions, sn, PH);
 end
 
 runtime = toc(Tstart);

@@ -1,5 +1,5 @@
-function bool = snHasMultiClass(qn)
+function bool = snHasMultiClass(sn)
 % BOOL = HASMULTICLASS()
 
-bool = qn.nclasses > 1;
+bool = sn.nclasses > 1;
 end

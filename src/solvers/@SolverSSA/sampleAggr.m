@@ -15,22 +15,22 @@ switch options.method
         options.samples = numSamples;
         options.force = true;
         [~, tranSystemState, event] = self.runAnalyzer(options);
-        qn = self.getStruct;
-        isf = qn.nodeToStateful(node.index);
-        [~,nir]=State.toMarginal(qn,qn.statefulToNode(isf),tranSystemState{1+isf});
+        sn = self.getStruct;
+        isf = sn.nodeToStateful(node.index);
+        [~,nir]=State.toMarginal(sn,sn.statefulToNode(isf),tranSystemState{1+isf});
         stationStateAggr = struct();
         stationStateAggr.handle = node;
         stationStateAggr.t = tranSystemState{1};
         stationStateAggr.state = nir;
-        qn = self.getStruct;
+        sn = self.getStruct;
         stationStateAggr.event = {};
         for e = 1:length(event)
-            for a=1:length(qn.sync{event(e)}.active)
-                stationStateAggr.event{end+1} = qn.sync{event(e)}.active{a};
+            for a=1:length(sn.sync{event(e)}.active)
+                stationStateAggr.event{end+1} = sn.sync{event(e)}.active{a};
                 stationStateAggr.event{end}.t = stationStateAggr.t(e);
             end
-            for p=1:length(qn.sync{event(e)}.passive)
-                stationStateAggr.event{end+1} = qn.sync{event(e)}.passive{p};
+            for p=1:length(sn.sync{event(e)}.passive)
+                stationStateAggr.event{end+1} = sn.sync{event(e)}.passive{p};
                 stationStateAggr.event{end}.t = stationStateAggr.t(e);
             end
         end       

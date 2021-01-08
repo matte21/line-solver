@@ -3,12 +3,12 @@ function Prob = getProb(self, node, state)
 
 % we do not use probSysState as that is for joint states
 [~, tranSysState] = self.runAnalyzer;
-qn = self.getStruct;
-isf = qn.nodeToStateful(node.index);
+sn = self.getStruct;
+isf = sn.nodeToStateful(node.index);
 TSS = cell2mat({tranSysState{1},tranSysState{1+isf}});
 TSS(:,1)=[TSS(1,1);diff(TSS(:,1))];
 if nargin<3 %~exist('state','var')
-    state = qn.state{isf};
+    state = sn.state{isf};
 end
 rows = findrows(TSS(:,2:end), state);
 if ~isempty(rows)

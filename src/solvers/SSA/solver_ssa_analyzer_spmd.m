@@ -1,7 +1,7 @@
-function [XN,UN,QN,RN,TN,CN,qnc]=solver_ssa_analyzer_spmd(laboptions, qn, PH)
+function [XN,UN,QN,RN,TN,CN,qnc]=solver_ssa_analyzer_spmd(laboptions, sn, PH)
 % [XN,UN,QN,RN,TN,CN]=SOLVER_SSA_ANALYZER_SPMD(LABOPTIONS, QN, PH)
 
-qnc = qn;
+qnc = sn;
 M = qnc.nstations;    %number of stations
 K = qnc.nclasses;    %number of classes
 
@@ -95,20 +95,20 @@ CN = cellsum(CN)/nLabs;
 XN = cellsum(XN)/nLabs;
 
 for k=1:K
-    for isf=1:qn.nstateful
-        if qn.nodetype(isf) == NodeType.Cache
-            ind = qn.statefulToNode(isf);
-            qn.varsparam{ind}.actualhitprob(k) = 0;
-            qn.varsparam{ind}.actualmissprob(k) = 0;
+    for isf=1:sn.nstateful
+        if sn.nodetype(isf) == NodeType.Cache
+            ind = sn.statefulToNode(isf);
+            sn.varsparam{ind}.actualhitprob(k) = 0;
+            sn.varsparam{ind}.actualmissprob(k) = 0;
             for l=1:nLabs
                 qntmp = qnc{l};                
                 if length(qntmp.varsparam{ind}.hitclass)>=k                
-                    qn.varsparam{ind}.actualhitprob(k) = qn.varsparam{ind}.actualhitprob(k) + (1/nLabs) * qntmp.varsparam{ind}.actualhitprob(k);
-                    qn.varsparam{ind}.actualmissprob(k) = qn.varsparam{ind}.actualmissprob(k) + (1/nLabs) * qntmp.varsparam{ind}.actualmissprob(k);
+                    sn.varsparam{ind}.actualhitprob(k) = sn.varsparam{ind}.actualhitprob(k) + (1/nLabs) * qntmp.varsparam{ind}.actualhitprob(k);
+                    sn.varsparam{ind}.actualmissprob(k) = sn.varsparam{ind}.actualmissprob(k) + (1/nLabs) * qntmp.varsparam{ind}.actualmissprob(k);
                 end
             end
         end
     end
 end
-qnc = qn;
+qnc = sn;
 end

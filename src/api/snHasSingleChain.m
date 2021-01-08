@@ -1,5 +1,5 @@
-function bool = snHasSingleChain(qn)
+function bool = snHasSingleChain(sn)
 % BOOL = HASSINGLECHAIN()
 
-bool = qn.nchains == 1;
+bool = sn.nchains == 1;
 end

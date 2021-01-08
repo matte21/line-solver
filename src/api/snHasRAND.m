@@ -1,5 +1,5 @@
-function bool = snHasRAND(qn)
+function bool = snHasRAND(sn)
 % BOOL = HASRAND()
 
-bool = any(qn.schedid==SchedStrategy.ID_SIRO);
+bool = any(sn.schedid==SchedStrategy.ID_SIRO);
 end

@@ -1,4 +1,4 @@
-function [ymean, ymean_t, t, iter] = solver_fluid_iteration(qn, N, Mu, Phi, PH, P, S, ymean, ydefault, slowrate, Tstart, max_time, options)
+function [ymean, ymean_t, t, iter] = solver_fluid_iteration(sn, N, Mu, Phi, PH, P, S, ymean, ydefault, slowrate, Tstart, max_time, options)
 % [YMEAN, YMEAN_T, T, ITER] = SOLVER_FLUID_ITERATION(QN, N, MU, PHI, PH, P, S, YMEAN, YDEFAULT, SLOWRATE, TSTART, MAX_TIME, OPTIONS)
 
 % Copyright (c) 2012-2021, Imperial College London
@@ -26,7 +26,7 @@ nonZeroRates = nonZeroRates(isfinite(nonZeroRates));
 rategap = log10(max(nonZeroRates)/min(nonZeroRates)); % if the max rate is Distrib.InfRate and the min is 1, then rategap = 6
 
 % init ode
-[ode_h, ~] = solver_fluid_odes(N, Mu, Phi, PH, P, S, qn.sched, qn.schedparam, options);
+[ode_h, ~] = solver_fluid_odes(N, Mu, Phi, PH, P, S, sn.sched, sn.schedparam, options);
 
 T0 = timespan(1);
 %opt = odeset();

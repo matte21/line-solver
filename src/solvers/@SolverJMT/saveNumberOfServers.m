@@ -7,9 +7,9 @@ sizeNode = simDoc.createElement('parameter');
 sizeNode.setAttribute('classPath', 'java.lang.Integer');
 sizeNode.setAttribute('name', 'maxJobs');
 
-qn = self.getStruct;
+sn = self.getStruct;
 valueNode = simDoc.createElement('value');
-valueNode.appendChild(simDoc.createTextNode(int2str(qn.nservers(qn.nodeToStation(ind)))));
+valueNode.appendChild(simDoc.createTextNode(int2str(sn.nservers(sn.nodeToStation(ind)))));
 
 sizeNode.appendChild(valueNode);
 section.appendChild(sizeNode);

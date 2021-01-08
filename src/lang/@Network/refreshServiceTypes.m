@@ -11,10 +11,10 @@ if nargin<2
     classSet = 1:K;
 elseif nargin==2
     line_error(mfilename,'refreshRates requires either 0 or 2 parameters.')
-elseif nargin==3 && isfield(self.qn,'rates') && isfield(self.qn,'scv')
+elseif nargin==3 && isfield(self.sn,'rates') && isfield(self.sn,'scv')
     % we are only updating selected stations and classes so use the
     % existing ones for the others
-    procid = self.qn.procid;
+    procid = self.sn.procid;
 else
     procid = nan(M,K); % disabled
 end
@@ -56,7 +56,7 @@ for i=statSet
     end
 end
 
-if ~isempty(self.qn)
-    self.qn.procid = procid;
+if ~isempty(self.sn)
+    self.sn.procid = procid;
 end
 end

@@ -4,13 +4,13 @@ function [simDoc, section] = saveForkStrategy(self, simDoc, section, ind)
 % Copyright (c) 2012-2021, Imperial College London
 % All rights reserved.
 
-qn=self.getStruct;
+sn=self.getStruct;
 
 jplNode = simDoc.createElement('parameter');
 jplNode.setAttribute('classPath', 'java.lang.Integer');
 jplNode.setAttribute('name', 'jobsPerLink');
 valueNode = simDoc.createElement('value');
-valueNode.appendChild(simDoc.createTextNode(int2str(qn.varsparam{ind}.tasksPerLink)));
+valueNode.appendChild(simDoc.createTextNode(int2str(sn.varsparam{ind}.tasksPerLink)));
 jplNode.appendChild(valueNode);
 section.appendChild(jplNode);
 
@@ -36,10 +36,10 @@ strategyNode.setAttribute('classPath', 'jmt.engine.NetStrategies.ForkStrategy');
 strategyNode.setAttribute('name', 'ForkStrategy');
 
 i = ind;
-numOfClasses = qn.nclasses;
+numOfClasses = sn.nclasses;
 for r=1:numOfClasses
     refClassNode = simDoc.createElement('refClass');
-    refClassNode.appendChild(simDoc.createTextNode(qn.classnames{r}));
+    refClassNode.appendChild(simDoc.createTextNode(sn.classnames{r}));
     strategyNode.appendChild(refClassNode);
     
     classStratNode = simDoc.createElement('subParameter');
@@ -49,9 +49,9 @@ for r=1:numOfClasses
     classStratNode2.setAttribute('array', 'true');
     classStratNode2.setAttribute('classPath', 'jmt.engine.NetStrategies.ForkStrategies.OutPath');
     classStratNode2.setAttribute('name', 'EmpiricalEntryArray');
-    switch qn.routing(i,r)
+    switch sn.routing(i,r)
         case RoutingStrategy.ID_PROB
-            for k=find(qn.connmatrix(i,:))
+            for k=find(sn.connmatrix(i,:))
                 classStratNode3 = simDoc.createElement('subParameter');
                 classStratNode3.setAttribute('classPath', 'jmt.engine.NetStrategies.ForkStrategies.OutPath');
                 classStratNode3.setAttribute('name', 'OutPathEntry');
@@ -62,7 +62,7 @@ for r=1:numOfClasses
                 classStratNode4Station.setAttribute('classPath', 'java.lang.String');
                 classStratNode4Station.setAttribute('name', 'stationName');
                 classStratNode4StationValueNode = simDoc.createElement('value');
-                classStratNode4StationValueNode.appendChild(simDoc.createTextNode(sprintf('%s',qn.nodenames{k})));
+                classStratNode4StationValueNode.appendChild(simDoc.createTextNode(sprintf('%s',sn.nodenames{k})));
             end
             classStratNode4Station.appendChild(classStratNode4StationValueNode);
             classStratNode3.appendChild(classStratNode4Station);
@@ -84,7 +84,7 @@ for r=1:numOfClasses
             classStratNode5bStation.setAttribute('classPath', 'java.lang.String');
             classStratNode5bStation.setAttribute('name', 'numbers');
             classStratNode5bStationValueNode = simDoc.createElement('value');
-            classStratNode5bStationValueNode.appendChild((simDoc.createTextNode(int2str(qn.varsparam{ind}.tasksPerLink))));
+            classStratNode5bStationValueNode.appendChild((simDoc.createTextNode(int2str(sn.varsparam{ind}.tasksPerLink))));
             classStratNode5bStation.appendChild(classStratNode5bStationValueNode);
             classStratNode4b.appendChild(classStratNode5bStation);
             classStratNode5bProbability = simDoc.createElement('subParameter');

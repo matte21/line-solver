@@ -1,16 +1,16 @@
-function [Pr,G,runtime] = solver_nc_joint(qn, options)
+function [Pr,G,runtime] = solver_nc_joint(sn, options)
 % [PR,G,RUNTIME] = SOLVER_NC_JOINT(QN, OPTIONS)
 
 % Copyright (c) 2012-2021, Imperial College London
 % All rights reserved.
 
-M = qn.nstations;    %number of stations
-K = qn.nclasses;    %number of classes
-state = qn.state;
-S = qn.nservers;
-NK = qn.njobs';  % initial population per class
-C = qn.nchains;
-PH = qn.proc;
+M = sn.nstations;    %number of stations
+K = sn.nclasses;    %number of classes
+state = sn.state;
+S = sn.nservers;
+NK = sn.njobs';  % initial population per class
+C = sn.nchains;
+PH = sn.proc;
 %% initialization
 
 % determine service times
@@ -22,14 +22,14 @@ for k = 1:K
 end
 ST(isnan(ST))=0;
 
-alpha = zeros(qn.nstations,qn.nclasses);
-Vchain = zeros(qn.nstations,qn.nchains);
-for c=1:qn.nchains
-    inchain = find(qn.chains(c,:));
-    for i=1:qn.nstations
-        Vchain(i,c) = sum(qn.visits{c}(i,inchain)) / sum(qn.visits{c}(qn.refstat(inchain(1)),inchain));
+alpha = zeros(sn.nstations,sn.nclasses);
+Vchain = zeros(sn.nstations,sn.nchains);
+for c=1:sn.nchains
+    inchain = find(sn.chains(c,:));
+    for i=1:sn.nstations
+        Vchain(i,c) = sum(sn.visits{c}(i,inchain)) / sum(sn.visits{c}(sn.refstat(inchain(1)),inchain));
         for k=inchain
-            alpha(i,k) = alpha(i,k) + qn.visits{c}(i,k) / sum(qn.visits{c}(i,inchain)); % isn't alpha(i,j) always zero when entering here?
+            alpha(i,k) = alpha(i,k) + sn.visits{c}(i,k) / sum(sn.visits{c}(i,inchain)); % isn't alpha(i,j) always zero when entering here?
         end
     end
 end
@@ -42,22 +42,22 @@ STchain = zeros(M,C);
 
 Nchain = zeros(1,C);
 refstatchain = zeros(C,1);
-for c=1:qn.nchains
-    inchain = find(qn.chains(c,:));
-    isOpenChain = any(isinf(qn.njobs(inchain)));
-    for i=1:qn.nstations
+for c=1:sn.nchains
+    inchain = find(sn.chains(c,:));
+    isOpenChain = any(isinf(sn.njobs(inchain)));
+    for i=1:sn.nstations
         % we assume that the visits in L(i,inchain) are equal to 1
         STchain(i,c) = ST(i,inchain) * alpha(i,inchain)';
-        if isOpenChain && i == qn.refstat(inchain(1)) % if this is a source ST = 1 / arrival rates
-            STchain(i,c) = 1 / sumfinite(qn.rates(i,inchain)); % ignore degenerate classes with zero arrival rates
+        if isOpenChain && i == sn.refstat(inchain(1)) % if this is a source ST = 1 / arrival rates
+            STchain(i,c) = 1 / sumfinite(sn.rates(i,inchain)); % ignore degenerate classes with zero arrival rates
         else
             STchain(i,c) = ST(i,inchain) * alpha(i,inchain)';
         end
         Lchain(i,c) = Vchain(i,c) * ST(i,inchain) * alpha(i,inchain)';
     end
     Nchain(c) = sum(NK(inchain));
-    refstatchain(c) = qn.refstat(inchain(1));
-    if any((qn.refstat(inchain(1))-refstatchain(c))~=0)
+    refstatchain(c) = sn.refstat(inchain(1));
+    if any((sn.refstat(inchain(1))-refstatchain(c))~=0)
         line_error(sprintf('Classes in chain %d have different reference station.',c));
     end
 end
@@ -81,10 +81,10 @@ end
 G = pfqn_gmvald(Lchain, Nchain, mu_chain);
 Pr = 1;
 for i=1:M
-    isf = qn.stationToStateful(i);
+    isf = sn.stationToStateful(i);
     state_i = state{isf};
-    [~,nivec] = State.toMarginal(qn, i, state{isf});
-    nivec_chain = nivec * qn.chains';
+    [~,nivec] = State.toMarginal(sn, i, state{isf});
+    nivec_chain = nivec * sn.chains';
     F_i = pfqn_gmvald(Lchain(i,:), nivec_chain, mu_chain(i,:));
     g0_i = pfqn_gmvald(ST(i,:).*alpha(i,:),nivec, mu_chain(i,:));
     G0_i = pfqn_gmvald(STchain(i,:),nivec_chain, mu_chain(i,:));

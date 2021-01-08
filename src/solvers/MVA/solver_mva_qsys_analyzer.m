@@ -1,4 +1,4 @@
-function [QN,UN,RN,TN,CN,XN,lG,runtime] = solver_mva_qsys_analyzer(qn, options)
+function [QN,UN,RN,TN,CN,XN,lG,runtime] = solver_mva_qsys_analyzer(sn, options)
 % [Q,U,R,T,C,X,LG,RUNTIME] = SOLVER_MVA_QSYS_ANALYZER(QN, OPTIONS)
 
 % Copyright (c) 2012-2021, Imperial College London
@@ -11,13 +11,13 @@ CN = []; XN = [];
 lG = NaN;
 
 method = options.method;
-source_ist = qn.nodeToStation(qn.nodetype == NodeType.Source);
-queue_ist = qn.nodeToStation(qn.nodetype == NodeType.Queue);
-lambda = qn.rates(source_ist)*qn.visits{1}(queue_ist);
-k = qn.nservers(queue_ist);
-mu = qn.rates(queue_ist);
-ca = sqrt(qn.scv(source_ist));
-cs = sqrt(qn.scv(queue_ist));
+source_ist = sn.nodeToStation(sn.nodetype == NodeType.Source);
+queue_ist = sn.nodeToStation(sn.nodetype == NodeType.Queue);
+lambda = sn.rates(source_ist)*sn.visits{1}(queue_ist);
+k = sn.nservers(queue_ist);
+mu = sn.rates(queue_ist);
+ca = sqrt(sn.scv(source_ist));
+cs = sqrt(sn.scv(queue_ist));
 if strcmpi(method,'exact')
     if ca == 1 && cs == 1 && k==1
         method = 'mm1';
@@ -69,15 +69,15 @@ switch method
         R = qsys_gig1_approx_marchal(lambda,mu,ca,cs);
     case {'gm1', 'gim1'}
         % sigma = Load at arrival instants (Laplace transform of the inter-arrival times)
-        LA = @(s) qn.lst{source_ist,1}(s);
-        mu = qn.rates(queue_ist);
+        LA = @(s) sn.lst{source_ist,1}(s);
+        mu = sn.rates(queue_ist);
         sigma = fzero(@(x) LA(mu-mu*x)-x,0.5);
         R = qsys_gm1(sigma,mu);
     otherwise
         line_error(mfilename,'Line:UnsupportedMethod','Unsupported method for a model with 1 station and 1 class.');
 end
 
-RN(queue_ist,1) = R *qn.visits{1}(queue_ist);
+RN(queue_ist,1) = R *sn.visits{1}(queue_ist);
 CN(queue_ist,1) = RN(1,1);
 XN(queue_ist,1) = lambda;
 UN(queue_ist,1) = lambda/mu/k;

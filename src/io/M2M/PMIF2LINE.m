@@ -4,6 +4,6 @@ function model = PMIF2LINE(filename,modelName)
 % Copyright (c) 2012-2021, Imperial College London
 % All rights reserved.
 verbose = false;
-qn = PMIF2QN(filename,verbose);
-model = QN2LINE(qn, modelName);
+sn = PMIF2QN(filename,verbose);
+model = QN2LINE(sn, modelName);
 end

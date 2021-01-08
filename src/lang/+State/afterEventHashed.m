@@ -1,4 +1,4 @@
-function [outhash, outrate, outprob] =  afterEventHashed(qn, ind, inhash, event, class)
+function [outhash, outrate, outprob] =  afterEventHashed(sn, ind, inhash, event, class)
 % [OUTHASH, OUTRATE, OUTPROB] =  AFTEREVENTHASHED(QN, IND, INHASH, EVENT, CLASS)
 
 % Copyright (c) 2012-2021, Imperial College London
@@ -11,17 +11,17 @@ if inhash == 0
 end
 
 % ind: node index
-%ist = qn.nodeToStation(ind);
-isf = qn.nodeToStateful(ind);
+%ist = sn.nodeToStation(ind);
+isf = sn.nodeToStateful(ind);
 
-inspace = qn.space{isf}(inhash,:);
+inspace = sn.space{isf}(inhash,:);
 isSimulation = false;
-[outspace, outrate, outprob] =  State.afterEvent(qn, ind, inspace, event, class, isSimulation);
+[outspace, outrate, outprob] =  State.afterEvent(sn, ind, inspace, event, class, isSimulation);
 if isempty(outspace)
     outhash = -1;
     outrate = 0;
     return
 else
-    outhash = State.getHash(qn, ind, outspace);
+    outhash = State.getHash(sn, ind, outspace);
 end
 end

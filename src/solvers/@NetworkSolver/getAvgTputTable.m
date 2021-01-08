@@ -5,12 +5,12 @@ function [AvgTable,TT] = getAvgTputTable(self,T,keepDisabled)
 %
 % Copyright (c) 2012-2021, Imperial College London
 % All rights reserved.
-if if nargin<3 %~exist('keepDisabled','var')
+if nargin<3 %~exist('keepDisabled','var')
     keepDisabled = false;
 end
 
-M = qn.nstations();
-K = qn.nclasses();
+M = sn.nstations();
+K = sn.nclasses();
 if nargin == 1
     T = getAvgTputHandles(self);
 end

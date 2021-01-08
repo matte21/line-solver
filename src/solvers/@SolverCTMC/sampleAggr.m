@@ -8,7 +8,7 @@ end
 [infGen, eventFilt] = getGenerator(self);
 stateSpace = getStateSpace(self);
 
-initState = qn.state;
+initState = sn.state;
 nst = cumsum([1,cellfun(@length,initState)']);
 s0 = cell2mat(initState(:)');
 
@@ -24,31 +24,31 @@ MMAP = mmap_normalize([{D0},{D1},eventFilt(:)']);
 % now sampel the MMAP
 [sjt,event,~,~,sts] = mmap_sample(MMAP,numSamples, pi0);
 
-qn = self.getStruct;
+sn = self.getStruct;
 sampleAggr = struct();
 sampleAggr.handle = node;
 sampleAggr.t = cumsum([0,sjt(1:end-1)']');
 ind = node.index;
-isf = qn.nodeToStateful(ind);
+isf = sn.nodeToStateful(ind);
 sampleAggr.state = stateSpace(sts,(nst(isf):nst(isf+1)-1));
-[~,sampleAggr.state] = State.toMarginal(qn,qn.statefulToNode(isf),sampleAggr.state);
+[~,sampleAggr.state] = State.toMarginal(sn,sn.statefulToNode(isf),sampleAggr.state);
 
 sampleAggr.event = {};
 %nodeEvent = false(length(event),1);
 %nodeTS = zeros(length(event),1);
 for e = 1:length(event)
-    for a=1:length(qn.sync{event(e)}.active)
-        sampleAggr.event{end+1} = qn.sync{event(e)}.active{a};
+    for a=1:length(sn.sync{event(e)}.active)
+        sampleAggr.event{end+1} = sn.sync{event(e)}.active{a};
         sampleAggr.event{end}.t = sampleAggr.t(e);
-%        if  qn.sync{event(e)}.active{a}.node == ind 
+%        if  sn.sync{event(e)}.active{a}.node == ind 
 %            nodeEvent(e) = true;
 %            nodeTS(e) = tranSysState.t(e);
 %        end
     end
-    for p=1:length(qn.sync{event(e)}.passive)
-        sampleAggr.event{end+1} = qn.sync{event(e)}.passive{p};
+    for p=1:length(sn.sync{event(e)}.passive)
+        sampleAggr.event{end+1} = sn.sync{event(e)}.passive{p};
         sampleAggr.event{end}.t = sampleAggr.t(e);
-%        if  qn.sync{event(e)}.passive{p}.node == ind 
+%        if  sn.sync{event(e)}.passive{p}.node == ind 
 %            nodeEvent(e) = true;
 %            nodeTS(e) = tranSysState.t(e);
 %        end

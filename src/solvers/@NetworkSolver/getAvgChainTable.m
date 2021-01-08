@@ -4,9 +4,9 @@ function [AvgChain,QTc,UTc,RTc,TTc] = getAvgChainTable(self,Q,U,R,T)
 % Copyright (c) 2012-2021, Imperial College London
 % All rights reserved.
 
-qn = self.model.getStruct;
-M = qn.nstations();
-K = qn.nchains();
+sn = self.model.getStruct;
+M = sn.nstations();
+K = sn.nchains();
 if nargin == 1
     [Q,U,R,T] = getAvgHandles(self);
 end

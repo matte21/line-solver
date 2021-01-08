@@ -1,5 +1,5 @@
-function bool = snHasHomogeneousScheduling(qn, strategy)
+function bool = snHasHomogeneousScheduling(sn, strategy)
 % BOOL = HASHOMOGENEOUSSCHEDULING(STRATEGY)
 
-bool = length(findstring(qn.sched,strategy)) == qn.nstations;
+bool = length(findstring(sn.sched,strategy)) == sn.nstations;
 end

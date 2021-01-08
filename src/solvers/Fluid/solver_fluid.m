@@ -1,19 +1,19 @@
-function [QN,ymean,QNt,UNt,ymean_t,t,iters,runtime] = solver_fluid(qn, options)
+function [QN,ymean,QNt,UNt,ymean_t,t,iters,runtime] = solver_fluid(sn, options)
 % [QN,YMEAN,QNT,UNT,YMEAN_T,T,ITERS,RUNTIME] = SOLVER_FLUID(QN, OPTIONS)
 
 % Copyright (c) 2012-2021, Imperial College London
 % All rights reserved.
 
-M = qn.nstations;    %number of stations
-K = qn.nclasses;    %number of classes
-N = qn.nclosedjobs;    %population
-Mu = qn.mu;
-Phi = qn.phi;
-PH = qn.proc;
-schedid = qn.schedid;
-rt = qn.rt;
-S = qn.nservers;
-NK = qn.njobs';  %initial population
+M = sn.nstations;    %number of stations
+K = sn.nclasses;    %number of classes
+N = sn.nclosedjobs;    %population
+Mu = sn.mu;
+Phi = sn.phi;
+PH = sn.proc;
+schedid = sn.schedid;
+rt = sn.rt;
+S = sn.nservers;
+NK = sn.njobs';  %initial population
 
 match = zeros(M,K); % indicates whether a class is served at a station
 for i = 1:M
@@ -34,7 +34,7 @@ end
 max_time = Inf;
 Tstart = tic;
 
-%phases = qn.phases;
+%phases = sn.phases;
 phases = zeros(M,K);
 for i = 1:M
     for k = 1:K
@@ -90,7 +90,7 @@ else
 end
 
 %% solve ode
-[ymean, ymean_t, t, iters] = solver_fluid_iteration(qn, N, Mu, Phi, PH, rt, S, ymean, ydefault, slowrate, Tstart, max_time, options);
+[ymean, ymean_t, t, iters] = solver_fluid_iteration(sn, N, Mu, Phi, PH, rt, S, ymean, ydefault, slowrate, Tstart, max_time, options);
 
 runtime = toc(Tstart);
 % if options.verbose >= 2
@@ -120,7 +120,7 @@ for i=1:M
 end
 
 for i=1:M
-    if qn.nservers(i) > 0 % not INF
+    if sn.nservers(i) > 0 % not INF
         for k = 1:K
             UNt{i,k} = min(QNt{i,k} / S(i), QNt{i,k} ./ Qt{i}); % if not an infinite server then this is a number between 0 and 1
             UNt{i,k}(isnan(UNt{i,k})) = 0; % fix cases where qlen is 0

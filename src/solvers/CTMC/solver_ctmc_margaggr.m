@@ -1,30 +1,30 @@
-function [Pnir,pi,runtime,fname] = solver_ctmc_margaggr(qn, options)
+function [Pnir,pi,runtime,fname] = solver_ctmc_margaggr(sn, options)
 % [PNIR,PI,RUNTIME,FNAME] = SOLVER_CTMC_MARGAGGR(QN, OPTIONS)
 %
 % Copyright (c) 2012-2021, Imperial College London
 % All rights reserved.
 
 
-M = qn.nstations;    %number of stations
-K = qn.nclasses;    %number of classes
-state = qn.state;
+M = sn.nstations;    %number of stations
+K = sn.nclasses;    %number of classes
+state = sn.state;
 fname = '';
-rt = qn.rt;
-S = qn.nservers;
-NK = qn.njobs';  % initial population per class
-sched = qn.sched;
+rt = sn.rt;
+S = sn.nservers;
+NK = sn.njobs';  % initial population per class
+sched = sn.sched;
 
 Tstart = tic;
 
 myP = cell(K,K);
 for k = 1:K
     for c = 1:K
-        myP{k,c} = zeros(qn.nstations);
+        myP{k,c} = zeros(sn.nstations);
     end
 end
 
-for ist=1:qn.nstations
-    for jst=1:qn.nstations
+for ist=1:sn.nstations
+    for jst=1:sn.nstations
         for k = 1:K
             for c = 1:K
                 % routing table for each class
@@ -34,7 +34,7 @@ for ist=1:qn.nstations
     end
 end
 
-[Q,SS,SSq,~,~,~,qn] = solver_ctmc(qn, options);
+[Q,SS,SSq,~,~,~,sn] = solver_ctmc(sn, options);
 if options.keep
     fname = tempname;
     save([fname,'.mat'],'Q','SSq')
@@ -45,23 +45,23 @@ pi = ctmc_solve(Q);
 pi(pi<1e-14)=0;
 
 statesz = [];
-for ind=1:qn.nnodes
-    if qn.isstateful(ind)
-        isf = qn.nodeToStateful(ind);
-        statesz(isf) = size(qn.space{isf},2);
+for ind=1:sn.nnodes
+    if sn.isstateful(ind)
+        isf = sn.nodeToStateful(ind);
+        statesz(isf) = size(sn.space{isf},2);
     end
 end
 cstatesz = [0,cumsum(statesz)];
-Pnir = zeros(1,qn.nstations);
-for ind=1:qn.nnodes
-    if qn.isstateful(ind)
-        isf = qn.nodeToStateful(ind);
-        ist = qn.nodeToStation(ind);
-        state_i = [zeros(1,size(qn.space{isf},2)-length(state{isf})),state{isf}];
-        [~,nivec] = State.toMarginal(qn, ind, state{isf});
+Pnir = zeros(1,sn.nstations);
+for ind=1:sn.nnodes
+    if sn.isstateful(ind)
+        isf = sn.nodeToStateful(ind);
+        ist = sn.nodeToStation(ind);
+        state_i = [zeros(1,size(sn.space{isf},2)-length(state{isf})),state{isf}];
+        [~,nivec] = State.toMarginal(sn, ind, state{isf});
         Pnir(ist) = 0;
         for s=1:size(SS,1)
-            [~,sivec] = State.toMarginal(qn, ind, SS(s,(cstatesz(isf)+1):(cstatesz(isf)+length(state_i))));
+            [~,sivec] = State.toMarginal(sn, ind, SS(s,(cstatesz(isf)+1):(cstatesz(isf)+length(state_i))));
             if all(sivec == nivec)
                 Pnir(ist) = Pnir(ist) + pi(s);
             end

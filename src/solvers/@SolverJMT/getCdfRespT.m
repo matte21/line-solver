@@ -4,18 +4,18 @@ function [RD,logData] = getCdfRespT(self, R)
 if nargin<2 %~exist('R','var')
     R = getAvgRespTHandles(self);
 end
-qn = self.getStruct;
-RD = cell(qn.nstations, qn.nclasses);
+sn = self.getStruct;
+RD = cell(sn.nstations, sn.nclasses);
 QN = getAvgQLen(self); % steady-state qlen
 n = QN;
-for r=1:qn.nclasses
-    if isinf(qn.njobs(r))
+for r=1:sn.nclasses
+    if isinf(sn.njobs(r))
         n(:,r) = floor(QN(:,r));
     else
         n(:,r) = floor(QN(:,r));
-        if sum(n(:,r)) < qn.njobs(r)
+        if sum(n(:,r)) < sn.njobs(r)
             imax = maxpos(n(:,r)); % put jobs on the bottleneck
-            n(imax,r) = n(imax,r) + qn.njobs(r) - sum(n(:,r));
+            n(imax,r) = n(imax,r) + sn.njobs(r) - sum(n(:,r));
         end
     end
 end
@@ -32,7 +32,7 @@ for i= 1:cdfmodel.getNumberOfStations
         end
     end
 end
-Plinked = qn.rtorig;
+Plinked = sn.rtorig;
 isNodeLogged = max(isNodeClassLogged,[],2);
 logpath = tempdir;
 cdfmodel.linkAndLog(Plinked, isNodeLogged, logpath);

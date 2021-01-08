@@ -5,17 +5,17 @@ function [AN] = getAvgArvRChain(self,A)
 % Copyright (c) 2012-2021, Imperial College London
 % All rights reserved.
 
-qn = self.model.getStruct();
+sn = self.model.getStruct();
 %if nargin == 1
 %    [Q] = getAvgHandles(self);
 %end
 [ANclass] = getAvgArvR(self);
 
 % compute average chain metrics
-AN = zeros(qn.nstations, qn.nchains);
-for c=1:qn.nchains
-    inchain = find(qn.chains(c,:));
-    for i=1:qn.nstations
+AN = zeros(sn.nstations, sn.nchains);
+for c=1:sn.nchains
+    inchain = find(sn.chains(c,:));
+    for i=1:sn.nstations
         if ~isempty(ANclass)
             AN(i,c) = sum(ANclass(i,inchain));
         end

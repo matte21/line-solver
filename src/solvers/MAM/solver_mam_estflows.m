@@ -1,17 +1,17 @@
-function ARV = solver_mam_estflows(qn, DEP, config)
+function ARV = solver_mam_estflows(sn, DEP, config)
 % ARV = SOLVER_MAM_ESTFLOWS(QN, DEP, CONFIG)
 % DEP{i,r} is the departure process of class r from i in (D0,D1) format
 
-I = qn.nnodes;
-C = qn.nchains;
-R = qn.nclasses;
+I = sn.nnodes;
+C = sn.nchains;
+R = sn.nclasses;
 
 % In this function we use indexing over all non-ClassSwitch nodes
 non_cs_classes = [];
 isNCS = zeros(1,I);
 nodeToNCS = zeros(1,I);
 for ind=1:I
-    if qn.nodetype(ind) ~= NodeType.ClassSwitch
+    if sn.nodetype(ind) ~= NodeType.ClassSwitch
         non_cs_classes(end+1:end+R)= ((ind-1)*R+1):(ind*R);
         isNCS(ind) = true;
         nodeToNCS(ind) = sum(isNCS);
@@ -21,8 +21,8 @@ for ind=1:I
 end
 
 % Hide the nodes that are not class switches
-rtncs = dtmc_stochcomp(qn.rtnodes,non_cs_classes);
-Inc = I - sum(qn.nodetype == NodeType.ClassSwitch);
+rtncs = dtmc_stochcomp(sn.rtnodes,non_cs_classes);
+Inc = I - sum(sn.nodetype == NodeType.ClassSwitch);
 
 MMAP = DEP; % PH renewal process initially in (D0,D1) format
 
@@ -44,9 +44,9 @@ LINKS = cell(Inc,Inc);
 for ind=1:I
     if isNCS(ind)
         inc = nodeToNCS(ind);
-        switch qn.nodetype(ind)
+        switch sn.nodetype(ind)
             case {NodeType.Source, NodeType.Delay, NodeType.Queue}
-                ist = qn.nodeToStation(ind);
+                ist = sn.nodeToStation(ind);
                 
                 % obtain departure maps
                 if R>1
@@ -77,7 +77,7 @@ end
 % then we determine all incoming flows from all stations
 for ind=1:I
     FLOWS={};
-    if isNCS(ind) && qn.nodetype(ind) ~= NodeType.Source
+    if isNCS(ind) && sn.nodetype(ind) ~= NodeType.Source
         inc = nodeToNCS(ind);
         for jnd=1:Inc
             if ~isempty(LINKS{jnd,inc}) && sum(mmap_lambda(LINKS{jnd,inc}))>1e-6

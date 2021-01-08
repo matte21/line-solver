@@ -8,15 +8,15 @@ queuePutStrategyNode.setAttribute('array', 'true');
 queuePutStrategyNode.setAttribute('classPath', 'jmt.engine.NetStrategies.QueuePutStrategy');
 queuePutStrategyNode.setAttribute('name', 'QueuePutStrategy');
 
-qn = self.getStruct;
-numOfClasses = qn.nclasses;
-i = qn.nodeToStation(ind);
+sn = self.getStruct;
+numOfClasses = sn.nclasses;
+i = sn.nodeToStation(ind);
 for r=1:numOfClasses
     refClassNode2 = simDoc.createElement('refClass');
-    refClassNode2.appendChild(simDoc.createTextNode(qn.classnames{r}));
+    refClassNode2.appendChild(simDoc.createTextNode(sn.classnames{r}));
     queuePutStrategyNode.appendChild(refClassNode2);
     % Different to savePutStrategy.    
-    switch qn.schedid(i) %contrary to JMT, we assume identical across classes
+    switch sn.schedid(i) %contrary to JMT, we assume identical across classes
         case SchedStrategy.ID_SIRO
             subParameterNode2 = simDoc.createElement('subParameter');
             subParameterNode2.setAttribute('classPath', 'jmt.engine.NetStrategies.QueuePutStrategies.RandStrategy');

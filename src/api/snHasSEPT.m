@@ -1,5 +1,5 @@
-function bool = snHasSEPT(qn)
+function bool = snHasSEPT(sn)
 % BOOL = HASSEPT()
 
-bool = any(qn.schedid==SchedStrategy.ID_SEPT);
+bool = any(sn.schedid==SchedStrategy.ID_SEPT);
 end

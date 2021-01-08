@@ -35,9 +35,9 @@ if self.enableChecks && ~self.supports(self.model)
     throw(ME);
 end
 
-qn = getStruct(self); % this gets modified later on so pass by copy
-M = qn.nstations;
-K = qn.nclasses;
+sn = getStruct(self); % this gets modified later on so pass by copy
+M = sn.nstations;
+K = sn.nclasses;
 
 %%
 RT = 0;
@@ -45,21 +45,21 @@ lastSol= [];
 Q = zeros(M,K); R = zeros(M,K); T = zeros(M,K);
 U = zeros(M,K); C = zeros(1,K); X = zeros(1,K);
 Qt=[];
-s0 = qn.state;
-s0prior = qn.stateprior;
+s0 = sn.state;
+s0prior = sn.stateprior;
 s0_sz = cellfun(@(x) size(x,1), s0)';
 s0_id = pprod(s0_sz-1);
 while s0_id>=0 % for all possible initial states
     s0prior_val = 1;
-    for ind=1:qn.nnodes
-        if qn.isstateful(ind)
-            isf = qn.nodeToStateful(ind);
+    for ind=1:sn.nnodes
+        if sn.isstateful(ind)
+            isf = sn.nodeToStateful(ind);
             s0prior_val = s0prior_val * s0prior{isf}(1+s0_id(isf)); % update prior
-            qn.state{isf} = s0{isf}(1+s0_id(isf),:); % assign initial state to network
+            sn.state{isf} = s0{isf}(1+s0_id(isf),:); % assign initial state to network
         end
     end
     if s0prior_val > 0        
-        [Qfull, Ufull, Rfull, Tfull, Cfull, Xfull, t, Qfull_t, Ufull_t, Tfull_t, lastSol] = solver_fluid_analyzer(qn, options);
+        [Qfull, Ufull, Rfull, Tfull, Cfull, Xfull, t, Qfull_t, Ufull_t, Tfull_t, lastSol] = solver_fluid_analyzer(sn, options);
         [t,uniqueIdx] = unique(t);
         if isempty(lastSol) % if solution fails
             Q = NaN*ones(M,K); R = NaN*ones(M,K);

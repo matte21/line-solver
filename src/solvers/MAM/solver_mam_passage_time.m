@@ -1,4 +1,4 @@
-function [RD] = solver_mam_passage_time(qn, PH, options)
+function [RD] = solver_mam_passage_time(sn, PH, options)
 % [RD] = SOLVER_MAM_PASSAGE_TIME(QN, PH, OPTIONS)
 
 % Copyright (c) 2012-2021, Imperial College London
@@ -8,11 +8,11 @@ global BuToolsVerbose;
 global BuToolsCheckInput;
 global BuToolsCheckPrecision;
 %% generate local state spaces
-M = qn.nstations;
-K = qn.nclasses;
-N = qn.njobs';
-rt = qn.rt;
-V = qn.visits;
+M = sn.nstations;
+K = sn.nclasses;
+N = sn.njobs';
+rt = sn.rt;
+V = sn.visits;
 
 Q = zeros(M,K);
 U = zeros(M,K);
@@ -29,7 +29,7 @@ if M==2 && all(isinf(N))
     pie = {};
     S = {};
     for i=1:M
-        switch qn.schedid(i)
+        switch sn.schedid(i)
             case SchedStrategy.ID_EXT
                 na = cellfun(@(x) length(x{1}),{PH{i,:}});
                 A = {PH{i,1}{1},PH{i,1}{2},PH{i,1}{2}};
@@ -40,7 +40,7 @@ if M==2 && all(isinf(N))
             case {SchedStrategy.ID_FCFS, SchedStrategy.ID_HOL}
                 row = size(S,1) + 1;
                 for k=1:K
-                    PH{i,k} = map_scale(PH{i,k}, map_mean(PH{i,k})/qn.nservers(i));
+                    PH{i,k} = map_scale(PH{i,k}, map_mean(PH{i,k})/sn.nservers(i));
                     pie{k} = map_pie(PH{i,k});
                     S{k} = PH{i,k}{1};
                 end
@@ -50,9 +50,9 @@ if M==2 && all(isinf(N))
         end
     end
     
-    if any(qn.classprio ~= qn.classprio(1)) % if priorities are not identical
-        [uK,iK] = unique(qn.classprio);
-        if length(uK) == length(qn.classprio) % if all priorities are different
+    if any(sn.classprio ~= sn.classprio(1)) % if priorities are not identical
+        [uK,iK] = unique(sn.classprio);
+        if length(uK) == length(sn.classprio) % if all priorities are different
             %            [Ret{1:2*K}] = MMAPPH1NPPR({A{[1,3:end]}}, {pie{:}}, {S{:}}, 'stDistrPH');
             line_error(mfilename,'Response time distribution in priority models not yet supported.');
         else

@@ -1,30 +1,30 @@
-function [ni, nir] = toMarginalAggr(qn, ind, state_i, K, Ks, space_buf, space_srv, space_var) %#ok<INUSD>
+function [ni, nir] = toMarginalAggr(sn, ind, state_i, K, Ks, space_buf, space_srv, space_var) %#ok<INUSD>
 % [NI, NIR] = TOMARGINALAGGR(QN, IND, STATE_I, K, KS, SPACE_BUF, SPACE_SRV, SPACE_VAR) %#OK<INUSD>
 
 % Copyright (c) 2012-2021, Imperial College London
 % All rights reserved.
 
-if ~isstruct(qn) % the input can be a Network object too
-    qn=qn.getStruct();
+if ~isstruct(sn) % the input can be a Network object too
+    sn=sn.getStruct();
 end
 % ind: node index
-ist = qn.nodeToStation(ind);
-%isf = qn.nodeToStateful(ind);
-R = qn.nclasses;
-if ~qn.isstation(ind) && qn.isstateful(ind) % if stateful node
-    ni = sum(state_i(1:(end-sum(qn.nvars(ind,:)))));
-    nir = state_i(1:(end-sum(qn.nvars(ind,:))));
+ist = sn.nodeToStation(ind);
+%isf = sn.nodeToStateful(ind);
+R = sn.nclasses;
+if ~sn.isstation(ind) && sn.isstateful(ind) % if stateful node
+    ni = sum(state_i(1:(end-sum(sn.nvars(ind,:)))));
+    nir = state_i(1:(end-sum(sn.nvars(ind,:))));
     return
 end
 
 if nargin < 5
-    K = qn.phasessz(ist,:);
-    Ks = qn.phaseshift(ist,:);
+    K = sn.phasessz(ist,:);
+    Ks = sn.phaseshift(ist,:);
 end
 
 if nargin < 8
-    space_var = state_i(:,(end-sum(qn.nvars(ind,:))+1):end); % server state
-    space_srv = state_i(:,(end-sum(K)+1):(end-sum(qn.nvars(ind,:))));
+    space_var = state_i(:,(end-sum(sn.nvars(ind,:))+1):end); % server state
+    space_srv = state_i(:,(end-sum(K)+1):(end-sum(sn.nvars(ind,:))));
     space_buf = state_i(:,1:(end-sum(K)));
 end
 
@@ -34,7 +34,7 @@ for r=1:R
         nir(:,r) = nir(:,r) + space_srv(:,Ks(r)+k);
     end
 end
-switch qn.schedid(ist)
+switch sn.schedid(ist)
     case SchedStrategy.ID_EXT
         for r=1:R
             nir(:,r) = Inf;
@@ -68,7 +68,7 @@ switch qn.schedid(ist)
 end
 
 for r=1:R
-    if isnan(qn.rates(ist,r)) % if disabled
+    if isnan(sn.rates(ist,r)) % if disabled
         nir(:,r) = 0;
     end
 end

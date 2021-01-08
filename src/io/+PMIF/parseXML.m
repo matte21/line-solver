@@ -1,4 +1,4 @@
-function qn = parseXML(filename, verbose)
+function sn = parseXML(filename, verbose)
 % QN = PARSEXML(FILENAME, VERBOSE)
 
 % Copyright (c) 2012-2021, Imperial College London
@@ -19,7 +19,7 @@ try
 catch exception %java.io.FileNotFoundException
     if ~exist(filename, 'file')
         line_printf(['Error: Input file ', filename,' not found']);
-        qn = [];
+        sn = [];
         return;
     else
         rethrow(exception);
@@ -35,7 +35,7 @@ end
 if ~strcmp(rootElem, 'QueueingNetworkModel')
     line_printf(['Error: Input file ', filename,' does not have a proper PMIF model']);
     line_printf(['Root element:', rootElem ] );
-    qn = [];
+    sn = [];
     return;
 end
 
@@ -138,7 +138,7 @@ for i = 0:timeServiceRequestList.getLength()-1
 end
 
 
-qn = PMIF.PMIF(servers, workUnitServers, closedWorkloads, ...
+sn = PMIF.PMIF(servers, workUnitServers, closedWorkloads, ...
     demandServiceRequests, workUnitServiceRequests, timeServiceRequests);
 
 

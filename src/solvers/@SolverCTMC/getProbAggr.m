@@ -5,21 +5,21 @@ if ~isnumeric(ist) % station object
     ist = ist.index; 
 end
 
-qn = self.getStruct;
+sn = self.getStruct;
 if nargin<2 %~exist('ist','var')
     line_error(mfilename,'getProb requires to pass a parameter the station of interest.');
 end
-if ist > qn.nstations
+if ist > sn.nstations
     line_error(mfilename,'Station number exceeds the number of stations in the model.');
 end
 if ~isfield(self.options,'keep')
     self.options.keep = false;
 end
 T0 = tic;
-qn.state = qn.state;
+sn.state = sn.state;
 
 if isempty(self.result) || ~isfield(self.result,'Prob') || ~isfield(self.result.Prob,'marginal')
-    Pnir = solver_ctmc_margaggr(qn, self.options);
+    Pnir = solver_ctmc_margaggr(sn, self.options);
     self.result.('solver') = getName(self);
     self.result.Prob.marginal = Pnir;
 else

@@ -5,13 +5,13 @@ function [AvgTable,QT,UT,RT,TT] = getAvgTable(self,Q,U,R,T,keepDisabled)
 % Copyright (c) 2012-2021, Imperial College London
 % All rights reserved.
 
-qn = getStruct(self);
+sn = getStruct(self);
 
 if nargin<6 %~exist('keepDisabled','var')
     keepDisabled = false;
 end
-M = qn.nstations();
-K = qn.nclasses();
+M = sn.nstations();
+K = sn.nclasses();
 if nargin == 2
     keepDisabled = Q;
     [Q,U,R,T,~] = getAvgHandles(self);
@@ -37,13 +37,13 @@ if isempty(QN)
     TT = Table();
     AT = Table();
 elseif ~keepDisabled
-    V = cellsum(qn.visits);
+    V = cellsum(sn.visits);
     if isempty(V) % SSA
         for i=1:M
-            for c=1:qn.nchains
-                chain_classes = find(qn.chains(c,:));
+            for c=1:sn.nchains
+                chain_classes = find(sn.chains(c,:));
                 k = chain_classes(1);
-                Tchain=sum(TN(qn.refstat(k),chain_classes));
+                Tchain=sum(TN(sn.refstat(k),chain_classes));
                 for k=chain_classes
                     V(i,k)=TN(i,k)/Tchain;
                 end
@@ -59,7 +59,7 @@ elseif ~keepDisabled
     for i=1:M
         for k=1:K
             if any(sum([QN(i,k),UN(i,k),RN(i,k),TN(i,k)])>0)
-                c = find(qn.chains(:,k));
+                c = find(sn.chains(:,k));
                 JobClass{end+1,1} = Q{i,k}.class.name;
                 Station{end+1,1} = Q{i,k}.station.name;
                 Qval(end+1) = QN(i,k);
@@ -68,7 +68,7 @@ elseif ~keepDisabled
                 if RN(i,k)<Distrib.Zero
                     Residval(end+1) = RN(i,k);
                 else
-                    Residval(end+1) = RN(i,k)*V(i,k)/sum(V(qn.refstat(k),qn.chains(c,:)));
+                    Residval(end+1) = RN(i,k)*V(i,k)/sum(V(sn.refstat(k),sn.chains(c,:)));
                 end
                 Tval(end+1) = TN(i,k);
             end
@@ -88,13 +88,13 @@ elseif ~keepDisabled
     %AvgTable = Table(Station,JobClass,QLen,Util,RespT,Tput);
     AvgTable = Table(Station, JobClass, QLen, Util, RespT, ResidT, Tput);
 else
-    V = cellsum(qn.visits);
+    V = cellsum(sn.visits);
     if isempty(V) % SSA
         for i=1:M
-            for c=1:qn.nchains
-                chain_classes = find(qn.chains(c,:));
+            for c=1:sn.nchains
+                chain_classes = find(sn.chains(c,:));
                 k = chain_classes(1);
-                Tchain=sum(TN(qn.refstat(k),chain_classes));
+                Tchain=sum(TN(sn.refstat(k),chain_classes));
                 for k=chain_classes
                     V(i,k)=TN(i,k)/Tchain;
                 end
@@ -108,7 +108,7 @@ else
     Station = cell(K*M,1);
     for i=1:M
         for k=1:K
-            c = find(qn.chains(:,k));
+            c = find(sn.chains(:,k));
             JobClass{(i-1)*K+k} = Q{i,k}.class.name;
             Station{(i-1)*K+k} = Q{i,k}.station.name;
             Qval((i-1)*K+k) = QN(i,k);
@@ -117,7 +117,7 @@ else
             if RN(i,k)<Distrib.Zero
                 Residval((i-1)*K+k) = RN(i,k);
             else
-                Residval((i-1)*K+k) = RN(i,k)*V(i,k)/sum(V(qn.refstat(k),qn.chains(c,:)));
+                Residval((i-1)*K+k) = RN(i,k)*V(i,k)/sum(V(sn.refstat(k),sn.chains(c,:)));
             end
             Tval((i-1)*K+k) = TN(i,k);
         end

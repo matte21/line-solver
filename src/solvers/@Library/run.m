@@ -17,9 +17,9 @@ end
 
 Solver.resetRandomGeneratorSeed(options.seed);
 
-[qn] = getStruct(self);
+[sn] = getStruct(self);
 
-[Q,U,R,T,C,X] = solver_lib_analyzer(qn, options);
+[Q,U,R,T,C,X] = solver_lib_analyzer(sn, options);
 
 runtime=toc(T0);
 self.setAvgResults(Q,U,R,T,C,X,runtime);

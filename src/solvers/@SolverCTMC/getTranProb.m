@@ -3,13 +3,13 @@ function [Pi_t, SSnode] = getTranProb(self, node)
 
 options = self.getOptions;
 if isfield(options,'timespan')  && isfinite(options.timespan(2))
-    qn = self.getStruct;
-    [t,pi_t,~,~,~,~,~,~,~,~,SS] = solver_ctmc_transient_analyzer(qn, options);
+    sn = self.getStruct;
+    [t,pi_t,~,~,~,~,~,~,~,~,SS] = solver_ctmc_transient_analyzer(sn, options);
     jnd = node.index;
     shift = 1;
-    for isf = 1:qn.nstateful
-        len = length(qn.state{isf});
-        if qn.statefulToNode(isf) == jnd
+    for isf = 1:sn.nstateful
+        len = length(sn.state{isf});
+        if sn.statefulToNode(isf) == jnd
             SSnode = SS(:,shift:shift+len-1);
             break;
         end

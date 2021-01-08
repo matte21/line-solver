@@ -84,7 +84,7 @@ switch options.method
             initTimeSpan = self.options.timespan;
             self.options.timespan(1) = self.options.timespan(2);
             if isfield(options,'timespan')  && isfinite(options.timespan(2))
-                qn = self.getStruct;
+                sn = self.getStruct;
                 tu = [];
                 for it=1:options.iter_max
                     self.options.seed = initSeed + it -1;
@@ -101,11 +101,11 @@ switch options.method
                         tu = tu(tu<=tumax);
                     end
                 end
-                QNt = cellzeros(qn.nstations, qn.nclasses, length(tu), 2);
-                UNt = cellzeros(qn.nstations, qn.nclasses, length(tu), 2);
-                TNt = cellzeros(qn.nstations, qn.nclasses, length(tu), 2);
-                M = qn.nstations;
-                K = qn.nclasses;
+                QNt = cellzeros(sn.nstations, sn.nclasses, length(tu), 2);
+                UNt = cellzeros(sn.nstations, sn.nclasses, length(tu), 2);
+                TNt = cellzeros(sn.nstations, sn.nclasses, length(tu), 2);
+                M = sn.nstations;
+                K = sn.nclasses;
                 for j=1:M
                     for r=1:K
                         QNt{j,r}(:,2) = tu;
@@ -119,8 +119,8 @@ switch options.method
                             QNt{j,r}(:,1) = QNt{j,r}(:,1) + (1/options.iter_max) * avgQlenAt_t;
                         end
                         for it=1:options.iter_max
-                            if isfinite(qn.nservers(j))
-                                occupancyAt_t = interp1(TranSysStateAggr{it}.t, min(TranSysStateAggr{it}.state{j}(:,r),qn.nservers(j)), tu,'previous')/qn.nservers(j);
+                            if isfinite(sn.nservers(j))
+                                occupancyAt_t = interp1(TranSysStateAggr{it}.t, min(TranSysStateAggr{it}.state{j}(:,r),sn.nservers(j)), tu,'previous')/sn.nservers(j);
                             else % if delay we use queue-length
                                 occupancyAt_t = interp1(TranSysStateAggr{it}.t, TranSysStateAggr{it}.state{j}(:,r), tu,'previous');
                             end
@@ -137,10 +137,10 @@ switch options.method
                         %                             avgDeparturesAt_t(isnan(avgDeparturesAt_t))=0;
                         %                             TNt{j,r}(:,1) = TNt{j,r}(:,1) + (1/options.iter_max) * avgDeparturesAt_t;
                         %                         end
-                        if isfinite(qn.nservers(j))
-                            TNt{j,r}(:,1) = UNt{j,r}(:,1) * qn.nservers(j) * qn.rates(j,r);
+                        if isfinite(sn.nservers(j))
+                            TNt{j,r}(:,1) = UNt{j,r}(:,1) * sn.nservers(j) * sn.rates(j,r);
                         else
-                            TNt{j,r}(:,1) = UNt{j,r}(:,1) * qn.rates(j,r);
+                            TNt{j,r}(:,1) = UNt{j,r}(:,1) * sn.rates(j,r);
                         end
                     end
                 end

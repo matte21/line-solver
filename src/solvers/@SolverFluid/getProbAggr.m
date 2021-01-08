@@ -4,18 +4,18 @@ function [Pnir,logPnir] = getProbAggr(self, ist)
 if nargin<2 %~exist('ist','var')
     line_error(mfilename,'getProbAggr requires to pass a parameter the station of interest.');
 end
-if ist > qn.nstations
+if ist > sn.nstations
     line_error(mfilename,'Station number exceeds the number of stations in the model.');
 end
 if isempty(self.result)
     self.run;
 end
 Q = self.result.Avg.Q;
-qn = self.getStruct;
-N = qn.njobs;
+sn = self.getStruct;
+N = sn.njobs;
 if all(isfinite(N))
-    state = qn.state{qn.stationToStateful(ist)};
-    [~, nir, ~, ~] = State.toMarginal(qn, ist, state, self.getOptions);
+    state = sn.state{sn.stationToStateful(ist)};
+    [~, nir, ~, ~] = State.toMarginal(sn, ist, state, self.getOptions);
     % Binomial approximation with mean fitted to queue-lengths.
     % Rainer Schmidt, "An approximate MVA ...", PEVA 29:245-254, 1997.
     logPnir = 0;

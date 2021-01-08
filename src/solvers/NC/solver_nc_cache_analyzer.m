@@ -1,4 +1,4 @@
-function [QN,UN,RN,TN,CN,XN,lG,pij,runtime] = solver_nc_cache_analyzer(qn, options)
+function [QN,UN,RN,TN,CN,XN,lG,pij,runtime] = solver_nc_cache_analyzer(sn, options)
 % [Q,U,R,T,C,X,LG,PIJ,RUNTIME] = SOLVER_NC_CACHE_ANALYZER(QN, OPTIONS)
 
 % Copyright (c) 2012-2021, Imperial College London
@@ -8,15 +8,15 @@ T0=tic;
 QN = []; UN = [];
 RN = []; TN = [];
 CN = [];
-XN = zeros(1,qn.nclasses);
+XN = zeros(1,sn.nclasses);
 lG = NaN;
 
-source_ist = qn.nodeToStation(qn.nodetype == NodeType.Source);
-sourceRate = qn.rates(source_ist,:);
+source_ist = sn.nodeToStation(sn.nodetype == NodeType.Source);
+sourceRate = sn.rates(source_ist,:);
 sourceRate(isnan(sourceRate)) = 0;
 TN(source_ist,:) = sourceRate;
 
-ch = qn.varsparam{qn.nodetype == NodeType.Cache};
+ch = sn.varsparam{sn.nodetype == NodeType.Cache};
 
 m = ch.cap;
 n = ch.nitems;
@@ -26,7 +26,7 @@ if n<m+2
 end
 
 h = length(m);
-u = qn.nclasses;
+u = sn.nclasses;
 lambda = zeros(u,n,h);
 
 for v=1:u
@@ -56,7 +56,7 @@ switch options.method
         [pij] = mucache_prob_rayint(gamma,m, lE);
 end
 
-for r = 1:qn.nclasses
+for r = 1:sn.nclasses
     if length(ch.hitclass)>=r && ch.missclass(r)>0 && ch.hitclass(r)>0
         XN(ch.missclass(r)) = XN(ch.missclass(r)) + missRate(r);
         XN(ch.hitclass(r)) = XN(ch.hitclass(r)) + (sourceRate(r) - missRate(r));

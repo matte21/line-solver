@@ -6,17 +6,17 @@ function [TN] = getAvgTputChain(self,T)
 % Copyright (c) 2012-2021, Imperial College London
 % All rights reserved.
 
-qn = self.model.getStruct();
+sn = self.model.getStruct();
 %if nargin == 1
 %    [Q] = getAvgHandles(self);
 %end
 [TNclass] = getAvgTput(self);
 
 % compute average chain metrics
-TN = zeros(qn.nstations, qn.nchains);
-for c=1:qn.nchains
-    inchain = find(qn.chains(c,:));
-    for i=1:qn.nstations
+TN = zeros(sn.nstations, sn.nchains);
+for c=1:sn.nchains
+    inchain = find(sn.chains(c,:));
+    for i=1:sn.nstations
         if ~isempty(TNclass)
             TN(i,c) = sum(TNclass(i,inchain)); %#ok<FNDSB>
         end

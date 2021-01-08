@@ -3,28 +3,28 @@ function features = extractFeatures(model)
 % Network object (QN model in LINE) and returns a vector
 % of 15 features as shown below
 
-	qn = model.getStruct;   
+	sn = model.getStruct;   
     features = zeros(1, 15);
     
     % Station and scheduling information
-    features(1) = sum(qn.schedid == SchedStrategy.ID_FCFS); % Num FCFS queues
-    features(2) = sum(qn.schedid == SchedStrategy.ID_PS); % Num PS queues
-    features(3) = sum(qn.schedid == SchedStrategy.ID_INF); % Num delays
-    features(4) = qn.nnodes - qn.nstations; % Num CS nodes
-    features(5) = sum(qn.nservers(~isinf(qn.nservers))); % Num queue servers
+    features(1) = sum(sn.schedid == SchedStrategy.ID_FCFS); % Num FCFS queues
+    features(2) = sum(sn.schedid == SchedStrategy.ID_PS); % Num PS queues
+    features(3) = sum(sn.schedid == SchedStrategy.ID_INF); % Num delays
+    features(4) = sn.nnodes - sn.nstations; % Num CS nodes
+    features(5) = sum(sn.nservers(~isinf(sn.nservers))); % Num queue servers
     
     % Job information
-    features(6) = qn.nchains; % Num chains
-    features(7) = qn.nclosedjobs; % Number of jobs in the system
+    features(6) = sn.nchains; % Num chains
+    features(7) = sn.nclosedjobs; % Number of jobs in the system
     
     % Service process information
     features(8:10) = getServiceDist(model); % Num of each distribution type
-    features(11) = mean(qn.rates, 'all', 'omitnan'); % Avg service rate
-    features(12) = mean(qn.scv, 'all', 'omitnan'); % Avg SCV
-    features(13) = mean(qn.phases, 'all', 'omitnan'); % Avg phases
+    features(11) = mean(sn.rates, 'all', 'omitnan'); % Avg service rate
+    features(12) = mean(sn.scv, 'all', 'omitnan'); % Avg SCV
+    features(13) = mean(sn.phases, 'all', 'omitnan'); % Avg phases
     
     % Misc
-    features(14) = sum(qn.nodetype == NodeType.Queue) == 1; % If only 1 Queue, special for nc.mmint
+    features(14) = sum(sn.nodetype == NodeType.Queue) == 1; % If only 1 Queue, special for nc.mmint
     features(15) = model.hasProductFormSolution; % Check if model has product form solution
 end
 

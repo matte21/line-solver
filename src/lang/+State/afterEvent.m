@@ -1,4 +1,4 @@
-function [outspace, outrate, outprob] =  afterEvent(qn, ind, inspace, event, class, isSimulation)
+function [outspace, outrate, outprob] =  afterEvent(sn, ind, inspace, event, class, isSimulation)
 % [OUTSPACE, OUTRATE, OUTPROB] =  AFTEREVENT(QN, IND, INSPACE, EVENT, CLASS, ISSIMULATION)
 
 % Copyright (c) 2012-2021, Imperial College London
@@ -9,40 +9,40 @@ function [outspace, outrate, outprob] =  afterEvent(qn, ind, inspace, event, cla
 %if ~exist('isSimulation','var')
 %    isSimulation = false;
 %end
-M = qn.nstations;
-R = qn.nclasses;
-S = qn.nservers;
-phasessz = qn.phasessz;
-phaseshift = qn.phaseshift;
-pie = qn.pie;
+M = sn.nstations;
+R = sn.nclasses;
+S = sn.nservers;
+phasessz = sn.phasessz;
+phaseshift = sn.phaseshift;
+pie = sn.pie;
 outspace = [];
 outrate = [];
 outprob = 1;
 % ind: node index
-isf = qn.nodeToStateful(ind);
+isf = sn.nodeToStateful(ind);
 
 hasOnlyExp = false; % true if all service processes are exponential
-if qn.isstation(ind)
-    ist = qn.nodeToStation(ind);
+if sn.isstation(ind)
+    ist = sn.nodeToStation(ind);
     K = phasessz(ist,:);
     Ks = phaseshift(ist,:);
     if max(K)==1
         hasOnlyExp = true;
     end
-    mu = qn.mu;
-    phi = qn.phi;
-    ph = qn.proc;
-    capacity = qn.cap;
-    classcap = qn.classcap;
+    mu = sn.mu;
+    phi = sn.phi;
+    ph = sn.proc;
+    capacity = sn.cap;
+    classcap = sn.classcap;
     if K(class) == 0 % if this class is not accepted at the resource
         return
     end
-    V = sum(qn.nvars(ind,:));
+    V = sum(sn.nvars(ind,:));
     space_var = inspace(:,(end-V+1):end); % local state variables
     space_srv = inspace(:,(end-sum(K)-V+1):(end-V)); % server state
     space_buf = inspace(:,1:(end-sum(K)-V)); % buffer state
-elseif qn.isstateful(ind)
-    V = sum(qn.nvars(ind,:));
+elseif sn.isstateful(ind)
+    V = sum(sn.nvars(ind,:));
     % in this case service is always immediate so sum(K)=1
     space_var = inspace(:,(end-V+1):end); % local state variables
     space_srv = inspace(:,(end-R-V+1):(end-V)); % server state
@@ -53,13 +53,13 @@ else % stateless node
     space_buf = [];
 end
 
-%switch qn.nodetype(ind)
+%switch sn.nodetype(ind)
 %    case {NodeType.Queue, NodeType.Delay, NodeType.Source}
-if qn.isstation(ind)
+if sn.isstation(ind)
     switch event
         case EventType.ID_ARV %% passive
             % return if there is no space to accept the arrival
-            [ni,nir] = State.toMarginalAggr(qn,ind,inspace,K,Ks,space_buf,space_srv,space_var);
+            [ni,nir] = State.toMarginalAggr(sn,ind,inspace,K,Ks,space_buf,space_srv,space_var);
             % otherwise check scheduling strategy
             pentry = pie{ist,class};
             outprob = [];
@@ -68,9 +68,9 @@ if qn.isstation(ind)
                 space_var_k = space_var;
                 space_srv_k = space_srv;
                 space_buf_k = space_buf;
-                switch qn.schedid(ist)
+                switch sn.schedid(ist)
                     case SchedStrategy.ID_EXT % source, can receive any "virtual" arrival from the sink as long as it is from an open class
-                        if isinf(qn.njobs(class))
+                        if isinf(sn.njobs(class))
                             outspace = inspace;
                             outrate = -1*zeros(size(outspace,1)); % passive action, rate is unspecified
                             outprob = ones(size(outspace,1));
@@ -146,21 +146,21 @@ if qn.isstation(ind)
             end
         case EventType.ID_DEP
             if any(any(space_srv(:,(Ks(class)+1):(Ks(class)+K(class))))) % something is busy
-                if hasOnlyExp && (qn.schedid(ist) == SchedStrategy.ID_PS || qn.schedid(ist) == SchedStrategy.ID_DPS || qn.schedid(ist) == SchedStrategy.ID_GPS || qn.schedid(ist) == SchedStrategy.ID_INF)
+                if hasOnlyExp && (sn.schedid(ist) == SchedStrategy.ID_PS || sn.schedid(ist) == SchedStrategy.ID_DPS || sn.schedid(ist) == SchedStrategy.ID_GPS || sn.schedid(ist) == SchedStrategy.ID_INF)
                     nir = space_srv;
                     ni = sum(nir,2);
                     sir = nir;
                     kir = sir;
                 else
-                    [ni,nir,sir,kir] = State.toMarginal(qn,ind,inspace,K,Ks,space_buf,space_srv,space_var);
+                    [ni,nir,sir,kir] = State.toMarginal(sn,ind,inspace,K,Ks,space_buf,space_srv,space_var);
                 end
-                switch qn.routing(ind)
+                switch sn.routing(ind)
                     case RoutingStrategy.ID_RRB
-                        idx = find(space_var(end) == qn.varsparam{ind}.outlinks);
-                        if idx < length(qn.varsparam{ind}.outlinks)
-                            space_var = qn.varsparam{ind}.outlinks(idx+1);
+                        idx = find(space_var(end) == sn.varsparam{ind}.outlinks);
+                        if idx < length(sn.varsparam{ind}.outlinks)
+                            space_var = sn.varsparam{ind}.outlinks(idx+1);
                         else
-                            space_var = qn.varsparam{ind}.outlinks(1);
+                            space_var = sn.varsparam{ind}.outlinks(1);
                         end
                 end
                 if sir(class)>0 % is a job of class is in service
@@ -171,9 +171,9 @@ if qn.isstation(ind)
                         rate = zeros(size(space_srv,1),1);
                         en =  space_srv(:,Ks(class)+k) > 0;
                         if any(en)
-                            switch qn.schedid(ist)
+                            switch sn.schedid(ist)
                                 case SchedStrategy.ID_EXT % source, can produce an arrival from phase-k as long as it is from an open class
-                                    if isinf(qn.njobs(class))
+                                    if isinf(sn.njobs(class))
                                         pentry = pie{ist,class};
                                         for kentry = 1:K(class)
                                             space_srv = inspace(:,(end-sum(K)-V+1):(end-V)); % server state
@@ -204,7 +204,7 @@ if qn.isstation(ind)
                                         line_error(mfilename,'Multi-server DPS stations are not supported yet.');
                                     end
                                     % in GPS, the scheduling parameter are the weights
-                                    w_i = qn.schedparam(ist,:);
+                                    w_i = sn.schedparam(ist,:);
                                     w_i = w_i / sum(w_i);
                                     rate(en) = mu{ist,class}(k)*(phi{ist,class}(k))*(kir(en,class,k)/nir(class))*w_i(class)*nir(class)./(sum(repmat(w_i,sum(en),1)*nir',2));
                                     % if state is unchanged, still add with rate 0
@@ -217,7 +217,7 @@ if qn.isstation(ind)
                                         line_error(mfilename,'Multi-server GPS stations are not supported yet.');
                                     end
                                     % in GPS, the scheduling parameter are the weights
-                                    w_i = qn.schedparam(ist,:);
+                                    w_i = sn.schedparam(ist,:);
                                     w_i = w_i / sum(w_i);
                                     cir = min(nir,ones(size(nir)));
                                     rate = mu{ist,class}(k)*(phi{ist,class}(k))*(kir(en,class,k)/nir(class))*w_i(class)/(w_i*cir(:)); % assume active
@@ -255,7 +255,7 @@ if qn.isstation(ind)
                                     en_wbuf = en & ni>S(ist); %states with jobs in buffer
                                     en_wobuf = ~en_wbuf;
                                     space_srv(en,Ks(class)+k) = space_srv(en,Ks(class)+k) - 1; % record departure
-                                    priogroup = [0,qn.classprio];
+                                    priogroup = [0,sn.classprio];
                                     space_buf_groupg = arrayfun(@(x) priogroup(1+x), space_buf);
                                     start_classprio = max(space_buf_groupg(en_wbuf,:),[],2);
                                     isrowmax = space_buf_groupg == repmat(start_classprio, 1, size(space_buf_groupg,2));
@@ -347,8 +347,8 @@ if qn.isstation(ind)
                                     % in SEPT, the scheduling parameter is the priority order of the class means
                                     % en_wbuf: states where the buffer is non-empty
                                     % sept_class: class to pick in service
-                                    [en_wbuf, first_class_inrow] = max(space_buf(:,qn.schedparam(ist,:))~=0, [], 2);
-                                    sept_class = qn.schedparam(ist,first_class_inrow); % this is different for sept and lept
+                                    [en_wbuf, first_class_inrow] = max(space_buf(:,sn.schedparam(ist,:))~=0, [], 2);
+                                    sept_class = sn.schedparam(ist,first_class_inrow); % this is different for sept and lept
                                     
                                     space_buf(en_wbuf,sept_class) = space_buf(en_wbuf,sept_class) - 1; % remove from buffer
                                     pentry = pie{ist,sept_class};
@@ -371,7 +371,7 @@ if qn.isstation(ind)
                                         space_srv(en_wbuf,Ks(sept_class)+kentry) = space_srv(en_wbuf,Ks(sept_class)+kentry) - 1; % bring job in service
                                     end
                                 otherwise
-                                    line_error(mfilename,'Scheduling strategy %s is not supported.', qn.sched{ist});
+                                    line_error(mfilename,'Scheduling strategy %s is not supported.', sn.sched{ist});
                             end
                         end
                     end
@@ -391,7 +391,7 @@ if qn.isstation(ind)
             outspace = [];
             outrate = [];
             outprob = [];
-            [ni,nir,~,kir] = State.toMarginal(qn,ind,inspace,K,Ks,space_buf,space_srv,space_var);
+            [ni,nir,~,kir] = State.toMarginal(sn,ind,inspace,K,Ks,space_buf,space_srv,space_var);
             if nir(class)>0
                 for k=1:(K(class)-1)
                     en = space_srv(:,Ks(class)+k) > 0;
@@ -403,7 +403,7 @@ if qn.isstation(ind)
                             space_var_k = space_var(en,:);
                             space_srv_k(:,Ks(class)+k) = space_srv_k(:,Ks(class)+k) - 1;
                             space_srv_k(:,Ks(class)+kdest) = space_srv_k(:,Ks(class)+kdest) + 1;
-                            switch qn.schedid(ist)
+                            switch sn.schedid(ist)
                                 case SchedStrategy.ID_EXT
                                     rate = ph{ist,class}{1}(k,kdest); % move next job forward
                                 case SchedStrategy.ID_INF
@@ -414,7 +414,7 @@ if qn.isstation(ind)
                                     if S(ist) > 1
                                         line_error(mfilename,'Multi-server DPS not supported yet');
                                     end
-                                    w_i = qn.schedparam(ist,:);
+                                    w_i = sn.schedparam(ist,:);
                                     w_i = w_i / sum(w_i);
                                     rate = ph{ist,class}{1}(k,kdest)*kir(:,class,k)*w_i(class)./(sum(repmat(w_i,size(nir,1),1)*nir',2)); % assume active
                                 case SchedStrategy.ID_GPS
@@ -422,7 +422,7 @@ if qn.isstation(ind)
                                         line_error(mfilename,'Multi-server GPS not supported yet');
                                     end
                                     cir = min(nir,ones(size(nir)));
-                                    w_i = qn.schedparam(ist,:); w_i = w_i / sum(w_i);
+                                    w_i = sn.schedparam(ist,:); w_i = w_i / sum(w_i);
                                     rate = ph{ist,class}{1}(k,kdest)*kir(:,class,k)/nir(class)*w_i(class)/(w_i*cir(:)); % assume active
                                     
                                 case {SchedStrategy.ID_FCFS, SchedStrategy.ID_HOL, SchedStrategy.ID_LCFS, SchedStrategy.ID_SIRO, SchedStrategy.ID_SEPT, SchedStrategy.ID_LEPT}
@@ -448,8 +448,8 @@ if qn.isstation(ind)
                 end
             end
     end
-elseif qn.isstateful(ind)
-    switch qn.nodetype(ind)
+elseif sn.isstateful(ind)
+    switch sn.nodetype(ind)
         case NodeType.Cache
             % job arrives in class, then reads and moves into hit or miss
             % class, then departs
@@ -465,15 +465,15 @@ elseif qn.isstateful(ind)
                         outrate = Distrib.InfRate*ones(size(outspace,1)); % passive action, rate is unspecified
                     end
                 case EventType.ID_READ
-                    n = qn.varsparam{ind}.nitems; % n items
-                    m = qn.varsparam{ind}.cap; % capacity
-                    ac = qn.varsparam{ind}.accost; % access cost                    
-                    hitclass = qn.varsparam{ind}.hitclass;
-                    missclass = qn.varsparam{ind}.missclass;
+                    n = sn.varsparam{ind}.nitems; % n items
+                    m = sn.varsparam{ind}.cap; % capacity
+                    ac = sn.varsparam{ind}.accost; % access cost                    
+                    hitclass = sn.varsparam{ind}.hitclass;
+                    missclass = sn.varsparam{ind}.missclass;
                     h = length(m);
-                    rpolicy_id = qn.varsparam{ind}.rpolicy;
+                    rpolicy_id = sn.varsparam{ind}.rpolicy;
                     if space_srv(class)>0 && sum(space_srv)==1 % is a job of class is in
-                        p = qn.varsparam{ind}.pref{class};
+                        p = sn.varsparam{ind}.pref{class};
                         en =  space_srv(:,class) > 0;
                         space_srv_k = [];
                         space_var_k = [];

@@ -32,27 +32,27 @@ catch
     self.result.Prob.logNormConstAggr = NaN;
 end
 
-qn = self.getStruct;
+sn = self.getStruct;
 %%%
-M = qn.nstations;    %number of stations
-S = qn.nservers;
-NK = qn.njobs';  % initial population per class
-C = qn.nchains;
-SCV = qn.scv;
+M = sn.nstations;    %number of stations
+S = sn.nservers;
+NK = sn.njobs';  % initial population per class
+C = sn.nchains;
+SCV = sn.scv;
 
 % determine service times
-ST = 1./qn.rates;
-ST(isnan(qn.rates))=0;
+ST = 1./sn.rates;
+ST(isnan(sn.rates))=0;
 SCV(isnan(SCV))=1;
 
-alpha = zeros(qn.nstations,qn.nclasses);
-Vchain = zeros(qn.nstations,qn.nchains);
-for c=1:qn.nchains
-    inchain = find(qn.chains(c,:));
-    for i=1:qn.nstations
-        Vchain(i,c) = sum(qn.visits{c}(i,inchain)) / sum(qn.visits{c}(qn.refstat(inchain(1)),inchain));
+alpha = zeros(sn.nstations,sn.nclasses);
+Vchain = zeros(sn.nstations,sn.nchains);
+for c=1:sn.nchains
+    inchain = find(sn.chains(c,:));
+    for i=1:sn.nstations
+        Vchain(i,c) = sum(sn.visits{c}(i,inchain)) / sum(sn.visits{c}(sn.refstat(inchain(1)),inchain));
         for k=inchain
-            alpha(i,k) = alpha(i,k) + qn.visits{c}(i,k) / sum(qn.visits{c}(i,inchain));
+            alpha(i,k) = alpha(i,k) + sn.visits{c}(i,k) / sum(sn.visits{c}(i,inchain));
         end
     end
 end
@@ -65,22 +65,22 @@ STchain = zeros(M,C);
 SCVchain = zeros(M,C);
 Nchain = zeros(1,C);
 refstatchain = zeros(C,1);
-for c=1:qn.nchains
-    inchain = find(qn.chains(c,:));
-    isOpenChain = any(isinf(qn.njobs(inchain)));
-    for i=1:qn.nstations
+for c=1:sn.nchains
+    inchain = find(sn.chains(c,:));
+    isOpenChain = any(isinf(sn.njobs(inchain)));
+    for i=1:sn.nstations
         % we assume that the visits in L(i,inchain) are equal to 1
         STchain(i,c) = ST(i,inchain) * alpha(i,inchain)';
-        if isOpenChain && i == qn.refstat(inchain(1)) % if this is a source ST = 1 / arrival rates
-            STchain(i,c) = 1 / sumfinite(qn.rates(i,inchain)); % ignore degenerate classes with zero arrival rates
+        if isOpenChain && i == sn.refstat(inchain(1)) % if this is a source ST = 1 / arrival rates
+            STchain(i,c) = 1 / sumfinite(sn.rates(i,inchain)); % ignore degenerate classes with zero arrival rates
         else
             STchain(i,c) = ST(i,inchain) * alpha(i,inchain)';
         end
         SCVchain(i,c) = SCV(i,inchain) * alpha(i,inchain)';
     end
     Nchain(c) = sum(NK(inchain));
-    refstatchain(c) = qn.refstat(inchain(1));
-    if any((qn.refstat(inchain(1))-refstatchain(c))~=0)
+    refstatchain(c) = sn.refstat(inchain(1));
+    if any((sn.refstat(inchain(1))-refstatchain(c))~=0)
         line_error(sprintf('Classes in chain %d have different reference station.',c));
     end
 end
@@ -88,30 +88,30 @@ STchain(~isfinite(STchain))=0;
 %%%
 statres = parsed.solutions.algorithm.stationresults;
 
-for k=1:qn.nclasses
-    for i=1:qn.nstations
-        switch qn.nodetype(self.getStruct.stationToNode(i))
+for k=1:sn.nclasses
+    for i=1:sn.nstations
+        switch sn.nodetype(self.getStruct.stationToNode(i))
             case NodeType.Source
                 s = struct();
                 s.('alfa') = NaN;
                 s.('analyzedSamples') = Inf;
-                s.('class') = qn.classnames{k};
+                s.('class') = sn.classnames{k};
                 s.('discardedSamples') = 0;
-                s.('lowerLimit') = qn.rates(i,k);
+                s.('lowerLimit') = sn.rates(i,k);
                 s.('maxSamples') = Inf;
-                s.('meanValue') = qn.rates(i,k);
+                s.('meanValue') = sn.rates(i,k);
                 s.('measureType') = MetricType.Tput;
                 s.('nodeType') = 'station';
                 s.('precision') = Inf;
-                s.('station') = qn.nodenames{self.getStruct.stationToNode(i)};
+                s.('station') = sn.nodenames{self.getStruct.stationToNode(i)};
                 s.('successful') = 'true';
-                s.('upperLimit') = qn.rates(i,k);
+                s.('upperLimit') = sn.rates(i,k);
                 self.result.metric{end+1} = s;
                 
                 s = struct();
                 s.('alfa') = NaN;
                 s.('analyzedSamples') = Inf;
-                s.('class') = qn.classnames{k};
+                s.('class') = sn.classnames{k};
                 s.('discardedSamples') = 0;
                 s.('lowerLimit') = 0;
                 s.('maxSamples') = Inf;
@@ -119,7 +119,7 @@ for k=1:qn.nclasses
                 s.('measureType') = MetricType.QLen;
                 s.('nodeType') = 'station';
                 s.('precision') = Inf;
-                s.('station') = qn.nodenames{self.getStruct.stationToNode(i)};
+                s.('station') = sn.nodenames{self.getStruct.stationToNode(i)};
                 s.('successful') = 'true';
                 s.('upperLimit') = 0;
                 self.result.metric{end+1} = s;
@@ -127,7 +127,7 @@ for k=1:qn.nclasses
                 s = struct();
                 s.('alfa') = NaN;
                 s.('analyzedSamples') = Inf;
-                s.('class') = qn.classnames{k};
+                s.('class') = sn.classnames{k};
                 s.('discardedSamples') = 0;
                 s.('lowerLimit') = 0;
                 s.('maxSamples') = Inf;
@@ -135,7 +135,7 @@ for k=1:qn.nclasses
                 s.('measureType') = MetricType.RespT;
                 s.('nodeType') = 'station';
                 s.('precision') = Inf;
-                s.('station') = qn.nodenames{self.getStruct.stationToNode(i)};
+                s.('station') = sn.nodenames{self.getStruct.stationToNode(i)};
                 s.('successful') = 'true';
                 s.('upperLimit') = 0;
                 self.result.metric{end+1} = s;
@@ -143,7 +143,7 @@ for k=1:qn.nclasses
                 s = struct();
                 s.('alfa') = NaN;
                 s.('analyzedSamples') = Inf;
-                s.('class') = qn.classnames{k};
+                s.('class') = sn.classnames{k};
                 s.('discardedSamples') = 0;
                 s.('lowerLimit') = 0;
                 s.('maxSamples') = Inf;
@@ -151,7 +151,7 @@ for k=1:qn.nclasses
                 s.('measureType') = MetricType.Util;
                 s.('nodeType') = 'station';
                 s.('precision') = Inf;
-                s.('station') = qn.nodenames{self.getStruct.stationToNode(i)};
+                s.('station') = sn.nodenames{self.getStruct.stationToNode(i)};
                 s.('successful') = 'true';
                 s.('upperLimit') = 0;
                 self.result.metric{end+1} = s;
@@ -163,18 +163,18 @@ end
 %Rchain
 %Xchain
 %Tchain
-% for c=1:qn.nchains
-%     inchain = find(qn.chains(c,:));
+% for c=1:sn.nchains
+%     inchain = find(sn.chains(c,:));
 %     for k=inchain(:)'
-%         X(k) = Xchain(c) * alpha(qn.refstat(k),k);
-%         for i=1:qn.nstations
+%         X(k) = Xchain(c) * alpha(sn.refstat(k),k);
+%         for i=1:sn.nstations
 %             if isinf(S(i))
-%                 U(i,k) = ST(i,k) * (Xchain(c) * Vchain(i,c) / Vchain(qn.refstat(k),c)) * alpha(i,k);
+%                 U(i,k) = ST(i,k) * (Xchain(c) * Vchain(i,c) / Vchain(sn.refstat(k),c)) * alpha(i,k);
 %             else
-%                 U(i,k) = ST(i,k) * (Xchain(c) * Vchain(i,c) / Vchain(qn.refstat(k),c)) * alpha(i,k) / S(i);
+%                 U(i,k) = ST(i,k) * (Xchain(c) * Vchain(i,c) / Vchain(sn.refstat(k),c)) * alpha(i,k) / S(i);
 %             end
 %             if Lchain(i,c) > 0
-%                 Q(i,k) = Rchain(i,c) * ST(i,k) / STchain(i,c) * Xchain(c) * Vchain(i,c) / Vchain(qn.refstat(k),c) * alpha(i,k);
+%                 Q(i,k) = Rchain(i,c) * ST(i,k) / STchain(i,c) * Xchain(c) * Vchain(i,c) / Vchain(sn.refstat(k),c) * alpha(i,k);
 %                 T(i,k) = Tchain(i,c) * alpha(i,k);
 %                 R(i,k) = Q(i,k) / T(i,k);
 %             else
@@ -183,7 +183,7 @@ end
 %                 Q(i,k)=0;
 %             end
 %         end
-%         C(k) = qn.njobs(k) / X(k);
+%         C(k) = sn.njobs(k) / X(k);
 %     end
 % end
 % Q=abs(Q); R=abs(R); X=abs(X); U=abs(U); T=abs(T); C=abs(C);
@@ -193,13 +193,13 @@ end
 for i=1:length(statres)
     classres = statres(i).classresults;
     for c=1:length(classres)
-        inchain = find(qn.chains(c,:));
+        inchain = find(sn.chains(c,:));
         for m=1:length(classres(c).measure)
             for k=inchain(:)'
                 s = struct();
                 s.('alfa') = NaN;
                 s.('analyzedSamples') = Inf;
-                s.('class') = qn.classnames{k};
+                s.('class') = sn.classnames{k};
                 s.('discardedSamples') = 0;
                 s.('meanValue') = classres(c).measure(m).ATTRIBUTE.meanValue;
                 if strcmp(s.meanValue,'NaN')
@@ -209,24 +209,24 @@ for i=1:length(statres)
                 s.('measureType') = classres(c).measure(m).ATTRIBUTE.measureType;
                 switch classres(c).measure(m).ATTRIBUTE.measureType
                     case 'Utilization'
-                        if isinf(qn.nservers(i))
-                            s.meanValue = ST(i,k) * (s.meanValue / STchain(i,c)) * Vchain(i,c) / Vchain(qn.refstat(k),c) * alpha(i,k);
+                        if isinf(sn.nservers(i))
+                            s.meanValue = ST(i,k) * (s.meanValue / STchain(i,c)) * Vchain(i,c) / Vchain(sn.refstat(k),c) * alpha(i,k);
                         else
-                            s.meanValue = ST(i,k) * (s.meanValue / STchain(i,c)) / Vchain(qn.refstat(k),c) * alpha(i,k) * min(sum(NK(isfinite(NK))), qn.nservers(i)) / qn.nservers(i);
+                            s.meanValue = ST(i,k) * (s.meanValue / STchain(i,c)) / Vchain(sn.refstat(k),c) * alpha(i,k) * min(sum(NK(isfinite(NK))), sn.nservers(i)) / sn.nservers(i);
                         end
                         s.('measureType') = classres(c).measure(m).ATTRIBUTE.measureType;
                     case 'Throughput'
                         s.meanValue = s.meanValue * alpha(i,k);
                     case 'Number of Customers'
-                        % Q(i,k) = Rchain(i,c) * ST(i,k) / STchain(i,c) * Xchain(c) * Vchain(i,c) / Vchain(qn.refstat(k),c) * alpha(i,k);
-                        s.meanValue = s.meanValue * ST(i,k) / STchain(i,c) / Vchain(qn.refstat(k),c) * alpha(i,k);
+                        % Q(i,k) = Rchain(i,c) * ST(i,k) / STchain(i,c) * Xchain(c) * Vchain(i,c) / Vchain(sn.refstat(k),c) * alpha(i,k);
+                        s.meanValue = s.meanValue * ST(i,k) / STchain(i,c) / Vchain(sn.refstat(k),c) * alpha(i,k);
                     case 'Residence time'
                         s.('measureType') = 'Response Time';
-                        s.meanValue = s.meanValue / qn.visits{c}(i,k); % this is to convert from JMVA's residence into LINE's response time per visit
-                        if isinf(qn.nservers(i))
-                            s.meanValue = s.meanValue * ST(i,k) / STchain(i,c) / Vchain(qn.refstat(k),c) * alpha(i,k);
+                        s.meanValue = s.meanValue / sn.visits{c}(i,k); % this is to convert from JMVA's residence into LINE's response time per visit
+                        if isinf(sn.nservers(i))
+                            s.meanValue = s.meanValue * ST(i,k) / STchain(i,c) / Vchain(sn.refstat(k),c) * alpha(i,k);
                         else
-                            s.meanValue = s.meanValue * ST(i,k) / STchain(i,c) / Vchain(qn.refstat(k),c) * alpha(i,k);
+                            s.meanValue = s.meanValue * ST(i,k) / STchain(i,c) / Vchain(sn.refstat(k),c) * alpha(i,k);
                         end
                     otherwise
                         s.('measureType') = classres(c).measure(m).ATTRIBUTE.measureType;

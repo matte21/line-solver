@@ -39,7 +39,7 @@ function [estVal,fObjFun] = estimatorUBO(self, node)
 
 %%
 % rescale utilization to be mean number of busy serveers
-qn = self.model.getStruct;
+sn = self.model.getStruct;
 
 if isfinite(node.getNumberOfServers())
     U = self.getAggrUtil(node);
@@ -49,7 +49,7 @@ if isfinite(node.getNumberOfServers())
 end
 
 % obtain per class metrics
-for r=1:qn.nclasses
+for r=1:sn.nclasses
     avgArvR{r} = self.getArvR(node, self.model.classes{r});
     if isempty(avgArvR{r})
         error('Arrival rate data for node %d in class %d is missing.', self.model.getNodeIndex(node), r);

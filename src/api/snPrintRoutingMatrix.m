@@ -1,17 +1,17 @@
-function snPrintRoutingMatrix(qn)
+function snPrintRoutingMatrix(sn)
 % SNPRINTROUTINGMATRIX()
 
-node_names = qn.nodenames;
-classnames = qn.classnames;
-rtnodes = qn.rtnodes;
-nnodes = qn.nnodes;
-nclasses = qn.nclasses;
+node_names = sn.nodenames;
+classnames = sn.classnames;
+rtnodes = sn.rtnodes;
+nnodes = sn.nnodes;
+nclasses = sn.nclasses;
 for i=1:nnodes
     for r=1:nclasses
         for j=1:nnodes
             for s=1:nclasses
                 if rtnodes((i-1)*nclasses+r,(j-1)*nclasses+s)>0
-                    if qn.nodetype == NodeType.ID_CACHE
+                    if sn.nodetype == NodeType.ID_CACHE
                         pr = 'state-dependent';
                     else
                         pr = num2str(rtnodes((i-1)*nclasses+r,(j-1)*nclasses+s),'%f');

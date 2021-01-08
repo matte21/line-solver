@@ -7,9 +7,9 @@ function [AvgTable,QT,UT,RT,TT,AT] = getAvgNodeTable(self,Q,U,R,T,keepDisabled)
 if nargin<6 %~exist('keepDisabled','var')
     keepDisabled = false;
 end
-qn = self.model.getStruct;
-I = qn.nnodes();
-K = qn.nclasses();
+sn = self.model.getStruct;
+I = sn.nnodes();
+K = sn.nclasses();
 if nargin == 1
     [Q,U,R,T,A] = getAvgHandles(self);
 end
@@ -31,8 +31,8 @@ elseif ~keepDisabled
     for i=1:I
         for k=1:K
             if any(sum([QN(i,k),UN(i,k),RN(i,k),TN(i,k),AN(i,k)])>0)
-                JobClass{end+1,1} = qn.classnames{k};
-                Node{end+1,1} = qn.nodenames{i};
+                JobClass{end+1,1} = sn.classnames{k};
+                Node{end+1,1} = sn.nodenames{i};
                 Qval(end+1) = QN(i,k);
                 Uval(end+1) = UN(i,k);
                 Rval(end+1) = RN(i,k);
@@ -61,8 +61,8 @@ else
     Node = cell(K*I,1);
     for i=1:I
         for k=1:K
-            JobClass{end+1,1} = qn.classnames{k};
-            Node{end+1,1} = qn.nodenames{i};
+            JobClass{end+1,1} = sn.classnames{k};
+            Node{end+1,1} = sn.nodenames{i};
             Qval((i-1)*K+k) = QN(i,k);
             Uval((i-1)*K+k) = UN(i,k);
             Rval((i-1)*K+k) = RN(i,k);

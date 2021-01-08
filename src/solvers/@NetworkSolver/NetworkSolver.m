@@ -176,9 +176,9 @@ classdef NetworkSolver < Solver
                 WN = [];
                 return
             end
-            qn = self.model.getStruct;
-            WN = RN - 1./ qn.rates(:);
-            WN(qn.nodetype==NodeType.Source) = 0;
+            sn = self.model.getStruct;
+            WN = RN - 1./ sn.rates(:);
+            WN(sn.nodetype==NodeType.Source) = 0;
         end
         
         function TN = getAvgTput(self)
@@ -193,18 +193,18 @@ classdef NetworkSolver < Solver
             % AN = GETAVGARVR()
             
             % Compute average arrival rate at steady-state
-            M = qn.nstations;
-            K = qn.nclasses;
+            M = sn.nstations;
+            K = sn.nclasses;
             T = getAvgTputHandles(self);
             [~,~,~,TN] = self.getAvg([],[],[],T);
-            qn = self.model.getStruct;
+            sn = self.model.getStruct;
             if ~isempty(T)
                 AN = zeros(M,K);
                 for k=1:K
                     for i=1:M
                         for j=1:M
                             for r=1:K
-                                AN(i,k) = AN(i,k) + TN(j,r)*qn.rt((j-1)*K+r, (i-1)*K+k);
+                                AN(i,k) = AN(i,k) + TN(j,r)*sn.rt((j-1)*K+r, (i-1)*K+k);
                             end
                         end
                     end

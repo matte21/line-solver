@@ -14,7 +14,7 @@ function estVal = estimatorERPS(self, node)
 % All rights reserved.
 
 %%
-qn = self.model.getStruct;
+sn = self.model.getStruct;
 
 if node.schedStrategy ~= SchedStrategy.PS
     error('The ERPS method is available only for processor sharing stations.');
@@ -23,7 +23,7 @@ end
 nodeId = self.model.getNodeIndex(node);
 
 % obtain per class metrics
-R = qn.nclasses;
+R = sn.nclasses;
 for r=1:R
     avgRespT{r} = self.getRespT(node, self.model.classes{r});        
     arvlEvent = Event(EventType.ID_ARV, node, self.model.classes{r}); %class-r arrival at node 

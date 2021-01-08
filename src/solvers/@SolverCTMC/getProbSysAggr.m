@@ -5,9 +5,9 @@ if ~isfield(self.options,'keep')
     self.options.keep = false;
 end
 T0 = tic;
-qn = self.getStruct;
+sn = self.getStruct;
 %if self.model.isStateValid
-    Pn = solver_ctmc_jointaggr(qn, self.options);
+    Pn = solver_ctmc_jointaggr(sn, self.options);
     self.result.('solver') = getName(self);
     self.result.Prob.joint = Pn;
 %else

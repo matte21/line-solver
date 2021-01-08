@@ -9,12 +9,12 @@ placeCapacityNode = simDoc.createElement('parameter');
 placeCapacityNode.setAttribute('array', 'true');
 placeCapacityNode.setAttribute('classPath', 'java.lang.Integer');
 placeCapacityNode.setAttribute('name', 'capacities');
-qn = self.getStruct;
-numOfClasses = qn.nclasses;
-i = qn.nodeToStation(ind);
+sn = self.getStruct;
+numOfClasses = sn.nclasses;
+i = sn.nodeToStation(ind);
 for r=1:numOfClasses
     refClassNode = simDoc.createElement('refClass');
-    refClassNode.appendChild(simDoc.createTextNode(qn.classnames{r}));
+    refClassNode.appendChild(simDoc.createTextNode(sn.classnames{r}));
     placeCapacityNode.appendChild(refClassNode);
     
     subParameterNode = simDoc.createElement('subParameter');
@@ -22,10 +22,10 @@ for r=1:numOfClasses
     subParameterNode.setAttribute('name', 'capacity');
     
     valueNode2 = simDoc.createElement('value');
-    if isinf(qn.classcap(i,r))
+    if isinf(sn.classcap(i,r))
         valueNode2.appendChild(simDoc.createTextNode(int2str(-1)));
     else
-        valueNode2.appendChild(simDoc.createTextNode(int2str(qn.classcap(i,r))));
+        valueNode2.appendChild(simDoc.createTextNode(int2str(sn.classcap(i,r))));
     end
     
     subParameterNode.appendChild(valueNode2);

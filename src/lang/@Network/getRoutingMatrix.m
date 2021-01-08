@@ -14,7 +14,7 @@ nodes = self.nodes;
 %nodeNames = getNodeNames(self);
 % connection matrix
 connections = self.getConnectionMatrix;
-self.qn.connmatrix = connections;
+self.sn.connmatrix = connections;
 rtNodesByClass = {};
 rtNodesByStation = {};
 hasOpen = hasOpenClasses(self);

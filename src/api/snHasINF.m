@@ -1,5 +1,5 @@
-function bool = snHasINF(qn)
+function bool = snHasINF(sn)
 % BOOL = HASINF()
 
-bool = any(qn.schedid==SchedStrategy.ID_INF);
+bool = any(sn.schedid==SchedStrategy.ID_INF);
 end

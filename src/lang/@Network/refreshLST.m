@@ -12,10 +12,10 @@ if nargin<2
     classSet = 1:K;
 elseif nargin==2
     classSet = 1:K;
-elseif nargin==3 && isfield(self.qn,'lt')
+elseif nargin==3 && isfield(self.sn,'lt')
     % we are only updating selected stations and classes so use the
     % existing ones for the others
-    lt = self.qn.lt;
+    lt = self.sn.lt;
 else
     lt = cell(M,K);
 end
@@ -41,7 +41,7 @@ for i=statSet
         end
     end
 end
-if ~isempty(self.qn) %&& isprop(self.qn,'mu')
-    self.qn.lst = lt;
+if ~isempty(self.sn) %&& isprop(self.sn,'mu')
+    self.sn.lst = lt;
 end
 end

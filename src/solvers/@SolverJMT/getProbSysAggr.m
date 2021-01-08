@@ -1,15 +1,15 @@
 function probSysStateAggr = getProbSysAggr(self)
 % PROBSYSSTATEAGGR = GETPROBSYSSTATEAGGR()
 
-qn = self.getStruct;
+sn = self.getStruct;
 TranSysStateAggr = self.sampleSysAggr;
 TSS = cell2mat([TranSysStateAggr.t,TranSysStateAggr.state(:)']);
 TSS(:,1)=[diff(TSS(:,1));0];
-state = qn.state;
-nir = zeros(qn.nstateful,qn.nclasses);
-for isf=1:qn.nstateful
-    ind = qn.statefulToNode(isf);
-    [~,nir(isf,:)] = State.toMarginal(qn, ind, state{isf});
+state = sn.state;
+nir = zeros(sn.nstateful,sn.nclasses);
+for isf=1:sn.nstateful
+    ind = sn.statefulToNode(isf);
+    [~,nir(isf,:)] = State.toMarginal(sn, ind, state{isf});
 end
 nir = nir';
 rows = findrows(TSS(:,2:end), nir(:)');

@@ -1,14 +1,14 @@
-function [isvalid] = snIsStateValid(qn)
+function [isvalid] = snIsStateValid(sn)
 % [ISVALID] = ISSTATEVALID()
 nir = [];
 sir = [];
-for ist=1:qn.nstations
-    isf = qn.stationToStateful(ist);
-    if size(qn.state{isf},1)>1
+for ist=1:sn.nstations
+    isf = sn.stationToStateful(ist);
+    if size(sn.state{isf},1)>1
         line_warning(mfilename,sprintf('isStateValid will ignore some node %d states, define a unique initial state to address this problem.',ist));
-        qn.state{isf} = qn.state{isf}(1,:);
+        sn.state{isf} = sn.state{isf}(1,:);
     end
-    [~, nir(ist,:), sir(ist,:), ~] = State.toMarginal(qn, qn.stationToNode(ist), qn.state{isf});
+    [~, nir(ist,:), sir(ist,:), ~] = State.toMarginal(sn, sn.stationToNode(ist), sn.state{isf});
 end
-isvalid = State.isValid(qn, nir, sir);
+isvalid = State.isValid(sn, nir, sir);
 end

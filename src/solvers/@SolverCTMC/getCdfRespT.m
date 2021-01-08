@@ -4,10 +4,10 @@ function RD = getCdfRespT(self, R)
 if nargin<2 %~exist('R','var')
     R = getAvgRespTHandles(self);
 end
-qn = self.getStruct;
-RD = cell(qn.nstations, qn.nclasses);
-M = qn.nstations;
-K = qn.nclasses;
+sn = self.getStruct;
+RD = cell(sn.nstations, sn.nclasses);
+M = sn.nstations;
+K = sn.nclasses;
 for i=1:M
     for r=1:K
         if ~R{i,r}.disabled
@@ -32,7 +32,7 @@ for i=1:M
                 end
                 
                 taggedModel.classes{end+1,1} = taggedModel.classes{r}.copy;
-                if isfinite(qn.njobs(r)) % what if Nr=1 ?
+                if isfinite(sn.njobs(r)) % what if Nr=1 ?
                     taggedModel.classes{r}.population = taggedModel.classes{r}.population - 1;
                     taggedModel.classes{end,1}.population = 1;
                 end

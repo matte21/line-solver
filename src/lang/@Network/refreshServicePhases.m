@@ -12,12 +12,12 @@ if nargin<2
     classSet = 1:K;
 elseif nargin==2
     classSet = 1:K;
-elseif nargin==3 && isfield(self.qn, 'mu') && isfield(self.qn, 'phi') && isfield(self.qn, 'phases')
+elseif nargin==3 && isfield(self.sn, 'mu') && isfield(self.sn, 'phi') && isfield(self.sn, 'phases')
     % we are only updating selected stations and classes so use the
     % existing ones for the others
-    mu = self.qn.mu;
-    phi = self.qn.phi;
-    phases = self.qn.phases;
+    mu = self.sn.mu;
+    phi = self.sn.phi;
+    phases = self.sn.phases;
 else
     mu = cell(M,K);
     phi = cell(M,K);
@@ -59,12 +59,12 @@ for i=statSet
     end
 end
 
-if ~isempty(self.qn) %&& isprop(self.qn,'mu')
-    self.qn.mu = mu;
-    self.qn.phi = phi;
-    self.qn.phases = phases;
-    self.qn.phasessz = max(self.qn.phases,ones(size(self.qn.phases)));
-    self.qn.phaseshift = [zeros(size(phases,1),1),cumsum(self.qn.phasessz,2)];
+if ~isempty(self.sn) %&& isprop(self.sn,'mu')
+    self.sn.mu = mu;
+    self.sn.phi = phi;
+    self.sn.phases = phases;
+    self.sn.phasessz = max(self.sn.phases,ones(size(self.sn.phases)));
+    self.sn.phaseshift = [zeros(size(phases,1),1),cumsum(self.sn.phasessz,2)];
 end
 [ph, phases] = refreshMarkovianService(self);
 end

@@ -4,32 +4,32 @@ function [simElem, simDoc] = saveClasses(self, simElem, simDoc)
 % Copyright (c) 2012-2021, Imperial College London
 % All rights reserved.
 
-qn = self.getStruct;
+sn = self.getStruct;
 
-numOfClasses = qn.nclasses;
+numOfClasses = sn.nclasses;
 for r=1:numOfClasses
     userClass = simDoc.createElement('userClass');
-    userClass.setAttribute('name', qn.classnames{r});
-    if isinf(qn.njobs(r))
+    userClass.setAttribute('name', sn.classnames{r});
+    if isinf(sn.njobs(r))
         userClass.setAttribute('type', 'open');
     else
         userClass.setAttribute('type', 'closed');
     end
-    userClass.setAttribute('priority', int2str(qn.classprio(r)));
-    refStatIndex = qn.refstat(r);
-    refNodeIndex = qn.stationToNode(qn.refstat(r));
-    refStatName = qn.nodenames{refNodeIndex};
-    if ~isempty(qn.proc{refStatIndex,r})
-        if isfinite(qn.njobs(r)) % if closed
-            userClass.setAttribute('customers', int2str(qn.njobs(r)));
+    userClass.setAttribute('priority', int2str(sn.classprio(r)));
+    refStatIndex = sn.refstat(r);
+    refNodeIndex = sn.stationToNode(sn.refstat(r));
+    refStatName = sn.nodenames{refNodeIndex};
+    if ~isempty(sn.proc{refStatIndex,r})
+        if isfinite(sn.njobs(r)) % if closed
+            userClass.setAttribute('customers', int2str(sn.njobs(r)));
             userClass.setAttribute('referenceSource', refStatName);
-        elseif isnan(qn.proc{refStatIndex,r}{1}) % open disabled in source
+        elseif isnan(sn.proc{refStatIndex,r}{1}) % open disabled in source
             userClass.setAttribute('referenceSource', 'ClassSwitch');
         else % if other open
-            userClass.setAttribute('referenceSource', qn.nodenames{qn.stationToNode(qn.refstat(r))});
+            userClass.setAttribute('referenceSource', sn.nodenames{sn.stationToNode(sn.refstat(r))});
         end
     else
-        userClass.setAttribute('referenceSource', qn.nodenames{qn.stationToNode(qn.refstat(r))});
+        userClass.setAttribute('referenceSource', sn.nodenames{sn.stationToNode(sn.refstat(r))});
     end
     simElem.appendChild(userClass);
 end
