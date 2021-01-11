@@ -57,7 +57,6 @@ if isempty(self.handles) || ~isfield(self.handles,'Q')
             Q{i,r} = Qir;
         end
     end
-    self.addMetric(Q);
     self.handles.Q = Q;
 else
     Q = self.handles.Q;
@@ -88,7 +87,6 @@ if isempty(self.handles) || ~isfield(self.handles,'U')
             U{i,r} = Uir;
         end
     end
-    self.addMetric(U);
     self.handles.U = U;
 else
     U = self.handles.U;
@@ -116,7 +114,6 @@ if isempty(self.handles) || ~isfield(self.handles,'R')
             R{i,r} = Rir;
         end
     end
-    self.addMetric(R);
     self.handles.R = R;
 else
     R = self.handles.R;
@@ -138,7 +135,6 @@ if isempty(self.handles) || ~isfield(self.handles,'T')
             T{i,r} = Tir;
         end
     end
-    self.addMetric(T);
     self.handles.T = T;
 else
     T = self.handles.T;
@@ -152,7 +148,6 @@ if isempty(self.handles) || ~isfield(self.handles,'A')
     for i=1:M
         for r=1:K
             Air = Metric(MetricType.ArvR, classes{r}, stations{i});
-            %self.addMetric(A{i,r}); % not supported by JMT
             if ~hasServiceTunnel(i)
                 if ~isServiceDefined(i,r)
                     Air.disable();

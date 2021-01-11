@@ -65,6 +65,7 @@ classdef SolverJMT < NetworkSolver
         [simDoc, section] = saveJoinStrategy(self, simDoc, section, ind)
         [simElem, simDoc] = saveClasses(self, simElem, simDoc)
         [simElem, simDoc] = saveLinks(self, simElem, simDoc)
+        [simElem, simDoc] = saveMetric(self, simElem, simDoc, handles)
         [simElem, simDoc] = saveMetrics(self, simElem, simDoc)
         [simElem, simDoc] = saveXMLHeader(self, logPath)
         
@@ -112,8 +113,7 @@ classdef SolverJMT < NetworkSolver
         [RD,log] = getCdfRespT(self, R);
         RD = getTranCdfRespT(self, R);
         RD = getTranCdfPassT(self, R);
-    end
-    
+    end    
     
     methods (Static)
         

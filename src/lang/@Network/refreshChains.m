@@ -18,7 +18,6 @@ rates = self.sn.rates;
 [rt,~,rtnodes] = self.refreshRoutingMatrix(rates);
 self.sn.rt = rt;
 self.sn.rtnodes = rtnodes;
-self.sn.rtorig = self.linkedRoutingTable;
 
 %% determine class switching mask
 K = getNumberOfClasses(self);

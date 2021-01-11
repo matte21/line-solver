@@ -2,6 +2,7 @@ function options = lineDefaults(solverName)
 if nargin < 1
     solverName = 'Solver'; % global options unless overridden by a solver
 end
+
 %% Solver default options
 options = struct();
 options.cache = true;

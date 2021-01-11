@@ -27,7 +27,6 @@ if isempty(self.handles) || ~isfield(self.handles,'Q')
             end
         end
     end
-    self.addMetric(Q);
     self.handles.Q = Q;
 else
     Q = self.handles.Q;

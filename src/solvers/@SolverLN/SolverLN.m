@@ -241,10 +241,6 @@ classdef SolverLN < LayeredNetworkSolver & EnsembleSolver
                     self.solvers{e}.setChecks(false);
                 end
             end
-            
-            for e=1:length(self.ensemble)
-                self.ensemble{e}.resetPerfIndexes();
-            end
         end
         
         updateThinkTimes(self, it);

@@ -14,7 +14,6 @@ if isempty(self.handles) || ~isfield(self.handles,'A')
     for i=1:M
         for r=1:K
             A{i,r} = Metric(MetricType.ArvR, self.classes{r}, self.stations{i});
-            %self.addMetric(A{i,r}); % not supported by JMT
             if ~strcmpi(class(self.stations{i}.server),'ServiceTunnel')
                 if isempty(self.stations{i}.server.serviceProcess{r}) || strcmpi(class(self.stations{i}.server.serviceProcess{r}{end}),'Disabled')
                     A{i,r}.disable();

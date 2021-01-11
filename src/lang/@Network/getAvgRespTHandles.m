@@ -28,7 +28,6 @@ if isempty(self.handles) || ~isfield(self.handles,'R')
             end
         end
     end
-    self.addMetric(R);
     self.handles.R = R;
 else
     R = self.handles.R;

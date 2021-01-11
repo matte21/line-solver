@@ -40,7 +40,6 @@ M = sn.nstations;
 K = sn.nclasses;
 
 %%
-RT = 0;
 lastSol= [];
 Q = zeros(M,K); R = zeros(M,K); T = zeros(M,K);
 U = zeros(M,K); C = zeros(1,K); X = zeros(1,K);
@@ -55,9 +54,11 @@ while s0_id>=0 % for all possible initial states
         if sn.isstateful(ind)
             isf = sn.nodeToStateful(ind);
             s0prior_val = s0prior_val * s0prior{isf}(1+s0_id(isf)); % update prior
-            sn.state{isf} = s0{isf}(1+s0_id(isf),:); % assign initial state to network
+            %sn.state{isf} = s0{isf}(1+s0_id(isf),:); % assign initial state to network
+            self.model.nodes{ind}.setState(s0{isf}(1+s0_id(isf),:));
         end
     end
+    sn = self.model.getStruct;
     if s0prior_val > 0        
         [Qfull, Ufull, Rfull, Tfull, Cfull, Xfull, t, Qfull_t, Ufull_t, Tfull_t, lastSol] = solver_fluid_analyzer(sn, options);
         [t,uniqueIdx] = unique(t);

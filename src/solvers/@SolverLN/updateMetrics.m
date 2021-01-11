@@ -10,8 +10,7 @@ for r=1:size(self.svctmap,1)
     classidx = self.svctmap(r,4);
     self.svct(aidx) = self.results{end,self.idxhash(idx)}.RN(nodeidx,classidx);
     self.tput(aidx) = self.results{end,self.idxhash(idx)}.TN(nodeidx,classidx);    
-    self.svctproc{aidx} = APH.fitMeanAndSCV(self.svct(aidx),3/5);
-    %self.svctproc{aidx} = Exp.fitMean(self.svct(aidx));
+    self.svctproc{aidx} = Exp.fitMean(self.svct(aidx));
     %self.tputproc{aidx} = Exp.fitRate(self.tput(aidx));
 end
 

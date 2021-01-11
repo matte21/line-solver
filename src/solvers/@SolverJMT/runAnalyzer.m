@@ -69,10 +69,10 @@ switch options.method
             self.writeJSIM;
             cmd = ['java -cp "',getJMTJarPath(self),filesep,'JMT.jar" jmt.commandline.Jmt sim "',getFilePath(self),'jsim',filesep,getFileName(self),'.jsim" -seed ',num2str(options.seed),' --illegal-access=permit'];
             if options.verbose
-                line_printf('\nJMT model: %s',[getFilePath(self),'jsim',filesep,getFileName(self),'.jsim']);                
+                line_printf('\nJMT model: %s',[getFilePath(self),'jsim',filesep,getFileName(self),'.jsim']);
                 line_printf('\nJMT command: %s',cmd);
             end
-            [~, result] = system(cmd);
+            [~, cmdoutput] = system(cmd);
             runtime = toc(Tstart);
             self.getResults;
             if ~options.keep
@@ -159,14 +159,14 @@ switch options.method
             self.result.runtime = runtime;
         end
     case {'jmva','jmva.amva','jmva.mva','jmva.recal','jmva.comom','jmva.chow','jmva.bs','jmva.aql','jmva.lin','jmva.dmlin','jmva.ls',...
-          'jmt.jmva','jmt.jmva.mva','jmt.jmva.amva','jmt.jmva.recal','jmt.jmva.comom','jmt.jmva.chow','jmt.jmva.bs','jmt.jmva.aql','jmt.jmva.lin','jmt.jmva.dmlin','jmt.jmva.ls'}
+            'jmt.jmva','jmt.jmva.mva','jmt.jmva.amva','jmt.jmva.recal','jmt.jmva.comom','jmt.jmva.chow','jmt.jmva.bs','jmt.jmva.aql','jmt.jmva.lin','jmt.jmva.dmlin','jmt.jmva.ls'}
         fname = self.writeJMVA([getFilePath(self),'jmva',filesep,getFileName(self),'.jmva']);
         cmd = ['java -cp "',getJMTJarPath(self),filesep,'JMT.jar" jmt.commandline.Jmt mva "',fname,'" -seed ',num2str(options.seed),' --illegal-access=permit'];
         if options.verbose
             line_printf('\nJMT model: %s',[getFilePath(self),'jmva',filesep,getFileName(self),'.jmva']);
             line_printf('\nJMT command: %s',cmd);
         end
-        [~, result] = system(cmd);
+        [~, cmdoutput] = system(cmd);
         runtime = toc(Tstart);
         self.getResults;
         if ~options.keep

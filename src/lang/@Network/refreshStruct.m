@@ -5,6 +5,11 @@ function refreshStruct(self)
 % All rights reserved.
 
 sanitize(self);
+
+% store invariant information
+if self.hasStruct
+    rtorig = self.sn.rtorig; % this must be destroyed with resetNetwork
+end
 nodetypes = getNodeTypes(self);
 classnames = getClassNames(self);
 nodenames = getNodeNames(self);
@@ -14,6 +19,11 @@ refstat = getReferenceStations(self);
 
 %% init minimal structure
 sn = NetworkStruct(); % create in self to ensure propagation
+if isempty(self.sn)
+    sn.rtorig = [];
+else
+    sn.rtorig = self.sn.rtorig;
+end
 sn.nnodes = numel(nodenames);
 sn.nclasses = length(classnames);
 

@@ -111,65 +111,65 @@ classdef Metric < Copyable
             end
             r = self.classIndex;
             
-            switch results.solver
-                case 'SolverJMT'
-                    switch self.type
-                        case MetricType.TranTput
-                            %results.Tran.Avg.T{i,r}.Name = sprintf('Throughput (station %d, class %d)',i,r);
-                            %results.Tran.Avg.T{i,r}.TimeInfo.Units = 'since initialization';
-                            value = results.Tran.Avg.T{i,r};
-                            return
-                        case MetricType.TranUtil
-                            %results.Tran.Avg.U{i,r}.Name = sprintf('Utilization (station %d, class %d)',i,r);
-                            %results.Tran.Avg.U{i,r}.TimeInfo.Units = 'since initialization';
-                            value = results.Tran.Avg.U{i,r};
-                            return
-                        case MetricType.TranQLen
-                            %results.Tran.Avg.Q{i,r}.Name = sprintf('Queue Length (station %d, class %d)',i,r);
-                            %results.Tran.Avg.Q{i,r}.TimeInfo.Units = 'since initialization';
-                            value = results.Tran.Avg.Q{i,r};
-                            return
-                        case MetricType.TranRespT
-                            %results.Tran.Avg.Q{i,r}.Name = sprintf('Queue Length (station %d, class %d)',i,r);
-                            %results.Tran.Avg.Q{i,r}.TimeInfo.Units = 'since initialization';
-                            value = results.Tran.Avg.R{i,r};
-                            return
-                    end
+%             switch results.solver
+%                 case 'SolverJMT'
+%                     switch self.type
+%                         case MetricType.TranTput
+%                             %results.Tran.Avg.T{i,r}.Name = sprintf('Throughput (station %d, class %d)',i,r);
+%                             %results.Tran.Avg.T{i,r}.TimeInfo.Units = 'since initialization';
+%                             value = results.Tran.Avg.T{i,r};
+%                             return
+%                         case MetricType.TranUtil
+%                             %results.Tran.Avg.U{i,r}.Name = sprintf('Utilization (station %d, class %d)',i,r);
+%                             %results.Tran.Avg.U{i,r}.TimeInfo.Units = 'since initialization';
+%                             value = results.Tran.Avg.U{i,r};
+%                             return
+%                         case MetricType.TranQLen
+%                             %results.Tran.Avg.Q{i,r}.Name = sprintf('Queue Length (station %d, class %d)',i,r);
+%                             %results.Tran.Avg.Q{i,r}.TimeInfo.Units = 'since initialization';
+%                             value = results.Tran.Avg.Q{i,r};
+%                             return
+%                         case MetricType.TranRespT
+%                             %results.Tran.Avg.Q{i,r}.Name = sprintf('Queue Length (station %d, class %d)',i,r);
+%                             %results.Tran.Avg.Q{i,r}.TimeInfo.Units = 'since initialization';
+%                             value = results.Tran.Avg.R{i,r};
+%                             return
+%                     end
                     
-                    for i=1:length(results.metric)
-                        type = self.type;
-                        switch self.type
-                            case MetricType.TranQLen
-                                type = MetricType.QLen;
-                            case MetricType.TranUtil
-                                type = MetricType.Util;
-                            case MetricType.TranTput
-                                type = MetricType.Tput;
-                            case MetricType.TranRespT
-                                type = MetricType.RespT;
-                        end
-                        if strcmp(results.metric{i}.class, self.class.name) && strcmp(results.metric{i}.measureType,type) && strcmp(results.metric{i}.station, self.station.name)
-                            chainIdx = find(cellfun(@any,strfind(model.getStruct.classnames,self.class.name)));
-                            %chain = model.getChains{chainIdx};
-                            switch self.class.type
-                                case 'closed'
-                                    N = model.getNumberOfJobs();
-                                    if results.metric{i}.analyzedSamples > sum(N(chainIdx)) % for a class to be considered recurrent we ask more samples than jobs in the corresponding closed chain
-                                        value = results.metric{i}.meanValue;
-                                    else
-                                        value = 0; % transient metric, long term avg is 0
-                                    end
-                                case 'open'
-                                    if results.metric{i}.analyzedSamples >= 0 % we assume that open classes are always recurrent
-                                        value = results.metric{i}.meanValue;
-                                    else
-                                        value = 0; % transient metric, long term avg is 0
-                                    end
-                            end
-                            break;
-                        end
-                    end
-                otherwise % another LINE solver
+%                     for i=1:length(results.metric)
+%                         type = self.type;
+%                         switch self.type
+%                             case MetricType.TranQLen
+%                                 type = MetricType.QLen;
+%                             case MetricType.TranUtil
+%                                 type = MetricType.Util;
+%                             case MetricType.TranTput
+%                                 type = MetricType.Tput;
+%                             case MetricType.TranRespT
+%                                 type = MetricType.RespT;
+%                         end
+%                         if strcmp(results.metric{i}.class, self.class.name) && strcmp(results.metric{i}.measureType,type) && strcmp(results.metric{i}.station, self.station.name)
+%                             chainIdx = find(cellfun(@any,strfind(model.getStruct.classnames,self.class.name)));
+%                             %chain = model.getChains{chainIdx};
+%                             switch self.class.type
+%                                 case 'closed'
+%                                     N = model.getNumberOfJobs();
+%                                     if results.metric{i}.analyzedSamples > sum(N(chainIdx)) % for a class to be considered recurrent we ask more samples than jobs in the corresponding closed chain
+%                                         value = results.metric{i}.meanValue;
+%                                     else
+%                                         value = 0; % transient metric, long term avg is 0
+%                                     end
+%                                 case 'open'
+%                                     if results.metric{i}.analyzedSamples >= 0 % we assume that open classes are always recurrent
+%                                         value = results.metric{i}.meanValue;
+%                                     else
+%                                         value = 0; % transient metric, long term avg is 0
+%                                     end
+%                             end
+%                             break;
+%                         end
+%                     end
+%                otherwise % another LINE solver
                     if nargin<3 %~exist('model','var')
                         line_error(mfilename,'Wrong syntax, use Metric.get(results,model).\n');
                     end
@@ -184,7 +184,7 @@ classdef Metric < Copyable
                         %self.classIndex = findstring(classnames,self.class.name);
                         self.classIndex = self.class.index;
                     end
-                    r = self.classIndex;
+                    r = self.classIndex;                    
                     switch self.type
                         case MetricType.Util
                             if isempty(results.Avg.U)
@@ -258,7 +258,7 @@ classdef Metric < Copyable
                                 value = results.Tran.Avg.R{i,r};
                             end
                     end
-            end
+%            end
         end
     end
 end
