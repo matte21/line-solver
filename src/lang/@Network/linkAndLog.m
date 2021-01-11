@@ -7,6 +7,10 @@ function [loggerBefore,loggerAfter] = linkAndLog(self, P, isNodeLogged, logPath)
 
 self.resetStruct; % important to regenerate the sn with the loggers
 
+if self.isInitialized
+    line_error(mfilename,'The network state cannot be initialized, or must be reset, before calling linkAndLog.');
+end
+
 if ~isempty(self.connections)
     line_warning(mfilename,'Network topology already instantiated. Calling resetNetwork automatically before adding loggers.');
     self.resetNetwork;

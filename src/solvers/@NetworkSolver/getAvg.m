@@ -72,7 +72,11 @@ if ~isempty(U)
     UNclass = zeros(M,K);
     for k=1:K
         for i=1:M
-            UNclass(i,k) = U{i,k}.get(self.result, self.model);
+            try
+                UNclass(i,k) = U{i,k}.get(self.result, self.model);
+            catch
+                keyboard
+            end
         end
     end
 end

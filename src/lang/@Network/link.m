@@ -189,8 +189,7 @@ end
 %                 end
 %             end
 
-
-self.linkedRoutingTable = P;
+self.sn.rtorig = P;
 
 % As we will now create a CS for each link i->j,
 % we now condition on the job going from node i to j

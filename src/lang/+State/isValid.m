@@ -11,8 +11,9 @@ if nargin==3
     options = Solver.defaultOptions;
 end
 isValid = true;
+
 if isa(sn,'Network')
-    sn=sn.getStruct();
+    sn = sn.getStruct();
 end
 
 if isempty(n) & ~isempty(s)

@@ -22,7 +22,6 @@ end
 cdfmodel = self.model.copy;
 cdfmodel.resetNetwork;
 cdfmodel.reset;
-cdfmodel.initFromMarginal(n);
 isNodeClassLogged = false(cdfmodel.getNumberOfNodes, cdfmodel.getNumberOfClasses);
 for i= 1:cdfmodel.getNumberOfStations
     for r=1:cdfmodel.getNumberOfClasses
@@ -36,6 +35,7 @@ Plinked = sn.rtorig;
 isNodeLogged = max(isNodeClassLogged,[],2);
 logpath = tempdir;
 cdfmodel.linkAndLog(Plinked, isNodeLogged, logpath);
+cdfmodel.initFromMarginal(n);
 SolverJMT(cdfmodel, self.getOptions).getAvg(); % log data
 logData = SolverJMT.parseLogs(cdfmodel, isNodeLogged, MetricType.RespT);
 % from here convert from nodes in logData to stations

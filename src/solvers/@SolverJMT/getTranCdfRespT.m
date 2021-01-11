@@ -9,6 +9,7 @@ end
 RD = cell(sn.nstations, sn.nclasses);
 cdfmodel = self.model.copy;
 cdfmodel.resetNetwork;
+cdfmodel.reset;
 isNodeClassLogged = false(cdfmodel.getNumberOfNodes, cdfmodel.getNumberOfClasses);
 for i= 1:cdfmodel.getNumberOfStations
     for r=1:cdfmodel.getNumberOfClasses

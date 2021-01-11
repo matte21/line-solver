@@ -146,7 +146,7 @@ classdef EnsembleSolver < Solver
                 T1=tic;
                 switch options.method
                     case {'default','serial'}
-                        for e = self.list(it)
+                        for e = self.list(it)                            
                             [results{it,e}, solverTime] = self.analyze(it,e);
                             sruntime(it,e) = sruntime(it,e) + solverTime;
                         end

@@ -1,4 +1,4 @@
-function [ni, nir, sir, kir] = toMarginal(sn, ind, state_i, K, Ks, space_buf, space_srv, space_var) %#ok<INUSD>
+function [ni, nir, sir, kir] = toMarginal(sn, ind, state_i, phasesz, phaseshift, space_buf, space_srv, space_var) %#ok<INUSD>
 % [NI, NIR, SIR, KIR] = TOMARGINAL(QN, IND, STATE_I, K, KS, SPACE_BUF, SPACE_SRV, SPACE_VAR) %#OK<INUSD>
 
 % Copyright (c) 2012-2021, Imperial College London
@@ -22,19 +22,19 @@ ist = sn.nodeToStation(ind);
 %isf = sn.nodeToStateful(ind);
 
 if nargin < 5
-    K = sn.phasessz(ist,:);
-    Ks = sn.phaseshift(ist,:);
+    phasesz = sn.phasessz(ist,:);
+    phaseshift = sn.phaseshift(ist,:);
 end
 
 isExponential = false;
-if max(K)==1
+if max(phasesz)==1
     isExponential = true;
 end
 
 if nargin < 8
     space_var = state_i(:,(end-sum(sn.nvars(ind,:))+1):end); % server stat
-    space_srv = state_i(:,(end-sum(K)-sum(sn.nvars(ind,:))+1):(end-sum(sn.nvars(ind,:))));
-    space_buf = state_i(:,1:(end-sum(K)-sum(sn.nvars(ind,:))));
+    space_srv = state_i(:,(end-sum(phasesz)-sum(sn.nvars(ind,:))+1):(end-sum(sn.nvars(ind,:))));
+    space_buf = state_i(:,1:(end-sum(phasesz)-sum(sn.nvars(ind,:))));
 end
 
 if isExponential
@@ -43,10 +43,10 @@ if isExponential
 else
     nir = zeros(size(state_i,1),R);
     sir = zeros(size(state_i,1),R); % class-r jobs in service
-    kir = zeros(size(state_i,1),R,max(K)); % class-r jobs in service in phase k
+    kir = zeros(size(state_i,1),R,max(phasesz)); % class-r jobs in service in phase k
     for r=1:R
-        for k=1:K(r)
-            kir(:,r,k) = space_srv(:,Ks(r)+k);
+        for k=1:phasesz(r)
+            kir(:,r,k) = space_srv(:,phaseshift(r)+k);
             sir(:,r) = sir(:,r) + kir(:,r,k);
         end
     end
@@ -106,7 +106,7 @@ if sn.nodetype(ind) ~= NodeType.Place
     for r=1:R
         if isnan(sn.rates(ist,r)) % if disabled station
             nir(:,r) = 0;
-            for k=1:K(r)
+            for k=1:phasesz(r)
                 kir(:,r,k) = 0;
             end
             sir(:,r)=0;

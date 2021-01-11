@@ -10,8 +10,8 @@ sn = getStruct(self);
 if nargin<6 %~exist('keepDisabled','var')
     keepDisabled = false;
 end
-M = sn.nstations();
-K = sn.nclasses();
+M = sn.nstations;
+K = sn.nclasses;
 if nargin == 2
     keepDisabled = Q;
     [Q,U,R,T,~] = getAvgHandles(self);

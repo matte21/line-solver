@@ -95,8 +95,8 @@ classdef Solver < handle
         
         function results = getResults(self)
             % RESULTS = GETRESULTS()
-            % Return results data structure
-            results = self.result;
+            % Return results data structure            
+            results = self.result;                                  
         end
         
         function bool = hasResults(self)

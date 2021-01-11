@@ -1,6 +1,6 @@
 function sn = getStruct(self, wantInitialState)
 % QN = GETSTRUCT(WANTINITSTATE)
-if isempty(self.sn)
+if ~self.hasStruct
     refreshStruct(self);
 end
 if nargin == 1 || wantInitialState
