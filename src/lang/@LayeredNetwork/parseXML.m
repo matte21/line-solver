@@ -103,7 +103,7 @@ for i = 0:procList.getLength()-1
             thinkTimeMean = 0.0;
         end
         if thinkTimeMean <= 0.0
-            thinkTime = Immediate();
+            thinkTime = Immediate.getInstance();
         else
             thinkTime = Exp.fitMean(thinkTimeMean);
         end
@@ -140,7 +140,7 @@ for i = 0:procList.getLength()-1
                         hostDemandSCV = 1.0;
                     end
                     if hostDemandMean <= 0.0
-                        hostDemand = Immediate();
+                        hostDemand = Immediate.getInstance();
                     else
                         if hostDemandSCV <= 0.0
                             hostDemand = Det(hostDemandMean);
@@ -223,7 +223,7 @@ for i = 0:procList.getLength()-1
                         hostDemandSCV = 1.0;
                     end
                     if hostDemandMean <= 0.0
-                        hostDemand = Immediate();
+                        hostDemand = Immediate.getInstance();
                     else
                         if hostDemandSCV <= 0.0
                             hostDemand = Det(hostDemandMean);

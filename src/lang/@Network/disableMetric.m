@@ -7,9 +7,9 @@ function self = disableMetric(self, Y)
 if iscell(Y)
     Y={Y{:}};
     for i=1:length(Y)
-        Y{i}.disable();
+        Y{i}.disable=true;
     end
 else
-    Y.disable();
+    Y.disable=true;
 end
 end

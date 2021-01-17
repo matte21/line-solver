@@ -47,6 +47,13 @@ classdef SolverAuto < NetworkSolver
             self.candidates = {self.solvers{find(boolSolver)}};
             warning(wstatus);
         end
+        
+        function sn = getStruct(self)
+            % QN = GETSTRUCT()
+            
+            % Get data structure summarizing the model
+            sn = self.model.getStruct(true);
+        end
     end
     
     methods

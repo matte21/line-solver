@@ -12,6 +12,13 @@ classdef SolverMVA < NetworkSolver
             self.setOptions(Solver.parseOptions(varargin, self.defaultOptions));
         end
         
+        function sn = getStruct(self)
+            % QN = GETSTRUCT()
+            
+            % Get data structure summarizing the model
+            sn = self.model.getStruct(false);
+        end
+        
         [runtime, analyzer] = runAnalyzer(self, options, config);        
         [lNormConst] = getProbNormConstAggr(self);        
         [Pnir,logPnir] = getProbAggr(self, ist);        

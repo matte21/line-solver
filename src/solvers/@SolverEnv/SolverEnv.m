@@ -124,7 +124,7 @@ classdef SolverEnv < EnsembleSolver
                     Qexit{e,h} = zeros(size(self.results{it,e}.Tran.Avg.Q));
                     for i=1:size(self.results{it,e}.Tran.Avg.Q,1)
                         for r=1:size(self.results{it,e}.Tran.Avg.Q,2)
-                            w{e,h} = [0, map_cdf(self.envObj.proc{e,h}, self.results{it,e}.Tran.Avg.Q{i,r}.t(2:end)) - map_cdf(self.envObj.proc{e,h}, self.results{it,e}.Tran.Avg.Q{i,r}.t(1:end-1))]';
+                            w{e,h} = [0, map_cdf(self.envObj.proc{e}{h}, self.results{it,e}.Tran.Avg.Q{i,r}.t(2:end)) - map_cdf(self.envObj.proc{e}{h}, self.results{it,e}.Tran.Avg.Q{i,r}.t(1:end-1))]';
                             if ~isnan(w{e,h})
                                 Qexit{e,h}(i,r) = self.results{it,e}.Tran.Avg.Q{i,r}.metric'*w{e,h}/sum(w{e,h});
                             else
@@ -172,7 +172,7 @@ classdef SolverEnv < EnsembleSolver
                 %                     QE{e,h} = zeros(size(self.results{it,e}.Tran.Avg.Q));
                 %                     for i=1:size(self.results{it,e}.Tran.Avg.Q,1)
                 %                         for r=1:size(self.results{it,e}.Tran.Avg.Q,2)
-                %                             w{e,h} = [0, map_cdf(self.envObj.proc{e,h}, self.results{it,e}.Tran.Avg.Q{i,r}(2:end,2)) - map_cdf(self.envObj.proc{e,h}, self.results{it,e}.Tran.Avg.Q{i,r}(1:end-1,2))]';
+                %                             w{e,h} = [0, map_cdf(self.envObj.proc{e}{h}, self.results{it,e}.Tran.Avg.Q{i,r}(2:end,2)) - map_cdf(self.envObj.proc{e}{h}, self.results{it,e}.Tran.Avg.Q{i,r}(1:end-1,2))]';
                 %                             if ~isnan(w{e,h})
                 %                                 QE{e,h}(i,r) = self.results{it,e}.Tran.Avg.Q{i,r}(:,1)'*w{e,h}/sum(w{e,h});
                 %                             else

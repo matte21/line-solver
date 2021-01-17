@@ -6,7 +6,10 @@ function [ph, phases] = refreshMarkovianService(self)
 
 M = getNumberOfStations(self);
 K = getNumberOfClasses(self);
-ph = cell(M,K);
+ph = cell(M,1);
+for i=1:M
+    ph{i,1} = cell(1,K);
+end
 phases = zeros(M,K);
 stations = self.stations;
 for i=1:M
@@ -35,28 +38,28 @@ for i=1:M
         end
     end
     for r=1:K
-        ph{i,r} = ph_i{r};
-        if isempty(ph{i,r}) % fluid fails otherwise
+        ph{i}{r} = ph_i{r};
+        if isempty(ph{i}{r}) % fluid fails otherwise
             phases(i,r) = 1;
-        elseif any(isnan(ph{i,r}{1}(:))) || any(isnan(ph{i,r}{2}(:))) % disabled
+        elseif any(isnan(ph{i}{r}{1}(:))) || any(isnan(ph{i}{r}{2}(:))) % disabled
             phases(i,r) = 0;
         else
-            phases(i,r) = length(ph{i,r}{1});
+            phases(i,r) = length(ph{i}{r}{1});
         end
     end
 end
 if ~isempty(self.sn) %&& isprop(self.sn,'mu')
 	proc = ph;
 	pie = cell(size(ph));
-	for i=1:size(ph,1)
-    	for r=1:size(ph,2)
-        	map_ir = ph{i,r};
+	for i=1:M
+    	for r=1:K
+        	map_ir = ph{i}{r};
         	if ~isempty(map_ir)
-				% proc{i,r} = map_normalize(map_ir);
-                proc{i,r} = map_ir;
-				pie{i,r} = map_pie(map_ir);
+				%.proc{i}{r} = map_normalize(map_ir);
+                proc{i}{r} = map_ir;
+				pie{i}{r} = map_pie(map_ir);
     	    else
-				pie{i,r} = NaN;
+				pie{i}{r} = NaN;
     	    end
     	end
 	end

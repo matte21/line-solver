@@ -24,7 +24,7 @@ ST = zeros(M,K);
 V = zeros(M,K);
 for k = 1:K
     for i=1:M
-        ST(i,k) = 1 ./ map_lambda(PHr{i,k});
+        ST(i,k) = 1 ./ map_lambda(PHr{i}{k});
     end
 end
 ST(isnan(ST))=0;
@@ -109,7 +109,7 @@ for ist=1:sn.nstations
         switch sn.schedid(ist)
             case SchedStrategy.ID_FCFS
                 for r=1:K
-                    PHr = sn.proc{ist,r};
+                    PHr = sn.proc{ist}{r};
                     if ~isempty(PHr)
                         kir = kirvec(1,r,:); kir=kir(:)';
                         if length(kir)>1
@@ -128,7 +128,7 @@ for ist=1:sn.nstations
                 end
             case SchedStrategy.ID_SIRO
                 for r=1:K
-                    PHr = sn.proc{ist,r};
+                    PHr = sn.proc{ist}{r};
                     if ~isempty(PHr)
                         kir = kirvec(1,r,:); kir=kir(:)';
                         if length(kir)>1
@@ -147,7 +147,7 @@ for ist=1:sn.nstations
                 end
             case SchedStrategy.ID_PS
                 for r=1:K
-                    PHr = sn.proc{ist,r};
+                    PHr = sn.proc{ist}{r};
                     if ~isempty(PHr)
                         kir = kirvec(1,r,:); kir=kir(:)';
                         Ar = map_pie(PHr)*inv(-PHr{1});
@@ -157,7 +157,7 @@ for ist=1:sn.nstations
                 F_i = F_i * factorial(sum(kirvec(:)))./prod(mu(ist,1:sum(kirvec(:))));
             case SchedStrategy.ID_INF
                 for r=1:K
-                    PHr = sn.proc{ist,r};
+                    PHr = sn.proc{ist}{r};
                     if ~isempty(PHr)
                         kir = kirvec(1,r,:); kir=kir(:)';
                         Ar = map_pie(PHr)*inv(-PHr{1});

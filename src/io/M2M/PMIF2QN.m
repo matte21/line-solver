@@ -184,9 +184,9 @@ if ~isempty(parsed)
         for r=1:size(rates,2)
             if rates(i,r) == 0
                 rates(i,r) = NaN;
-                sn.proc{i,r} = {[NaN],[NaN]};
+                sn.proc{i}{r} = {[NaN],[NaN]};
             else
-                sn.proc{i,r} = map_exponential(1/rates(i,r));
+                sn.proc{i}{r} = map_exponential(1/rates(i,r));
             end
         end
     end

@@ -21,12 +21,12 @@ AvgTable
 Tnoinit = toc(Tnoinit)
 
 %% Solve with LN with LQNS initialization
-lnsolver = SolverLN(model, @(x) SolverMVA(x));
-Tinit = tic;
-lnsolver.initFromRawAvgTables(NodeAvgTable, CallAvgTable);
-AvgTable = lnsolver.getAvgTable;
-AvgTable
-Tinit = toc(Tinit)
+% lnsolver = SolverLN(model, @(x) SolverMVA(x));
+% Tinit = tic;
+% lnsolver.initFromRawAvgTables(NodeAvgTable, CallAvgTable);
+% AvgTable = lnsolver.getAvgTable;
+% AvgTable
+% Tinit = toc(Tinit)
 
 %% We now obtain the CDF of response times
 fluidsolver = SolverFluid(model.ensemble{3});

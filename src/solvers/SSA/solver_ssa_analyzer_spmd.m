@@ -36,8 +36,8 @@ spmd
                     % we use Little's law, otherwise there are issues in
                     % estimating the fraction of time assigned to class k (to
                     % recheck)
-                    if ~isempty(PH{i,k})
-                        UN(i,k) = probSysState*arvRates(:,i,k)*map_mean(PH{i,k})/S(i);
+                    if ~isempty(PH{i}{k})
+                        UN(i,k) = probSysState*arvRates(:,i,k)*map_mean(PH{i}{k})/S(i);
                     end
             end
         end

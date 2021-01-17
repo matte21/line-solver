@@ -18,9 +18,9 @@ NK = sn.njobs';  %initial population
 match = zeros(M,K); % indicates whether a class is served at a station
 for i = 1:M
     for k = 1:K
-        if isnan(Mu{i,k})
-            Mu{i,k} = [];
-            Phi{i,k}=[];
+        if isnan(Mu{i}{k})
+            Mu{i}{k} = [];
+            Phi{i}{k}=[];
         end
         match(i,k) = sum(rt(:, (i-1)*K+k)) > 0;
     end
@@ -38,15 +38,15 @@ Tstart = tic;
 phases = zeros(M,K);
 for i = 1:M
     for k = 1:K
-        phases(i,k) = length(Mu{i,k});
+        phases(i,k) = length(Mu{i}{k});
     end
 end
 
 slowrate = zeros(M,K);
 for i = 1:M
     for k = 1:K
-        if ~isempty(Mu{i,k})
-            slowrate(i,k) = min(Mu{i,k}(:)); %service completion (exit) rates in each phase
+        if ~isempty(Mu{i}{k})
+            slowrate(i,k) = min(Mu{i}{k}(:)); %service completion (exit) rates in each phase
         else
             slowrate(i,k) = Inf;
         end

@@ -154,10 +154,10 @@ classdef Station < StatefulNode
         %             svcProc = {};
         %             for r=1:nclasses
         %                 if isempty(self.server.serviceProcess{r})
-        %                     self.server.serviceProcess{r} = {[],ServiceStrategy.LI,Disabled()};
-        %                     svcProc{r} = Disabled();
+        %                     self.server.serviceProcess{r} = {[],ServiceStrategy.LI,Disabled.getInstance()};
+        %                     svcProc{r} = Disabled.getInstance();
         %                 elseif self.server.serviceProcess{r}{end}.isImmediate()
-        %                     svcProc{r} = Immediate();
+        %                     svcProc{r} = Immediate.getInstance();
         %                 elseif ~self.server.serviceProcess{r}{end}.isDisabled()
         %                     svcProc{r} = serviceProcess{r}{end};
         %                 else
@@ -175,7 +175,7 @@ classdef Station < StatefulNode
             phi = cell(1,nclasses);
             for r=1:nclasses
                 if isempty(self.input.sourceClasses{r})
-                    self.input.sourceClasses{r} = {[],ServiceStrategy.LI,Disabled()};
+                    self.input.sourceClasses{r} = {[],ServiceStrategy.LI,Disabled.getInstance()};
                     map{r}  = {[NaN],[NaN]};
                     mu{r}  = NaN;
                     phi{r}  = NaN;
@@ -217,7 +217,7 @@ classdef Station < StatefulNode
             for r=1:nclasses
                 serviceProcess_r = self.server.serviceProcess{r};
                 if isempty(serviceProcess_r)
-                    serviceProcess_r = {[],ServiceStrategy.LI,Disabled()};
+                    serviceProcess_r = {[],ServiceStrategy.LI,Disabled.getInstance()};
                     map{r}  = {[NaN],[NaN]};
                     mu{r}  = NaN;
                     phi{r}  = NaN;

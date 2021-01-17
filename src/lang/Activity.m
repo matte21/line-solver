@@ -70,7 +70,7 @@ classdef Activity < LayeredNetworkElement
             
             if isnumeric(hostDemand)
                 if hostDemand <= Distrib.Zero
-                    obj.hostDemand = Immediate();
+                    obj.hostDemand = Immediate.getInstance();
                     obj.hostDemandMean = Distrib.Zero;
                     obj.hostDemandSCV = Distrib.Zero;
                 else

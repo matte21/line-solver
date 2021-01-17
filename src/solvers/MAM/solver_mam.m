@@ -53,9 +53,9 @@ if all(isinf(sn.njobs)) % is open
                 for k=1:K
                     %                    divide service time by number of servers and put
                     %                    later a surrogate delay server in tandem to compensate
-                    PH{ist,k} = map_scale(PH{ist,k}, map_mean(PH{ist,k})/sn.nservers(ist));
-                    pie{ist,k} = map_pie(PH{ist,k});
-                    D0{ist,k} = PH{ist,k}{1};
+                    PH{ist}{k} = map_scale(PH{ist}{k}, map_mean(PH{ist}{k})/sn.nservers(ist));
+                    pie{ist}{k} = map_pie(PH{ist}{k});
+                    D0{ist,k} = PH{ist}{k}{1};
                 end
         end
     end
@@ -70,7 +70,7 @@ if all(isinf(sn.njobs)) % is open
             for ind=1:M
                 for r=1:K
                     ist = sn.nodeToStation(ind);
-                    DEP{ind,r} = map_scale(PH{ist,r}, 1 / (lambda(r) * V(ind,r)) );
+                    DEP{ind,r} = map_scale(PH{ist}{r}, 1 / (lambda(r) * V(ind,r)) );
                 end
             end
         end
@@ -88,16 +88,16 @@ if all(isinf(sn.njobs)) % is open
                         line_printf('\nArrival process at node %d is now at %d states. Compressing.',ind,length(ARV{ind}{1}));
                         ARV{ind} = mmap_compress(ARV{ind});
                     end                    
-                    [Qret{1:K}, ncDistr] = MMAPPH1FCFS({ARV{ind}{[1,3:end]}}, {pie{ist,:}}, {D0{ist,:}}, 'ncMoms', 1, 'ncDistr',2);
+                    [Qret{1:K}, ncDistr] = MMAPPH1FCFS({ARV{ind}{[1,3:end]}}, {pie{ist}{:}}, {D0{ist,:}}, 'ncMoms', 1, 'ncDistr',2);
                     for k=1:K
                         QN(ist,k) = sum(Qret{k});
                     end
                     TN(ist,:) = mmap_lambda(ARV{ind});
             end
             for k=1:K
-                UN(ist,k) = TN(ist,k) * map_mean(PH{ist,k});
+                UN(ist,k) = TN(ist,k) * map_mean(PH{ist}{k});
                 %add number of jobs at the surrogate delay server
-                QN(ist,k) = QN(ist,k) + TN(ist,k)*(map_mean(PH{ist,k})*sn.nservers(ist)) * (sn.nservers(ist)-1)/sn.nservers(ist);
+                QN(ist,k) = QN(ist,k) + TN(ist,k)*(map_mean(PH{ist}{k})*sn.nservers(ist)) * (sn.nservers(ist)-1)/sn.nservers(ist);
                 RN(ist,k) = QN(ist,k) ./ TN(ist,k);
             end
         end
@@ -110,7 +110,7 @@ if all(isinf(sn.njobs)) % is open
             ind = sn.stationToNode(ist);
             switch sn.nodetype(ind)
                 case NodeType.Queue
-                    [Ret{1:2*K}] = MMAPPH1FCFS({ARV{ind}{[1,3:end]}}, {pie{ist,:}}, {D0{ist,:}}, 'stDistrPH');
+                    [Ret{1:2*K}] = MMAPPH1FCFS({ARV{ind}{[1,3:end]}}, {pie{ist}{:}}, {D0{ist,:}}, 'stDistrPH');
                     for r=1:K
                         
                         %obtain response time distribution for class r
@@ -125,7 +125,7 @@ if all(isinf(sn.njobs)) % is open
                         pieA = map_pie(A);
                         
                         %define a ph for the service process of class r
-                        S = PH{ist,r};
+                        S = PH{ist}{r};
                         pieS = map_pie(S);
                         tS = sum(S{2},2);
                         

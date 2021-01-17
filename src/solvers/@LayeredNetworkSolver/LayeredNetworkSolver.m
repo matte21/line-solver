@@ -18,6 +18,13 @@ classdef LayeredNetworkSolver < Solver
                 line_error(mfilename,'Model is not a LayeredNetwork.');
             end
         end
+                
+        function sn = getStruct(self)
+            % QN = GETSTRUCT()
+            
+            % Get data structure summarizing the model
+            sn = self.model.getStruct();
+        end        
     end
     
     methods %(Abstract) % implemented with errors for Octave compatibility

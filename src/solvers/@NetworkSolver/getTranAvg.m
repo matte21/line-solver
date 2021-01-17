@@ -10,11 +10,11 @@ if nargin == 1
     [Qt,Ut,Tt] = self.getTranHandles;
 end
 if nargin == 2
-    handlers = Qt;
-    Qt=handlers{1};
-    Ut=handlers{2};
+    handles = Qt;
+    Qt=handles{1};
+    Ut=handles{2};
     %Rt=handlers{3};
-    Tt=handlers{3};
+    Tt=handles{3};
 end
 
 QNclass_t={};
@@ -49,23 +49,38 @@ if ~isempty(Qt)
     TNclass_t = cell(M,K);
     for k=1:K
         for i=1:M
-            ret = Qt{i,k}.get(self.result,self.model);
+            %%
+            if ~Qt{i,k}.disabled && ~isempty(self.result.Tran.Avg.Q)
+                ret = self.result.Tran.Avg.Q{i,k};
+            else
+                ret = NaN;
+            end
             metricVal = struct();
             metricVal.handle = {self.model.stations{i}, self.model.classes{k}};
             metricVal.t = ret(:,2);
             metricVal.metric = ret(:,1);
             metricVal.isaggregate = true;
-            QNclass_t{i,k} = metricVal;            
+            QNclass_t{i,k} = metricVal;
             
-            ret = Ut{i,k}.get(self.result,self.model);
+            %%
+            if ~Ut{i,k}.disabled && ~isempty(self.result.Tran.Avg.U)
+                ret = self.result.Tran.Avg.U{i,k};
+            else
+                ret = NaN;
+            end
             metricVal = struct();
-            metricVal.handle = {self.model.stations{i}, self.model.classes{k}};
+                metricVal.handle = {self.model.stations{i}, self.model.classes{k}};
             metricVal.t = ret(:,2);
             metricVal.metric = ret(:,1);
             metricVal.isaggregate = true;
             UNclass_t{i,k} = metricVal;
             
-            ret = Tt{i,k}.get(self.result,self.model);
+            %%
+            if ~Tt{i,k}.disabled && ~isempty(self.result.Tran.Avg.T)
+                ret = self.result.Tran.Avg.T{i,k};
+            else
+                ret = NaN;
+            end
             metricVal = struct();
             metricVal.handle = {self.model.stations{i}, self.model.classes{k}};
             metricVal.t = ret(:,2);

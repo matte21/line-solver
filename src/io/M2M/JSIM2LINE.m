@@ -185,7 +185,7 @@ for r=1:length(classes)
             jobclass{r} =  OpenClass(model, classes{r}.name, classes{r}.priority);
             if strcmpi(classes{r}.referenceSource,'StatelessClassSwitcher')
                 sourceIdx = cellisa(node,'Source');
-                node{sourceIdx}.setArrival(jobclass{r},Disabled());
+                node{sourceIdx}.setArrival(jobclass{r},Disabled.getInstance());
             end
     end
 end
@@ -351,7 +351,7 @@ for i=1:length(node_name)
             xsection_i_subpar{i} = {xsection_i_par{i}.subParameter};
             xarv_statdistrib{i}{r}={xsection_i_subpar{i}{1}.subParameter};
             if isempty(xarv_statdistrib{i}{r}{r})
-                node{i}.setArrival(jobclass{r}, Disabled());
+                node{i}.setArrival(jobclass{r}, Disabled.getInstance());
             else
                 xarv_statdistrib{i}{r}={xarv_statdistrib{i}{r}{r}.ATTRIBUTE};
                 xarv{i} = {xsection_i{i}(1).parameter.subParameter};
@@ -418,7 +418,7 @@ for i=1:length(node_name)
             para_ir = schedparams{i}(r);
             switch xsvc_statdistrib{i}{r}{1}.name
                 case 'Disabled'
-                    node{i}.setService(jobclass{r}, Disabled());
+                    node{i}.setService(jobclass{r}, Disabled.getInstance());
                 case 'Replayer'
                     par={xsvc_sec{i}{r}.subParameter}; par=par{2};
                     node{i}.setService(jobclass{r}, Replayer(par.value), para_ir);

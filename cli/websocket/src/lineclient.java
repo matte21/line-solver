@@ -51,7 +51,6 @@ public class lineclient extends WebSocketClient {
 	if (cmd.hasOption("h")) {
 		System.out.println("LINE Solver - Client Interface");
 		System.out.println("Copyright (c) 2012-2021, QORE group, Imperial College London");
-		System.out.println("Version 2.0.12. All rights reserved.");
 		System.out.println("-----------------------------------------------------------------------");
 		System.out.println("Usage: cat MODEL | java -jar linecli.jar SERVER_IP SERVER_PORT\n");
 		System.out.println("Example: cat mymodel.jsimg | java -jar linecli.jar 192.168.0.1 5863 ");

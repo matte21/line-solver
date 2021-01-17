@@ -27,7 +27,7 @@ M = sn.nstations;
 K = sn.nclasses;
 refstat = sn.refstat;
 Lambda = sn.mu;
-Pi = sn.phi;
+phi = sn.phi;
 phases = sn.phases;
 
 %Qlength for all stations, classes,
@@ -49,9 +49,9 @@ for i = 1:sn.nstations
             idx = sum(sum(phases(1:i-1,:))) + sum( phases(i,1:k-1) );
             Xservice{i,k} = zeros(phases(i,k),1);
             for f = 1:phases(i,k)         
-                Tfull(i,k) = Tfull(i,k) + Qfull(idx+f)*Lambda{i,k}(f)*Pi{i,k}(f);
-                Tfull_t{i,k} = Tfull_t{i,k} + Qfull_t{i,k}*Lambda{i,k}(f)*Pi{i,k}(f);
-                Xservice{i,k}(f) = Qfull(idx+f)*Lambda{i,k}(f);
+                Tfull(i,k) = Tfull(i,k) + Qfull(idx+f)*Lambda{i}{k}(f)*phi{i}{k}(f);
+                Tfull_t{i,k} = Tfull_t{i,k} + Qfull_t{i,k}*Lambda{i}{k}(f)*phi{i}{k}(f);
+                Xservice{i,k}(f) = Qfull(idx+f)*Lambda{i}{k}(f);
             end
         end
     else
@@ -68,7 +68,7 @@ for i = 1:sn.nstations
                     w = zeros(1,sn.nclasses);
                     for k = 1:sn.nclasses
                         idx = sum(sum(phases(1:i-1,:))) + sum( phases(i,1:k-1) );
-                        wi(k) = map_mean(sn.proc{i,k});
+                        wi(k) = map_mean(sn.proc{i}{k});
                         wni = wni + wi(k)*sum(Qfull((idx+1):(idx+phases(i,k))));
                     end
                     wni_t = 0*Qfull_t{i,1};
@@ -85,18 +85,18 @@ for i = 1:sn.nstations
                     switch sn.schedid(i)
                         case SchedStrategy.ID_EXT
                             if f==1
-                                Tfull(i,k) = Tfull(i,k) + (1-sum(Qfull(idx+(2:phases(i,k)))))*Lambda{i,k}(f)*Pi{i,k}(f);
-                                Tfull_t{i,k} = Tfull_t{i,k} + (1-sum(ymean_t(:,idx+(2:phases(i,k))),2))*Lambda{i,k}(f)*Pi{i,k}(f);
-                                Xservice{i,k}(f) = (1-sum(Qfull(idx+(2:phases(i,k)))))*Lambda{i,k}(f);
+                                Tfull(i,k) = Tfull(i,k) + (1-sum(Qfull(idx+(2:phases(i,k)))))*Lambda{i}{k}(f)*phi{i}{k}(f);
+                                Tfull_t{i,k} = Tfull_t{i,k} + (1-sum(ymean_t(:,idx+(2:phases(i,k))),2))*Lambda{i}{k}(f)*phi{i}{k}(f);
+                                Xservice{i,k}(f) = (1-sum(Qfull(idx+(2:phases(i,k)))))*Lambda{i}{k}(f);
                             else
-                                Tfull(i,k) = Tfull(i,k) + Qfull(idx+f)*Lambda{i,k}(f)*Pi{i,k}(f);
-                                Tfull_t{i,k} = Tfull_t{i,k} + ymean_t(:,idx+f)*Lambda{i,k}(f)*Pi{i,k}(f);
-                                Xservice{i,k}(f) = Qfull(idx+f)*Lambda{i,k}(f);
+                                Tfull(i,k) = Tfull(i,k) + Qfull(idx+f)*Lambda{i}{k}(f)*phi{i}{k}(f);
+                                Tfull_t{i,k} = Tfull_t{i,k} + ymean_t(:,idx+f)*Lambda{i}{k}(f)*phi{i}{k}(f);
+                                Xservice{i,k}(f) = Qfull(idx+f)*Lambda{i}{k}(f);
                             end
                         case {SchedStrategy.ID_INF, SchedStrategy.ID_PS}
-                            Tfull(i,k) = Tfull(i,k) + Qfull(idx+f)*Lambda{i,k}(f)*Pi{i,k}(f)/xi*min(xi,sn.nservers(i));
-                            Tfull_t{i,k} = Tfull_t{i,k} + ymean_t(:,idx+f)*Lambda{i,k}(f)*Pi{i,k}(f)./xi_t.*min(xi_t,sn.nservers(i));
-                            Xservice{i,k}(f) = Qfull(idx+f)*Lambda{i,k}(f)/xi*min(xi,sn.nservers(i));
+                            Tfull(i,k) = Tfull(i,k) + Qfull(idx+f)*Lambda{i}{k}(f)*phi{i}{k}(f)/xi*min(xi,sn.nservers(i));
+                            Tfull_t{i,k} = Tfull_t{i,k} + ymean_t(:,idx+f)*Lambda{i}{k}(f)*phi{i}{k}(f)./xi_t.*min(xi_t,sn.nservers(i));
+                            Xservice{i,k}(f) = Qfull(idx+f)*Lambda{i}{k}(f)/xi*min(xi,sn.nservers(i));
                         case SchedStrategy.ID_DPS
                             w = sn.schedparam(i,:);
                             wxi = w*Q(i,:)'; %number of jobs in the station
@@ -104,27 +104,27 @@ for i = 1:sn.nstations
                             for r=2:size(Qfull_t,2)
                                 wxi_t = wxi_t + w(r)*Qfull_t{i,r};
                             end
-                            Tfull(i,k) = Tfull(i,k) + Qfull(idx+f)*Lambda{i,k}(f)*Pi{i,k}(f)*w(k)/wxi*min(xi,sn.nservers(i));
-                            Tfull_t{i,k} = Tfull_t{i,k} + ymean_t(:,idx+f)*Lambda{i,k}(f)*Pi{i,k}(f)*w(k)./wxi_t.*min(xi_t,sn.nservers(i));
-                            Xservice{i,k}(f) = Qfull(idx+f)*Lambda{i,k}(f)*w(k)/wxi*min(xi,sn.nservers(i));
+                            Tfull(i,k) = Tfull(i,k) + Qfull(idx+f)*Lambda{i}{k}(f)*phi{i}{k}(f)*w(k)/wxi*min(xi,sn.nservers(i));
+                            Tfull_t{i,k} = Tfull_t{i,k} + ymean_t(:,idx+f)*Lambda{i}{k}(f)*phi{i}{k}(f)*w(k)./wxi_t.*min(xi_t,sn.nservers(i));
+                            Xservice{i,k}(f) = Qfull(idx+f)*Lambda{i}{k}(f)*w(k)/wxi*min(xi,sn.nservers(i));
                         case {SchedStrategy.ID_FCFS, SchedStrategy.ID_SIRO}
                             switch options.method
                                 case {'default','stateindep'}
-                                    Tfull(i,k) = Tfull(i,k) + Qfull(idx+f)*Lambda{i,k}(f)*Pi{i,k}(f)/xi*min(xi,sn.nservers(i));
-                                    Tfull_t{i,k} = Tfull_t{i,k} + ymean_t(:,idx+f)*Lambda{i,k}(f)*Pi{i,k}(f)./xi_t.*min(xi_t,sn.nservers(i));
-                                    Xservice{i,k}(f) = Qfull(idx+f)*Lambda{i,k}(f)/xi*min(xi,sn.nservers(i));
+                                    Tfull(i,k) = Tfull(i,k) + Qfull(idx+f)*Lambda{i}{k}(f)*phi{i}{k}(f)/xi*min(xi,sn.nservers(i));
+                                    Tfull_t{i,k} = Tfull_t{i,k} + ymean_t(:,idx+f)*Lambda{i}{k}(f)*phi{i}{k}(f)./xi_t.*min(xi_t,sn.nservers(i));
+                                    Xservice{i,k}(f) = Qfull(idx+f)*Lambda{i}{k}(f)/xi*min(xi,sn.nservers(i));
                                 case 'statedep'
-                                    Tfull(i,k) = Tfull(i,k) + Qfull(idx+f)*Lambda{i,k}(f)*Pi{i,k}(f)*wi(k)/wni*min(xi,sn.nservers(i));
-                                    Tfull_t{i,k} = Tfull_t{i,k} + ymean_t(:,idx+f)*Lambda{i,k}(f)*Pi{i,k}(f)./xi_t.*min(xi_t,sn.nservers(i));
-                                    Xservice{i,k}(f) = Qfull(idx+f)*Lambda{i,k}(f)*wi(k)/wni*min(xi,sn.nservers(i));
+                                    Tfull(i,k) = Tfull(i,k) + Qfull(idx+f)*Lambda{i}{k}(f)*phi{i}{k}(f)*wi(k)/wni*min(xi,sn.nservers(i));
+                                    Tfull_t{i,k} = Tfull_t{i,k} + ymean_t(:,idx+f)*Lambda{i}{k}(f)*phi{i}{k}(f)./xi_t.*min(xi_t,sn.nservers(i));
+                                    Xservice{i,k}(f) = Qfull(idx+f)*Lambda{i}{k}(f)*wi(k)/wni*min(xi,sn.nservers(i));
                                     
-                                    %Tfull(i,k) = Tfull(i,k) + Qfull(idx+f)*Lambda{i,k}(f)*Pi{i,k}(f)*min(xi,sn.nservers(i))*wi(k);
-                                    %Tfull_t{i,k} = Tfull_t{i,k} + ymean_t(:,idx+f)*Lambda{i,k}(f)*Pi{i,k}(f).*min(xi_t,sn.nservers(i)) * wi(k);
-                                    %Xservice{i,k}(f) = Qfull(idx+f)*Lambda{i,k}(f)*min(xi,sn.nservers(i))*wi(k);
+                                    %Tfull(i,k) = Tfull(i,k) + Qfull(idx+f)*Lambda{i}{k}(f)*phi{i}{k}(f)*min(xi,sn.nservers(i))*wi(k);
+                                    %Tfull_t{i,k} = Tfull_t{i,k} + ymean_t(:,idx+f)*Lambda{i}{k}(f)*phi{i}{k}(f).*min(xi_t,sn.nservers(i)) * wi(k);
+                                    %Xservice{i,k}(f) = Qfull(idx+f)*Lambda{i}{k}(f)*min(xi,sn.nservers(i))*wi(k);
                                     
-                                    %                                    Tfull(i,k) = Tfull(i,k) + Qfull(idx+f)*Lambda{i,k}(f)*Pi{i,k}(f)*min(xi,sn.nservers(i))*wi(k)/wni;
-                                    %                                    Tfull_t{i,k} = Tfull_t{i,k} + ymean_t(:,idx+f)*Lambda{i,k}(f)*Pi{i,k}(f).*min(xi_t,sn.nservers(i)) * wi(k)/wni;
-                                    %                                    Xservice{i,k}(f) = Qfull(idx+f)*Lambda{i,k}(f)*min(xi,sn.nservers(i))*wi(k)/wni;
+                                    %                                    Tfull(i,k) = Tfull(i,k) + Qfull(idx+f)*Lambda{i}{k}(f)*phi{i}{k}(f)*min(xi,sn.nservers(i))*wi(k)/wni;
+                                    %                                    Tfull_t{i,k} = Tfull_t{i,k} + ymean_t(:,idx+f)*Lambda{i}{k}(f)*phi{i}{k}(f).*min(xi_t,sn.nservers(i)) * wi(k)/wni;
+                                    %                                    Xservice{i,k}(f) = Qfull(idx+f)*Lambda{i}{k}(f)*min(xi,sn.nservers(i))*wi(k)/wni;
                             end
                         otherwise
                             line_error(mfilename,'Unsupported scheduling policy');
@@ -186,7 +186,7 @@ Ufull = zeros(M,K);
 for i =1:M
     for k = 1:K
         idx = Xservice{i,k}>0;
-        Ufull(i,k) = sum(Xservice{i,k}(idx)./ Lambda{i,k}(idx));
+        Ufull(i,k) = sum(Xservice{i,k}(idx)./ Lambda{i}{k}(idx));
         switch sn.schedid(i)
             case SchedStrategy.ID_FCFS
                 switch options.method

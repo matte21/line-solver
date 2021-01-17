@@ -95,9 +95,9 @@ end
 %                     for k = 1:Kic(i,c)
 %                         %pure ps + fcfs correction
 %                         if x(xic+k-1) > 0 && n(i) > S(i)
-%                             rates = [rates; Phi{i,c}(k) * P((i-1)*K+c,(j-1)*K+l) * Mu{i,c}(k) * x(xic+k-1)/n(i) * S(i);]; % f_k^{dep}
+%                             rates = [rates; Phi{i}{c}(k) * P((i-1)*K+c,(j-1)*K+l) * Mu{i}{c}(k) * x(xic+k-1)/n(i) * S(i);]; % f_k^{dep}
 %                         elseif x(xic+k-1) > 0
-%                             rates = [rates; Phi{i,c}(k) * P((i-1)*K+c,(j-1)*K+l) * Mu{i,c}(k) * x(xic+k-1);]; % f_k^{dep}
+%                             rates = [rates; Phi{i}{c}(k) * P((i-1)*K+c,(j-1)*K+l) * Mu{i}{c}(k) * x(xic+k-1);]; % f_k^{dep}
 %                         else
 %                             rates = [rates; 0;]; % f_k^{dep}
 %                         end
@@ -115,7 +115,7 @@ end
 %             xic = q_indices(i,c);
 %             for k = 1 : (Kic(i,c) - 1)
 %                 if x(xic+k-1) > 0
-%                     rates = [rates; (1-Phi{i,c}(k))*Mu{i,c}(k)*x(xic+k-1)/n(i)];
+%                     rates = [rates; (1-Phi{i}{c}(k))*Mu{i}{c}(k)*x(xic+k-1)/n(i)];
 %                 else
 %                     rates = [rates; 0 ]
 %                 end

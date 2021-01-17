@@ -40,8 +40,8 @@ for r=1:numOfClasses
         subParNodeAlphaVec.setAttribute('array', 'true');
         subParNodeAlphaVec.setAttribute('classPath', 'java.lang.Object');
         subParNodeAlphaVec.setAttribute('name', 'vector');
-        PH = sn.proc{i,r};
-        alpha = abs(sn.pie{i,r});
+        PH = sn.proc{i}{r};
+        alpha = abs(sn.pie{i}{r});
         for k=1:sn.phases(i,r)
             subParNodeAlphaElem = simDoc.createElement('subParameter');
             subParNodeAlphaElem.setAttribute('classPath', 'java.lang.Double');
@@ -94,7 +94,7 @@ for r=1:numOfClasses
         distrParNode.setAttribute('classPath', 'jmt.engine.random.MAPPar');
         distrParNode.setAttribute('name', 'distrPar');
         
-        MAP = sn.proc{i,r};
+        MAP = sn.proc{i}{r};
         
         subParNodeD0 = simDoc.createElement('subParameter');
         subParNodeD0.setAttribute('array', 'true');
@@ -219,21 +219,21 @@ for r=1:numOfClasses
                 subParNodeAlpha.setAttribute('classPath', 'java.lang.Double');
                 subParNodeAlpha.setAttribute('name', 'p');
                 subParValue = simDoc.createElement('value');
-                subParValue.appendChild(simDoc.createTextNode(sprintf('%.12f',sn.pie{i,r}(1))));
+                subParValue.appendChild(simDoc.createTextNode(sprintf('%.12f',sn.pie{i}{r}(1))));
                 subParNodeAlpha.appendChild(subParValue);
                 distrParNode.appendChild(subParNodeAlpha);
                 subParNodeAlpha = simDoc.createElement('subParameter');
                 subParNodeAlpha.setAttribute('classPath', 'java.lang.Double');
                 subParNodeAlpha.setAttribute('name', 'lambda1');
                 subParValue = simDoc.createElement('value');
-                subParValue.appendChild(simDoc.createTextNode(sprintf('%.12f',-sn.proc{i,r}{1}(1,1))));
+                subParValue.appendChild(simDoc.createTextNode(sprintf('%.12f',-sn.proc{i}{r}{1}(1,1))));
                 subParNodeAlpha.appendChild(subParValue);
                 distrParNode.appendChild(subParNodeAlpha);
                 subParNodeAlpha = simDoc.createElement('subParameter');
                 subParNodeAlpha.setAttribute('classPath', 'java.lang.Double');
                 subParNodeAlpha.setAttribute('name', 'lambda2');
                 subParValue = simDoc.createElement('value');
-                subParValue.appendChild(simDoc.createTextNode(sprintf('%.12f',-sn.proc{i,r}{1}(2,2))));
+                subParValue.appendChild(simDoc.createTextNode(sprintf('%.12f',-sn.proc{i}{r}{1}(2,2))));
                 subParNodeAlpha.appendChild(subParValue);
                 distrParNode.appendChild(subParNodeAlpha);
             case ProcessType.ID_ERLANG
@@ -256,28 +256,28 @@ for r=1:numOfClasses
                 subParNodeAlpha.setAttribute('classPath', 'java.lang.Double');
                 subParNodeAlpha.setAttribute('name', 'lambda0');
                 subParValue = simDoc.createElement('value');
-                subParValue.appendChild(simDoc.createTextNode(sprintf('%.12f',sn.proc{i,r}{2}(1,1))));
+                subParValue.appendChild(simDoc.createTextNode(sprintf('%.12f',sn.proc{i}{r}{2}(1,1))));
                 subParNodeAlpha.appendChild(subParValue);
                 distrParNode.appendChild(subParNodeAlpha);
                 subParNodeAlpha = simDoc.createElement('subParameter');
                 subParNodeAlpha.setAttribute('classPath', 'java.lang.Double');
                 subParNodeAlpha.setAttribute('name', 'lambda1');
                 subParValue = simDoc.createElement('value');
-                subParValue.appendChild(simDoc.createTextNode(sprintf('%.12f',sn.proc{i,r}{2}(2,2))));
+                subParValue.appendChild(simDoc.createTextNode(sprintf('%.12f',sn.proc{i}{r}{2}(2,2))));
                 subParNodeAlpha.appendChild(subParValue);
                 distrParNode.appendChild(subParNodeAlpha);
                 subParNodeAlpha = simDoc.createElement('subParameter');
                 subParNodeAlpha.setAttribute('classPath', 'java.lang.Double');
                 subParNodeAlpha.setAttribute('name', 'sigma0');
                 subParValue = simDoc.createElement('value');
-                subParValue.appendChild(simDoc.createTextNode(sprintf('%.12f',sn.proc{i,r}{1}(1,2))));
+                subParValue.appendChild(simDoc.createTextNode(sprintf('%.12f',sn.proc{i}{r}{1}(1,2))));
                 subParNodeAlpha.appendChild(subParValue);
                 distrParNode.appendChild(subParNodeAlpha);
                 subParNodeAlpha = simDoc.createElement('subParameter');
                 subParNodeAlpha.setAttribute('classPath', 'java.lang.Double');
                 subParNodeAlpha.setAttribute('name', 'sigma1');
                 subParValue = simDoc.createElement('value');
-                subParValue.appendChild(simDoc.createTextNode(sprintf('%.12f',sn.proc{i,r}{1}(2,1))));
+                subParValue.appendChild(simDoc.createTextNode(sprintf('%.12f',sn.proc{i}{r}{1}(2,1))));
                 subParNodeAlpha.appendChild(subParValue);
                 distrParNode.appendChild(subParNodeAlpha);
             case ProcessType.ID_GAMMA

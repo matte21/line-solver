@@ -30,7 +30,7 @@ classdef NetworkSolver < Solver
             [Qt,Ut,Tt] = model.getTranHandles;
             self.setTranHandles(Qt,Ut,Tt);
             
-            if ~model.hasStruct()
+            if ~model.hasStruct
                 self.model.refreshStruct(); % force model to refresh
             end
         end

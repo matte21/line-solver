@@ -122,7 +122,7 @@ classdef Queue < Station
             self.input.inputJobClasses{class.index} = {class, self.schedPolicy, DropStrategy.WaitingQueue};
             self.server.serviceProcess{1, class.index}{2} = ServiceStrategy.LI;                        
             if distribution.isImmediate()
-                self.server.serviceProcess{1, class.index}{3} = Immediate();
+                self.server.serviceProcess{1, class.index}{3} = Immediate.getInstance();
             else
                 self.server.serviceProcess{1, class.index}{3} = distribution;
             end
@@ -134,7 +134,7 @@ classdef Queue < Station
                 %self.model.initDefault(self.model.getNodeIndex(self));
                 self.model.setInitialized(false); % this is a better way to invalidate to avoid that sequential calls to setService all trigger an initDefault
             end
-            %if self.model.hasStruct()
+            %if self.model.hasStruct
                 %self.model.refreshService(self.stationIndex,class.index);
             %end
         end

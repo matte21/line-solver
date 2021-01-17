@@ -23,8 +23,8 @@ classdef Immediate < Distrib
         function X = sample(self, n)
             % X = SAMPLE(N)
             
-            if nargin<2 %~exist('n','var'), 
-                n = 1; 
+            if nargin<2 %~exist('n','var'),
+                n = 1;
             end
             X = zeros(n,1);
         end
@@ -76,10 +76,10 @@ classdef Immediate < Distrib
         function L = evalLST(self, s)
             % L = EVALST(S)
             
-            % Evaluate the Laplace-Stieltjes transform of the distribution function at t            
+            % Evaluate the Laplace-Stieltjes transform of the distribution function at t
             
             L = 1; % as in Det(0)
-        end        
+        end
         
         function PH = getPH(self)
             PH = {[-Distrib.InfRate] ,[Distrib.InfRate]};
@@ -91,8 +91,16 @@ classdef Immediate < Distrib
             % distribution
             % Overrides Distrib.isImmediate(self)
             bool = true;
-        end        
+        end
     end
     
+    methods (Static)
+        function singleton = getInstance
+            persistent staticImmediate
+            if isempty(staticImmediate)
+                staticImmediate = Immediate();
+            end
+            singleton = staticImmediate;
+        end
+    end
 end
-

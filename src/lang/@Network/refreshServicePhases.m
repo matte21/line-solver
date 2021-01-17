@@ -10,8 +10,26 @@ K = getNumberOfClasses(self);
 if nargin<2
     statSet = 1:M;
     classSet = 1:K;
+    mu = cell(M,1);
+    for i=1:M
+        mu{i,1} = cell(1,K);
+    end
+    phi = cell(M,1);
+    for i=1:M
+        phi{i,1} = cell(1,K);
+    end
+    phases = zeros(M,K);
 elseif nargin==2
     classSet = 1:K;
+    mu = cell(M,1);
+    for i=1:M
+        mu{i,1} = cell(1,K);
+    end
+    phi = cell(M,1);
+    for i=1:M
+        phi{i,1} = cell(1,K);
+    end
+    phases = zeros(M,K);
 elseif nargin==3 && isfield(self.sn, 'mu') && isfield(self.sn, 'phi') && isfield(self.sn, 'phases')
     % we are only updating selected stations and classes so use the
     % existing ones for the others
@@ -19,8 +37,14 @@ elseif nargin==3 && isfield(self.sn, 'mu') && isfield(self.sn, 'phi') && isfield
     phi = self.sn.phi;
     phases = self.sn.phases;
 else
-    mu = cell(M,K);
-    phi = cell(M,K);
+    mu = cell(M,1);
+    for i=1:M
+        mu{i,1} = cell(1,K);
+    end
+    phi = cell(M,1);
+    for i=1:M
+        phi{i,1} = cell(1,K);
+    end
     phases = zeros(M,K);
 end
 
@@ -49,8 +73,8 @@ for i=statSet
         end
     end
     for r=classSet
-        mu{i,r} = mu_i{r};
-        phi{i,r} = phi_i{r};
+        mu{i}{r} = mu_i{r};
+        phi{i}{r} = phi_i{r};
         if isnan(mu_i{r}) % disabled
             phases(i,r) = 0;
         else

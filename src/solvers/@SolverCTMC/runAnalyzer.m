@@ -24,6 +24,7 @@ if self.enableChecks && ~self.supports(self.model)
 end
 
 sn = getStruct(self);
+
 M = sn.nstations;
 K = sn.nclasses;
 NK = sn.njobs;

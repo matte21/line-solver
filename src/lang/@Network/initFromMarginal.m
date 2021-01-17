@@ -35,5 +35,5 @@ for ind=1:sn.nnodes
         end
     end
 end
-self.isInitialized = true;
+self.hasState = true;
 end

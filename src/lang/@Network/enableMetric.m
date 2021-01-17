@@ -7,9 +7,9 @@ function self = enableMetric(self, Y)
 if iscell(Y)
     Y={Y{:}};
     for i=1:length(Y)
-        Y{i}.enable();
+        Y{i}.enabled = true;
     end
 else
-    Y.enable();
+    Y.enabled = true;
 end
 end

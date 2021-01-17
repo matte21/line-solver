@@ -31,7 +31,7 @@ if sn.isstation(ind)
     end
     mu = sn.mu;
     phi = sn.phi;
-    ph = sn.proc;
+    proc = sn.proc;
     capacity = sn.cap;
     classcap = sn.classcap;
     if K(class) == 0 % if this class is not accepted at the resource
@@ -61,7 +61,7 @@ if sn.isstation(ind)
             % return if there is no space to accept the arrival
             [ni,nir] = State.toMarginalAggr(sn,ind,inspace,K,Ks,space_buf,space_srv,space_var);
             % otherwise check scheduling strategy
-            pentry = pie{ist,class};
+            pentry = pie{ist}{class};
             outprob = [];
             outprob_k = [];
             for kentry = 1:K(class)
@@ -174,26 +174,26 @@ if sn.isstation(ind)
                             switch sn.schedid(ist)
                                 case SchedStrategy.ID_EXT % source, can produce an arrival from phase-k as long as it is from an open class
                                     if isinf(sn.njobs(class))
-                                        pentry = pie{ist,class};
+                                        pentry = pie{ist}{class};
                                         for kentry = 1:K(class)
                                             space_srv = inspace(:,(end-sum(K)-V+1):(end-V)); % server state
                                             space_srv(en,Ks(class)+k) = space_srv(en,Ks(class)+k) - 1; % record departure
                                             space_srv(en,Ks(class)+kentry) = space_srv(en,Ks(class)+kentry) + 1; % new job
                                             outspace = [outspace; space_buf(en,:), space_srv(en,:), space_var(en,:)];
-                                            outrate = [outrate; pentry(kentry)*mu{ist,class}(k)*phi{ist,class}(k)*ones(size(inspace(en,:),1),1)];
+                                            outrate = [outrate; pentry(kentry)*mu{ist}{class}(k)*phi{ist}{class}(k)*ones(size(inspace(en,:),1),1)];
                                             outprob = [outprob; ones(size(space_buf(en,:),1),1)];
                                         end
                                     end
                                 case SchedStrategy.ID_INF % move first job in service
                                     space_srv(en,Ks(class)+k) = space_srv(en,Ks(class)+k) - 1; % record departure
-                                    rate(en) = mu{ist,class}(k)*(phi{ist,class}(k)).*kir(en,class,k); % assume active
+                                    rate(en) = mu{ist}{class}(k)*(phi{ist}{class}(k)).*kir(en,class,k); % assume active
                                     % if state is unchanged, still add with rate 0
                                     outspace = [outspace; space_buf(en,:), space_srv(en,:), space_var(end,:)];
                                     outrate = [outrate; rate(en,:)];
                                     outprob = [outprob; ones(size(rate(en,:),1),1)];
                                 case SchedStrategy.ID_PS % move first job in service
                                     space_srv(en,Ks(class)+k) = space_srv(en,Ks(class)+k) - 1; % record departure
-                                    rate(en) = mu{ist,class}(k)*(phi{ist,class}(k)).*(kir(en,class,k)./ni(en)).*min(ni(en),S(ist)); % assume active
+                                    rate(en) = mu{ist}{class}(k)*(phi{ist}{class}(k)).*(kir(en,class,k)./ni(en)).*min(ni(en),S(ist)); % assume active
                                     % if state is unchanged, still add with rate 0
                                     outspace = [outspace; space_buf(en,:), space_srv(en,:), space_var(en,:)];
                                     outrate = [outrate; rate(en,:)];
@@ -206,7 +206,7 @@ if sn.isstation(ind)
                                     % in GPS, the scheduling parameter are the weights
                                     w_i = sn.schedparam(ist,:);
                                     w_i = w_i / sum(w_i);
-                                    rate(en) = mu{ist,class}(k)*(phi{ist,class}(k))*(kir(en,class,k)/nir(class))*w_i(class)*nir(class)./(sum(repmat(w_i,sum(en),1)*nir',2));
+                                    rate(en) = mu{ist}{class}(k)*(phi{ist}{class}(k))*(kir(en,class,k)/nir(class))*w_i(class)*nir(class)./(sum(repmat(w_i,sum(en),1)*nir',2));
                                     % if state is unchanged, still add with rate 0
                                     outspace = [outspace; space_buf(en,:), space_srv(en,:), space_var(en,:)];
                                     outrate = [outrate; rate(en,:)];
@@ -220,14 +220,14 @@ if sn.isstation(ind)
                                     w_i = sn.schedparam(ist,:);
                                     w_i = w_i / sum(w_i);
                                     cir = min(nir,ones(size(nir)));
-                                    rate = mu{ist,class}(k)*(phi{ist,class}(k))*(kir(en,class,k)/nir(class))*w_i(class)/(w_i*cir(:)); % assume active
+                                    rate = mu{ist}{class}(k)*(phi{ist}{class}(k))*(kir(en,class,k)/nir(class))*w_i(class)/(w_i*cir(:)); % assume active
                                     % if state is unchanged, still add with rate 0
                                     outspace = [outspace; space_buf(en,:), space_srv(en,:), space_var(en,:)];
                                     outrate = [outrate; rate(en,:)];
                                     outprob = [outprob; ones(size(rate(en,:),1),1)];
                                 case SchedStrategy.ID_FCFS % move first job in service
                                     space_srv(en,Ks(class)+k) = space_srv(en,Ks(class)+k) - 1; % record departure
-                                    rate(en) = mu{ist,class}(k)*(phi{ist,class}(k)).*kir(en,class,k); % assume active
+                                    rate(en) = mu{ist}{class}(k)*(phi{ist}{class}(k)).*kir(en,class,k); % assume active
                                     en_wbuf = en & ni>S(ist); %states with jobs in buffer
                                     en_wobuf = ~en_wbuf;
                                     outspace = [outspace; space_buf(en_wobuf,:), space_srv(en_wobuf,:), space_var(en_wobuf,:)];
@@ -237,7 +237,7 @@ if sn.isstation(ind)
                                         start_svc_class = space_buf(en_wbuf,end);
                                         if start_svc_class > 0
                                             space_buf(en_wbuf,:) = [zeros(sum(en_wbuf),1),space_buf(en_wbuf,1:end-1)];
-                                            pentry_svc_class = pie{ist,start_svc_class};
+                                            pentry_svc_class = pie{ist}{start_svc_class};
                                             for kentry = 1:K(start_svc_class)
                                                 space_srv(en_wbuf,Ks(start_svc_class)+kentry) = space_srv(en_wbuf,Ks(start_svc_class)+kentry) + 1;
                                                 outspace = [outspace; space_buf(en,:), space_srv(en,:), space_var(en,:)];
@@ -251,7 +251,7 @@ if sn.isstation(ind)
                                     end
                                     % if state is unchanged, still add with rate 0
                                 case SchedStrategy.ID_HOL % FCFS priority
-                                    rate(en) = mu{ist,class}(k)*(phi{ist,class}(k)).*kir(:,class,k); % assume active
+                                    rate(en) = mu{ist}{class}(k)*(phi{ist}{class}(k)).*kir(:,class,k); % assume active
                                     en_wbuf = en & ni>S(ist); %states with jobs in buffer
                                     en_wobuf = ~en_wbuf;
                                     space_srv(en,Ks(class)+k) = space_srv(en,Ks(class)+k) - 1; % record departure
@@ -266,7 +266,7 @@ if sn.isstation(ind)
                                     outrate = [outrate; rate(en_wobuf,:)];
                                     outprob = [outprob; ones(size(rate(en_wobuf,:),1),1)];
                                     if start_svc_class > 0
-                                        pentry_svc_class = pie{ist,start_svc_class};
+                                        pentry_svc_class = pie{ist}{start_svc_class};
                                         for kentry = 1:K(start_svc_class)
                                             space_srv_k = space_srv;
                                             space_buf_k = space_buf;
@@ -284,7 +284,7 @@ if sn.isstation(ind)
                                     end
                                 case SchedStrategy.ID_LCFS % move last job in service
                                     space_srv(en,Ks(class)+k) = space_srv(en,Ks(class)+k) - 1; % record departure
-                                    rate(en) = mu{ist,class}(k)*(phi{ist,class}(k)).*kir(:,class,k); % assume active
+                                    rate(en) = mu{ist}{class}(k)*(phi{ist}{class}(k)).*kir(:,class,k); % assume active
                                     en_wbuf = en & ni>S(ist); %states with jobs in buffer
                                     [~, colfirstnnz] = max( space_buf(en_wbuf,:) ~=0, [], 2 ); % find first nnz column
                                     start_svc_class = space_buf(en_wbuf,colfirstnnz); % job entering service
@@ -296,7 +296,7 @@ if sn.isstation(ind)
                                         return
                                     end
                                     for kentry = 1:K(start_svc_class)
-                                        pentry_svc_class = pie{ist,start_svc_class};
+                                        pentry_svc_class = pie{ist}{start_svc_class};
                                         space_srv(en_wbuf,Ks(start_svc_class)+kentry) = space_srv(en_wbuf,Ks(start_svc_class)+kentry) + 1;
                                         % if state is unchanged, still add with rate 0
                                         outspace = [outspace; space_buf(en,:), space_srv(en,:), space_var(en,:)];
@@ -308,7 +308,7 @@ if sn.isstation(ind)
                                     end
                                 case SchedStrategy.ID_SIRO
                                     rate = zeros(size(space_srv,1),1);
-                                    rate(en) = mu{ist,class}(k)*(phi{ist,class}(k)).*kir(:,class,k); % this is for states not in en_buf
+                                    rate(en) = mu{ist}{class}(k)*(phi{ist}{class}(k)).*kir(:,class,k); % this is for states not in en_buf
                                     space_srv = inspace(:,end-sum(K)+1:end); % server state
                                     space_srv(en,Ks(class)+k) = space_srv(en,Ks(class)+k) - 1; % record departure
                                     % first record departure in states where the buffer is empty
@@ -323,7 +323,7 @@ if sn.isstation(ind)
                                         en_wbuf = en & space_buf(en,r) > 0; % states where the buffer is non-empty
                                         space_buf(en_wbuf,r) = space_buf(en_wbuf,r) - 1; % remove from buffer
                                         space_srv_r = space_srv;
-                                        pentry_svc_class = pie{ist,r};
+                                        pentry_svc_class = pie{ist}{r};
                                         pick_prob = (nir(r)-sir(r)) / (ni-sum(sir));
                                         if pick_prob >= 0
                                             rate_r(en_wbuf,:) = rate_r(en_wbuf,:) * pick_prob;
@@ -340,7 +340,7 @@ if sn.isstation(ind)
                                     end
                                 case {SchedStrategy.ID_SEPT,SchedStrategy.ID_LEPT} % move last job in service
                                     rate = zeros(size(space_srv,1),1);
-                                    rate(en) = mu{ist,class}(k)*(phi{ist,class}(k)).*kir(:,class,k); % this is for states not in en_buf
+                                    rate(en) = mu{ist}{class}(k)*(phi{ist}{class}(k)).*kir(:,class,k); % this is for states not in en_buf
                                     space_srv = inspace(:,end-sum(K)+1:end); % server state
                                     space_srv(en,Ks(class)+k) = space_srv(en,Ks(class)+k) - 1; % record departure
                                     space_buf = inspace(:,1:(end-sum(K))); % buffer state
@@ -351,7 +351,7 @@ if sn.isstation(ind)
                                     sept_class = sn.schedparam(ist,first_class_inrow); % this is different for sept and lept
                                     
                                     space_buf(en_wbuf,sept_class) = space_buf(en_wbuf,sept_class) - 1; % remove from buffer
-                                    pentry = pie{ist,sept_class};
+                                    pentry = pie{ist}{sept_class};
                                     for kentry=1:K(sept_class)
                                         space_srv(en_wbuf,Ks(sept_class)+kentry) = space_srv(en_wbuf,Ks(sept_class)+kentry) + 1; % bring job in service
                                         if isSimulation
@@ -405,28 +405,28 @@ if sn.isstation(ind)
                             space_srv_k(:,Ks(class)+kdest) = space_srv_k(:,Ks(class)+kdest) + 1;
                             switch sn.schedid(ist)
                                 case SchedStrategy.ID_EXT
-                                    rate = ph{ist,class}{1}(k,kdest); % move next job forward
+                                    rate = proc{ist}{class}{1}(k,kdest); % move next job forward
                                 case SchedStrategy.ID_INF
-                                    rate = ph{ist,class}{1}(k,kdest)*kir(:,class,k); % assume active
+                                    rate = proc{ist}{class}{1}(k,kdest)*kir(:,class,k); % assume active
                                 case SchedStrategy.ID_PS
-                                    rate = ph{ist,class}{1}(k,kdest)*kir(:,class,k)./ni(:).*min(ni(:),S(ist)); % assume active
+                                    rate = proc{ist}{class}{1}(k,kdest)*kir(:,class,k)./ni(:).*min(ni(:),S(ist)); % assume active
                                 case SchedStrategy.ID_DPS
                                     if S(ist) > 1
                                         line_error(mfilename,'Multi-server DPS not supported yet');
                                     end
                                     w_i = sn.schedparam(ist,:);
                                     w_i = w_i / sum(w_i);
-                                    rate = ph{ist,class}{1}(k,kdest)*kir(:,class,k)*w_i(class)./(sum(repmat(w_i,size(nir,1),1)*nir',2)); % assume active
+                                    rate = proc{ist}{class}{1}(k,kdest)*kir(:,class,k)*w_i(class)./(sum(repmat(w_i,size(nir,1),1)*nir',2)); % assume active
                                 case SchedStrategy.ID_GPS
                                     if S(ist) > 1
                                         line_error(mfilename,'Multi-server GPS not supported yet');
                                     end
                                     cir = min(nir,ones(size(nir)));
                                     w_i = sn.schedparam(ist,:); w_i = w_i / sum(w_i);
-                                    rate = ph{ist,class}{1}(k,kdest)*kir(:,class,k)/nir(class)*w_i(class)/(w_i*cir(:)); % assume active
+                                    rate = proc{ist}{class}{1}(k,kdest)*kir(:,class,k)/nir(class)*w_i(class)/(w_i*cir(:)); % assume active
                                     
                                 case {SchedStrategy.ID_FCFS, SchedStrategy.ID_HOL, SchedStrategy.ID_LCFS, SchedStrategy.ID_SIRO, SchedStrategy.ID_SEPT, SchedStrategy.ID_LEPT}
-                                    rate = ph{ist,class}{1}(k,kdest)*kir(:,class,k); % assume active
+                                    rate = proc{ist}{class}{1}(k,kdest)*kir(:,class,k); % assume active
                             end
                             % if the class cannot be served locally,
                             % then rate = NaN since mu{i,class}=NaN

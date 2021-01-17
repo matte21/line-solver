@@ -1,3 +1,3 @@
 function setInitialized(self, bool)
-self.isInitialized = bool;
+self.hasState = bool;
 end

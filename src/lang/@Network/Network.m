@@ -6,7 +6,7 @@ classdef Network < Model
     
     properties (Access=private)
         doChecks;
-        isInitialized;
+        hasState;
         logPath;
         usedFeatures; % structure of booleans listing the used classes
         % it must be accessed via getUsedLangFeatures that updates
@@ -15,6 +15,7 @@ classdef Network < Model
     
     properties (Access=public)
         sn;
+        hasStruct;
     end
     
     properties (Hidden)
@@ -61,7 +62,7 @@ classdef Network < Model
         nodes = resetNetwork(self)
         resetStruct(self)
         
-        refreshStruct(self);
+        refreshStruct(self, hard);
         [rates, scv, hasRateChanged, hasSCVChanged] = refreshRates(self, statSet, classSet);
         [ph, mu, phi, phases] = refreshServicePhases(self, statSet, classSet);
         proctypes = refreshServiceTypes(self);
@@ -91,19 +92,16 @@ classdef Network < Model
             self.connections = [];
             initUsedFeatures(self);
             self.sn = [];
-            self.isInitialized = false;
+            self.hasState = false;
             self.logPath = '';
             self.items = {};
             self.sourceidx = [];
             self.sinkidx = [];
             self.setChecks(true);
+            self.hasStruct = false;
         end
         
         setInitialized(self, bool);
-        
-        function bool = hasStruct(self)
-            bool = ~isempty(self.sn) & isfield(self.sn,'nnodes'); % check any field different from rtorig and state that are persistent
-        end
         
         function self = setChecks(self, bool)
             self.doChecks = bool;
@@ -836,10 +834,22 @@ classdef Network < Model
         
         function ret = exportNetworkStruct(sn, language)
             % @todo unfinished
-            
+            if nargin<2
+                language='json';
+            end
             ret = javaObject('java.util.HashMap');
             switch language
-                case {'java','Java'}
+                case {'json'}
+                    sn.rtfun = func2str(sn.rtfun);
+                    for i=1:size(sn.lst,1)
+                        for r=1:length(sn.lst{i})
+                            if ~isempty(sn.lst{i}{r})
+                                sn.lst{i}{r}=func2str(sn.lst{i}{r});
+                            end
+                        end
+                    end
+                    ret = jsonencode(sn);
+                case {'java'}
                     fieldNames = fields(sn);
                     for f=1:length(fieldNames)
                         switch fieldNames{f}
@@ -851,9 +861,7 @@ classdef Network < Model
                         end
                         ret.put(fieldNames{f},exportJava(field));
                     end
-            end
-            
-        end
-        
+            end            
+        end        
     end
 end

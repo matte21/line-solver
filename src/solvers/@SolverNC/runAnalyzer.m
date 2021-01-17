@@ -1,7 +1,8 @@
 function runtime = runAnalyzer(self, options, config)
 % RUNTIME = RUN()
 % Run the solver
-sn = self.model.getStruct(false); % doesn't need initial state
+
+sn = getStruct(self); % doesn't need initial state
 
 T0=tic;
 if nargin<2
@@ -57,7 +58,20 @@ else % queueing network
     if any(sn.nodetype == NodeType.Cache)
         line_error(mfilename,'Caching analysis not supported yet by NC in general networks.');
     end
-    [QN,UN,RN,TN,CN,XN,lG,runtime] = solver_nc_analyzer(sn, options);
+    configLDSolver = false;
+    if isfield(options,'config')
+        for c=1:2:length(options.config)
+            switch options.config{c}
+                case 'ld'
+                    configLDSolver = options.config{c+1};
+            end
+        end
+    end
+    if configLDSolver
+        [QN,UN,RN,TN,CN,XN,lG,runtime] = solver_ncld_analyzer(sn, options);
+    else
+        [QN,UN,RN,TN,CN,XN,lG,runtime] = solver_nc_analyzer(sn, options);
+    end
 end
 self.setAvgResults(QN,UN,RN,TN,CN,XN,runtime);
 self.result.Prob.logNormConstAggr = lG;

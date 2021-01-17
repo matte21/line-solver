@@ -7,9 +7,6 @@ function isValid = isValid(sn, n, s, options)
 % n(r): number of jobs at the station in class r
 % s(r): jobs of class r that are running
 
-if nargin==3
-    options = Solver.defaultOptions;
-end
 isValid = true;
 
 if isa(sn,'Network')
@@ -27,7 +24,7 @@ if iscell(n) %then n is a cell array of states
     for isf=1:length(ncell)
         ist = sn.statefulToStation(isf);
         ind = sn.statefulToNode(isf);
-        [~, n(ist,:), s(ist,:), ~] = State.toMarginal(sn, ind, ncell{isf}, options);
+        [~, n(ist,:), s(ist,:), ~] = State.toMarginal(sn, ind, ncell{isf});
     end
 end
 
@@ -37,7 +34,7 @@ for ist=1:sn.nstations
     for r=1:R
         K(r) = sn.phases(ist,r);
         if sn.nodetype(sn.stationToNode(ist)) ~= NodeType.Place
-            if ~isempty(sn.proc) && ~isempty(sn.proc{ist,r}) && any(any(isnan(sn.proc{ist,r}{1}))) && n(ist,r)>0 % if disabled
+            if ~isempty(sn.proc) && ~isempty(sn.proc{ist}{r}) && any(any(isnan(sn.proc{ist}{r}{1}))) && n(ist,r)>0 % if disabled
                 isValid = false;
                 %            line_error(mfilename,sprintf('Chain %d is initialized with an incorrect number of jobs: %f instead of %d.', nc, statejobs_chain, njobs_chain));
                 return

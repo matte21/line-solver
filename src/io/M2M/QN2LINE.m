@@ -45,7 +45,7 @@ for k = 1:K
         % set it to the first node where the rate for this class is
         % non-null
         for i=1:M
-            if sum(nnz(sn.proc{i,k}{1}))>0
+            if sum(nnz(sn.proc{i}{k}{1}))>0
                 break
             end
         end
@@ -57,26 +57,26 @@ for k = 1:K
     end
     
     for i=1:M
-        SCVik = map_scv(PH{i,k});
+        SCVik = map_scv(PH{i}{k});
         %        if SCVik >= 0.5
         switch sn.schedid(i)
             case SchedStrategy.ID_EXT
                 if isnan(sn.rates(i,k))
-                    node{i}.setArrival(jobclass{k}, Disabled());
+                    node{i}.setArrival(jobclass{k}, Disabled.getInstance());
                 elseif sn.rates(i,k)==0
-                    node{i}.setArrival(jobclass{k}, Immediate());
+                    node{i}.setArrival(jobclass{k}, Immediate.getInstance());
                 else
-                    node{i}.setArrival(jobclass{k}, APH.fitMeanAndSCV(map_mean(PH{i,k}),SCVik));
+                    node{i}.setArrival(jobclass{k}, APH.fitMeanAndSCV(map_mean(PH{i}{k}),SCVik));
                 end
             case SchedStrategy.ID_FORK
                 % do nothing
             otherwise
                 if isnan(sn.rates(i,k))
-                    node{i}.setService(jobclass{k}, Disabled());
+                    node{i}.setService(jobclass{k}, Disabled.getInstance());
                 elseif sn.rates(i,k)==0
-                    node{i}.setService(jobclass{k}, Immediate());
+                    node{i}.setService(jobclass{k}, Immediate.getInstance());
                 else
-                    node{i}.setService(jobclass{k}, APH.fitMeanAndSCV(map_mean(PH{i,k}),SCVik));
+                    node{i}.setService(jobclass{k}, APH.fitMeanAndSCV(map_mean(PH{i}{k}),SCVik));
                 end
         end
         %        else
@@ -85,11 +85,11 @@ for k = 1:K
         %            nPhases = max(1,round(1/SCVik));
         %            switch sn.schedid(i)
         %                case SchedStrategy.ID_EXT
-        %                    node{i}.setArrival(jobclass{k}, Erlang(nPhases/map_mean(PH{i,k}),nPhases));
+        %                    node{i}.setArrival(jobclass{k}, Erlang(nPhases/map_mean(PH{i}{k}),nPhases));
         %                case SchedStrategy.ID_FORK
         % do nothing
         %                otherwise
-        %                    node{i}.setService(jobclass{k}, Erlang(nPhases/map_mean(PH{i,k}),nPhases));
+        %                    node{i}.setService(jobclass{k}, Erlang(nPhases/map_mean(PH{i}{k}),nPhases));
         %            end
     end
     %end

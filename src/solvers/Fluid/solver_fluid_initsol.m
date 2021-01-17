@@ -29,7 +29,7 @@ for ind=1:sn.nnodes
                 end
             case {SchedStrategy.ID_FCFS, SchedStrategy.ID_SIRO, SchedStrategy.ID_PS, SchedStrategy.ID_INF, SchedStrategy.ID_DPS, SchedStrategy.ID_HOL}
                 for r=1:size(kir_i,2)
-                    for k=1:length(sn.mu{ist,r})
+                    for k=1:length(sn.mu{ist}{r})
                         if k==1
                             state_i(:,end+1) = nir(:,r) - sum(kir_i(:,r,2:end),3); % jobs in waiting buffer are re-started phase 1
                             if ~isnan(sn.rates(ist,r))

@@ -82,7 +82,7 @@ for k = 1:sn.nclasses
         % non-null
         iref = 0;
         for i=1:sn.nstations
-            if sum(nnz(sn.proc{i,k}{1}))>0
+            if sum(nnz(sn.proc{i}{k}{1}))>0
                 iref = i;
                 break
             end
@@ -107,20 +107,20 @@ for k=1:sn.nclasses
                         fprintf(fid,'node{%d}.setService(jobclass{%d}, Replayer(''%s'')); %% (%s,%s)\n',sn.stationToNode(i),k,model.stations{i}.serviceProcess{k}.params{1}.paramValue,sn.nodenames{sn.stationToNode(i)},sn.classnames{k});
                 end
             else
-                SCVik = map_scv(PH{i,k});
+                SCVik = map_scv(PH{i}{k});
                 if SCVik >= 0.5
                     switch sn.schedid(i)
                         case SchedStrategy.ID_EXT
                             if SCVik == 1
-                                fprintf(fid,'node{%d}.setArrival(jobclass{%d}, Exp.fitMean(%f)); %% (%s,%s)\n',sn.stationToNode(i),k,map_mean(PH{i,k}),sn.nodenames{sn.stationToNode(i)},sn.classnames{k});
+                                fprintf(fid,'node{%d}.setArrival(jobclass{%d}, Exp.fitMean(%f)); %% (%s,%s)\n',sn.stationToNode(i),k,map_mean(PH{i}{k}),sn.nodenames{sn.stationToNode(i)},sn.classnames{k});
                             else
-                                fprintf(fid,'node{%d}.setArrival(jobclass{%d}, Cox2.fitMeanAndSCV(%f,%f)); %% (%s,%s)\n',sn.stationToNode(i),k,map_mean(PH{i,k}),SCVik,sn.nodenames{sn.stationToNode(i)},sn.classnames{k});
+                                fprintf(fid,'node{%d}.setArrival(jobclass{%d}, Cox2.fitMeanAndSCV(%f,%f)); %% (%s,%s)\n',sn.stationToNode(i),k,map_mean(PH{i}{k}),SCVik,sn.nodenames{sn.stationToNode(i)},sn.classnames{k});
                             end
                         otherwise
                             if SCVik == 1
-                                fprintf(fid,'node{%d}.setService(jobclass{%d}, Exp.fitMean(%f)); %% (%s,%s)\n',sn.stationToNode(i),k,map_mean(PH{i,k}),sn.nodenames{sn.stationToNode(i)},sn.classnames{k});
+                                fprintf(fid,'node{%d}.setService(jobclass{%d}, Exp.fitMean(%f)); %% (%s,%s)\n',sn.stationToNode(i),k,map_mean(PH{i}{k}),sn.nodenames{sn.stationToNode(i)},sn.classnames{k});
                             else
-                                fprintf(fid,'node{%d}.setService(jobclass{%d}, Cox2.fitMeanAndSCV(%f,%f)); %% (%s,%s)\n',sn.stationToNode(i),k,map_mean(PH{i,k}),SCVik,sn.nodenames{sn.stationToNode(i)},sn.classnames{k});
+                                fprintf(fid,'node{%d}.setService(jobclass{%d}, Cox2.fitMeanAndSCV(%f,%f)); %% (%s,%s)\n',sn.stationToNode(i),k,map_mean(PH{i}{k}),SCVik,sn.nodenames{sn.stationToNode(i)},sn.classnames{k});
                             end
                     end
                 else
@@ -129,16 +129,16 @@ for k=1:sn.nclasses
                     nPhases = max(1,round(1/SCVik));
                     switch sn.schedid(i)
                         case SchedStrategy.ID_EXT
-                            if isnan(PH{i,k}{1})
-                                fprintf(fid,'node{%d}.setArrival(jobclass{%d}, Disabled()); %% (%s,%s)\n',sn.stationToNode(i),k,sn.nodenames{sn.stationToNode(i)},sn.classnames{k});
+                            if isnan(PH{i}{k}{1})
+                                fprintf(fid,'node{%d}.setArrival(jobclass{%d}, Disabled.getInstance()); %% (%s,%s)\n',sn.stationToNode(i),k,sn.nodenames{sn.stationToNode(i)},sn.classnames{k});
                             else
-                                fprintf(fid,'node{%d}.setArrival(jobclass{%d}, Erlang(%f,%f)); %% (%s,%s)\n',sn.stationToNode(i),k,nPhases/map_mean(PH{i,k}),nPhases,sn.nodenames{sn.stationToNode(i)},sn.classnames{k});
+                                fprintf(fid,'node{%d}.setArrival(jobclass{%d}, Erlang(%f,%f)); %% (%s,%s)\n',sn.stationToNode(i),k,nPhases/map_mean(PH{i}{k}),nPhases,sn.nodenames{sn.stationToNode(i)},sn.classnames{k});
                             end
                         otherwise
-                            if isnan(PH{i,k}{1})
-                                fprintf(fid,'node{%d}.setService(jobclass{%d}, Disabled()); %% (%s,%s)\n',sn.stationToNode(i),k,sn.nodenames{sn.stationToNode(i)},sn.classnames{k});
+                            if isnan(PH{i}{k}{1})
+                                fprintf(fid,'node{%d}.setService(jobclass{%d}, Disabled.getInstance()); %% (%s,%s)\n',sn.stationToNode(i),k,sn.nodenames{sn.stationToNode(i)},sn.classnames{k});
                             else
-                                fprintf(fid,'node{%d}.setService(jobclass{%d}, Erlang(%f,%f)); %% (%s,%s)\n',sn.stationToNode(i),k,nPhases/map_mean(PH{i,k}),nPhases,sn.nodenames{sn.stationToNode(i)},sn.classnames{k});
+                                fprintf(fid,'node{%d}.setService(jobclass{%d}, Erlang(%f,%f)); %% (%s,%s)\n',sn.stationToNode(i),k,nPhases/map_mean(PH{i}{k}),nPhases,sn.nodenames{sn.stationToNode(i)},sn.classnames{k});
                             end
                     end
                 end

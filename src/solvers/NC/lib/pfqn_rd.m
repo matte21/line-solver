@@ -1,7 +1,15 @@
 function lGN = pfqn_rd(L,N,Z,mu)
+if sum(N)<0
+    lGN=-Inf;
+    return
+end
+if sum(N)==0
+    lGN=0;
+    return
+end
 [M,R]=size(L);
 gamma = ones(M,sum(N));
-mu = mu(M,1:sum(N));
+mu = mu(:,1:sum(N));
 s = sum(N)*ones(1,M);
 for i=1:M
     gamma(i,:) = mu(i,:)/mu(i,s(i));    
@@ -33,9 +41,11 @@ for vtot=0:vmax
     EN = exp(lEN(vtot+1));
     C = C + ((sum(N)-max(0,max(vtot-1)))/sum(N)) * EN;
 end
-%[~,lGsigma] = pfqn_mci(y,N,Z,1e5);
-lGN = pfqn_nc(y,N,Z);
-%[~,lGsigma] = pfqn_ca(y,N,Z);
+%[~,lGN] = pfqn_mci(y,N,Z,1e5);
+options = SolverNC.defaultOptions;
+options.method='default';
+lGN = pfqn_nc(y,N,Z,options);
+%[~,lGN] = pfqn_ca(y,N,Z);
 lGN = lGN + log(C);
 end
 

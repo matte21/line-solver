@@ -46,21 +46,21 @@ if all(isinf(sn.njobs)) % is open
             case SchedStrategy.ID_EXT
                 % assemble a MMAP for the arrival process from all classes
                 for k=1:K
-                    if isnan(PH{ist,k}{1})
-                        PH{ist,k} = map_exponential(Inf); % no arrivals from this class
+                    if isnan(PH{ist}{k}{1})
+                        PH{ist}{k} = map_exponential(Inf); % no arrivals from this class
                     end
                 end
                 chainArrivalAtSource = cell(1,C);
                 for c=1:C %for each chain
                     inchain = find(sn.chains(c,:))';
                     k = inchain(1);
-                    chainArrivalAtSource{c} = {PH{ist,k}{1},PH{ist,k}{2},PH{ist,k}{2}};
+                    chainArrivalAtSource{c} = {PH{ist}{k}{1},PH{ist}{k}{2},PH{ist}{k}{2}};
                     for ki=2:length(inchain)
                         k = inchain(ki);
-                        if isnan(PH{ist,k}{1})
-                            PH{ist,k} = map_exponential(Inf); % no arrivals from this class
+                        if isnan(PH{ist}{k}{1})
+                            PH{ist}{k} = map_exponential(Inf); % no arrivals from this class
                         end
-                        chainArrivalAtSource{c} = mmap_super_safe({chainArrivalAtSource{c},{PH{ist,k}{1},PH{ist,k}{2},PH{ist,k}{2}}}, config.space_max, 'default');
+                        chainArrivalAtSource{c} = mmap_super_safe({chainArrivalAtSource{c},{PH{ist}{k}{1},PH{ist}{k}{2},PH{ist}{k}{2}}}, config.space_max, 'default');
                     end
 %                     if c == 1
 %                         aggrArrivalAtSource = mmap_super_safe({chainArrivalAtSource{1}, mmap_exponential(0,1)}, config.space_max, 'default');
@@ -77,9 +77,9 @@ if all(isinf(sn.njobs)) % is open
                 for k=1:K
                     % divide service time by number of servers and put
                     % later a surrogate delay server in tandem to compensate
-                    PH{ist,k} = map_scale(PH{ist,k}, map_mean(PH{ist,k})/sn.nservers(ist));
-                    pie{ist,k} = map_pie(PH{ist,k});
-                    D0{ist,k} = PH{ist,k}{1};
+                    PH{ist}{k} = map_scale(PH{ist}{k}, map_mean(PH{ist}{k})/sn.nservers(ist));
+                    pie{ist}{k} = map_pie(PH{ist}{k});
+                    D0{ist,k} = PH{ist}{k}{1};
                 end
         end
     end % i
@@ -92,14 +92,14 @@ if all(isinf(sn.njobs)) % is open
                 case SchedStrategy.ID_INF
                     for k=1:K
                         TN(ist,k) = lambda(k)*V(ist,k);
-                        UN(ist,k) = map_mean(PH{ist,k})*TN(ist,k);
-                        QN(ist,k) = TN(ist,k).*map_mean(PH{ist,k})*V(ist,k);
+                        UN(ist,k) = map_mean(PH{ist}{k})*TN(ist,k);
+                        QN(ist,k) = TN(ist,k).*map_mean(PH{ist}{k})*V(ist,k);
                         RN(ist,k) = QN(ist,k)/TN(ist,k);
                     end
                 case SchedStrategy.ID_PS
                     for k=1:K
                         TN(ist,k) = lambda(k)*V(ist,k);
-                        UN(ist,k) = map_mean(PH{ist,k})*TN(ist,k);
+                        UN(ist,k) = map_mean(PH{ist}{k})*TN(ist,k);
                     end
                     sum(UN(ist,:))
                     for k=1:K
@@ -126,20 +126,20 @@ if all(isinf(sn.njobs)) % is open
                     if strcmp(sn.schedid(ist),SchedStrategy.ID_HOL) && any(sn.classprio ~= sn.classprio(1)) % if priorities are not identical
                         [uK,iK] = unique(sn.classprio);
                         if length(uK) == length(sn.classprio) % if all priorities are different
-                            [Qret{iK}] = MMAPPH1NPPR({aggrArrivalAtNode{[1;2+iK]}}, {pie{ist,iK}}, {D0{ist,iK}}, 'ncMoms', 1);
+                            [Qret{iK}] = MMAPPH1NPPR({aggrArrivalAtNode{[1;2+iK]}}, {pie{ist}{iK}}, {D0{ist,iK}}, 'ncMoms', 1);
                         else
                             line_error(mfilename,'Solver MAM requires either identical priorities or all distinct priorities');
                         end
                     else
-                        [Qret{1:K}] = MMAPPH1FCFS({aggrArrivalAtNode{[1,3:end]}}, {pie{ist,:}}, {D0{ist,:}}, 'ncMoms', 1);
+                        [Qret{1:K}] = MMAPPH1FCFS({aggrArrivalAtNode{[1,3:end]}}, {pie{ist}{:}}, {D0{ist,:}}, 'ncMoms', 1);
                     end
                     QN(ist,:) = cell2mat(Qret);
                     for k=1:K
                         c = find(sn.chains(:,k));
                         TN(ist,k) = rates{ist,c}(k);
-                        UN(ist,k) = TN(ist,k) * map_mean(PH{ist,k});
+                        UN(ist,k) = TN(ist,k) * map_mean(PH{ist}{k});
                         % add number of jobs at the surrogate delay server
-                        QN(ist,k) = QN(ist,k) + TN(ist,k)*(map_mean(PH{ist,k})*sn.nservers(ist)) * (sn.nservers(ist)-1)/sn.nservers(ist);
+                        QN(ist,k) = QN(ist,k) + TN(ist,k)*(map_mean(PH{ist}{k})*sn.nservers(ist)) * (sn.nservers(ist)-1)/sn.nservers(ist);
                         RN(ist,k) = QN(ist,k) ./ TN(ist,k);
                     end
             end

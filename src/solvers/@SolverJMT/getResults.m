@@ -15,13 +15,13 @@ for m=1:length(result.metric)
     metric = result.metric{m};
     switch metric.measureType
         case MetricType.QLen
-            i = sn.nodeToStation(cellfun(@(c) strcmp(c,metric.station), sn.nodenames));
+            i = sn.nodeToStation(find(sn.nodenames == metric.station));
             r = find(cellfun(@(c) strcmp(c,metric.class), sn.classnames));
             if isinf(sn.njobs(r))
                 result.Avg.Q(i,r) = metric.meanValue;
             else % 'closed'
                 N = sn.njobs;
-                chainIdx = find(cellfun(@any,strfind(sn.classnames,metric.class)));
+                chainIdx = find(sn.classnames == metric.class);
                 if metric.analyzedSamples > sum(sn.njobs(chainIdx))  % for a class to be considered recurrent we ask more samples than jobs in the corresponding closed chain
                     result.Avg.Q(i,r) = metric.meanValue;
                 else
@@ -29,13 +29,13 @@ for m=1:length(result.metric)
                 end
             end
         case MetricType.Util
-            i = sn.nodeToStation(cellfun(@(c) strcmp(c,metric.station), sn.nodenames));
+            i = sn.nodeToStation(find(sn.nodenames == metric.station));
             r = find(cellfun(@(c) strcmp(c,metric.class), sn.classnames));
             if isinf(sn.njobs(r))
                 result.Avg.U(i,r) = metric.meanValue;
             else % 'closed'
                 N = sn.njobs;
-                chainIdx = find(cellfun(@any,strfind(sn.classnames,metric.class)));
+                chainIdx = find(sn.classnames == metric.class);
                 if metric.analyzedSamples > sum(sn.njobs(chainIdx))  % for a class to be considered recurrent we ask more samples than jobs in the corresponding closed chain
                     result.Avg.U(i,r) = metric.meanValue;
                 else
@@ -43,13 +43,13 @@ for m=1:length(result.metric)
                 end
             end
         case MetricType.RespT
-            i = sn.nodeToStation(cellfun(@(c) strcmp(c,metric.station), sn.nodenames));
+            i = sn.nodeToStation(find(sn.nodenames == metric.station));
             r = find(cellfun(@(c) strcmp(c,metric.class), sn.classnames));
             if isinf(sn.njobs(r))
                 result.Avg.R(i,r) = metric.meanValue;
             else % 'closed'
                 N = sn.njobs;
-                chainIdx = find(cellfun(@any,strfind(sn.classnames,metric.class)));
+                chainIdx = find(sn.classnames == metric.class);
                 if metric.analyzedSamples > sum(sn.njobs(chainIdx))  % for a class to be considered recurrent we ask more samples than jobs in the corresponding closed chain
                     result.Avg.R(i,r) = metric.meanValue;
                 else
@@ -57,13 +57,13 @@ for m=1:length(result.metric)
                 end
             end
         case MetricType.Tput
-            i = sn.nodeToStation(cellfun(@(c) strcmp(c,metric.station), sn.nodenames));
+            i = sn.nodeToStation(find(sn.nodenames == metric.station));
             r = find(cellfun(@(c) strcmp(c,metric.class), sn.classnames));
             if isinf(sn.njobs(r))
                 result.Avg.T(i,r) = metric.meanValue;
             else % 'closed'
                 N = sn.njobs;
-                chainIdx = find(cellfun(@any,strfind(sn.classnames,metric.class)));
+                chainIdx = find(sn.classnames == metric.class);
                 if metric.analyzedSamples > sum(sn.njobs(chainIdx))  % for a class to be considered recurrent we ask more samples than jobs in the corresponding closed chain
                     result.Avg.T(i,r) = metric.meanValue;
                 else

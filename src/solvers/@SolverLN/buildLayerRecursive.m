@@ -74,7 +74,7 @@ for tidx_caller = callers
             aidxClass{eidx}.completes = false;
             aidxClass{eidx}.attribute = [LayeredNetworkElement.ENTRY, eidx];
             model.attribute.entries(end+1,:) = [aidxClass{eidx}.index, eidx];
-            clientDelay.setService(aidxClass{eidx}, Immediate());
+            clientDelay.setService(aidxClass{eidx}, Immediate.getInstance());
         end
     end
     
@@ -110,7 +110,7 @@ for tidx_caller = callers
                         cidxClass{cidx} = OpenClass(model, lqn.callhashnames{cidx}, 0);
                         sourceStation.setArrival(cidxClass{cidx}, Exp(Distrib.Tol));
                         for m=1:nreplicas
-                            serverStation{m}.setService(cidxClass{cidx}, Immediate());
+                            serverStation{m}.setService(cidxClass{cidx}, Immediate.getInstance());
                         end
                         openClasses(end+1,:) = [cidxClass{cidx}.index, callmean(cidx), cidx];
                         model.attribute.calls(end+1,:) = [cidxClass{cidx}.index, cidx, lqn.callpair(cidx,1), lqn.callpair(cidx,2)];
@@ -144,9 +144,9 @@ for tidx_caller = callers
                         cidxAuxClass{cidx} = ClosedClass(model, [lqn.callhashnames{cidx},'.Aux'], 0, clientDelay);
                         cidxAuxClass{cidx}.completes = false;
                         cidxAuxClass{cidx}.attribute = [LayeredNetworkElement.CALL, cidx];
-                        clientDelay.setService(cidxAuxClass{cidx}, Immediate());
+                        clientDelay.setService(cidxAuxClass{cidx}, Immediate.getInstance());
                         for m=1:nreplicas
-                            serverStation{m}.setService(cidxAuxClass{cidx}, Disabled());
+                            serverStation{m}.setService(cidxAuxClass{cidx}, Disabled.getInstance());
                         end
                 end
             end
@@ -235,7 +235,7 @@ self.ensemble{idx} = model;
                                         P{cidxAuxClass{cidx}, cidxClass{cidx}}(clientDelay,clientDelay) = 1 / (callmean(cidx));
                                     end
                                     jobPos = 1;
-                                    clientDelay.setService(cidxClass{cidx}, Immediate());
+                                    clientDelay.setService(cidxClass{cidx}, Immediate.getInstance());
                                     for m=1:nreplicas
                                         serverStation{m}.setService(cidxClass{cidx}, callresptproc{cidx});
                                         self.callupdmap{idx}(end+1,:) = [idx, cidx, model.getNodeIndex(serverStation{m}), cidxClass{cidx}.index];

@@ -15,5 +15,5 @@ for ind=1:self.getNumberOfNodes
         end
     end
 end
-self.isInitialized = true;
+self.hasState = true;
 end

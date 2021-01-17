@@ -109,7 +109,7 @@ switch options.method
                                     if rates(i,k)>0
                                         %[cx] = APH.fitMeanAndSCV(1/rates(i,k), SCV(i,k));
                                         [cx,muik,phiik] = Coxian.fitMeanAndSCV(1/rates(i,k), SCV(i,k));
-                                        %[~,muik,phiik] = Coxian.fitMeanAndSCV(map_mean(PH{i,k}), 1); % replace with an exponential
+                                        %[~,muik,phiik] = Coxian.fitMeanAndSCV(map_mean(PH{i}{k}), 1); % replace with an exponential
                                         % we now handle the case that due to either numerical issues
                                         % or different relationship between scv and mean the size of
                                         % the phase-type representation has changed
@@ -124,9 +124,9 @@ switch options.method
                                         %if any(muik > 0.01+ sn.mu{i,k} * rates(i,k) / rates0(i,k))
                                         %    keyboard
                                         %end
-                                        sn.proc{i,k} = cx.getRepresentation;
+                                        sn.proc{i}{k} = cx.getRepresentation;
                                         sn.mu{i,k} = muik;
-                                        sn.phi{i,k} = phiik;
+                                        sn.phi{i}{k} = phiik;
                                         sn.phases = phases;
                                         if phases(i,k) ~= phases_last(i,k)
                                             isf = sn.stationToStateful(i);

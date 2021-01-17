@@ -36,6 +36,7 @@ if self.enableChecks && ~self.supports(self.model)
 end
 
 sn = getStruct(self); % this gets modified later on so pass by copy
+
 M = sn.nstations;
 K = sn.nclasses;
 

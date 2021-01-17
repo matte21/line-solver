@@ -13,35 +13,36 @@ for i=1:M
         if ~R{i,r}.disabled
             [i,r]
             if  isempty(self.model.stations{i}.server.serviceProcess{r}) || self.model.stations{i}.server.serviceProcess{r}{end}.isDisabled
-                 % noop
-            else                
+                % noop
+            else
                 % tag a class-r job
                 taggedModel = self.model.copy;
                 taggedModel.resetNetwork;
-                taggedModel.reset;
+                taggedModel.reset(true);
                 
                 Plinked = taggedModel.getLinkedRoutingMatrix;
                 if ~iscell(Plinked)
                     line_error(mfilename, 'getCdfRespT requires the original model to be linked with a routing matrix defined as a cell array P{r,s} for every class pair (r,s).');
                 else
                     for s=1:(K+1)
-                        Plinked{s,K+1} = zeros(M);
-                        Plinked{K+1,s} = zeros(M);
+                        Plinked{s,K+1} = Plinked{s,r};
+                        Plinked{K+1,s} = Plinked{r,s};
                     end
-                    Plinked{K+1,K+1}(i,i)=1; % self-looping class
                 end
                 
                 taggedModel.classes{end+1,1} = taggedModel.classes{r}.copy;
-                if isfinite(sn.njobs(r)) % what if Nr=1 ?
-                    taggedModel.classes{r}.population = taggedModel.classes{r}.population - 1;
-                    taggedModel.classes{end,1}.population = 1;
-                end
+                taggedModel.classes{end,1}.index=length(taggedModel.classes);                
+                taggedModel.classes{r,1}.name=[taggedModel.classes{r,1}.name,'.tagged'];
+                %if isfinite(sn.njobs(r)) && sn.njobs(r)>1 % make class r with a single job now
+                taggedModel.classes{r}.population = 1;
+                taggedModel.classes{end,1}.population = taggedModel.classes{end}.population - 1;
+                %end
                 
                 for m=1:length(taggedModel.nodes)
                     taggedModel.stations{m}.output.outputStrategy{end+1} = taggedModel.stations{m}.output.outputStrategy{r};
                 end
                 
-                for m=1:length(taggedModel.stations)                                        
+                for m=1:length(taggedModel.stations)
                     if self.model.stations{m}.server.serviceProcess{r}{end}.isDisabled
                         taggedModel.stations{m}.input.inputJobClasses(1,end+1) = {[]};
                         taggedModel.stations{m}.server.serviceProcess{end+1} = taggedModel.stations{m}.server.serviceProcess{r};
@@ -54,11 +55,14 @@ for i=1:M
                         taggedModel.stations{m}.server.serviceProcess{end+1} = taggedModel.stations{m}.server.serviceProcess{r};
                         taggedModel.stations{m}.server.serviceProcess{end}{end}=taggedModel.stations{m}.server.serviceProcess{end}{end}.copy;
                         taggedModel.stations{m}.schedStrategyPar(end+1) = taggedModel.stations{m}.schedStrategyPar(r);
-                        taggedModel.stations{m}.classCap(r) = taggedModel.stations{m}.classCap(r) - 1;
-                        taggedModel.stations{m}.classCap(1,end+1) = 1;                        
+                        taggedModel.stations{m}.classCap(1,end+1) = taggedModel.stations{m}.classCap(r) - 1;
+                        taggedModel.stations{m}.classCap(r) = 1;
                     end
-                end                                
-                                
+                end
+                
+                taggedModel.refreshStruct(true);
+                %snt = taggedModel.getStruct
+                %keyboard
                 taggedModel.link(Plinked);
                 
                 [Qir,Fir,ev] = SolverCTMC(taggedModel).getGenerator(true);

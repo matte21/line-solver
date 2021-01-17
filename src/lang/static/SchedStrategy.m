@@ -184,8 +184,10 @@ classdef (Sealed) SchedStrategy
         end        
         
         function property = toProperty(text)
-            % PROPERTY = TOPROPERTY(TEXT)
-            
+            % PROPERTY = TOPROPERTY(TEXT)            
+            if iscell(text)
+                text=text{:};
+            end
             switch text
                 case 'inf'
                     property = 'INF';

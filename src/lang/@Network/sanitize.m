@@ -14,7 +14,7 @@ if isempty(self.sn)
             case {'Cache'}
                 for k=1:K
                     if k > length(self.nodes{i}.popularity) || isempty(self.nodes{i}.popularity{k})
-                        self.nodes{i}.popularity{k} = Disabled();
+                        self.nodes{i}.popularity{k} = Disabled.getInstance();
                     end
                 end
                 if isempty(self.nodes{i}.accessProb)
@@ -40,10 +40,10 @@ if isempty(self.sn)
             case 'Queue'
                 for k=1:K
                     if k > length(self.nodes{i}.server.serviceProcess) || isempty(self.nodes{i}.server.serviceProcess{k})
-                        self.nodes{i}.serviceProcess{k} = Disabled();
+                        self.nodes{i}.serviceProcess{k} = Disabled.getInstance();
                         self.nodes{i}.classCap(k) = 0;
                         self.nodes{i}.schedStrategyPar(k) = 0;
-                        self.nodes{i}.server.serviceProcess{k} = {[],ServiceStrategy.LI,Disabled()};
+                        self.nodes{i}.server.serviceProcess{k} = {[],ServiceStrategy.LI,Disabled.getInstance()};
                         self.nodes{i}.input.inputJobClasses{k} = {[],SchedStrategyType.NP,DropStrategy.WaitingQueue};
                     end
                 end
@@ -82,10 +82,10 @@ if isempty(self.sn)
             case 'Delay'
                 for k=1:K
                     if k > length(self.nodes{i}.server.serviceProcess) || isempty(self.nodes{i}.server.serviceProcess{k})
-                        self.nodes{i}.serviceProcess{k} = Disabled();
+                        self.nodes{i}.serviceProcess{k} = Disabled.getInstance();
                         self.nodes{i}.classCap(k) = 0;
                         self.nodes{i}.schedStrategyPar(k) = 0;
-                        self.nodes{i}.server.serviceProcess{k} = {[],ServiceStrategy.LI,Disabled()};
+                        self.nodes{i}.server.serviceProcess{k} = {[],ServiceStrategy.LI,Disabled.getInstance()};
                         self.nodes{i}.input.inputJobClasses{k} = {[],SchedStrategyType.NP,DropStrategy.WaitingQueue};
                     end
                 end
@@ -102,21 +102,21 @@ if isempty(self.sn)
             case 'Source'
                 for k=1:K
                     if k > length(self.nodes{i}.input.sourceClasses) || isempty(self.nodes{i}.input.sourceClasses{k})
-                        self.nodes{i}.input.sourceClasses{k} = {[],ServiceStrategy.LI,Disabled()};
+                        self.nodes{i}.input.sourceClasses{k} = {[],ServiceStrategy.LI,Disabled.getInstance()};
                     end
                 end
             case 'Place'
                 for k=1:K
                     if k > length(self.nodes{i}.server.serviceProcess) || isempty(self.nodes{i}.server.serviceProcess{k})
                         self.nodes{i}.schedStrategyPar(k) = 0;
-                        self.nodes{i}.server.serviceProcess{k} = {[],ServiceStrategy.LI,Disabled()};
+                        self.nodes{i}.server.serviceProcess{k} = {[],ServiceStrategy.LI,Disabled.getInstance()};
                     end
                 end
             case 'Transition'
                 for k=1:K
                     if k > length(self.nodes{i}.server.serviceProcess) || isempty(self.nodes{i}.server.serviceProcess{k})
                         %                         self.nodes{i}.schedStrategyPar(k) = 0;
-                        self.nodes{i}.server.serviceProcess{k} = {[],ServiceStrategy.LI,Disabled()};
+                        self.nodes{i}.server.serviceProcess{k} = {[],ServiceStrategy.LI,Disabled.getInstance()};
                     end
                 end
         end
@@ -131,7 +131,7 @@ if isempty(self.sn)
                         self.stations{i}.setProbRouting(self.classes{r}, self.stations{i}, 0.0);
                     otherwise
                         if isempty(self.stations{i}.server.serviceProcess{r})
-                            self.stations{i}.server.serviceProcess{r} = {[],ServiceStrategy.LI,Disabled()};
+                            self.stations{i}.server.serviceProcess{r} = {[],ServiceStrategy.LI,Disabled.getInstance()};
                         end
                 end
             end

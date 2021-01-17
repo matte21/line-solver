@@ -8,5 +8,5 @@ if nargin == 1
 else
     resetModel(self, resetState);
 end
-self.isInitialized = false;
+self.hasState = false;
 end

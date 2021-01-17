@@ -14,10 +14,11 @@ if self.hasStruct
     end
     self.sn = [];
     self.sn.rtorig = rtorig;
+    self.hasStruct = false;
 end
 
 if nargin == 2 && resetState
-    self.isInitialized = false;
+    self.hasState = false;
 end
 for ind = 1:length(self.getNodes)
     self.nodes{ind}.reset();

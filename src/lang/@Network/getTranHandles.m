@@ -25,24 +25,24 @@ for i=1:M
         %        Rt{i,r} = Metric(MetricType.TranRespT, self.classes{r}, self.stations{i});
         Ut{i,r} = Metric(MetricType.TranUtil, self.classes{r}, self.stations{i});
         if isa(self.stations{i},'Source')
-            Qt{i,r}.disable();
-            %            Rt{i,r}.disable();
-            Ut{i,r}.disable();
+            Qt{i,r}.disabled = true;
+            %            Rt{i,r}.disabled = true;
+            Ut{i,r}.disabled = true;
         end
         if isa(self.stations{i},'Sink')
-            Qt{i,r}.disable();
-            %            Rt{i,r}.disable();
-            Ut{i,r}.disable();
+            Qt{i,r}.disabled = true;
+            %            Rt{i,r}.disabled = true;
+            Ut{i,r}.disabled = true;
         end
         if isa(self.stations{i},'Join') || isa(self.stations{i},'Fork')
-            Ut{i,r}.disable();
+            Ut{i,r}.disabled = true;
         end
         if ~strcmpi(class(self.stations{i}.server),'ServiceTunnel')
             if isempty(self.stations{i}.server.serviceProcess{r}) || strcmpi(class(self.stations{i}.server.serviceProcess{r}{end}),'Disabled')
-                Tt{i,r}.disable();
-                Qt{i,r}.disable();
-                %                Rt{i,r}.disable();
-                Ut{i,r}.disable();
+                Tt{i,r}.disabled = true;
+                Qt{i,r}.disabled = true;
+                %                Rt{i,r}.disabled = true;
+                Ut{i,r}.disabled = true;
             end
         end
     end

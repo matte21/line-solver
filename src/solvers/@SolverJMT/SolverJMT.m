@@ -13,6 +13,8 @@ classdef SolverJMT < NetworkSolver
         maxSamples;
         maxEvents;
         seed;
+        simConfInt;
+        simMaxRelErr;
     end
     
     %Constants
@@ -38,7 +40,8 @@ classdef SolverJMT < NetworkSolver
             if ~Solver.isAvailable
                 line_error(mfilename,'SolverJMT cannot located JMT.jar in the MATLAB path.');
             end
-            
+            self.simConfInt = 0.99;
+            self.simMaxRelErr = 0.03;
             self.maxEvents = -1;
             jarPath = jmtGetPath;
             self.setJMTJarPath(jarPath);
@@ -86,11 +89,18 @@ classdef SolverJMT < NetworkSolver
         [result, parsed] = getResults(self)
         [result, parsed] = getResultsJSIM(self)
         [result, parsed] = getResultsJMVA(self)
+        
+        function sn = getStruct(self)
+            % QN = GETSTRUCT()
+            
+            % Get data structure summarizing the model
+            sn = self.model.getStruct(true);
+        end
     end
     
     %Private methods.
     methods (Access = 'private')
-        out = getJSIMTempPath(self)        
+        out = getJSIMTempPath(self)
         out = getJMVATempPath(self)
     end
     
@@ -113,7 +123,7 @@ classdef SolverJMT < NetworkSolver
         [RD,log] = getCdfRespT(self, R);
         RD = getTranCdfRespT(self, R);
         RD = getTranCdfPassT(self, R);
-    end    
+    end
     
     methods (Static)
         

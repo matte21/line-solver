@@ -8,7 +8,7 @@ function [QNclass,UNclass,RNclass,TNclass] = getAvg(self,Q,U,R,T)
 
 if nargin == 1 % no parameter
     if isempty(self.model.handles) || ~isfield(self.model.handles,'Q') || ~isfield(self.model.handles,'U') || ~isfield(self.model.handles,'R') || ~isfield(self.model.handles,'T') || ~isfield(self.model.handles,'A')
-        resetResults(self); % reset in case there are partial results saved        
+        resetResults(self); % reset in case there are partial results saved
     end
     [Q,U,R,T] = self.getAvgHandles;
 elseif nargin == 2
@@ -51,7 +51,7 @@ if ~self.hasAvgResults || ~self.options.cache
     end
 end % else return cached value
 
-sn = self.model.getStruct();
+sn = self.getStruct();
 M = sn.nstations();
 K = sn.nclasses();
 
@@ -63,28 +63,38 @@ TNclass = [];
 if ~isempty(Q)
     QNclass = zeros(M,K);
     for k=1:K
-        for i=1:M          
-            QNclass(i,k) = Q{i,k}.get(self.result, self.model);
-        end
-    end
-end
-if ~isempty(U)
-    UNclass = zeros(M,K);
-    for k=1:K
         for i=1:M
-            try
-                UNclass(i,k) = U{i,k}.get(self.result, self.model);
-            catch
-                keyboard
+            if ~Q{i,k}.disabled && ~isempty(self.result.Avg.Q)
+                QNclass(i,k) = self.result.Avg.Q(i,k);
+            else
+                QNclass(i,k) = NaN;
             end
         end
     end
 end
+
+if ~isempty(U)
+    UNclass = zeros(M,K);
+    for k=1:K
+        for i=1:M
+            if ~U{i,k}.disabled && ~isempty(self.result.Avg.U)
+                UNclass(i,k) = self.result.Avg.U(i,k);
+            else
+                UNclass(i,k) = NaN;
+            end
+        end
+    end
+end
+
 if ~isempty(R)
     RNclass = zeros(M,K);
     for k=1:K
         for i=1:M
-            RNclass(i,k) = R{i,k}.get(self.result, self.model);
+            if ~R{i,k}.disabled && ~isempty(self.result.Avg.R)
+                RNclass(i,k) =self.result.Avg.R(i,k);
+            else
+                RNclass(i,k) = NaN;                
+            end
         end
     end
 end
@@ -93,7 +103,11 @@ if ~isempty(T)
     TNclass = zeros(M,K);
     for k=1:K
         for i=1:M
-            TNclass(i,k) = T{i,k}.get(self.result, self.model);
+            if ~T{i,k}.disabled && ~isempty(self.result.Avg.T)
+                TNclass(i,k) = self.result.Avg.T(i,k);
+            else
+                TNclass(i,k) = NaN;                
+            end
         end
     end
 end

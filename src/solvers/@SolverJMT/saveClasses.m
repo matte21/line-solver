@@ -9,7 +9,7 @@ sn = self.getStruct;
 numOfClasses = sn.nclasses;
 for r=1:numOfClasses
     userClass = simDoc.createElement('userClass');
-    userClass.setAttribute('name', sn.classnames{r});
+    userClass.setAttribute('name', sn.classnames(r));
     if isinf(sn.njobs(r))
         userClass.setAttribute('type', 'open');
     else
@@ -19,11 +19,11 @@ for r=1:numOfClasses
     refStatIndex = sn.refstat(r);
     refNodeIndex = sn.stationToNode(sn.refstat(r));
     refStatName = sn.nodenames{refNodeIndex};
-    if ~isempty(sn.proc{refStatIndex,r})
+    if ~isempty(sn.proc{refStatIndex}{r})
         if isfinite(sn.njobs(r)) % if closed
             userClass.setAttribute('customers', int2str(sn.njobs(r)));
             userClass.setAttribute('referenceSource', refStatName);
-        elseif isnan(sn.proc{refStatIndex,r}{1}) % open disabled in source
+        elseif isnan(sn.proc{refStatIndex}{r}{1}) % open disabled in source
             userClass.setAttribute('referenceSource', 'ClassSwitch');
         else % if other open
             userClass.setAttribute('referenceSource', sn.nodenames{sn.stationToNode(sn.refstat(r))});

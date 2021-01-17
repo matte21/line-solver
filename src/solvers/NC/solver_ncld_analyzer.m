@@ -1,5 +1,5 @@
-function [Q,U,R,T,C,X,lG,runtime] = solver_nc_analyzer(sn, options)
-% [Q,U,R,T,C,X,LG,RUNTIME] = SOLVER_NC_ANALYZER(QN, OPTIONS)
+function [Q,U,R,T,C,X,lG,runtime] = solver_ncld_analyzer(sn, options)
+% [Q,U,R,T,C,X,LG,RUNTIME] = SOLVER_NCLD_ANALYZER(QN, OPTIONS)
 
 % Copyright (c) 2012-2021, Imperial College London
 % All rights reserved.
@@ -72,68 +72,71 @@ while max(abs(1-eta./eta_1)) > options.iter_tol && it < options.iter_max
     Nt = sum(Nchain(isfinite(Nchain)));
     
     Lms = zeros(M,C);
-    Z = zeros(M,C);
-    Zms = zeros(M,C);
+    mu = zeros(M,Nt);
     infServers = [];
+    Z = zeros(M,C);
     for i=1:M
         if isinf(nservers(i)) % infinite server
             %mu_chain(i,1:sum(Nchain)) = 1:sum(Nchain);
             infServers(end+1) = i;
-            Lms(i,:) = 0;
+            Lms(i,:) = Lchain(i,:);
             Z(i,:) = Lchain(i,:);
-            Zms(i,:) = 0;
+            mu(i,1:Nt) = 1:Nt;
         else
             if strcmpi(options.method,'exact') && nservers(i)>1
                 %options.method = 'default';
                 line_warning(mfilename,sprintf('%s does not support exact multiserver yet. Switching to approximate method.', 'SolverNC'));
             end
-            Lms(i,:) = Lchain(i,:) / nservers(i);
-            Z(i,:) = 0;
-            Zms(i,:) = Lchain(i,:) * (nservers(i)-1)/nservers(i);
+            Lms(i,:) = Lchain(i,:);
+            mu(i,1:Nt) = min(1:Nt,nservers(i));
         end
     end
     Qchain = zeros(M,C);
     % step 1
-    
-    [lG,Xchain, Qchain] = pfqn_nc(Lms,Nchain,sum(Z,1)+sum(Zms,1), options);
-    
-    if sum(Zms,1) > Distrib.Zero
-        % in this case, we need to use the iterative approximation below
-        Xchain=[];
-        Qchain=[];
+    switch options.method
+        case 'exact'
+            [~,lG]=pfqn_gmvald(Lms, Nchain, mu, options);
+        case 'rd'            
+            [lG]=pfqn_rd(Lms, Nchain, 0*Nchain, mu);                
+        case 'nrp'
+            [lG]=pfqn_nrp(Lms, Nchain, 0*Nchain, mu);
+        case 'nrl'
+            [lG]=pfqn_nrl(Lms, Nchain, 0*Nchain, mu);
     end
     
-    % commented out, poor performance on bench_CQN_FCFS_rm_multiserver_hicv_midload
-    % model 7 as it does not guarantee that the closed population is
-    % constant
-    %     % step 2 - reduce the artificial think time
-    %     if any(S(isfinite(S)) > 1)
-    %         Xchain = zeros(1,C);
-    %         for r=1:C % we need the utilizations in step 2 so we determine tput
-    %             Xchain(r) = exp(pfqn_nc(Lcorr,oner(Nchain,r),sum(Z,1)+sum(Zcorr,1), options) - lG);
-    %         end
-    %         for i=1:M
-    %             if isinf(S(i)) % infinite server
-    %                 % do nothing
-    %             else
-    %                 Zcorr(i,:) = max([0,(1-(Xchain*Lchain(i,:)'/S(i))^S(i))]) * Lchain(i,:) * (S(i)-1)/S(i);
-    %             end
-    %         end
-    %         lG = pfqn_nc(Lcorr,Nchain,sum(Z,1)+sum(Zcorr,1), options); % update lG
-    %     end
+    Xchain=[];
+    Qchain=[];
     
     if isempty(Xchain)
         for r=1:C
-            lGr(r) = pfqn_nc(Lms,oner(Nchain,r),sum(Z,1)+sum(Zms,1), options);
+            switch options.method
+                case {'default','exact'}
+                    [~,lGr(r)] = pfqn_gmvald(Lms, oner(Nchain,r), mu, options);
+                case 'rd'
+                    [lGr(r)] = pfqn_rd(Lms, oner(Nchain,r),0*Nchain,mu);
+                case 'nrp'
+                    [lGr(r)] = pfqn_nrp(Lms, oner(Nchain,r),0*Nchain,mu);
+                case 'nrl'
+                    [lGr(r)] = pfqn_nrl(Lms, oner(Nchain,r),0*Nchain,mu);
+            end
             Xchain(r) = exp(lGr(r) - lG);
             for i=1:M
                 if Lchain(i,r)>0
                     if isinf(nservers(i)) % infinite server
                         Qchain(i,r) = Lchain(i,r) * Xchain(r);
                     else
-                        lGar(i,r) = pfqn_nc([Lms(setdiff(1:size(Lms,1),i),:),zeros(size(Lms,1)-1,1); Lms(i,:),1], [oner(Nchain,r),1], [sum(Z,1)+sum(Zms,1),0], options);
+                        switch options.method
+                            case {'default','exact'}
+                                [~,lGar(i,r)] = pfqn_gmvald([Lms(setdiff(1:size(Lms,1),i),:),zeros(size(Lms,1)-1,1); Lms(i,:),1], [oner(Nchain,r),1], mu, options);
+                            case 'rd'
+                                [lGar(i,r)] = pfqn_rd([Lms(setdiff(1:size(Lms,1),i),:),zeros(size(Lms,1)-1,1); Lms(i,:),1], [oner(Nchain,r),1],[oner(Nchain,r),1]*0, mu);
+                            case 'nrp'
+                                [lGar(i,r)] = pfqn_nrp([Lms(setdiff(1:size(Lms,1),i),:),zeros(size(Lms,1)-1,1); Lms(i,:),1], [oner(Nchain,r),1],[oner(Nchain,r),1]*0, mu);
+                            case 'nrl'
+                                [lGar(i,r)] = pfqn_nrl([Lms(setdiff(1:size(Lms,1),i),:),zeros(size(Lms,1)-1,1); Lms(i,:),1], [oner(Nchain,r),1],[oner(Nchain,r),1]*0, mu);
+                        end
                         dlG = lGar(i,r) - lG;
-                        Qchain(i,r) = Zms(i,r) * Xchain(r) + Lms(i,r) * exp(dlG);
+                        Qchain(i,r) = Lms(i,r) * exp(dlG);
                     end
                 end
             end
@@ -230,25 +233,25 @@ while max(abs(1-eta./eta_1)) > options.iter_tol && it < options.iter_max
         switch schedid(i)
             case SchedStrategy.ID_FCFS
                 if range(ST0(i,sd))>0 && (max(SCV(i,sd))>1 - Distrib.Zero || min(SCV(i,sd))<1 + Distrib.Zero) % check if non-product-form
-%                    if rho(i) <= 1
-%                     else
-%                         ca(i) = 0;
-%                         for j=1:M
-%                             for r=1:K
-%                                 if ST0(j,r)>0
-%                                     for s=1:K
-%                                         if ST0(i,s)>0
-%                                             pji_rs = sn.rt((j-1)*sn.nclasses + r, (i-1)*sn.nclasses + s);
-%                                             ca(i) = ca(i) + (T(j,r)*pji_rs/sum(T(i,sd)))*(1 - pji_rs + pji_rs*((1-rho(j)^2)*ca_1(j) + rho(j)^2*cs_1(j)));
-%                                         end
-%                                     end
-%                                 end
-%                             end
-%                         end
-%                     end
+                    %                    if rho(i) <= 1
+                    %                     else
+                    %                         ca(i) = 0;
+                    %                         for j=1:M
+                    %                             for r=1:K
+                    %                                 if ST0(j,r)>0
+                    %                                     for s=1:K
+                    %                                         if ST0(i,s)>0
+                    %                                             pji_rs = sn.rt((j-1)*sn.nclasses + r, (i-1)*sn.nclasses + s);
+                    %                                             ca(i) = ca(i) + (T(j,r)*pji_rs/sum(T(i,sd)))*(1 - pji_rs + pji_rs*((1-rho(j)^2)*ca_1(j) + rho(j)^2*cs_1(j)));
+                    %                                         end
+                    %                                     end
+                    %                                 end
+                    %                             end
+                    %                         end
+                    %                     end
                     ca(i) = 1;
-                    cs(i) = (SCV(i,sd)*T(i,sd)')/sum(T(i,sd));                    
-                    gamma(i) = (rho(i)^nservers(i)+rho(i))/2; % multi-server                    
+                    cs(i) = (SCV(i,sd)*T(i,sd)')/sum(T(i,sd));
+                    gamma(i) = (rho(i)^nservers(i)+rho(i))/2; % multi-server
                     % asymptotic decay rate (diffusion approximation, Kobayashi JACM)
                     eta(i) = exp(-2*(1-rho(i))/(cs(i)+ca(i)*rho(i)));
                     %eta(i) = rho(i);
@@ -263,8 +266,8 @@ while max(abs(1-eta./eta_1)) > options.iter_tol && it < options.iter_max
             case SchedStrategy.ID_FCFS
                 if range(ST0(i,sd))>0 && (max(SCV(i,sd))>1 - Distrib.Zero || min(SCV(i,sd))<1 + Distrib.Zero) % check if non-product-form
                     for k=1:K
-                        if sn.rates(i,k)>0                            
-                            ST(i,k) = (1-rho(i)^4)*ST0(i,k) + rho(i)^4*((1-rho(i)^4) * gamma(i)*nservers(i)/sum(T(i,sd)) +  rho(i)^4* eta(i)*nservers(i)/sum(T(i,sd)) );                            
+                        if sn.rates(i,k)>0
+                            ST(i,k) = (1-rho(i)^4)*ST0(i,k) + rho(i)^4*((1-rho(i)^4) * gamma(i)*nservers(i)/sum(T(i,sd)) +  rho(i)^4* eta(i)*nservers(i)/sum(T(i,sd)) );
                         end
                     end
                 end

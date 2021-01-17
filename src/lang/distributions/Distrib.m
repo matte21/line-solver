@@ -130,7 +130,7 @@ classdef Distrib < Copyable
             % BOOL = ISIMMEDIATE()
             % Check if the distribution is equivalent to an Immediate
             % distribution
-            bool = getMean(self) < Distrib.Zero;% || isa(self,'Immediate');
+            bool = getMean(self) < Distrib.Zero;
         end
         
         function bool = isContinuous(self)

@@ -1,12 +1,13 @@
 function sn = getStruct(self, wantInitialState)
 % QN = GETSTRUCT(WANTINITSTATE)
+
 if ~self.hasStruct
     refreshStruct(self);
 end
+
 if nargin == 1 || wantInitialState
-    [s0, s0prior] = self.getState;
-    self.sn.state = s0;
-    self.sn.stateprior = s0prior;
+    [self.sn.state, self.sn.stateprior] = self.getState;
 end
+
 sn = self.sn;
 end

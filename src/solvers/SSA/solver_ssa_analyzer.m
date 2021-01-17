@@ -41,8 +41,8 @@ switch options.method
                         % we use Little's law, otherwise there are issues in
                         % estimating the fraction of time assigned to class k (to
                         % recheck)
-                        if ~isempty(PH{ist,k})
-                            UN(ist,k) = probSysState*arvRates(:,ist,k)*map_mean(PH{ist,k})/S(ist);
+                        if ~isempty(PH{ist}{k})
+                            UN(ist,k) = probSysState*arvRates(:,ist,k)*map_mean(PH{ist}{k})/S(ist);
                         end
                 end
             end
@@ -115,8 +115,8 @@ switch options.method
                         % we use Little's law, otherwise there are issues in
                         % estimating the fraction of time assigned to class k (to
                         % recheck)
-                        if ~isempty(PH{ist,k})
-                            UN(ist,k) = probSysState*arvRates(:,ist,k)*map_mean(PH{ist,k})/S(ist);
+                        if ~isempty(PH{ist}{k})
+                            UN(ist,k) = probSysState*arvRates(:,ist,k)*map_mean(PH{ist}{k})/S(ist);
                         end
                 end
             end

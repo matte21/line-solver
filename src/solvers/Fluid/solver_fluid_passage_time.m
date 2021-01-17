@@ -31,7 +31,7 @@ slowrate = zeros(M,K);
 for j = 1:M
     for k = 1:K
         slowrate(j,k) = Inf;
-        slowrate(j,k) = min(slowrate(j,k),min(Lambda{j,k}(:))); %service completion (exit) rates in each phase
+        slowrate(j,k) = min(slowrate(j,k),min(Lambda{j}{k}(:))); %service completion (exit) rates in each phase
     end
 end
 
@@ -78,11 +78,11 @@ for i = 1:sn.nstations
                     catch me
                         line_printf('\nODE solver failed. Fluid solver switching to default initialization.');
                         odeopt = odeset('AbsTol', tol, 'RelTol', tol, 'NonNegative', 1:length(y0_c));
-                        try
-                            [t_iter, ymean_t_iter] = solveode(ode_h_c, trange, y0_c, odeopt, options);
-                        catch
-                            keyboard
-                        end
+                        %try
+                        [t_iter, ymean_t_iter] = solveode(ode_h_c, trange, y0_c, odeopt, options);
+                        %catch
+                        %    keyboard
+                        %end
                     end
                     %%%
                     iter = iter + 1;
@@ -123,25 +123,35 @@ return
         numTranClasses = Kc - K;
         idxTranCl = zeros(1,K); % indices of the transient class corresponding to each class in the original model for chain k
         idxTranCl(chains(k,:)==1) =  K+1:Kc; % this is just K+1 since we are adding a single new class, but this format may be generalizable
-        newLambda = cell(M,Kc);
-        new_pi = cell(M,Kc);
+        new_mu = cell(M,1);
+        for m=1:M
+            new_mu{m,1} = cell(1,Kc);
+        end
+        new_pi = cell(M,1);
+        for m=1:M
+            new_pi{m,1} = cell(1,Kc);
+        end
         new_rt = zeros(M*Kc, M*Kc); % new routing table
         new_proc = PH;
         
         for j=1:sn.nstations
             % service rates
-            newLambda(j,1:K) = Lambda(j,:);
-            newLambda(j,K+1) = Lambda(j,c);
+            for k=1:K
+                new_mu{j}{k} = Lambda{j}{k};
+            end
+            new_mu{j}{K+1} = Lambda{j}{c};
             
             % completion probabilities
-            new_pi(j,1:K) = Pi(j,:);
-            new_pi(j,K+1) = Pi(j,c);
+            for k=1:K
+                new_pi{j}{k} = Pi{j}{k};
+            end
+            new_pi{j}{K+1} = Pi{j}{c};
             
             % phd distribution
             for r=1:nChains
-                new_proc{j,r} = PH{j,r};
+                new_proc{j}{r} = PH{j}{r};
             end
-            new_proc{j,K+1} = PH{j,c};
+            new_proc{j}{K+1} = PH{j}{c};
         end
         
         % routing/switching probabilities
@@ -184,7 +194,7 @@ return
         
         % setup the ODEs for the new QN
         %        options.method  = 'statedep'; % default doesn't seem to work in some models
-        [ode_h_c, ~] = solver_fluid_odes(N, reshape({newLambda{:,:}},M,Kc), reshape({new_pi{:,:}},M,Kc), new_proc, new_rt, S, sn.sched, sn.schedparam, options);
+        [ode_h_c, ~] = solver_fluid_odes(N, new_mu', new_pi', new_proc, new_rt, S, sn.sched, sn.schedparam, options);
         
         % setup initial point
         y0_c = zeros(1, sum(sum(phases_c(:,:))));

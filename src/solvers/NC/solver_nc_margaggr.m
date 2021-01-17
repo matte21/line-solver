@@ -24,7 +24,7 @@ ST = zeros(M,K);
 V = zeros(M,K);
 for k = 1:K
     for i=1:M
-        ST(i,k) = 1 ./ map_lambda(PH{i,k});
+        ST(i,k) = 1 ./ map_lambda(PH{i}{k});
     end
 end
 ST(isnan(ST))=0;

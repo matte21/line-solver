@@ -80,5 +80,15 @@ classdef Disabled < ContinuousDistrib & DiscreteDistrib
         end
     end
     
+    methods (Static)
+        function singleton = getInstance
+            persistent staticDisabled
+            if isempty(staticDisabled)
+                staticDisabled = Disabled();
+            end
+            singleton = staticDisabled;
+        end
+    end
+    
 end
 

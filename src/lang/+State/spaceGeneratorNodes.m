@@ -13,7 +13,7 @@ for ind=1:sn.nnodes
             c = find(sn.chains(:,r));
             if ~isempty(sn.visits{c}) && sn.visits{c}(ist,r) == 0
                 capacityc(ind,r) = 0;
-            elseif ~isempty(sn.proc) && ~isempty(sn.proc{ist,r}) && any(any(isnan(sn.proc{ist,r}{1}))) % disabled
+            elseif ~isempty(sn.proc) && ~isempty(sn.proc{ist}{r}) && any(any(isnan(sn.proc{ist}{r}{1}))) % disabled
                 capacityc(ind,r) = 0;
             else
                 if isinf(N(r))

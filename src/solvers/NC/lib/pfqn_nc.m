@@ -81,21 +81,21 @@ scalevecz = scalevec(nonzeroDemandClasses);
 % compute G for classes No with non-zero demand
 [lGnnzdem,Xnnzdem,Qnnzdem] = sub_method(L, N, Z, options);
 
-if isempty(Xnnzdem)
+if isempty(Xnnzdem) 
     X = [];
+    Q = [];
 else
     zClasses = setdiff(1:Rin, nnzClasses);
     Xz = zeros(1,length(zClasses));
     Xnnz = zeros(1,length(nnzClasses));
     Xnnz(zeroDemandClasses) = Nz./ sum(Zz,1)./ scalevec(zeroDemandClasses);
     Xnnz(nonzeroDemandClasses) = Xnnzdem./ scalevec(nonzeroDemandClasses);
-    X(1,[zClasses, nnzClasses]) = [Xz, Xnnz];
-    
+    X(1,[zClasses, nnzClasses]) = [Xz, Xnnz];        
     Qz = zeros(size(Qnnzdem,1),length(zClasses));
     Qnnz = zeros(size(Qnnzdem,1),length(nnzClasses));
     Qnnz(:,zeroDemandClasses) = 0; % they are all in the delay
     Qnnz(:,nonzeroDemandClasses) = Qnnzdem; % Q does not require scaling
-    Q(noDemStations,:) = 0;
+    Q(noDemStations,:) = 0;        
     Q(demStations,[zClasses, nnzClasses]) = [Qz, Qnnz];
 end
 % scale back to original demands
@@ -130,10 +130,10 @@ X=[];Q=[];
             end
         elseif sum(Z,1)==0 % single queue, no delay
             lG = -N*log(L)';
-        else % repairman model
-            if N < 10
+        else % repairman model            
+            if sum(N) < 10
                  [~,~,~,~,lG] = pfqn_mva(L,N,sum(Z,1));
-            elseif N < 50 % otherwise numerical issues
+            elseif sum(N) < 50 % otherwise numerical issues
                 [~,lG] = pfqn_mmint2(L,N,sum(Z,1));
                 if isnan(lG)
                     [~,lG] = pfqn_le(L,N,sum(Z,1));

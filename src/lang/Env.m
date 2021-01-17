@@ -41,8 +41,8 @@ classdef Env < Ensemble
             end
             for e=E
                 for h=1:E
-                    self.env{e,h} = Disabled();
-                    self.env{h,e} = Disabled();
+                    self.env{e,h} = Disabled.getInstance();
+                    self.env{h,e} = Disabled.getInstance();
                 end
             end
             self.ensemble{E} = model;
@@ -72,28 +72,31 @@ classdef Env < Ensemble
             end
             
             % analyse holding times
-            emmap = cell(E);
+            emmap = cell(E,1);
+            for e=1:E
+                emmap{e} = cell(1,E);
+            end
             self.holdTime = {};
             for e=1:E
                 for h=1:E
                     if isa(self.env{e,h},'Disabled')
-                        emmap{e,h} = {0,0}; % multiclass MMAP representation
+                        emmap{e}{h} = {0,0}; % multiclass MMAP representation
                     else
-                        emmap{e,h} = self.env{e,h}.getRepresentation; % multiclass MMAP representation
+                        emmap{e}{h} = self.env{e,h}.getRepresentation; % multiclass MMAP representation
                     end
                     for j = 1:E
                         if j == h
-                            emmap{e,h}{2+j} = emmap{e,h}{2};
+                            emmap{e}{h}{2+j} = emmap{e}{h}{2};
                         else
-                            emmap{e,h}{2+j} = 0 * emmap{e,h}{2};
+                            emmap{e}{h}{2+j} = 0 * emmap{e}{h}{2};
                         end
                     end
                 end
-                self.holdTime{e} = emmap{e,e};
+                self.holdTime{e} = emmap{e}{e};
                 for h=setdiff(1:E,e)
-                    self.holdTime{e}{1} = krons(self.holdTime{e}{1},emmap{e,h}{1});
+                    self.holdTime{e}{1} = krons(self.holdTime{e}{1},emmap{e}{h}{1});
                     for j = 2:(E+2)
-                        self.holdTime{e}{j} = krons(self.holdTime{e}{j},emmap{e,h}{j});
+                        self.holdTime{e}{j} = krons(self.holdTime{e}{j},emmap{e}{h}{j});
                         completion_rates = self.holdTime{e}{j}*ones(length(self.holdTime{e}{j}),1);
                         self.holdTime{e}{j} = 0*self.holdTime{e}{j};
                         self.holdTime{e}{j}(:,1) = completion_rates;

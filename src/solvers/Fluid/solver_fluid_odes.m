@@ -1,11 +1,11 @@
-function [ode_h,q_indices] = solver_fluid_odes(N, Mu, Phi, PH, P, nservers, sched, schedparam, options)
+function [ode_h,q_indices] = solver_fluid_odes(N, Mu, phi, PH, P, nservers, sched, schedparam, options)
 % [ODE_H,Q_INDICES] = SOLVER_FLUID_ODES(N, MU, PHI, PH, P, NSERVERS, SCHED, SCHEDPARAM)
 
 % Copyright (c) 2012-2021, Imperial College London
 % All rights reserved.
 
 M = length(nservers);    % number of stations
-K = size(Mu,2);   % number of classes
+K = length(Mu{1});   % number of classes
 w = ones(M,K);
 
 enabled = false(M,K); % indicates whether a class is served at a station
@@ -24,10 +24,10 @@ cumsum = 1;
 for i = 1 : M
     for c = 1:K
         q_indices(i,c) = cumsum;
-        if isnan(Mu{i,c})
+        if isnan(Mu{i}{c})
             numphases = 0;
         else
-            numphases = length(Mu{i,c});
+            numphases = length(Mu{i}{c});
         end
         Kic(i,c) = numphases;
         cumsum = cumsum + numphases;
@@ -52,11 +52,11 @@ switch options.method
         all_jumps = ode_jumps_new(M, K, enabled, q_indices, P, Kic);
         % determines a vector with the fixed part of the rates,
         % and defines the indexes that correspond to the events that occur
-        [rateBase, eventIdx] = ode_rate_base(Phi, Mu, PH, M, K, enabled, q_indices, P, Kic, schedid, all_jumps);
+        [rateBase, eventIdx] = ode_rate_base(phi, Mu, PH, M, K, enabled, q_indices, P, Kic, schedid, all_jumps);
         ode_si_h = @(t,x) all_jumps * ode_rates_stateindep(x, M, K, q_indices, Kic, nservers, w, schedid, rateBase, eventIdx);
         ode_h = ode_si_h;
     case 'statedep'
-        ode_sd_h = @(t,x) ode_statedep(x, Phi, Mu, PH, M, K, enabled, q_indices, P, Kic, nservers, w, schedid);
+        ode_sd_h = @(t,x) ode_statedep(x, phi, Mu, PH, M, K, enabled, q_indices, P, Kic, nservers, w, schedid);
         ode_h = ode_sd_h;
         %ode_sd_h = @(t,x) ode_hybrid(x, Phi, Mu, PH, M, K, enabled, q_indices, P, Kic, nservers, w, sched_id, all_jumps, rateBase, eventIdx);
 end

@@ -12,6 +12,12 @@ classdef SolverSSA < NetworkSolver
             self.setOptions(Solver.parseOptions(varargin, self.defaultOptions));
         end
         
+        function sn = getStruct(self)
+            % QN = GETSTRUCT()
+            
+            % Get data structure summarizing the model
+            sn = self.model.getStruct(true);
+        end
         
         [runtime, tranSysState, tranSync] = run(self, options);        
         Prob = getProb(self, node, state);

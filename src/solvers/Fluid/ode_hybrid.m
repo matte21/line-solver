@@ -58,7 +58,7 @@ for i = 1:M
                     for kic = 1 : (Kic(i,c) - 1)
                         for kic_p = 1:Kic(i,c)
                             if kic ~= kic_p
-                                rate = PH{i,c}{1}(kic, kic_p);
+                                rate = PH{i}{c}{1}(kic, kic_p);
                                 if ni > nservers(i)
                                     rate = rate * nservers(i) /ni;
                                 end
@@ -77,11 +77,11 @@ for i = 1:M
                         for l = 1:K
                             xjl = q_indices(j,l);
                             if enabled(j,l)
-                                pie = map_pie(PH{j,l});
+                                pie = map_pie(PH{j}{l});
                                 if rt((i-1)*K+c,(j-1)*K+l) > 0
                                     for kic = 1 : Kic(i,c)
                                         for kjl = 1 : Kic(j,l)
-                                            rate = Phi{i,c}(kic) * Mu{i,c}(kic) * rt((i-1)*K+c,(j-1)*K+l) * pie(kjl);
+                                            rate = Phi{i}{c}(kic) * Mu{i}{c}(kic) * rt((i-1)*K+c,(j-1)*K+l) * pie(kjl);
                                             if ni > nservers(i)
                                                 rate = rate * nservers(i) /ni;
                                             end

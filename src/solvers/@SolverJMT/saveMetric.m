@@ -4,10 +4,10 @@ for i=1:size(handles,1)
         currentPerformanceIndex = handles{i,r};
         if currentPerformanceIndex.disabled == 0
             performanceNode = simDoc.createElement('measure');
-            performanceNode.setAttribute('alpha', num2str(1 - currentPerformanceIndex.simConfInt,2));
+            performanceNode.setAttribute('alpha', num2str(1 - self.simConfInt,2));
             performanceNode.setAttribute('name', strcat('Performance_', int2str(i)));
             performanceNode.setAttribute('nodeType', 'station');
-            performanceNode.setAttribute('precision', num2str(currentPerformanceIndex.simMaxRelErr,2));
+            performanceNode.setAttribute('precision', num2str(self.simMaxRelErr,2));
             if isempty(currentPerformanceIndex.station)
                 performanceNode.setAttribute('referenceNode', '');
             else

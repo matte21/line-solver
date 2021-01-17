@@ -31,6 +31,14 @@ classdef SolverCTMC < NetworkSolver
         [infGen, eventFilt, ev] = getGenerator(self, force)
         tstate = sampleSys(self, numevents)
         sampleAggr = sampleAggr(self, node, numSamples)
+        
+        function sn = getStruct(self)
+            % QN = GETSTRUCT()
+            
+            % Get data structure summarizing the model
+            sn = self.model.getStruct(true);
+        end
+        
     end
            
     methods (Static)

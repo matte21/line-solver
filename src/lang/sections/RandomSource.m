@@ -16,7 +16,7 @@ classdef RandomSource < InputSection
             
             self@InputSection('RandomSource');
             for i = 1 : length(classes)
-                self.sourceClasses{1,i} = {[],ServiceStrategy.LI,Disabled()};
+                self.sourceClasses{1,i} = {[],ServiceStrategy.LI,Disabled.getInstance()};
             end
         end
     end

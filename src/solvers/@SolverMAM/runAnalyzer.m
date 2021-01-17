@@ -19,7 +19,7 @@ end
 
 Solver.resetRandomGeneratorSeed(options.seed);
 
-[sn] = getStruct(self);
+sn = getStruct(self); 
 
 [Q,U,R,T,C,X] = solver_mam_analyzer(sn, options);
 

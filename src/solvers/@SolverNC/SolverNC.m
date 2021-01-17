@@ -20,11 +20,19 @@ classdef SolverNC < NetworkSolver
         runtime = runAnalyzer(self, options, config)
         Pnir = getProb(self, node, state)
         Pnir = getProbAggr(self, node, state_a)
-        Pn   = getProbSys(self)        
+        Pn   = getProbSys(self)
         Pn   = getProbSysAggr(self)
         RD = getCdfRespT(self, R);
-
+        
         [lNormConst] = getProbNormConstAggr(self)
+        
+        function sn = getStruct(self)
+            % QN = GETSTRUCT()
+            
+            % Get data structure summarizing the model
+            sn = getStruct(self.model, false); %no need for initial state
+        end
+        
     end
     
     methods (Static)
@@ -42,7 +50,7 @@ classdef SolverNC < NetworkSolver
                 'RoutingStrategy_PROB','RoutingStrategy_RAND',...
                 'SchedStrategy_FCFS','ClosedClass',...
                 'Cache','CacheClassSwitcher'});
-                %'OpenClass',...
+            %'OpenClass',...
         end
         
         function [bool, featSupported] = supports(model)
@@ -52,9 +60,9 @@ classdef SolverNC < NetworkSolver
             featSupported = SolverNC.getFeatureSet();
             bool = SolverFeatureSet.supports(featSupported, featUsed);
         end
-
+        
         function checkOptions(options)
-            % CHECKOPTIONS(OPTIONS)            
+            % CHECKOPTIONS(OPTIONS)
             solverName = mfilename;
             if isfield(options,'timespan') && isfinite(options.timespan(2))
                 line_error(mfilename,'Finite timespan not supported in %s',solverName);
@@ -63,7 +71,7 @@ classdef SolverNC < NetworkSolver
         
         function options = defaultOptions()
             % OPTIONS = DEFAULTOPTIONS()
-            options = lineDefaults('NC');            
+            options = lineDefaults('NC');
         end
     end
 end

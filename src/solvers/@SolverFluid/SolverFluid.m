@@ -10,14 +10,22 @@ classdef SolverFluid < NetworkSolver
             
             self@NetworkSolver(model, mfilename);
             self.setOptions(Solver.parseOptions(varargin, self.defaultOptions));
-        end       
+        end
     end
     
     methods
         RD = getTranCdfPassT(self, R);
         [Pnir,logPnir] = getProbAggr(self, ist);
         RD = getCdfRespT(self, R);
-                
+        
+        function sn = getStruct(self)
+            % QN = GETSTRUCT()
+            
+            % Get data structure summarizing the model
+            sn = self.model.getStruct(true);
+        end
+        
+        
         % solve method is supplied by Solver superclass
         runtime = runAnalyzer(self, options, config);
     end
@@ -29,7 +37,7 @@ classdef SolverFluid < NetworkSolver
             featSupported = SolverFeatureSet;
             featSupported.setTrue({
                 'ClassSwitch','DelayStation','Queue',...
-                'Cox2','Erlang','Exponential','HyperExp',... 
+                'Cox2','Erlang','Exponential','HyperExp',...
                 'APH', ...
                 'StatelessClassSwitcher','InfiniteServer','SharedServer','Buffer','Dispatcher',...
                 'Server','ServiceTunnel',...

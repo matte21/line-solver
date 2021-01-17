@@ -146,7 +146,7 @@ classdef SolverLN < LayeredNetworkSolver & EnsembleSolver
                     end
                 end
                 if self.options.verbose
-                    line_printf(sprintf('\b SolverLN error is: %f',self.maxIterErr(it)/E));
+                    line_printf(sprintf('\bError: %f.',self.maxIterErr(it)/E));
                     if it==30
                         if self.options.verbose
                             line_printf( ' Starting moving window to help convergence.');

@@ -190,7 +190,7 @@ for net=1:length(graphLayer)
                 %                 end
             end
                 node{1}.setService(jobclass{class_entry}, destEntryProcess);
-                node{2}.setService(jobclass{class_entry}, Disabled());
+                node{2}.setService(jobclass{class_entry}, Disabled.getInstance());
             classlast = class_entry;
             stationlast = 1;
             
@@ -220,7 +220,7 @@ for net=1:length(graphLayer)
                             end
                         end
                     end
-                        node{1}.setService(jobclass{class_hostdemand}, Disabled());
+                        node{1}.setService(jobclass{class_hostdemand}, Disabled.getInstance());
                         node{2}.setService(jobclass{class_hostdemand}, actobj.hostDemand);
                         stationlast = 2; % store that we last visited the server
                         classlast = class_hostdemand; % store class for return path
@@ -245,7 +245,7 @@ for net=1:length(graphLayer)
                     destEntryRate = 1/destEntryW;
                     entryRT = Exp(destEntryRate);
                         node{1}.setService(jobclass{class_hostdemand}, entryRT);
-                        node{2}.setService(jobclass{class_hostdemand}, Disabled());
+                        node{2}.setService(jobclass{class_hostdemand}, Disabled.getInstance());
                         stationlast = 1; % store that we last visited the server
                         classlast = class_hostdemand; % store class for return path
                 end
@@ -283,7 +283,7 @@ for net=1:length(graphLayer)
                     if isDestTaskInSubmodel
                         % set service time at server for this entry
                         if isBuild % if we are building the model for the first time
-                            node{1}.setService(jobclass{class_synchcall}, Disabled());
+                            node{1}.setService(jobclass{class_synchcall}, Disabled.getInstance());
                         end
                         destEntryW = (1-skipProb)*self.param.Nodes.RespT(self.getNodeIndex(destEntry)); % this has to add the contribution of the other W not in this model
                         destEntryRate = 1/destEntryW;

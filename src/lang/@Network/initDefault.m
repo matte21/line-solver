@@ -62,7 +62,7 @@ for i=nodes
 end
 
 if self.isStateValid % problem with example_initState_2
-    self.isInitialized = true;
+    self.hasState = true;
 else
     line_error(mfilename,'Default initialization failed.');
 end

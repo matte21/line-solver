@@ -29,8 +29,8 @@ function myLN = fromNetwork(model)
 %         T0.setThinkTime(Exp.fitMean(Z1));
 %         T1.setThinkTime(Exp.fitMean(Z2));
 %         
-%         A0 = Activity(myLN, 'A0', Immediate()).on(T0).boundTo(E0).synchCall(E2,1);
-%         A1 = Activity(myLN, 'A1', Immediate()).on(T1).boundTo(E1).synchCall(E3,1);
+%         A0 = Activity(myLN, 'A0', Immediate.getInstance()).on(T0).boundTo(E0).synchCall(E2,1);
+%         A1 = Activity(myLN, 'A1', Immediate.getInstance()).on(T1).boundTo(E1).synchCall(E3,1);
 %         A2 = Activity(myLN, 'A2', APH.fitMeanAndSCV(c/50,SCV)).on(T2).boundTo(E2).repliesTo(E2);
 %         A3 = Activity(myLN, 'A3', APH.fitMeanAndSCV(1,SCV)).on(T2).boundTo(E3).repliesTo(E3);
 %         

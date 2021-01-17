@@ -15,14 +15,14 @@ if isempty(self.handles) || ~isfield(self.handles,'Q')
         for r=1:K
             Q{i,r} = Metric(MetricType.QLen, self.classes{r}, self.stations{i});                        
             if isa(self.stations{i},'Source')
-                Q{i,r}.disable();
+                Q{i,r}.disable=true;
             end            
             if isa(self.stations{i},'Sink')
-                Q{i,r}.disable();
+                Q{i,r}.disable=true;
             end            
             if ~strcmpi(class(self.stations{i}.server),'ServiceTunnel')
                 if isempty(self.stations{i}.server.serviceProcess{r}) || strcmpi(class(self.stations{i}.server.serviceProcess{r}{end}),'Disabled')
-                    Q{i,r}.disable();
+                    Q{i,r}.disable=true;
                 end
             end
         end

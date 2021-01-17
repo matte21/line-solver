@@ -106,8 +106,8 @@ for k=1:K
             case SchedStrategy.ID_INF
                 UN(i,k) = QN(i,k);
             otherwise
-                if ~isempty(PH{i,k})
-                    UN(i,k) = pi*arvRates(wset,isf,k)*map_mean(PH{i,k})/S(i);
+                if ~isempty(PH{i}{k})
+                    UN(i,k) = pi*arvRates(wset,isf,k)*map_mean(PH{i}{k})/S(i);
                 end
         end
     end

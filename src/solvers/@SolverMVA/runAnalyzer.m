@@ -19,9 +19,10 @@ if self.enableChecks && ~self.supports(self.model)
     ME = MException('Line:FeatureNotSupportedBySolver', 'This model contains features not supported by the solver.');
     throw(ME);
 end
+
 Solver.resetRandomGeneratorSeed(options.seed);
 
-sn = getStruct(self);
+sn = getStruct(self); % doesn't need initial state
 
 if (strcmp(options.method,'exact')||strcmp(options.method,'mva')) && ~self.model.hasProductFormSolution
     line_error(mfilename,'The exact method requires the model to have a product-form solution. This model does not have one. You can use Network.hasProductFormSolution() to check before running the solver.');

@@ -16,17 +16,17 @@ if isempty(self.handles) || ~isfield(self.handles,'U')
         for r=1:K
             U{i,r} = Metric(MetricType.Util, self.classes{r}, self.stations{i});
             if isa(self.stations{i},'Source')
-                U{i,r}.disable();
+                U{i,r}.disable=true;
             end
             if isa(self.stations{i},'Sink')
-                U{i,r}.disable();
+                U{i,r}.disable=true;
             end
             if isa(self.stations{i},'Join') || isa(self.stations{i},'Fork')
-                U{i,r}.disable();
+                U{i,r}.disable=true;
             end
             if ~strcmpi(class(self.stations{i}.server),'ServiceTunnel')
                 if isempty(self.stations{i}.server.serviceProcess{r}) || strcmpi(class(self.stations{i}.server.serviceProcess{r}{end}),'Disabled')
-                    U{i,r}.disable();
+                    U{i,r}.disable=true;
                 end
             end
         end

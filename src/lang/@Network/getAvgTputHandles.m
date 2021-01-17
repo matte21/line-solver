@@ -17,7 +17,7 @@ if isempty(self.handles) || ~isfield(self.handles,'T')
             T{i,r} = Metric(MetricType.Tput, self.classes{r}, self.stations{i});
             if ~strcmpi(class(self.stations{i}.server),'ServiceTunnel')
                 if isempty(self.stations{i}.server.serviceProcess{r}) || strcmpi(class(self.stations{i}.server.serviceProcess{r}{end}),'Disabled')
-                    T{i,r}.disable();
+                    T{i,r}.disable=true;
                 end
             end
         end

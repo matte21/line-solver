@@ -83,7 +83,7 @@ for i=1:nInfStations
             nodes{i}.setService(servClass,Exp(1/demand));
             visited(i,servClass) = true;
         else
-            nodes{i}.setService(servClass,Disabled());
+            nodes{i}.setService(servClass,Disabled.getInstance());
             visited(i,servClass) = false;
         end
     end
@@ -98,7 +98,7 @@ for i=1:nLIStations
             nodes{nInfStations+i}.setService(servClass,Exp(1/demand));
             visited(nInfStations + i,servClass) = true;
         else
-            nodes{nInfStations+i}.setService(servClass,Disabled());
+            nodes{nInfStations+i}.setService(servClass,Disabled.getInstance());
             visited(nInfStations + i,servClass) = false;
         end
     end

@@ -107,21 +107,11 @@ for i=1:self.getNumberOfNodes % source
     if isa(nodes{i}.server,'StatelessClassSwitcher')
         Pi = rtNodes(((i-1)*K+1):i*K,:);
         Pcs = nodes{i}.server.csFun(1:K,1:K);
-        %for r=1:K
-        %    for s=1:K
-        %        Pcs(r,s) = nodes{i}.server.csFun(r,s);
-        %    end
-        %end
         rtNodes(((i-1)*K+1):i*K,:) = 0;
         for j=1:M % destination
-            Pij = Pi(1:K,((j-1)*K+1):j*K); %Pij(r,s)
-            % for r=1:K
-            for s=1:K
-                % Find the routing probability section determined by the router section in the first loop
-                %Pnodes(((i-1)*K+1):i*K,((j-1)*K+1):j*K) = Pcs*Pij;
-                rtNodes(((i-1)*K+1) : ((i-1)*K+K),(j-1)*K+s) = Pcs(1:K,s)*Pij(s,s);
-            end
-            %end
+            Pij = Pi(:,((j-1)*K+1):j*K); %Pij(r,s)
+            % Find the routing probability section determined by the router section in the first loop
+            rtNodes(((i-1)*K+1) : ((i-1)*K+K),(j-1)*K+(1:K)) = Pcs.*repmat(diag(Pij)',K,1);
         end
     elseif isa(nodes{i}.server,'StatefulClassSwitcher')
         Pi = rtNodes(((i-1)*K+1):i*K,:);

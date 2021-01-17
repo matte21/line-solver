@@ -75,6 +75,7 @@ classdef SolverLQNS < LayeredNetworkSolver
                 UN = PN;
                 RN = SN;
             end
+            
         end
                 
         function [result, iterations] = parseXMLResults(self, filename)

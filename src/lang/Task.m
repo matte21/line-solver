@@ -71,7 +71,7 @@ classdef Task < LayeredNetworkElement
             
             if isnumeric(thinkTime)
                 if thinkTime <= Distrib.Zero
-                    self.thinkTime = Immediate();
+                    self.thinkTime = Immediate.getInstance();
                     self.thinkTimeMean = Distrib.Zero;
                     self.thinkTimeSCV = Distrib.Zero;
                 else

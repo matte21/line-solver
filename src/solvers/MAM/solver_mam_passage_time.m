@@ -31,18 +31,18 @@ if M==2 && all(isinf(N))
     for i=1:M
         switch sn.schedid(i)
             case SchedStrategy.ID_EXT
-                na = cellfun(@(x) length(x{1}),{PH{i,:}});
-                A = {PH{i,1}{1},PH{i,1}{2},PH{i,1}{2}};
+                na = cellfun(@(x) length(x{1}),{PH{i}{:}});
+                A = {PH{i}{1}{1},PH{i}{1}{2},PH{i}{1}{2}};
                 for k=2:K
-                    A = mmap_super(A,{PH{i,k}{1},PH{i,k}{2},PH{i,k}{2}});
+                    A = mmap_super(A,{PH{i}{k}{1},PH{i}{k}{2},PH{i}{k}{2}});
                 end
                 idx_arv = i;
             case {SchedStrategy.ID_FCFS, SchedStrategy.ID_HOL}
                 row = size(S,1) + 1;
                 for k=1:K
-                    PH{i,k} = map_scale(PH{i,k}, map_mean(PH{i,k})/sn.nservers(i));
-                    pie{k} = map_pie(PH{i,k});
-                    S{k} = PH{i,k}{1};
+                    PH{i}{k} = map_scale(PH{i}{k}, map_mean(PH{i}{k})/sn.nservers(i));
+                    pie{k} = map_pie(PH{i}{k});
+                    S{k} = PH{i}{k}{1};
                 end
                 idx_q = i;
             otherwise

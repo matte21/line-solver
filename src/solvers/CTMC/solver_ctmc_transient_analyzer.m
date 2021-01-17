@@ -95,7 +95,7 @@ for k=1:K
             case SchedStrategy.ID_INF
                 UNt{i,k} = QNt{i,k};
             case {SchedStrategy.ID_FCFS, SchedStrategy.ID_HOL, SchedStrategy.ID_SIRO, SchedStrategy.ID_SEPT, SchedStrategy.ID_LEPT, SchedStrategy.ID_SJF}
-                if ~isempty(PH{i,k})
+                if ~isempty(PH{i}{k})
                     UNt{i,k} = occupancy_t*min(StateSpaceAggr(:,(i-1)*K+k),S(i))/S(i);
                 end
             case SchedStrategy.ID_PS
@@ -110,7 +110,7 @@ for k=1:K
                 nik(isnan(nik))=0;
                 UNt{i,k} = occupancy_t*nik;
             otherwise
-                if ~isempty(PH{i,k})
+                if ~isempty(PH{i}{k})
                     ind = sn.stationToNode(i);
                     line_warning(mfilename,'Transient utilization not support yet for station %s, returning an approximation.',sn.nodenames{ind});
                     UNt{i,k} = occupancy_t*min(StateSpaceAggr(:,(i-1)*K+k),S(i))/S(i);

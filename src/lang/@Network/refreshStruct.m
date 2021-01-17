@@ -1,21 +1,32 @@
-function refreshStruct(self)
+function refreshStruct(self, hardRefresh)
 % REFRESHSTRUCT()
 %
 % Copyright (c) 2012-2021, Imperial College London
 % All rights reserved.
 
 sanitize(self);
+if nargin<2
+    hardRefresh = true;
+end
 
 % store invariant information
-if self.hasStruct
+if self.hasStruct && ~hardRefresh
     rtorig = self.sn.rtorig; % this must be destroyed with resetNetwork
 end
-nodetypes = getNodeTypes(self);
-classnames = getClassNames(self);
-nodenames = getNodeNames(self);
+
+if self.hasStruct && ~hardRefresh
+    nodetypes = sn.nodetypes;
+    classnames = sn.classnames;
+    nodenames = sn.nodenames;
+    refstat = sn.refstat;
+else
+    nodetypes = getNodeTypes(self);
+    classnames = getClassNames(self);
+    nodenames = getNodeNames(self);
+    refstat = getReferenceStations(self);
+end
 njobs = getNumberOfJobs(self);
 numservers = getStationServers(self);
-refstat = getReferenceStations(self);
 
 %% init minimal structure
 sn = NetworkStruct(); % create in self to ensure propagation
@@ -129,6 +140,7 @@ end
 refreshLocalVars(self); % depends on chains (rtnodes)
 refreshSync(self); % this assumes that refreshChain is called before
 refreshPetriNetNodes(self);
+self.hasStruct = true;
 %sn.forks = self.getForks(sn.rt);
 end
 

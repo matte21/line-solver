@@ -44,14 +44,14 @@ if isempty(self.handles) || ~isfield(self.handles,'Q')
         for r=1:K
             Qir = Metric(MetricType.QLen, classes{r}, stations{i});
             if isSource(i)
-                Qir.disable();
+                Qir.disabled = true;
             end
             if isSink(i)
-                Qir.disable();
+                Qir.disabled = true;
             end
             if ~hasServiceTunnel(i)
                 if ~isServiceDefined(i,r)
-                    Qir.disable();
+                    Qir.disabled = true;
                 end
             end
             Q{i,r} = Qir;
@@ -71,17 +71,17 @@ if isempty(self.handles) || ~isfield(self.handles,'U')
         for r=1:K
             Uir = Metric(MetricType.Util, classes{r}, stations{i});
             if isSource(i)
-                Uir.disable();
+                Uir.disabled = true;
             end
             if isSink(i)
-                Uir.disable();
+                Uir.disabled = true;
             end
             if isa(stations{i},'Join') || isa(stations{i},'Fork')
-                Uir.disable();
+                Uir.disabled = true;
             end
             if ~hasServiceTunnel(i)
                 if ~isServiceDefined(i,r)
-                    Uir.disable();
+                    Uir.disabled = true;
                 end
             end
             U{i,r} = Uir;
@@ -101,14 +101,14 @@ if isempty(self.handles) || ~isfield(self.handles,'R')
         for r=1:K
             Rir = Metric(MetricType.RespT, classes{r}, stations{i});
             if isSource(i)
-                Rir.disable();
+                Rir.disabled = true;
             end
             if isSink(i)
-                Rir.disable();
+                Rir.disabled = true;
             end
             if ~hasServiceTunnel(i)
                 if ~isServiceDefined(i,r)
-                    Rir.disable();
+                    Rir.disabled = true;
                 end
             end
             R{i,r} = Rir;
@@ -129,7 +129,7 @@ if isempty(self.handles) || ~isfield(self.handles,'T')
             Tir = Metric(MetricType.Tput, classes{r}, stations{i});
             if ~hasServiceTunnel(i)
                 if ~isServiceDefined(i,r)
-                    Tir.disable();
+                    Tir.disabled = true;
                 end
             end
             T{i,r} = Tir;
@@ -150,7 +150,7 @@ if isempty(self.handles) || ~isfield(self.handles,'A')
             Air = Metric(MetricType.ArvR, classes{r}, stations{i});
             if ~hasServiceTunnel(i)
                 if ~isServiceDefined(i,r)
-                    Air.disable();
+                    Air.disabled = true;
                 end
             end
             A{i,r} = Air;

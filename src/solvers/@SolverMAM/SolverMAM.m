@@ -11,6 +11,13 @@ classdef SolverMAM < NetworkSolver
             self@NetworkSolver(model, mfilename);
             self.setOptions(Solver.parseOptions(varargin, self.defaultOptions));
         end
+                
+        function sn = getStruct(self)
+            % QN = GETSTRUCT()
+            
+            % Get data structure summarizing the model
+            sn = self.model.getStruct(true);
+        end
         
         runtime = runAnalyzer(self, options, config);
         RD = getCdfRespT(self, R);
