@@ -14,7 +14,7 @@ end
 % when t==0 the hkc function is not well defined
 tset(tset == 0) = Distrib.Zero;
 
-for k=fcfsNodes(:)
+for k=fcfsNodes(:)'
     if range(rates(k,:))>Distrib.Zero
         line_error(mfilename,'The FCFS stations has distinct service rates, the model is invalid.');
     end
@@ -77,7 +77,7 @@ for k=fcfsNodes(:)
                 Hkrt(t) = hkc(t,1+0) * exp(lGk); % nvec = 0
                 for s=1:R % nvec >= 1s
                     if Nr(s)>0
-                        gammak                        
+                        %gammak                        
                         lYks_t  = pfqn_rd(L,oner(Nr,s),Z,gammak);
                         %RD = lYks_t
                         %NRP 

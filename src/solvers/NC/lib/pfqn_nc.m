@@ -117,7 +117,7 @@ X=[];Q=[];
         else
             [~,lG] = pfqn_recal(L,N,sum(Z,1));% implemented with Z=0
         end
-    case {'default','adaptive'}
+    case {'adaptive','default'}
         if M>1
             if R <= 3 && sum(N)<50
                 [~,~,~,~,lG] = pfqn_mva(L,N,sum(Z,1));
@@ -189,7 +189,7 @@ X=[];Q=[];
         else
             [X,Q,~,~,lG] = pfqn_mva(L,N,Z);
         end
-    case 'comom'
+    case {'comom'}
         if R>1
             try
                 [~,lG,X,Q] = pfqn_comombtf(L,N,Z);
@@ -214,7 +214,7 @@ X=[];Q=[];
         end
         [~,lG] = pfqn_rgf(L,N);
     otherwise
-        line_error(mfilename,'Unrecognized method: %s',options.method);
+        line_error(mfilename,sprintf('Unrecognized method: %s',options.method));
 end
 return
 end

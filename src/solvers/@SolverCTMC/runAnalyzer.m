@@ -45,7 +45,7 @@ end
 if sizeEstimator > 6
     if ~isfield(options,'force') || options.force == false
         %        line_error(mfilename,'Line:ModelTooLargeToSolve','CTMC size may be too large to solve. Stopping SolverCTMC. Set options.force=true to bypass this control.\n');
-        ME = MException('Line:ModelTooLargeToSolve', 'CTMC size may be too large to solve. Stopping SolverCTMC. Set options.force=true to bypass this control.\n');
+        ME = MException('Line:ModelTooLargeToSolve', 'CTMC size may be too large to solve. Stopping SolverCTMC. Set options.force=true or use SolverCTMC(...,''force'',true) to bypass this control.\n');
         throw(ME);
         return
     end

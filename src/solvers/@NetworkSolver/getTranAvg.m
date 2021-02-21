@@ -40,8 +40,8 @@ if ~hasTranResults(self)
     runAnalyzer(self);
 end
 
-M = sn.nstations();
-K = sn.nclasses();
+M = sn.nstations;
+K = sn.nclasses;
 if ~isempty(Qt)
     QNclass_t = cell(M,K);
     UNclass_t = cell(M,K);

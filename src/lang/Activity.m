@@ -32,6 +32,8 @@ classdef Activity < LayeredNetworkElement
             
             if nargin<3 %~exist('hostDemand','var')
                 hostDemand = Distrib.Zero;
+            elseif isnumeric(hostDemand) && hostDemand == 0
+                hostDemand = Distrib.Zero;
             end
             if nargin<4 %~exist('boundToEntry','var')
                 boundToEntry = '';

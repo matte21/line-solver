@@ -14,7 +14,7 @@ end
 % when t==0 the hkc function is not well defined
 tset(tset == 0) = Distrib.Zero;
 hkc = cell(1,R);
-for k=fcfsNodes(:)
+for k=fcfsNodes(:)'
     for r=1:R
         if L(k,r) > Distrib.Zero
             Nr = oner(N,r);
@@ -23,7 +23,7 @@ for k=fcfsNodes(:)
             hMAPr = cell(1,1+sum(N));
             for n=0:sum(N)
                 if n < S(k)
-                    % the heuristic here is to use the average rates
+                    % the heuristic here is to use the average rates                    
                     hMAPr{1+n} = map_exponential(1/rates(k,r));
                 else
                     % the heuristic here is to use the rates per class

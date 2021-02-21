@@ -5,8 +5,8 @@ function [AvgChain,QTc,UTc,RTc,TTc] = getAvgChainTable(self,Q,U,R,T)
 % All rights reserved.
 
 sn = self.model.getStruct;
-M = sn.nstations();
-K = sn.nchains();
+M = sn.nstations;
+K = sn.nchains;
 if nargin == 1
     [Q,U,R,T] = getAvgHandles(self);
 end

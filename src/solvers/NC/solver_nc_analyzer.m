@@ -152,16 +152,7 @@ while max(abs(1-eta./eta_1)) > options.iter_tol && it < options.iter_max
     end
     
     if isnan(Xchain)
-        %        Z
-        %        Zcorr
-        %        Lcorr,Nchain,sum(Z,1)+sum(Zcorr,1)
-        %        lG
-        %        lGr
-        %        lGar
         line_warning(mfilename,'Normalizing constant computations produced a floating-point range exception. Model is likely too large.');
-        %Demands=Lcorr
-        %PopulationVector=oner(Nchain,r)
-        %ThinkTimes=sum(Z,1)+sum(Zcorr,1)
     end
     
     Z = sum(Z(1:M,:),1);
@@ -230,32 +221,31 @@ while max(abs(1-eta./eta_1)) > options.iter_tol && it < options.iter_max
         switch schedid(i)
             case SchedStrategy.ID_FCFS
                 if range(ST0(i,sd))>0 && (max(SCV(i,sd))>1 - Distrib.Zero || min(SCV(i,sd))<1 + Distrib.Zero) % check if non-product-form
-%                    if rho(i) <= 1
-%                     else
-%                         ca(i) = 0;
-%                         for j=1:M
-%                             for r=1:K
-%                                 if ST0(j,r)>0
-%                                     for s=1:K
-%                                         if ST0(i,s)>0
-%                                             pji_rs = sn.rt((j-1)*sn.nclasses + r, (i-1)*sn.nclasses + s);
-%                                             ca(i) = ca(i) + (T(j,r)*pji_rs/sum(T(i,sd)))*(1 - pji_rs + pji_rs*((1-rho(j)^2)*ca_1(j) + rho(j)^2*cs_1(j)));
-%                                         end
-%                                     end
-%                                 end
-%                             end
-%                         end
-%                     end
+                    %                    if rho(i) <= 1
+                    %                     else
+                    %                         ca(i) = 0;
+                    %                         for j=1:M
+                    %                             for r=1:K
+                    %                                 if ST0(j,r)>0
+                    %                                     for s=1:K
+                    %                                         if ST0(i,s)>0
+                    %                                             pji_rs = sn.rt((j-1)*sn.nclasses + r, (i-1)*sn.nclasses + s);
+                    %                                             ca(i) = ca(i) + (T(j,r)*pji_rs/sum(T(i,sd)))*(1 - pji_rs + pji_rs*((1-rho(j)^2)*ca_1(j) + rho(j)^2*cs_1(j)));
+                    %                                         end
+                    %                                     end
+                    %                                 end
+                    %                             end
+                    %                         end
+                    %                     end
                     ca(i) = 1;
-                    cs(i) = (SCV(i,sd)*T(i,sd)')/sum(T(i,sd));                    
-                    gamma(i) = (rho(i)^nservers(i)+rho(i))/2; % multi-server                    
+                    cs(i) = (SCV(i,sd)*T(i,sd)')/sum(T(i,sd));
+                    gamma(i) = (rho(i)^nservers(i)+rho(i))/2; % multi-server
                     % asymptotic decay rate (diffusion approximation, Kobayashi JACM)
                     eta(i) = exp(-2*(1-rho(i))/(cs(i)+ca(i)*rho(i)));
                     %eta(i) = rho(i);
                 end
         end
-    end
-    
+    end    
     
     for i=1:M
         sd = sn.rates(i,:)>0;
@@ -263,8 +253,8 @@ while max(abs(1-eta./eta_1)) > options.iter_tol && it < options.iter_max
             case SchedStrategy.ID_FCFS
                 if range(ST0(i,sd))>0 && (max(SCV(i,sd))>1 - Distrib.Zero || min(SCV(i,sd))<1 + Distrib.Zero) % check if non-product-form
                     for k=1:K
-                        if sn.rates(i,k)>0                            
-                            ST(i,k) = (1-rho(i)^4)*ST0(i,k) + rho(i)^4*((1-rho(i)^4) * gamma(i)*nservers(i)/sum(T(i,sd)) +  rho(i)^4* eta(i)*nservers(i)/sum(T(i,sd)) );                            
+                        if sn.rates(i,k)>0
+                            ST(i,k) = (1-rho(i)^8)*ST0(i,k) + rho(i)^8*(gamma(i) + rho(i)^8* (eta(i)-gamma(i)))*(nservers(i)/sum(T(i,sd)));
                         end
                     end
                 end

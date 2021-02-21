@@ -120,26 +120,32 @@ while max(abs(1-eta./eta_1)) > options.iter_tol && it < options.iter_max
                     [lGr(r)] = pfqn_nrl(Lms, oner(Nchain,r),0*Nchain,mu);
             end
             Xchain(r) = exp(lGr(r) - lG);
-            for i=1:M
-                if Lchain(i,r)>0
-                    if isinf(nservers(i)) % infinite server
-                        Qchain(i,r) = Lchain(i,r) * Xchain(r);
-                    else
-                        switch options.method
-                            case {'default','exact'}
-                                [~,lGar(i,r)] = pfqn_gmvald([Lms(setdiff(1:size(Lms,1),i),:),zeros(size(Lms,1)-1,1); Lms(i,:),1], [oner(Nchain,r),1], mu, options);
-                            case 'rd'
-                                [lGar(i,r)] = pfqn_rd([Lms(setdiff(1:size(Lms,1),i),:),zeros(size(Lms,1)-1,1); Lms(i,:),1], [oner(Nchain,r),1],[oner(Nchain,r),1]*0, mu);
-                            case 'nrp'
-                                [lGar(i,r)] = pfqn_nrp([Lms(setdiff(1:size(Lms,1),i),:),zeros(size(Lms,1)-1,1); Lms(i,:),1], [oner(Nchain,r),1],[oner(Nchain,r),1]*0, mu);
-                            case 'nrl'
-                                [lGar(i,r)] = pfqn_nrl([Lms(setdiff(1:size(Lms,1),i),:),zeros(size(Lms,1)-1,1); Lms(i,:),1], [oner(Nchain,r),1],[oner(Nchain,r),1]*0, mu);
-                        end
-                        dlG = lGar(i,r) - lG;
-                        Qchain(i,r) = Lms(i,r) * exp(dlG);
-                    end
-                end
-            end
+             for i=1:M
+                 Qchain(i,r)=0;
+             end
+             for i=1:M
+                 if Lchain(i,r)>0
+                     if isinf(nservers(i)) % infinite server
+                         Qchain(i,r) = real(Lchain(i,r) * Xchain(r));
+                     else
+                         if M==2 && sum(isfinite(nservers))==1 % repairmen                             
+                             Qchain(i,r) = real(Nchain(r) - sum(Lchain(isinf(nservers),r)) * Xchain(r));
+                         end                         
+%                         switch options.method
+%                             case {'default','exact'}
+%                                 [~,lGar(i,r)] = pfqn_gmvald([Lms(setdiff(1:size(Lms,1),i),:),zeros(size(Lms,1)-1,1); Lms(i,:),1], [oner(Nchain,r),1], mu, options);
+%                             case 'rd'
+%                                 [lGar(i,r)] = pfqn_rd([Lms(setdiff(1:size(Lms,1),i),:),zeros(size(Lms,1)-1,1); Lms(i,:),1], [oner(Nchain,r),1],[oner(Nchain,r),1]*0, mu);
+%                             case 'nrp'
+%                                 [lGar(i,r)] = pfqn_nrp([Lms(setdiff(1:size(Lms,1),i),:),zeros(size(Lms,1)-1,1); Lms(i,:),1], [oner(Nchain,r),1],[oner(Nchain,r),1]*0, mu);
+%                             case 'nrl'
+%                                 [lGar(i,r)] = pfqn_nrl([Lms(setdiff(1:size(Lms,1),i),:),zeros(size(Lms,1)-1,1); Lms(i,:),1], [oner(Nchain,r),1],[oner(Nchain,r),1]*0, mu);
+%                         end
+%                         dlG = lGar(i,r) - lG;
+%                         Qchain(i,r) = Lms(i,r) * exp(dlG);
+                     end
+                 end
+             end
         end
     else
         % just fill the delay servers
@@ -174,6 +180,11 @@ while max(abs(1-eta./eta_1)) > options.iter_tol && it < options.iter_max
     Tchain = repmat(Xchain,M,1) .* Vchain;
     Uchain = Tchain .* Lchain;
     Cchain = Nchain ./ Xchain - Z;
+    
+    Xchain=real(Xchain);
+    Uchain=real(Uchain);
+    Qchain=real(Qchain);
+    Rchain=real(Rchain);
     
     Xchain(~isfinite(Xchain))=0;
     Uchain(~isfinite(Uchain))=0;
@@ -253,7 +264,8 @@ while max(abs(1-eta./eta_1)) > options.iter_tol && it < options.iter_max
                     cs(i) = (SCV(i,sd)*T(i,sd)')/sum(T(i,sd));
                     gamma(i) = (rho(i)^nservers(i)+rho(i))/2; % multi-server
                     % asymptotic decay rate (diffusion approximation, Kobayashi JACM)
-                    eta(i) = exp(-2*(1-rho(i))/(cs(i)+ca(i)*rho(i)));
+                    eta(i) = exp(-2*(1-rho(i))/(cs(i)+ca(i)*rho(i)));                    
+                    %[~,eta(i)]=qsys_gig1_approx_klb(sum(T(i,sd))/nservers(i),rho(i) / (sum(T(i,sd))/nservers(i)),ca(i),cs(i));
                     %eta(i) = rho(i);
                 end
         end

@@ -8,8 +8,8 @@ if nargin<6 %~exist('keepDisabled','var')
     keepDisabled = false;
 end
 sn = self.model.getStruct;
-I = sn.nnodes();
-K = sn.nclasses();
+I = sn.nnodes;
+K = sn.nclasses;
 if nargin == 1
     [Q,U,R,T,A] = getAvgHandles(self);
 end

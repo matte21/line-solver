@@ -52,8 +52,8 @@ if ~self.hasAvgResults || ~self.options.cache
 end % else return cached value
 
 sn = self.getStruct();
-M = sn.nstations();
-K = sn.nclasses();
+M = sn.nstations;
+K = sn.nclasses;
 
 QNclass = [];
 UNclass = [];

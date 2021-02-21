@@ -1,4 +1,4 @@
-function line_warning(caller,MSG, varargin)
+function line_warning(caller, MSG, varargin)
 % LINE_WARNING(CALLER, ERRMSG)
 
 % Copyright (c) 2012-2021, Imperial College London
