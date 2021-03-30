@@ -1,4 +1,4 @@
-function [G,R,U]=QBD_EG(A0,A1,A2,optVerbose,nargout_caller)
+ function [G,R,U]=QBD_EG(A0,A1,A2,optVerbose,nargout_caller)
 %QBD_EG determines G directly if rank(A0)=1 or rank(A2)=1 
 
 G=[];

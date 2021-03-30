@@ -1,36 +1,43 @@
 function RD = getCdfRespT(self, R, config)
 % RD = GETCDFRESPT(R)
 T0 = tic;
-if nargin<2 %~exist('R','var')
+if nargin<2 || isempty(R) %~exist('R','var')
     R = self.getAvgRespTHandles;
 end
 if nargin<3 %~exist('config','var')
     config = self.getOptions.config;
-    config.algorithm = 'rd';
+    config.algorithm = 'exact';
 end
 RD = {};
 sn = self.getStruct;
 [~,D,N,Z,~,S]= snGetProductFormParams(sn);
 fcfsNodes = find(sn.schedid(sn.schedid ~= SchedStrategy.ID_INF) == SchedStrategy.ID_FCFS);
+fcfsNodeIds = find(sn.schedid == SchedStrategy.ID_FCFS);
+delayNodeIds = find(sn.schedid == SchedStrategy.ID_INF);
 if ~isempty(fcfsNodes)
     T = max(sum(N) * mean(1./sn.rates(fcfsNodes,:)));
     tset = logspace(-5,log10(T),100);
     rates = sn.rates(sn.schedid == SchedStrategy.ID_FCFS,:);
     switch config.algorithm
         case 'exact'
-        RD = pfqn_stdf(D,N,Z,S,fcfsNodes,rates,tset);
+            RDout = pfqn_stdf(D,N,Z,S,fcfsNodes,rates,tset);
         case 'rd'
-        RD = pfqn_stdf_heur(D,N,Z,S,fcfsNodes,rates,tset);
+            RDout = pfqn_stdf_heur(D,N,Z,S,fcfsNodes,rates,tset);
     end
-    for i=1:size(RD,1)
-        for j=1:size(RD,2)
-            RD{i,j}=real(RD{i,j});
+    for i=1:size(RDout,1)
+        for j=1:size(RDout,2)
+            RD{fcfsNodeIds(i),j} = real(RDout{i,j}); % remove complex number round-offs
+        end
+    end
+    for i=1:length(delayNodeIds)
+        for j=1:size(RDout,2)
+            RD{delayNodeIds(i),j} = [map_cdf(sn.proc{delayNodeIds(i)}{j}, tset(:))' tset(:)];
         end
     end
     runtime = toc(T0);
     self.setDistribResults(RD, runtime);
 else
-    line_warning(mfilename, 'getCdfRespT applies only to FCFS nodes.');    
+    line_warning(mfilename, 'getCdfRespT applies only to FCFS nodes.');
     return
 end
 end

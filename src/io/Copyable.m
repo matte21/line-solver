@@ -10,7 +10,7 @@ classdef Copyable < handle
             
             if isoctave % or matlab versions less than 7.11
                 % Other - serialize via temp file (slower)
-                fname = [tempname '.mat'];
+                fname = [lineTempName '.mat'];
                 save(fname, 'obj');
                 newObj = load(fname);
                 newObj = newObj.obj;
@@ -21,7 +21,7 @@ classdef Copyable < handle
                     objByteArray = getByteStreamFromArray(obj);
                     newObj = getArrayFromByteStream(objByteArray);
                 catch ME
-                    fname = [tempname '.mat'];
+                    fname = [lineTempName '.mat'];
                     save(fname, 'obj');
                     newObj = load(fname);
                     newObj = newObj.obj;

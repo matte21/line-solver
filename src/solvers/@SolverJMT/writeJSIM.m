@@ -132,6 +132,7 @@ try
     xmlwrite(fname, simXMLDoc);
 catch ME
     ME
+    ME.stack
     javaaddpath(which('xercesImpl-2.11.0.jar'));
     javaaddpath(which('xml-apis-2.11.0.jar'));
     pkg load io;

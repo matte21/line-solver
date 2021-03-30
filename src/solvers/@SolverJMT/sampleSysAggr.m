@@ -30,7 +30,7 @@ end
 % apply logging to the copied model
 Plinked = sn.rtorig;
 isNodeLogged = max(isNodeClassLogged,[],2);
-logpath = tempdir;
+logpath = lineTempDir;
 modelCopy.linkAndLog(Plinked, isNodeLogged, logpath);
 
 % simulate the model copy and retrieve log data
@@ -84,8 +84,8 @@ for ist= 1:sn.nstations
     statStateAggr{ist}.state = cell2mat(nir);
     statStateAggr{ist}.event = {event{isf,:}};
     statStateAggr{ist}.isaggregate = true;
-    sysStateAggr.arv_job_id = logData{2}.arvID;
-    sysStateAggr.dep_job_id = logData{2}.depID;
+    %sysStateAggr.arv_job_id = logData{2}.arvID;
+    %sysStateAggr.dep_job_id = logData{2}.depID;
 end
 
 tranSysStateAggr = cell(1,1+sn.nstations);
@@ -166,6 +166,6 @@ event_t = cellfun(@(c) c.t, event);
 sysStateAggr.event = {event{I}};
 sysStateAggr.event = sysStateAggr.event';
 sysStateAggr.isaggregate = true;
-sysStateAggr.arv_job_id = logData{2}.arvID;
-sysStateAggr.dep_job_id = logData{2}.depID;
+%sysStateAggr.arv_job_id = logData{2}.arvID;
+%sysStateAggr.dep_job_id = logData{2}.depID;
 end

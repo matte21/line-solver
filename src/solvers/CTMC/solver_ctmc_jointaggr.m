@@ -31,7 +31,7 @@ end
 [Q,~,SSq,~,~,~,sn] = solver_ctmc(sn, options);
 % SSq is an aggregate state space
 if options.keep
-    fname = tempname;
+    fname = lineTempName;
     save([fname,'.mat'],'Q','SSq')
     line_printf('\nCTMC generator and aggregate state space saved in: ');
     line_printf([fname, '.mat'])

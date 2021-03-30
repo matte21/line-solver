@@ -21,7 +21,7 @@ classdef SolverLQNS < LayeredNetworkSolver
             
             tic;
             options = self.getOptions;
-            filename = [tempname,'.lqnx'];
+            filename = [lineTempName,'.lqnx'];
             self.model.writeXML(filename);
             if options.verbose
                 ignoreWarn = '';
@@ -333,7 +333,7 @@ classdef SolverLQNS < LayeredNetworkSolver
                         || containsstr(ret,'Version 3') || containsstr(ret,'Version 2') ...
                         || containsstr(ret,'Version 1')
                     line_warning(mfilename,'Unsupported LQNS version. LINE requires Version 6.0 or greater.');
-                    bool = false;
+                    bool = true;
                 end
             else % linux
                 [~,ret] = unix('lqns -V -H');
@@ -344,7 +344,7 @@ classdef SolverLQNS < LayeredNetworkSolver
                         || containsstr(ret,'Version 3') || containsstr(ret,'Version 2') ...
                         || containsstr(ret,'Version 1')
                     line_warning(mfilename,'Unsupported LQNS version. LINE requires Version 6.0 or greater.');
-                    bool = false;
+                    bool = true;
                 end
             end
         end

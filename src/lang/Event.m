@@ -13,11 +13,12 @@ classdef Event
         prob;
         state; % state information when the event occurs (optional)
         t; % timestamp when the event occurs (optional)
+        job; % job id (optional) 
     end
     
     methods
-        function self = Event(event, node, class, prob, state, t)
-            % SELF = EVENT(EVENT, NODE, CLASS, PROB, STATE, TIMESTAMP)
+        function self = Event(event, node, class, prob, state, t, job)
+            % SELF = EVENT(EVENT, NODE, CLASS, PROB, STATE, TIMESTAMP ,job)
             
             self.node = node;            
             self.event = event;
@@ -34,6 +35,10 @@ classdef Event
                 t = NaN; % timestamp
             end
             self.t = t;
+            if nargin <7
+                job = NaN; % timestamp
+            end
+            self.job = job;
         end
         
         function print(self)
@@ -42,7 +47,11 @@ classdef Event
             if isnan(self.t)
                 line_printf('\n(%s: node: %d, class: %d)',EventType.toText(self.event),self.node,self.class);
             else
-                line_printf('\n(%s: node: %d, class: %d, time: %d)',EventType.toText(self.event),self.node,self.class,self.t);
+                if isnan(self.job)
+                    line_printf('\n(%s: node: %d, class: %d, time: %d)',EventType.toText(self.event),self.node,self.class,self.t);
+                else
+                    line_printf('\n(%s: node: %d, class: %d, job: %d, time: %d)',EventType.toText(self.event),self.node,self.class,self.job,self.t);
+                end
             end
         end
     end

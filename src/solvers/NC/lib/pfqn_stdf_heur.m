@@ -72,7 +72,7 @@ for k=fcfsNodes(:)'
             [~,~,~,~,lGk]  = pfqn_mvald(L(setdiff(1:M,k),:),Nr,Z,mu(setdiff(1:M,k),:));
             lGk = lGk(end);
             for t=1:T
-                [t,T]
+                %[t,T]
                 gammat = mu;
                 for m=1:sum(Nr)
                     gammat(k,m) = mu(k,m) * hkc{r}(t,1+m-1) / hkc{r}(t,1+m);

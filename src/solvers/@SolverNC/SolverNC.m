@@ -22,7 +22,7 @@ classdef SolverNC < NetworkSolver
         Pnir = getProbAggr(self, node, state_a)
         Pn   = getProbSys(self)
         Pn   = getProbSysAggr(self)
-        RD = getCdfRespT(self, R);
+        RD = getCdfRespT(self, R, config);
         
         [lNormConst] = getProbNormConstAggr(self)
         

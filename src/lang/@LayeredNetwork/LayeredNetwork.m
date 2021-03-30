@@ -71,7 +71,7 @@ classdef LayeredNetwork < Model & Ensemble
             
             self@Ensemble({})
             if nargin<1 %~exist('name','var')
-                [~,name]=fileparts(tempname);
+                [~,name]=fileparts(lineTempName);
             end
             self@Model(name);
             self.aux = struct();

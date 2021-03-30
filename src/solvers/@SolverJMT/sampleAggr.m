@@ -26,7 +26,7 @@ end
 % apply logging to the copied model
 Plinked = sn.rtorig;
 isNodeLogged = max(isNodeClassLogged,[],2);
-logpath = tempdir;
+logpath = lineTempDir;
 modelCopy.linkAndLog(Plinked, isNodeLogged, logpath);
 % simulate the model copy and retrieve log data
 solverjmt = SolverJMT(modelCopy, self.getOptions);

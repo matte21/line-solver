@@ -45,9 +45,9 @@ classdef SolverJMT < NetworkSolver
             self.maxEvents = -1;
             jarPath = jmtGetPath;
             self.setJMTJarPath(jarPath);
-            filePath = tempdir;
+            filePath = lineTempDir;
             self.filePath = filePath;
-            [~,fileName]=fileparts(tempname);
+            [~,fileName]=fileparts(lineTempName);
             self.fileName = fileName;
         end
         
@@ -234,7 +234,7 @@ classdef SolverJMT < NetworkSolver
         end
         
         dataSet = parseLogs(model, isNodeLogged, metric);
-        [state, evtype, evclass] = parseTranState(fileArv, fileDep, nodePreload);
+        [state, evtype, evclass, evjob] = parseTranState(fileArv, fileDep, nodePreload);
         [classResT, jobResT, jobResTArvTS, classResTJobID] = parseTranRespT(fileArv, fileDep);
         
         function checkOptions(options)

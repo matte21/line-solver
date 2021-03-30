@@ -21,7 +21,7 @@ for i= 1:cdfmodel.getNumberOfStations
 end
 Plinked = sn.rtorig;
 isNodeLogged = max(isNodeClassLogged,[],2);
-logpath = tempdir;
+logpath = lineTempDir;
 cdfmodel.linkAndLog(Plinked, isNodeLogged, logpath);
 SolverJMT(cdfmodel, self.getOptions).getAvg(); % log data
 logData = SolverJMT.parseLogs(cdfmodel, isNodeLogged, MetricType.RespT);

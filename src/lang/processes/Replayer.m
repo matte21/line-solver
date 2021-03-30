@@ -10,24 +10,28 @@ classdef Replayer < TimeSeries
     
     methods
         %Constructor
-        function self = Replayer(fileName)
-            % SELF = REPLAYER(FILENAME)
-            if exist(fileName,'file') == 2
-                dirStruct = dir(fileName); 
-                fileName = [dirStruct.folder,filesep,dirStruct.name];
-            else 
-                line_error(mfilename,'The file cannot be located, use the full file path.');
-            end
+        function self = Replayer(data)            
             self@TimeSeries('Replayer',1);
-            setParam(self, 1, 'fileName', fileName, 'java.lang.String');
-            self.data = [];
+            if ischar(data) % interpret as string
+                % SELF = REPLAYER(FILENAME)
+                if exist(fileName,'file') == 2
+                    dirStruct = dir(fileName);
+                    fileName = [dirStruct.folder,filesep,dirStruct.name];
+                else
+                    line_error(mfilename,'The file cannot be located, use the full file path.');
+                end                
+                setParam(self, 1, 'fileName', fileName, 'java.lang.String');
+                self.data = [];
+            else
+                self.data = data(:);
+            end
         end
         
         function load(self)
             % LOAD()
             
             fileName = self.getParam(1).paramValue;
-            self.data = load(fileName);            
+            self.data = load(fileName);
             self.data = self.data(:);
         end
         
@@ -78,12 +82,12 @@ classdef Replayer < TimeSeries
         end
         
         function distr = fitAPH(self)
-            % DISTR = FITAPH()            
+            % DISTR = FITAPH()
             distr = APH.fit(self.getMean, self.getSCV, self.getSkewness);
         end
         
         function distr = fitCoxian(self)
-            % DISTR = FITCOXIAN()            
+            % DISTR = FITCOXIAN()
             distr = Cox2.fit(self.getMean, self.getSCV, self.getSkewness);
             
         end

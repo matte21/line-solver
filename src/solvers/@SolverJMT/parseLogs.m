@@ -37,7 +37,7 @@ for ind=1:sn.nnodes
                 %                jobArvClassID(find(strcmp(jobArvClasses{c},jobArvClass)))=c;
             end
             logFileArvMat = [model.getLogPath,filesep,sprintf('%s-Arv.mat',model.getNodeNames{ind})];
-            save(logFileArvMat,'jobArvTS','jobArvID','jobArvClass','jobArvClasses','jobArvClassID');
+            save(logFileArvMat,'jobArvTS','jobArvID','jobArvClass','jobArvClassID');
             
             %% load departure process
             fid=fopen(logFileDep);
@@ -58,13 +58,13 @@ for ind=1:sn.nnodes
                 %                jobDepClassID(find(strcmp(jobDepClasses{c},jobDepClass)))=c;
             end
             logFileDepMat = [model.getLogPath,filesep,sprintf('%s-Dep.mat',model.getNodeNames{ind})];
-            save(logFileDepMat,'jobDepTS','jobDepID','jobDepClass','jobDepClasses','jobDepClassID');
+            save(logFileDepMat,'jobDepTS','jobDepID','jobDepClass','jobDepClassID');
             
             nodeState = cell(sn.nnodes,1);
             
             switch metric
                 case MetricType.QLen
-                    [node_ind, evtype, evclass] = SolverJMT.parseTranState(logFileArvMat, logFileDepMat, nodePreload{ind});
+                    [node_ind, evtype, evclass, evjob] = SolverJMT.parseTranState(logFileArvMat, logFileDepMat, nodePreload{ind});
                     
                     %% save in default data structure
                     for r=1:nclasses %0:numOfClasses
@@ -72,16 +72,16 @@ for ind=1:sn.nnodes
                         logData_indr.t = node_ind(:,1);
                         ec = cell(length(evtype),1);
                         for e=1:length(evtype)
-                            if evclass(e) == r
-                                ec{e,1} = Event(evtype(e), ind, r, NaN, [], node_ind(e,1));
+                            if evclass(e) == r                                 
+                                ec{e,1} = Event(evtype(e), ind, r, NaN, [], node_ind(e,1), evjob(e));
                             else
                                 ec{e,1} = [];
                             end
                         end
                         logData_indr.event = ec;
                         logData_indr.QLen = node_ind(:,1+r);
-                        logData_indr.arvID = jobArvID;
-                        logData_indr.depID = jobDepID;                        
+                        %logData_indr.arvID = jobArvID;
+                        %logData_indr.depID = jobDepID;                        
                         logData{ind,r} = logData_indr;
                     end
                     nodeState{ind} = node_ind;

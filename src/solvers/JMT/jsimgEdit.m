@@ -1,5 +1,5 @@
 function model = jsimgEdit
-fname = [tempname,'.jsimg'];
+fname = [lineTempName,'.jsimg'];
 copyfile(which('emptyModel.jsimg'),fname);
 jsimgView(fname);
 try

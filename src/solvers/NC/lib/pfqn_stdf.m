@@ -68,7 +68,7 @@ for k=fcfsNodes(:)'
             [~,~,~,~,lGk]  = pfqn_mvald(L(setdiff(1:M,k),:),Nr,Z,mu(setdiff(1:M,k),:));
             lGk = lGk(end);
             for t=1:T
-                [t,T]
+                %[t,T]
                 gammat = mu;
                 for m=1:sum(Nr)
                     gammat(k,m) = mu(k,m) * hkc(t,1+m-1) / hkc(t,1+m);
@@ -78,11 +78,11 @@ for k=fcfsNodes(:)'
                 for s=1:R % nvec >= 1s
                     if Nr(s)>0
                         %gammak                        
-                        lYks_t  = pfqn_rd(L,oner(Nr,s),Z,gammak);
+                        %lYks_t  = pfqn_rd(L,oner(Nr,s),Z,gammak);
                         %RD = lYks_t
                         %NRP 
                         %lYks_t = pfqn_nrp(L,oner(Nr,s),Z,gammak);
-                        %[~,~,~,~,lYks_t]  = pfqn_mvald(L,oner(Nr,s),Z,gammak); lYks_t = lYks_t(end);
+                        [~,~,~,~,lYks_t]  = pfqn_mvald(L,oner(Nr,s),Z,gammak); lYks_t = lYks_t(end);
                         %if t==10
                         %    keyboard
                         %end

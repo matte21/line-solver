@@ -1,9 +1,9 @@
 pd = pwd;
-cwd = fullfile(tempdir,'jsim');
+cwd = fullfile(lineTempDir,'jsim');
 cd(cwd)
 delete *.jsim
 delete *.jsim-result.jsim
-cwd = fullfile(tempdir,'jmva');
+cwd = fullfile(lineTempDir,'jmva');
 cd(cwd)
 delete *.jmva
 delete *.jmva-result.jsim

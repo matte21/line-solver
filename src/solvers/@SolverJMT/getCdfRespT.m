@@ -33,7 +33,7 @@ for i= 1:cdfmodel.getNumberOfStations
 end
 Plinked = sn.rtorig;
 isNodeLogged = max(isNodeClassLogged,[],2);
-logpath = tempdir;
+logpath = lineTempDir;
 cdfmodel.linkAndLog(Plinked, isNodeLogged, logpath);
 cdfmodel.initFromMarginal(n);
 SolverJMT(cdfmodel, self.getOptions).getAvg(); % log data

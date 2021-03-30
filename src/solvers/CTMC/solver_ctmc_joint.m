@@ -30,7 +30,7 @@ end
 
 [Q,SS,~,~,~,~,sn] = solver_ctmc(sn, options);
 if options.keep
-    fname = tempname;
+    fname = lineTempName;
     save([fname,'.mat'],'Q','SSq')
     line_printf('\nCTMC generator and state space saved in: ');
     line_printf([fname, '.mat'])

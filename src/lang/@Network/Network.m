@@ -13,7 +13,7 @@ classdef Network < Model
         % the Distribution classes dynamically
     end
     
-    properties (Access=public)
+    properties (Hidden)
         sn;
         hasStruct;
     end
