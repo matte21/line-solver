@@ -11,7 +11,7 @@ for i = 1:M
     if isinf(c(i)) % delay server
         r(i) = 1/n(i);
     else % regular server with c(i) servers
-        alpha=20;
+        alpha = 20;
         r(i) = 1./approximate(n(i),c(i),alpha);
         if isnan(r(i)) % if numerical problems
             r(i) = min(n(i),c(i));

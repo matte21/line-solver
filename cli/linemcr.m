@@ -102,7 +102,7 @@ end
 %persistent lineSplashScreenShown
 %lineSplashScreenShown = false;
 
-setmcruserdata('ParallelProfile', 'lineClusterProfile.settings');
+%setmcruserdata('ParallelProfile', 'lineClusterProfile.settings');
 
 warning off
 modelfile = [tempname,'.',inputext];
@@ -199,8 +199,8 @@ switch fileext
         model = LQN2LINE(modelfile, name);
         %fprintf('Model %s successfully parsed.\n', model.getName);
         switch solver
-            %case 'lqns'
-            %solver = SolverLQNS(model,'seed',randomSeed,'verbose',false);
+            case 'lqns'
+                solverObj = SolverLQNS(model,'seed',randomSeed,'verbose',false);
             case {'nc','ln','ln.comom'}
                 solverObj = SolverLN(model, @(m) SolverNC(m,'method','comom','seed',randomSeed,'verbose',false),'seed',randomSeed,'verbose',false);
             case {'mva','ln.mva'}

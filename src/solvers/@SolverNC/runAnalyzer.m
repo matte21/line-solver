@@ -71,7 +71,9 @@ else % queueing network
         [QN,UN,RN,TN,CN,XN,lG,runtime] = solver_ncld_analyzer(sn, options);
     else
         [QN,UN,RN,TN,CN,XN,lG,runtime] = solver_nc_analyzer(sn, options);
+        %[QN,UN,RN,TN,CN,XN,lG,runtime] = solver_ncld_analyzer(sn, options)
     end
+    
 end
 self.setAvgResults(QN,UN,RN,TN,CN,XN,runtime);
 self.result.Prob.logNormConstAggr = lG;

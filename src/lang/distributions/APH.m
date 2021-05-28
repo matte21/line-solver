@@ -61,6 +61,101 @@ classdef APH < MarkovianDistribution
             self.setParam(1, 'alpha', alpha, 'java.lang.Double');
             self.setParam(2, 'T', T, 'java.lang.Double');
         end
+
+        function updateFromRawMoments(self,varargin)
+            % UPDATE(SELF,VARARGIN)
+            
+            % Update parameters to match the first n moments
+            % (n<=4)
+            e1 = varargin{1};
+            e2 = varargin{2};
+            e3 = varargin{3};
+            if length(varargin) > 3
+                line_warning(mfilename,'Warning: update in %s distributions can only handle 3 moments, ignoring higher-order moments.',class(self));
+            end
+            try
+                [alpha,T] = APHFrom3Moments([e1,e2,e3]);
+            catch
+                m1 = e1;
+                m2 = e2;
+                m3 = e3;
+                if m2<1.5*m1^2
+                    m2 = 1.5*m1^2;
+                else
+                    m2 = m2;
+                end
+
+                scv = (m2/(m1^2))-1;
+
+                if scv == 0.5
+                    satisfy = 2;
+                elseif 0.5<scv && scv<1 
+                    if 6*(m1^3)*scv<m3 && m3<3*(m1^3)*(3*scv-1+sqrt(2)*(1-scv)^(3/2))
+                        satisfy = 1;
+                        m2 = 3*(m1^3)*(3*scv-1+sqrt(2)*(1-scv)^(3/2));
+                        m3 = 6*(m1^3)*scv;
+                    elseif m3<min(3*(m1^3)*(3*scv-1+sqrt(2)*(1-scv)^(3/2)),6*(m1^3)*scv)
+                        satisfy = 0;
+                    elseif m3>max(6*(m1^3)*scv,3*(m1^3)*(3*scv-1+sqrt(2)*(1-scv)^(3/2)))
+                        satisfy = 0;
+                    else
+                        satisfy = 1;
+                        m3 = m3;
+                    end
+                elseif scv == 1
+                    satisfy = 3;
+                    % one dimensional exponential distribution with lambda = 1/m1
+                elseif scv>1 
+                    satisfy = 1;
+                    if m3<=(3/2)*m1^3*(1+scv)^2
+                        m3 = (3/2)*m1^3*(1+scv)^2;
+                    else 
+                        m3 = m3;
+                    end
+                else
+                    satisfy = 1;
+                    m3 = m3;
+                end
+
+                if satisfy == 2
+                    c = 0.75*m1^4;
+                    d = 0.5*m1^2;
+                    b = 1.5*m1^3;
+                    a = 0;
+                    mu = (-b+6*m1*d+sqrt(a))/(b+sqrt(a));
+                    lambda1 = (b-sqrt(a))/c;
+                    lambda2 = (b+sqrt(a))/c;
+                elseif satisfy == 1
+                    c = 3*m2^2-2*m1*m3;
+                    d = 2*m1^2-m2;
+                    b = 3*m1*m2-m3;
+                    a = b^2-6*c*d;
+
+                    if c>0
+                        mu = (-b+6*m1*d+sqrt(a))/(b+sqrt(a));
+                        lambda1 = (b-sqrt(a))/c;
+                        lambda2 = (b+sqrt(a))/c;
+                    elseif c<0
+                        mu = (b-6*m1*d+sqrt(a))/(-b+sqrt(a));
+                        lambda1 = (b+sqrt(a))/c;
+                        lambda2 = (b-sqrt(a))/c;
+                    else
+                        mu = 1/(2*scv);
+                        lambda1 = 1/(scv*m1);
+                        lambda2 = 2/m1;
+                        % one dimensional exponential distribution with lambda = 1/m1
+                    end
+                else
+                    mu = 1/(2*scv);
+                    lambda1 = 1/(scv*m1);
+                    lambda2 = 2/m1;
+                end
+                alpha = [mu,1-mu];
+                T = [-lambda1,lambda1;0,-lambda2];                
+            end
+            self.setParam(1, 'alpha', alpha, 'java.lang.Double');
+            self.setParam(2, 'T', T, 'java.lang.Double');
+        end
         
         function updateMean(self,MEAN)
             % UPDATEMEAN(SELF,MEAN)
@@ -92,6 +187,31 @@ classdef APH < MarkovianDistribution
             APH = {T,-T*ones(length(T),1)*self.getInitProb};
         end
         
+        function Ft = evalCDF(self,varargin)
+            alpha = self.getParam(1).paramValue; 
+            T = self.getParam(2).paramValue; 
+            e = ones(length(alpha),1);
+            if isempty(varargin)
+                mean = self.getMean;
+                var = self.getVariance;
+                sigma = sqrt(var);
+                F = [];
+                i = 1;
+                for t = linspace(0,mean+10*sigma,200)
+                  F(i) = 1-alpha*expm(T.*t)*e;
+                  i = i+1;
+                end
+                t = linspace(0,mean+10*sigma,200);
+                Ft = [F',t'];
+            else
+                t = varargin{1};
+                Ft = [];
+                for i = 1:1:length(t)
+                    Ft(i) = 1-alpha*expm(T.*t(i))*e;
+                end
+            end
+        end
+        
     end
     
     methods (Static)
@@ -105,6 +225,17 @@ classdef APH < MarkovianDistribution
             else                
                 ex = APH(1.0, [1]);
                 ex.update(MEAN, SCV, SKEW);
+            end
+        end
+
+        function ex = fitRawMoments(m1, m2, m3)
+            
+            % Fit the distribution from first three moments
+            if m1 <= Distrib.Zero
+                ex = Exp(Inf);
+            else                
+                ex = APH(1.0, [1]);
+                ex.updateFromRawMoments(m1, m2, m3);
             end
         end
         
@@ -132,7 +263,7 @@ classdef APH < MarkovianDistribution
                 ex = APH(1.0, [1]);
                 ex.updateMeanAndSCV(MEAN, SCV);
             end
-        end
+        end   
     end
     
 end

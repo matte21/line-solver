@@ -23,7 +23,7 @@ model.link(P);
 %% Generate random dataset for utilization and average arrival rate
 n = 1000;
 ts = 1:n;
-arvr1_samples = 2*ones(n,1)-rand(n,1)*0.15; 
+arvrate_samples = 2*ones(n,1)-rand(n,1)*0.15; 
 util_samples = ones(n,1)-rand(n,1)*0.05; 
 respt_samples = 0.7./(1-util_samples); 
 
@@ -32,7 +32,7 @@ estoptions = ServiceEstimator.defaultOptions;
 estoptions.method = 'ubr';
 se = ServiceEstimator(model, estoptions);
 
-lambda1 = SampledMetric(MetricType.ArvR, ts, arvr1_samples, node{2}, jobclass{1});
+lambda1 = SampledMetric(MetricType.ArvR, ts, arvrate_samples, node{2}, jobclass{1});
 respT1 = SampledMetric(MetricType.RespT, ts, respt_samples, node{2}, jobclass{1});
 util = SampledMetric(MetricType.Util, ts, util_samples, node{2});
 

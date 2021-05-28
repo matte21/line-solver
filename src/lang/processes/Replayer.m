@@ -14,6 +14,7 @@ classdef Replayer < TimeSeries
             self@TimeSeries('Replayer',1);
             if ischar(data) % interpret as string
                 % SELF = REPLAYER(FILENAME)
+                fileName = data;
                 if exist(fileName,'file') == 2
                     dirStruct = dir(fileName);
                     fileName = [dirStruct.folder,filesep,dirStruct.name];
@@ -23,7 +24,7 @@ classdef Replayer < TimeSeries
                 setParam(self, 1, 'fileName', fileName, 'java.lang.String');
                 self.data = [];
             else
-                self.data = data(:);
+                self.data = data;
             end
         end
         

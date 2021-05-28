@@ -11,6 +11,7 @@ classdef lineserver < WebSocketServer
     end
     
     methods (Access = protected)
+        
         function onOpen(obj,conn,message)
             fprintf('%s\n',message)
         end

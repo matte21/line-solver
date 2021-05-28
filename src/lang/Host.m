@@ -43,6 +43,7 @@ classdef Host  < LayeredNetworkElement
             self.quantum = quantum;
             self.speedFactor = speedFactor;
             model.hosts{end+1} = self;
+            self.model = model;
         end
         
         function self=setReplication(self, replication)

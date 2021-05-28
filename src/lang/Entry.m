@@ -23,6 +23,7 @@ classdef Entry < LayeredNetworkElement
             self@LayeredNetworkElement(name);
             self.openArrivalRate = 0.0;
             model.entries{end+1} = self;
+            self.model = model;
         end
         
         function self = on(self, parent)

@@ -145,13 +145,13 @@ classdef EnsembleSolver < Solver
                 sruntime(it,1:E) = 0;
                 T1=tic;
                 switch options.method
-                    case {'default','serial'}
-                        for e = self.list(it)                            
+                    case {'para'}
+                        parfor e = self.list(it)
                             [results{it,e}, solverTime] = self.analyze(it,e);
                             sruntime(it,e) = sruntime(it,e) + solverTime;
                         end
-                    case {'para'}
-                        parfor e = self.list(it)
+                    otherwise
+                        for e = self.list(it)                            
                             [results{it,e}, solverTime] = self.analyze(it,e);
                             sruntime(it,e) = sruntime(it,e) + solverTime;
                         end

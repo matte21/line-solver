@@ -83,11 +83,11 @@ while max(max(abs(Q-Q_1))) > tol
         g = ga(Ak{r});
         sd = setdiff(rset,r); % change here to add class priorities
         
-        for k=infSET(:)'
+        for k = infSET(:)'
             W(k,r) = ST(k,r);
         end
         
-        for k=pfSET(:)'
+        for k = pfSET(:)'
             % C(k,r) = L(k,r) * g(k) * b(k,r) * (1 + delta * sum(Q(k,:))); % old - class-dependence
             if nservers(k)>1
                 if ismember(r,ocl)
@@ -100,7 +100,7 @@ while max(max(abs(Q-Q_1))) > tol
             end
         end
         
-        for k=dpsSET(:)'
+        for k = dpsSET(:)'
             if nservers(k)>1
                 line_error(mfilename,'Multi-server DPS not supported yet in AMVA solver.')
             else
@@ -120,7 +120,7 @@ while max(max(abs(Q-Q_1))) > tol
             end
         end
         
-        for k=fcfsSET(:)'
+        for k = fcfsSET(:)'
             if ST(k,r) == 0
                 W(k,r) = 0;
             else

@@ -97,7 +97,7 @@ while max(abs(1-eta./eta_1)) > options.iter_tol && it < options.iter_max
         case 'exact'
             [~,lG]=pfqn_gmvald(Lms, Nchain, mu, options);
         case 'rd'            
-            [lG]=pfqn_rd(Lms, Nchain, 0*Nchain, mu);                
+            [lG]=pfqn_rd(Lms, Nchain, 0*Nchain, mu);   
         case 'nrp'
             [lG]=pfqn_nrp(Lms, Nchain, 0*Nchain, mu);
         case 'nrl'

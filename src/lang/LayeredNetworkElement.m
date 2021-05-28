@@ -4,6 +4,10 @@ classdef LayeredNetworkElement < Element
     % Copyright (c) 2012-2021, Imperial College London
     % All rights reserved.
     
+    properties
+        model; % pointer to model
+    end    
+    
     properties (Constant)
         HOST = 0;
         PROCESSOR = 0;
@@ -22,6 +26,11 @@ classdef LayeredNetworkElement < Element
             self@Element(name);
         end
         
+        function ind = subsindex(self)
+            % IND = SUBSINDEX()
+            
+            ind = double(self.model.getNodeIndex(self.name))-1 % 0 based
+        end
     end
     
 end

@@ -48,6 +48,7 @@ classdef Task < LayeredNetworkElement
                 case 'ref'
                     model.reftasks{end+1} = self;
             end            
+            self.model = model;
         end
         
         function self = setReplication(self, replication)

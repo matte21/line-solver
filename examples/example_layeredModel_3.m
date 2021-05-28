@@ -33,7 +33,7 @@ fluidsolver = SolverFluid(model.ensemble{3});
 
 RD = fluidsolver.getCdfRespT
 % plot 'AS2=>E2' at 'Clients'
-semilogx(RD{1,4}(:,2), RD{1,4}(:,1))
-ylabel('cumulative distribution')
-xlabel('time - t')
-title('AS2=>E2 class at Clients')
+%semilogx(RD{1,4}(:,2), RD{1,4}(:,1))
+%ylabel('cumulative distribution')
+%xlabel('time - t')
+%title('AS2=>E2 class at Clients')

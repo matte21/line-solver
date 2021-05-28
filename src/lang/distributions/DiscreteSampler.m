@@ -50,9 +50,10 @@ classdef DiscreteSampler < DiscreteDistrib
         function X = sample(self, n)
             % X = SAMPLE(N)
             
+            x = self.getParam(2).paramValue;
             f = self.getParam(3).paramValue;
             r = rand(n,1);
-            X = maxpos(min(repmat(r,1,size(f,2))<=f,2)')';
+            X = x(maxpos(min(repmat(r,1,size(f,2))<=f,2)')');
         end
         
         function Ft = evalCDF(self,k)

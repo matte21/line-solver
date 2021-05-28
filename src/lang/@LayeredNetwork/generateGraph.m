@@ -321,5 +321,4 @@ end
 if isempty(self.indexes.activities)
     self.indexes.activities = findstring(self.lqnGraph.Nodes.Type, 'A');
 end
-
 end

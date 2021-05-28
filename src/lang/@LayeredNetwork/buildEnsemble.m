@@ -122,7 +122,7 @@ for net=1:length(graphLayer)
                         jobclass{end+1} = ClosedClass(ensemble{net}, className, nJobs, node{1}, 0);
                         jobclass{end}.completes = false;
                     end
-                 end
+                end
             end
         end
     end
@@ -189,8 +189,8 @@ for net=1:length(graphLayer)
                 %                     [demandMu,demandPhi] = Coxian.fitMeanAndSCV(destEntryMean, destEntrySCV);
                 %                 end
             end
-                node{1}.setService(jobclass{class_entry}, destEntryProcess);
-                node{2}.setService(jobclass{class_entry}, Disabled.getInstance());
+            node{1}.setService(jobclass{class_entry}, destEntryProcess);
+            node{2}.setService(jobclass{class_entry}, Disabled.getInstance());
             classlast = class_entry;
             stationlast = 1;
             
@@ -220,10 +220,10 @@ for net=1:length(graphLayer)
                             end
                         end
                     end
-                        node{1}.setService(jobclass{class_hostdemand}, Disabled.getInstance());
-                        node{2}.setService(jobclass{class_hostdemand}, actobj.hostDemand);
-                        stationlast = 2; % store that we last visited the server
-                        classlast = class_hostdemand; % store class for return path
+                    node{1}.setService(jobclass{class_hostdemand}, Disabled.getInstance());
+                    node{2}.setService(jobclass{class_hostdemand}, actobj.hostDemand);
+                    stationlast = 2; % store that we last visited the server
+                    classlast = class_hostdemand; % store class for return path
                 else
                     % if the processor of this client is in another submodel
                     % spend time in the delay equivalent to response time
@@ -244,10 +244,10 @@ for net=1:length(graphLayer)
                     destEntryW = self.param.Nodes.RespT(self.getNodeIndex(activities{a}));
                     destEntryRate = 1/destEntryW;
                     entryRT = Exp(destEntryRate);
-                        node{1}.setService(jobclass{class_hostdemand}, entryRT);
-                        node{2}.setService(jobclass{class_hostdemand}, Disabled.getInstance());
-                        stationlast = 1; % store that we last visited the server
-                        classlast = class_hostdemand; % store class for return path
+                    node{1}.setService(jobclass{class_hostdemand}, entryRT);
+                    node{2}.setService(jobclass{class_hostdemand}, Disabled.getInstance());
+                    stationlast = 1; % store that we last visited the server
+                    classlast = class_hostdemand; % store class for return path
                 end
                 
                 %% check if this is the last activity in the entry
@@ -288,16 +288,16 @@ for net=1:length(graphLayer)
                         destEntryW = (1-skipProb)*self.param.Nodes.RespT(self.getNodeIndex(destEntry)); % this has to add the contribution of the other W not in this model
                         destEntryRate = 1/destEntryW;
                         entryRT = Exp(destEntryRate);
-                            node{2}.setService(jobclass{class_synchcall}, entryRT);
-                            myP{classlast, classlast}(stationlast,stationlast)=selfLoopProb;
-                            myP{classlast, class_synchcall}(stationlast,2)=1-selfLoopProb;
-                            stationlast = 2;
-                            classlast = class_synchcall;
+                        node{2}.setService(jobclass{class_synchcall}, entryRT);
+                        myP{classlast, classlast}(stationlast,stationlast)=selfLoopProb;
+                        myP{classlast, class_synchcall}(stationlast,2)=1-selfLoopProb;
+                        stationlast = 2;
+                        classlast = class_synchcall;
                     else
                         if isHostInSubmodel % if host of source is in the model
                             % set as the service time, the response time of this call
-                                entryRT = Exp(Distrib.InfRate); % sync-call A=>B has no intrinsic demand at its processor
-                                node{2}.setService(jobclass{class_synchcall}, entryRT);
+                            entryRT = Exp(Distrib.InfRate); % sync-call A=>B has no intrinsic demand at its processor
+                            node{2}.setService(jobclass{class_synchcall}, entryRT);
                             myP{classlast, classlast}(stationlast,stationlast)=selfLoopProb;
                             myP{classlast, class_synchcall}(stationlast,1)=1-selfLoopProb;
                             edgeidx = self.findEdgeIndex(activities{a},destEntry);
@@ -306,7 +306,7 @@ for net=1:length(graphLayer)
                             %destEntryW = (1-skipProb)*self.param.Nodes.RespT(destEntryIdx);
                             destEntryRate = 1/destEntryW;
                             destEntryObj = Exp(destEntryRate);
-                                node{1}.setService(jobclass{class_synchcall}, destEntryObj);
+                            node{1}.setService(jobclass{class_synchcall}, destEntryObj);
                             stationlast = 1;
                             classlast = class_synchcall;
                         else
@@ -320,12 +320,12 @@ for net=1:length(graphLayer)
                             destEntryRate = 1/destEntryW;
                             entryRT = Exp(destEntryRate);
                             % set think time at clients for this entry
-                                node{1}.setService(jobclass{class_synchcall}, entryRT);
-                                node{2}.setService(jobclass{class_synchcall}, Exp(Distrib.InfRate));
-                                myP{classlast, classlast}(stationlast,stationlast)=selfLoopProb;
-                                myP{classlast, class_synchcall}(stationlast,1)=1-selfLoopProb;
-                                stationlast = 1;
-                                classlast = class_synchcall;
+                            node{1}.setService(jobclass{class_synchcall}, entryRT);
+                            node{2}.setService(jobclass{class_synchcall}, Exp(Distrib.InfRate));
+                            myP{classlast, classlast}(stationlast,stationlast)=selfLoopProb;
+                            myP{classlast, class_synchcall}(stationlast,1)=1-selfLoopProb;
+                            stationlast = 1;
+                            classlast = class_synchcall;
                         end
                     end
                     if isBuild % if we are building the model for the first time

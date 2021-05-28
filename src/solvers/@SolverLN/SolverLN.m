@@ -32,7 +32,12 @@ classdef SolverLN < LayeredNetworkSolver & EnsembleSolver
         tputproc;
         thinkproc;
         callresptproc;
-        getCdfRespT;
+        entryproc
+        getEntryCdfRespT;
+        svctcdf;
+        callresptcdf;
+        cdf
+        whetherConverge
     end
     
     properties (Hidden) % registries of quantities to update at every iteration
@@ -81,7 +86,8 @@ classdef SolverLN < LayeredNetworkSolver & EnsembleSolver
             self.lqn = lqn;
             
             % initialize call response times
-            self.getCdfRespT = cell(length(lqn.hostdem),1);
+            self.getEntryCdfRespT = cell(length(lqn.nentries),1);
+            self.whetherConverge = 0;
             self.svctproc = lqn.hostdem;
             self.thinkproc = lqn.think;
             self.callresptproc = cell(lqn.ncalls,1);
@@ -141,7 +147,12 @@ classdef SolverLN < LayeredNetworkSolver & EnsembleSolver
                     metric_1 = self.results{end-1,e}.QN;
                     N = sum(self.ensemble{e}.getNumberOfJobs);
                     if N>0
-                        IterErr = nanmax(abs(metric(:) - metric_1(:)))/N;
+%                         IterErr = nanmax(abs(metric(:) - metric_1(:)))/N;
+                        try
+                            IterErr = nanmax(abs(metric(:) - metric_1(:)))/N;
+                        catch
+                            IterErr = 0;
+                        end
                         self.maxIterErr(it) = self.maxIterErr(it) + IterErr;
                     end
                 end
@@ -155,6 +166,7 @@ classdef SolverLN < LayeredNetworkSolver & EnsembleSolver
                 end
                 % check if unchanged in the last two iterations
                 if it>2 && self.maxIterErr(it) < self.options.iter_tol && self.maxIterErr(it-1) < self.options.iter_tol&& self.maxIterErr(it-1) < self.options.iter_tol
+                    self.whetherConverge = 1;
                     if self.insist
                         % do a hard reset to check that this is really the fixed point
                         for e=1:length(self.ensemble)

@@ -21,7 +21,7 @@ optimopt = optimoptions(@fmincon,'MaxFunctionEvaluations',1e6,'Display','none');
 obj = @(X) -sum(N.*log(X+1e-6));
 x0 = N ./ (N.*sum(L,1)+Z);
 [Xopt] = fmincon(@(x) obj(x), x0, L, ones(M,1), [],[], zeros(1,R), [],[],optimopt);
-Xasy = Xopt .* N ./ (N + Z.*Xopt); % add think time. Tried to embed this in the optimization program but works worse.
+Xasy = Xopt .* N ./ (N + Z.*Xopt); % add think time. If embedded in the optimization program it goes worse.
 lG = -sum(N.*log(Xasy));
 G = exp(lG);
 end

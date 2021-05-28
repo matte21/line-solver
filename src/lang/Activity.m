@@ -46,6 +46,7 @@ classdef Activity < LayeredNetworkElement
             obj.boundToEntry = boundToEntry;
             obj.setCallOrder(callOrder);
             model.activities{end+1} = obj;
+            self.model = model;
         end
         
         function obj = setParent(obj, parent)
@@ -125,9 +126,10 @@ classdef Activity < LayeredNetworkElement
         end
         
         %synchCall
-        function obj = synchCall(obj, synchCallDest, synchCallMean)
+       
+        function obj = synchCall(obj, synchCallDest, synchCallMean, condition)
             % OBJ = SYNCHCALL(OBJ, SYNCHCALLDEST, SYNCHCALLMEAN)
-            
+           
             if nargin<3 %~exist('synchCallMean','var')
                 synchCallMean = 1.0;
             end

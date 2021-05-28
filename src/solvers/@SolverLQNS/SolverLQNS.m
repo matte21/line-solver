@@ -29,6 +29,24 @@ classdef SolverLQNS < LayeredNetworkSolver
                 ignoreWarn = '-w ';
             end
             
+            if isunix
+            switch options.method
+                case {'default','lqns'}
+                    system(['lqns ',ignoreWarn,' --iteration-limit ',num2str(options.iter_max),' -Pstop-on-message-loss=false -x ',filename]);
+                case {'srvn'}
+                    system(['lqns ',ignoreWarn,' --iteration-limit ',num2str(options.iter_max),' -Playering=srvn -Pstop-on-message-loss=false -x ',filename]);
+                case {'exact'}
+                    system(['lqns ',ignoreWarn,' --iteration-limit ',num2str(options.iter_max),' -Pmva=exact -Pstop-on-message-loss=false -x ',filename]);
+                case {'srvnexact'}
+                    system(['lqns ',ignoreWarn,' --iteration-limit ',num2str(options.iter_max),' -Playering=srvn -Pmva=exact -Pstop-on-message-loss=false -x ',filename]);
+                case {'sim','lqsim'}
+                    system(['lqsim ',ignoreWarn,' -A ',num2str(options.samples),',3 -Pstop-on-message-loss=off -x ',filename]);
+                case {'lqnsdefault'}
+                    system(['lqns ',ignoreWarn,' -x ',filename]);
+                otherwise
+                    system(['lqns ',ignoreWarn,' --iteration-limit ',num2str(options.iter_max),' -Pstop-on-message-loss=false -x ',filename]);
+            end
+            else
             switch options.method
                 case {'default','lqns'}
                     system(['lqns ',ignoreWarn,' -i ',num2str(options.iter_max),' -Pstop-on-message-loss=false -x ',filename]);
@@ -44,6 +62,7 @@ classdef SolverLQNS < LayeredNetworkSolver
                     system(['lqns ',ignoreWarn,' -x ',filename]);
                 otherwise
                     system(['lqns ',ignoreWarn,' -i ',num2str(options.iter_max),' -Pstop-on-message-loss=false -x ',filename]);
+            end
             end
             self.parseXMLResults(filename);
             if ~options.keep
@@ -215,7 +234,7 @@ classdef SolverLQNS < LayeredNetworkSolver
                                     callElement = asynchCalls.item(m);
                                     destName = char(callElement.getAttribute('dest'));
                                     destPos = findstring(lqn.names,destName);
-                                    destID = lqn.name{destPos};
+                                    destID = lqn.names{destPos};
                                     callPos = findstring(lqn.callnames,[actID,'->',destID]);
                                     callResult = callElement.getElementsByTagName('result-call');
                                     wRes = str2double(callResult.item(0).getAttribute('waiting'));

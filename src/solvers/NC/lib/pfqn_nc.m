@@ -81,7 +81,7 @@ scalevecz = scalevec(nonzeroDemandClasses);
 % compute G for classes No with non-zero demand
 [lGnnzdem,Xnnzdem,Qnnzdem] = sub_method(L, N, Z, options);
 
-if isempty(Xnnzdem) 
+if isempty(Xnnzdem)
     X = [];
     Q = [];
 else
@@ -90,12 +90,12 @@ else
     Xnnz = zeros(1,length(nnzClasses));
     Xnnz(zeroDemandClasses) = Nz./ sum(Zz,1)./ scalevec(zeroDemandClasses);
     Xnnz(nonzeroDemandClasses) = Xnnzdem./ scalevec(nonzeroDemandClasses);
-    X(1,[zClasses, nnzClasses]) = [Xz, Xnnz];        
+    X(1,[zClasses, nnzClasses]) = [Xz, Xnnz];
     Qz = zeros(size(Qnnzdem,1),length(zClasses));
     Qnnz = zeros(size(Qnnzdem,1),length(nnzClasses));
     Qnnz(:,zeroDemandClasses) = 0; % they are all in the delay
     Qnnz(:,nonzeroDemandClasses) = Qnnzdem; % Q does not require scaling
-    Q(noDemStations,:) = 0;        
+    Q(noDemStations,:) = 0;
     Q(demStations,[zClasses, nnzClasses]) = [Qz, Qnnz];
 end
 % scale back to original demands
@@ -108,7 +108,7 @@ function [lG,X,Q] = sub_method(L,N,Z,options)
 % LG = SUB_METHOD(L,N,Z,OPTIONS)
 [M,R] = size(L);
 X=[];Q=[];
-    switch options.method
+switch options.method
     case {'ca'}
         [~,lG] = pfqn_ca(L,N,sum(Z,1));
     case {'exact'}
@@ -122,7 +122,7 @@ X=[];Q=[];
             if R <= 3 && sum(N)<50
                 [~,~,~,~,lG] = pfqn_mva(L,N,sum(Z,1));
             else
-                if M>R                    
+                if M>R
                     [~,lG] = pfqn_kt(L,N,sum(Z,1));
                 else
                     [~,lG] = pfqn_le(L,N,sum(Z,1));
@@ -130,9 +130,9 @@ X=[];Q=[];
             end
         elseif sum(Z,1)==0 % single queue, no delay
             lG = -N*log(L)';
-        else % repairman model            
+        else % repairman model
             if sum(N) < 10
-                 [~,~,~,~,lG] = pfqn_mva(L,N,sum(Z,1));
+                [~,~,~,~,lG] = pfqn_mva(L,N,sum(Z,1));
             elseif sum(N) < 50 % otherwise numerical issues
                 [~,lG] = pfqn_mmint2(L,N,sum(Z,1));
                 if isnan(lG)
@@ -166,7 +166,7 @@ X=[];Q=[];
             line_warning(mfilename,'Model is not in normal usage, panacea cannot continue.');
         end
     case 'gm'
-        [~,lG] = pfqn_gm(L,N,sum(Z,1));        
+        [~,lG] = pfqn_gm(L,N,sum(Z,1));
     case 'le'
         [~,lG] = pfqn_le(L,N,sum(Z,1));
     case 'kt'
@@ -200,7 +200,7 @@ X=[];Q=[];
             end
         else
             [X,Q,~,~,lG] = pfqn_mva(L,N,Z);
-        end        
+        end
     case 'propfair'
         [~,lG] = pfqn_propfair(L,N,sum(Z,1));
     case {'recal'}
