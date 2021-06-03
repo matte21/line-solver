@@ -1,4 +1,4 @@
-function [M,MU,MI,pi0,]=mucache_miss_asy(gamma,m,lambda)
+function [M,MU,MI,pi0]=mucache_miss_asy(gamma,m,lambda)
 % FPI method
 [n,h]=size(gamma);
 xi = mucache_xi_fp(gamma,m);

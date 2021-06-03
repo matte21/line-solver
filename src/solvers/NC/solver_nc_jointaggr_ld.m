@@ -1,4 +1,4 @@
-tinfunction [Pr,G,runtime] = solver_nc_jointaggr_ld(sn, options)
+function [Pr,G,runtime] = solver_nc_jointaggr_ld(sn, options)
 % [PR,G,RUNTIME] = SOLVER_NC_JOINTAGGR(QN, OPTIONS)
 
 % Copyright (c) 2012-2021, Imperial College London
