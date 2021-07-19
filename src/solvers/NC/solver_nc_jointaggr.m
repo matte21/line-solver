@@ -67,7 +67,7 @@ while max(abs(1-eta./eta_1)) > options.iter_tol && it <= options.iter_max
         Nchain(c) = sum(NK(inchain));
         refstatchain(c) = sn.refstat(inchain(1));
         if any((sn.refstat(inchain(1))-refstatchain(c))~=0)
-            line_error(mfilename,'Classes in chain %d have different reference station.',c);
+            line_error(mfilename,sprintf('Classes in chain %d have different reference station.',c));
         end
     end
     STchain(~isfinite(STchain))=0;

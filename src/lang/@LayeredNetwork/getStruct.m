@@ -5,13 +5,13 @@ function lqn = getStruct(self)
 % Copyright 2012-2021, Imperial College London
 
 lqn = struct();
-lqn.nidx = 0;
+lqn.nidx = 0;  % total number of hosts, tasks, entries, and activities, except the reference tasks
 lqn.nhosts = length(self.hosts);
 lqn.ntasks = length(self.tasks);
 lqn.nreftasks = length(self.reftasks);
 lqn.nacts = length(self.activities);
 lqn.nentries = length(self.entries);
-lqn.ntasksof = [];
+lqn.ntasksof = [];  % number of tasks on the ith host
 lqn.nentriesof = [];
 lqn.nactsof = [];
 lqn.tshift = lqn.nhosts;
@@ -47,12 +47,18 @@ lqn.graph = sparse([]);
 lqn.replies = [];
 lqn.replygraph = sparse([]);
 
+lqn.nitems = cell(lqn.nhosts+lqn.ntasks,1); 
+lqn.itemlevelcap  = {};
+lqn.replacementpolicy  = {};
+lqn.nitemsof = {};
+lqn.itemsdistribution = {};
+lqn.iscache = zeros(lqn.nhosts+lqn.ntasks,1);
 tshift = lqn.nhosts;
 eshift = lqn.nhosts + lqn.ntasks;
 ashift = lqn.nhosts + lqn.ntasks + lqn.nentries;
 
 lqn.parent = [];
-for p=1:lqn.nhosts
+for p=1:lqn.nhosts  % for every processor, scheduling, multiplicity, replication, names, type
     lqn.hostidx(end+1) = idx;
     lqn.sched{idx,1} = SchedStrategy.fromText(self.hosts{p}.scheduling);
     lqn.schedid(idx,1) = SchedStrategy.toId(lqn.sched{idx,1});
@@ -84,6 +90,14 @@ for p=1:lqn.nhosts
                 lqn.hashnames{idx,1} = ['T:',lqn.names{idx,1}];
                 lqn.shortnames{idx,1} = ['T',num2str(idx-tshift)];
         end
+        switch class(self.hosts{p}.tasks(t))             
+            case 'CacheTask'
+                lqn.nitems{idx,1} = self.hosts{p}.tasks(t).items; 
+                lqn.itemlevelcap{idx,1} = self.hosts{p}.tasks(t).itemLevelCap;
+                lqn.replacementpolicy{idx,1} = self.hosts{p}.tasks(t).replacementPolicy;
+                lqn.hashnames{idx,1} = ['C:',lqn.names{idx,1}];
+                lqn.shortnames{idx,1} = ['C',num2str(idx-tshift)];                
+        end
         lqn.parent(idx) = pidx;
         lqn.graph(idx, pidx) = 1;
         lqn.nentriesof(idx) = length(self.hosts{p}.tasks(t).entries);
@@ -101,8 +115,16 @@ for t = 1:lqn.ntasks
     for e=1:lqn.nentriesof(tidx)
         lqn.entryidx(end+1) = idx;
         lqn.names{idx,1} = self.tasks{t}.entries(e).name;
+        switch class(self.tasks{t}.entries(e)) 
+            case 'Entry'
         lqn.hashnames{idx,1} = ['E:',lqn.names{idx,1}];
         lqn.shortnames{idx,1} = ['E',num2str(idx-eshift)];
+            case 'ItemEntry'
+                lqn.hashnames{idx,1} = ['I:',lqn.names{idx,1}];
+                lqn.shortnames{idx,1} = ['I',num2str(idx-eshift)];   
+                lqn.nitemsof{idx,1} = self.tasks{t}.entries(e).cardinality;
+                lqn.itemsdistribution{idx,1} = self.tasks{t}.entries(e).popularity;
+        end
         lqn.hostdem{idx,1} = Immediate.getInstance();
         lqn.parent(idx) = tidx;
         lqn.graph(tidx,idx) = 1;
@@ -156,6 +178,9 @@ for t = 1:lqn.ntasks
         boundToEntry = tasks{t}.activities(a).boundToEntry;
         %for b=1:length(boundToEntry)
         eidx = findstring(lqn.hashnames, ['E:',boundToEntry]);
+        if eidx<0
+            eidx = findstring(lqn.hashnames, ['I:',boundToEntry]);
+        end
         if eidx>0
             lqn.graph(eidx, aidx) = 1;
         end
@@ -163,6 +188,9 @@ for t = 1:lqn.ntasks
         
         for s=1:length(tasks{t}.activities(a).syncCallDests)
             target_eidx = findstring(lqn.hashnames, ['E:',tasks{t}.activities(a).syncCallDests{s}]);
+            if target_eidx < 0
+                target_eidx = findstring(lqn.hashnames, ['I:',tasks{t}.activities(a).syncCallDests{s}]);
+            end
             target_tidx = lqn.parent(target_eidx);
             cidx = cidx + 1;
             lqn.callidx(aidx, target_eidx) = cidx;
@@ -278,4 +306,5 @@ for tidx = find(lqn.schedid== SchedStrategy.ID_INF)
 end
 
 lqn.isref = lqn.schedid==SchedStrategy.ID_REF;
+lqn.iscache = ~cellfun(@isempty,lqn.nitems);
 end

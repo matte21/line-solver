@@ -30,39 +30,39 @@ classdef SolverLQNS < LayeredNetworkSolver
             end
             
             if isunix
-            switch options.method
-                case {'default','lqns'}
-                    system(['lqns ',ignoreWarn,' --iteration-limit ',num2str(options.iter_max),' -Pstop-on-message-loss=false -x ',filename]);
-                case {'srvn'}
-                    system(['lqns ',ignoreWarn,' --iteration-limit ',num2str(options.iter_max),' -Playering=srvn -Pstop-on-message-loss=false -x ',filename]);
-                case {'exact'}
-                    system(['lqns ',ignoreWarn,' --iteration-limit ',num2str(options.iter_max),' -Pmva=exact -Pstop-on-message-loss=false -x ',filename]);
-                case {'srvnexact'}
-                    system(['lqns ',ignoreWarn,' --iteration-limit ',num2str(options.iter_max),' -Playering=srvn -Pmva=exact -Pstop-on-message-loss=false -x ',filename]);
-                case {'sim','lqsim'}
-                    system(['lqsim ',ignoreWarn,' -A ',num2str(options.samples),',3 -Pstop-on-message-loss=off -x ',filename]);
-                case {'lqnsdefault'}
-                    system(['lqns ',ignoreWarn,' -x ',filename]);
-                otherwise
-                    system(['lqns ',ignoreWarn,' --iteration-limit ',num2str(options.iter_max),' -Pstop-on-message-loss=false -x ',filename]);
-            end
+                switch options.method
+                    case {'default','lqns'}
+                        system(['lqns ',ignoreWarn,' --iteration-limit ',num2str(options.iter_max),' -Pstop-on-message-loss=false -x ',filename]);
+                    case {'srvn'}
+                        system(['lqns ',ignoreWarn,' --iteration-limit ',num2str(options.iter_max),' -Playering=srvn -Pstop-on-message-loss=false -x ',filename]);
+                    case {'exact'}
+                        system(['lqns ',ignoreWarn,' --iteration-limit ',num2str(options.iter_max),' -Pmva=exact -Pstop-on-message-loss=false -x ',filename]);
+                    case {'srvnexact'}
+                        system(['lqns ',ignoreWarn,' --iteration-limit ',num2str(options.iter_max),' -Playering=srvn -Pmva=exact -Pstop-on-message-loss=false -x ',filename]);
+                    case {'sim','lqsim'}
+                        system(['lqsim ',ignoreWarn,' -A ',num2str(options.samples),',3  -Pstop-on-message-loss=off -x ',filename]);
+                    case {'lqnsdefault'}
+                        system(['lqns ',ignoreWarn,' -x ',filename]);
+                    otherwise
+                        system(['lqns ',ignoreWarn,' --iteration-limit ',num2str(options.iter_max),' -Pstop-on-message-loss=false -x ',filename]);
+                end
             else
-            switch options.method
-                case {'default','lqns'}
-                    system(['lqns ',ignoreWarn,' -i ',num2str(options.iter_max),' -Pstop-on-message-loss=false -x ',filename]);
-                case {'srvn'}
-                    system(['lqns ',ignoreWarn,' -i ',num2str(options.iter_max),' -Playering=srvn -Pstop-on-message-loss=false -x ',filename]);
-                case {'exact'}
-                    system(['lqns ',ignoreWarn,' -i ',num2str(options.iter_max),' -Pmva=exact -Pstop-on-message-loss=false -x ',filename]);
-                case {'srvnexact'}
-                    system(['lqns ',ignoreWarn,' -i ',num2str(options.iter_max),' -Playering=srvn -Pmva=exact -Pstop-on-message-loss=false -x ',filename]);
-                case {'sim','lqsim'}
-                    system(['lqsim ',ignoreWarn,' -A ',num2str(options.samples),',3 -Pstop-on-message-loss=off -x ',filename]);
-                case {'lqnsdefault'}
-                    system(['lqns ',ignoreWarn,' -x ',filename]);
-                otherwise
-                    system(['lqns ',ignoreWarn,' -i ',num2str(options.iter_max),' -Pstop-on-message-loss=false -x ',filename]);
-            end
+                switch options.method
+                    case {'default','lqns'}
+                        system(['lqns ',ignoreWarn,' -i ',num2str(options.iter_max),' -Pstop-on-message-loss=false -x ',filename]);
+                    case {'srvn'}
+                        system(['lqns ',ignoreWarn,' -i ',num2str(options.iter_max),' -Playering=srvn -Pstop-on-message-loss=false -x ',filename]);
+                    case {'exact'}
+                        system(['lqns ',ignoreWarn,' -i ',num2str(options.iter_max),' -Pmva=exact -Pstop-on-message-loss=false -x ',filename]);
+                    case {'srvnexact'}
+                        system(['lqns ',ignoreWarn,' -i ',num2str(options.iter_max),' -Playering=srvn -Pmva=exact -Pstop-on-message-loss=false -x ',filename]);
+                    case {'sim','lqsim'}
+                        system(['lqsim ',ignoreWarn,' -A ',num2str(options.samples),',3  -Pstop-on-message-loss=off -x ',filename]);
+                    case {'lqnsdefault'}
+                        system(['lqns ',ignoreWarn,' -x ',filename]);
+                    otherwise
+                        system(['lqns ',ignoreWarn,' -i ',num2str(options.iter_max),' -Pstop-on-message-loss=false -x ',filename]);
+                end
             end
             self.parseXMLResults(filename);
             if ~options.keep
@@ -76,10 +76,10 @@ classdef SolverLQNS < LayeredNetworkSolver
             % [QN,UN,RN,TN] = GETAVG(SELF,~,~,~,~,USELQNSnaming)
             %
             % SN: average service time
-                        
+            
             if nargin < 5
                 useLQNSnaming = false;
-            end            
+            end
             
             runAnalyzer(self);
             QN = self.result.Avg.QLen;
@@ -96,15 +96,15 @@ classdef SolverLQNS < LayeredNetworkSolver
             end
             
         end
-                
+        
         function [result, iterations] = parseXMLResults(self, filename)
             % [RESULT, ITERATIONS] = PARSEXMLRESULTS(FILENAME)
-        
+            
             import javax.xml.parsers.*;
             import org.w3c.dom.*;
             import java.io.*;
             
-            lqn = self.getStruct;            
+            lqn = self.getStruct;
             numOfNodes = lqn.nidx;
             numOfCalls = lqn.ncalls;
             Avg.Nodes.Utilization = NaN*ones(numOfNodes,1);
@@ -123,8 +123,8 @@ classdef SolverLQNS < LayeredNetworkSolver
             
             [fpath,fname,~] = fileparts(filename);
             resultFilename = [fpath,filesep,fname,'.lqxo'];
-            if self.options.verbose 
-                line_printf('\nParsing LQNS result file: %s',resultFilename);                
+            if self.options.verbose
+                line_printf('\nParsing LQNS result file: %s',resultFilename);
             end
             if self.options.keep
                 line_printf('\nLQNS result file available at: %s',resultFilename);
@@ -162,7 +162,7 @@ classdef SolverLQNS < LayeredNetworkSolver
                     p1uRes = str2double(taskResult.item(0).getAttribute('phase1-utilization'));
                     p2uRes = str2double(taskResult.item(0).getAttribute('phase2-utilization'));
                     tRes = str2double(taskResult.item(0).getAttribute('throughput'));
-                    puRes = str2double(taskResult.item(0).getAttribute('proc-utilization'));                    
+                    puRes = str2double(taskResult.item(0).getAttribute('proc-utilization'));
                     Avg.Nodes.Utilization(taskPos) = uRes;
                     Avg.Nodes.Phase1Utilization(taskPos) = p1uRes;
                     Avg.Nodes.Phase2Utilization(taskPos) = ifthenelse(isempty(p2uRes),NaN,p2uRes);
@@ -263,7 +263,7 @@ classdef SolverLQNS < LayeredNetworkSolver
             % [QN,UN,RN,TN] = GETRAWAVGTABLES(SELF,~,~,~,~)
             
             runAnalyzer(self);
-                    
+            
             lqn = self.getStruct;
             Node = label(lqn.names);
             O = length(Node);
@@ -306,16 +306,16 @@ classdef SolverLQNS < LayeredNetworkSolver
             
             %CallTypeMap = [CallType.SYNC;CallType.ASYNC;CallType.FWD];
             %Type = label(CallTypeMap(self.model.lqnGraph.Edges.Type(CallIndices)));
-            if lqn.ncalls == 0                
+            if lqn.ncalls == 0
                 CallAvgTable = Table();
             else
                 SourceNode = label({lqn.names{lqn.callpair(:,1)}})';
                 TargetNode = label({lqn.names{lqn.callpair(:,2)}})';
                 Type = lqn.calltype;
                 Waiting = self.result.RawAvg.Edges.Waiting(1:lqn.ncalls);
-                CallAvgTable = Table(SourceNode, TargetNode, Type, Waiting);            
+                CallAvgTable = Table(SourceNode, TargetNode, Type, Waiting);
             end
-        end        
+        end
     end
     
     methods (Static)
@@ -366,6 +366,17 @@ classdef SolverLQNS < LayeredNetworkSolver
                     bool = true;
                 end
             end
+        end
+        
+        function plot(model)
+            lastwd = pwd;
+            cwd = [lineRootFolder,filesep,'workspace'];
+            cd(cwd)
+            fname = tempname([lineRootFolder,filesep,'workspace']);
+            model.writeXML(fname);
+            [d,f]=fileparts(fname);
+            system(sprintf('lqn2ps %s',f));
+            fprintf(1,'Postscript file saved in: %s\n',[fname,'.ps'])
         end
     end
 end

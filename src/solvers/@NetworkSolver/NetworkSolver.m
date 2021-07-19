@@ -212,9 +212,9 @@ classdef NetworkSolver < Solver
             end
         end
         
-        function [AvgTable,QT,UT,RT,TT,AT] = getNodeAvgTable(self,Q,U,R,T,keepDisabled)
+        function [AvgTable,QT,UT,RT,TT,AT] = getNodeAvgTable(self,Q,U,R,T,A,keepDisabled)
             line_warning(mfilename,'getNodeAvgTable will be removed in a future release. Use getAvgNodeTable instead.');
-            [AvgTable,QT,UT,RT,TT,AT] = getAvgNodeTable(self,Q,U,R,T,keepDisabled);
+            [AvgTable,QT,UT,RT,TT,AT] = getAvgNodeTable(self,Q,U,R,T,A,keepDisabled);
         end
         
         function [QNn,UNn,RNn,TNn,ANn] = getNodeAvg(self, Q, U, R, T, A)
@@ -232,7 +232,7 @@ classdef NetworkSolver < Solver
         [AvgTable,RT] = getAvgRespTTable(self,R,keepDisabled);
         [AvgTable,TT] = getAvgTputTable(self,T,keepDisabled);
         
-        [NodeAvgTable,QTn,UTn,RTn,TTn] = getAvgNodeTable(self,Q,U,R,T,keepDisabled);
+        [NodeAvgTable,QTn,UTn,RTn,TTn] = getAvgNodeTable(self,Q,U,R,T,A,keepDisabled);
         
         [QNc,UNc,RNc,TNc]   = getAvgChain(self,Q,U,R,T);
         [AN]                = getAvgArvRChain(self,Q);

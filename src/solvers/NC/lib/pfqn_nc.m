@@ -152,12 +152,12 @@ switch options.method
         end
     case {'mmint','pnc2'}
         if size(L,1)>1
-            line_error(mfilename,'The %s method requires a model with a delay and a single queueing station.',options.method);
+            line_error(mfilename,sprintf('The %s method requires a model with a delay and a single queueing station.',options.method));
         end
         [~,lG] = pfqn_mmint2(L,N,sum(Z,1));
     case {'grm'}
         if size(L,1)>1
-            line_error(mfilename,'The %s method requires a model with a delay and a single queueing station.',options.method);
+            line_error(mfilename,sprintf('The %s method requires a model with a delay and a single queueing station.',options.method));
         end
         [~,lG] = pfqn_grm(L,N,sum(Z,1),options.samples);
     case {'pana','panacea','pnc'}

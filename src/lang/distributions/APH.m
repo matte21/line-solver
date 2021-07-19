@@ -197,11 +197,11 @@ classdef APH < MarkovianDistribution
                 sigma = sqrt(var);
                 F = [];
                 i = 1;
-                for t = linspace(0,mean+10*sigma,200)
+                for t = linspace(0,mean+10*sigma,500)
                   F(i) = 1-alpha*expm(T.*t)*e;
                   i = i+1;
                 end
-                t = linspace(0,mean+10*sigma,200);
+                t = linspace(0,mean+10*sigma,500);
                 Ft = [F',t'];
             else
                 t = varargin{1};

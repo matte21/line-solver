@@ -8,6 +8,7 @@ if isoctave
     fprintf(1, sprintf('%s\n',sprintf(MSG, varargin{:})));
 else
     MSG = strrep(MSG,'\n','');
+    MSG = strrep(MSG, '\', '\\');
     if ~contains(MSG,'...')
         if contains(MSG,'Summary')
             fprintf(1, sprintf('%s\n',sprintf(MSG, varargin{:})));

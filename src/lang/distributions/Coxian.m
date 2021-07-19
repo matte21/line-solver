@@ -16,7 +16,7 @@ classdef Coxian < MarkovianDistribution
                 mu = varargin{1};
                 phi = varargin{2};
                 if abs(phi(end)-1)>Distrib.Tol && isfinite(phi(end))
-                    line_error(mfilename,'The completion probability in the last Cox state must be 1.0 but it is %0.1f', phi(end));
+                    line_error(mfilename,sprintf('The completion probability in the last Cox state must be 1.0 but it is %0.1f', phi(end)));
                 end
                 setParam(self, 1, 'mu', mu, 'java.lang.Double');
                 setParam(self, 2, 'phi', phi, 'java.lang.Double'); % completion probability in phase 1

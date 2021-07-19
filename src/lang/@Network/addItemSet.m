@@ -2,7 +2,7 @@ function addItemSet(self, itemSet)
 % ADDITEMSET(ITEMSET)
 
 if sum(cellfun(@(x) strcmp(x.name, itemSet.name), self.items))>0
-    line_error(mfilename,'An item type with name %s already exists.\n', itemSet.name);
+    line_error(mfilename,sprintf('An item type with name %s already exists.\n', itemSet.name));
 end
 nItemSet = size(self.items,1);
 itemSet.index = nItemSet+1;

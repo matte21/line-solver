@@ -9,6 +9,8 @@ sn = getStruct(self);
 
 if nargin<6 %~exist('keepDisabled','var')
     keepDisabled = false;
+elseif isempty(Q) && isempty(U) && isempty(R) && isempty(T)
+    [Q,U,R,T,~] = getAvgHandles(self);
 end
 M = sn.nstations;
 K = sn.nclasses;

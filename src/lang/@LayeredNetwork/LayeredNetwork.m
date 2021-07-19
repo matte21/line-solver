@@ -132,7 +132,7 @@ classdef LayeredNetwork < Model & Ensemble
         self = update(self)
         self = updateParam(self, AvgTable, netSortAscending)
         self = initDefault(self)
-        plot(self)
+        plot(self)        
     end
     
     methods

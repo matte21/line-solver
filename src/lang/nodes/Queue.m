@@ -69,7 +69,7 @@ classdef Queue < Station
             switch SchedStrategy.toId(self.schedStrategy)
                 case {SchedStrategy.ID_DPS, SchedStrategy.ID_GPS}
                     if value ~= 1
-                        line_error(mfilename,'Cannot use multi-server stations with %s scheduling.', self.schedStrategy);
+                        line_error(mfilename,sprintf('Cannot use multi-server stations with %s scheduling.', self.schedStrategy));
                     end
                 otherwise
                     self.numberOfServers = value;

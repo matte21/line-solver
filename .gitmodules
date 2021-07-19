@@ -3,13 +3,7 @@
 	url = https://github.com/ghorvath78/butools
 [submodule "lib/m3a"]
 	path = lib/m3a
-	url = https://github.com/Imperial-AESOP/M3A
-[submodule "lib/fg"]
-	path = lib/fg
-	url = https://github.com/dice-project/DICE-Enhancement-FG
+	url = https://github.com/imperial-qore/M3A
 [submodule "lib/kpctoolbox"]
 	path = lib/kpctoolbox
-	url = https://github.com/kpctoolboxteam/kpc-toolbox
-[submodule "modules"]
-	path = modules
 	url = https://github.com/kpctoolboxteam/kpc-toolbox

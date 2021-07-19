@@ -51,6 +51,7 @@ classdef Network < Model
     
     methods % link, reset, refresh methods
         self = link(self, P)
+        self = linkFromNodeRoutingMatrix(self, Pnodes);
         [loggerBefore,loggerAfter] = linkAndLog(self, nodes, classes, P, wantLogger, logPath)
         [loggerBefore,loggerAfter] = linkNetworkAndLog(self, nodes, classes, P, wantLogger, logPath)% obsolete - old name
         sanitize(self);

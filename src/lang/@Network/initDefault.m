@@ -64,6 +64,6 @@ end
 if self.isStateValid % problem with example_initState_2
     self.hasState = true;
 else
-    line_error(mfilename,'Default initialization failed.');
+    line_error(mfilename,sprintf('Default initialization failed.'));
 end
 end

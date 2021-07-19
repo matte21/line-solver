@@ -4,14 +4,14 @@ function self = buildEnsemble(self)
 % Copyright (c) 2012-2021, Imperial College London
 % All rights reserved.
 ensemble = self.ensemble;
-[lqnGraph, taskGraph] = getGraph(self);
+[lqnGraph, taskGraph] = self.getGraph();
 %if isempty(self.param.Nodes.RespT)
 self.nodeMult = lqnGraph.Nodes.Mult(:);
 self.edgeWeight = lqnGraph.Edges.Weight(:);
 %end
 
 if isempty(self.layerGraph)
-    self.layerGraph = getGraphLayers(self);
+    self.layerGraph = self.getGraphLayers();
 end
 graphLayer = self.layerGraph;
 
@@ -40,18 +40,25 @@ for net=1:length(graphLayer)
     % create a queueing station for the single target in the lower layer
     if isBuild
         serverName = graphLayer{net}.Edges.EndNodes{1,2};
+        clientName = graphLayer{net}.Edges.EndNodes{1,1};
     else
         serverName = self.serverName{net};
     end
     serverIndex = self.getNodeIndex(serverName);
     if isBuild
+        client = self.getNodeObject(clientName);
         obj = self.getNodeObject(serverName);
         isInfServer = strcmpi(obj.scheduling,SchedStrategy.INF);
+        isCacheTask = strcmpi(self.getNodeType(clientName),'C');
+        isHostServer = strcmpi(self.getNodeType(serverName),'H');
         if isInfServer
             node{2} = DelayStation(ensemble{net}, serverName);
         else
             node{2} = Queue(ensemble{net}, serverName, obj.scheduling);
             node{2}.setNumServers(self.nodeMult(serverIndex));
+        end
+        if isCacheTask && isHostServer
+            node{3} = Cache(ensemble{net}, clientName, client.items, client.itemLevelCap, client.replacementPolicy);  
         end
     end
     
@@ -216,7 +223,12 @@ for net=1:length(graphLayer)
                                     myP{classh_entry, class_hostdemand}(stationlast,2) = 1/length(entries); % visit first the activity bound to entry
                                 end
                             else
+                                if ~isCacheTask
                                 myP{classlast, class_hostdemand}(stationlast,2) = 1; % visit first the activity bound to entry
+                                else
+                                    myP{classlast, class_hostdemand}(stationlast,3) = 1; 
+                                    cachenode = 3;
+                                end
                             end
                         end
                     end
@@ -257,7 +269,7 @@ for net=1:length(graphLayer)
                     % check if the successors are remote entries, if not
                     % it's a leaf
                     for actnext = successors
-                        if ~strcmpi(self.getNodeType(actnext),'E') % skip successors that are remote entry calls
+                        if ~strcmpi(self.getNodeType(actnext),'E') && ~strcmpi(self.getNodeType(actnext),'I') % skip successors that are remote entry calls
                             isReplyActivity = false;
                         end
                     end
@@ -298,8 +310,13 @@ for net=1:length(graphLayer)
                             % set as the service time, the response time of this call
                             entryRT = Exp(Distrib.InfRate); % sync-call A=>B has no intrinsic demand at its processor
                             node{2}.setService(jobclass{class_synchcall}, entryRT);
+                                if ~isCacheTask
                             myP{classlast, classlast}(stationlast,stationlast)=selfLoopProb;
                             myP{classlast, class_synchcall}(stationlast,1)=1-selfLoopProb;
+                                else
+                                    myP{classlast,classlast}(cachenode,stationlast)=1;
+                                    myP{classlast,class_synchcall}(stationlast,1)=1;
+                                end
                             edgeidx = self.findEdgeIndex(activities{a},destEntry);
                             destEntryIdx = self.getNodeIndex(destEntry);
                             destEntryW = (1-skipProb)*self.param.Edges.RespT(edgeidx);
@@ -354,23 +371,35 @@ for net=1:length(graphLayer)
                 if isReplyActivity
                     % loop back to entry
                     if isBuild
+                        if isCacheTask && isHostInSubmodel && ~length(actobj.syncCallDests)
+                            myP{classlast,classlast}(cachenode,stationlast)=1;
+                            myP{classlast,class_entry}(stationlast,1)=1;
+                            jobclass{classlast}.completes = true; 
+                        else
                         myP{classlast,classlast}(stationlast,stationlast)=selfLoopProb;
                         myP{classlast,class_entry}(stationlast,1)=1-selfLoopProb;
                         jobclass{classlast}.completes = true;
                     end
+                    end
                 else
                     for actnext = successors
-                        if ~strcmpi(self.getNodeType(actnext),'E') % skip successors that are remote entry calls
+                        if ~strcmpi(self.getNodeType(actnext),'E') && ~strcmpi(self.getNodeType(actnext),'I') % skip successors that are remote entry calls
                             act_name = self.getNodeName(actnext);
                             classnext = cellfun(@(c) strcmpi(c.name,act_name), jobclass);
                             edge_a_as = self.findEdgeIndex(self.getNodeIndex(activities{a}),actnext);
                             if isHostInSubmodel
                                 %                                myP{classlast,classlast}(stationlast, stationlast)= 1-1/G.Edges.Weight(edge_a_as);
                                 %                                myP{classlast,classnext}(stationlast, 2)= 1/G.Edges.Weight(edge_a_as);
+                                if ~isCacheTask
                                 myP{classlast,classlast}(stationlast, stationlast)= selfLoopProb;
                                 myP{classlast,classnext}(stationlast, 2)= 1-selfLoopProb;
                                 stationlast = 2;
                                 classlast = classnext;
+                            else
+                                    node{3}.setReadItemEntry(classlast, entryobj);
+                                    classhitmiss{find(successors == actnext)} = classnext;
+
+                                end
                             else
                                 %                                myP{classlast,classlast}(stationlast, stationlast)= 1-1/G.Edges.Weight(edge_a_as);
                                 %                                myP{classlast,classnext}(stationlast, 1)= 1/G.Edges.Weight(edge_a_as);
@@ -380,6 +409,10 @@ for net=1:length(graphLayer)
                                 classlast = classnext;
                             end
                         end
+                    end
+                    if isCacheTask && isHostInSubmodel
+                       node{3}.setHitClass(jobclass{classlast}, jobclass{classhitmiss{1}});
+                       node{3}.setMissClass(jobclass{classlast}, jobclass{classhitmiss{2}});
                     end
                 end
             end

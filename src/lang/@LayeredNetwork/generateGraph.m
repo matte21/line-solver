@@ -57,7 +57,12 @@ for p=1:length(self.hosts)
                 type{end+1} = 'R'; % reference task
                 maxjobs(:,end+1) =  multiplicity(end);
             otherwise
+                switch class(self.hosts{p}.tasks(t))
+                    case 'Task'
                 type{end+1} = 'T';
+                    case 'CacheTask'
+                        type{end+1} = 'C';
+                end
         end
         for e=1:length(self.hosts{p}.tasks(t).entries)
             ctre = ctre + 1;
@@ -65,7 +70,12 @@ for p=1:length(self.hosts)
             name{end+1} = sprintf('E%d',ctre);
             eidx = length(name);
             entryname = name{end};
+            switch class(self.hosts{p}.tasks(t).entries(e))
+                case 'Entry'
             type{end+1} = 'E';
+                case 'ItemEntry'
+                    type{end+1} = 'I';
+            end
             demand(end+1) = 0.0;
             object{end+1} = self.hosts{p}.tasks(t).entries(e);
             multiplicity(end+1)= NaN;
@@ -231,6 +241,15 @@ for p=1:length(proc)
                             PreType(end+1,1) = 0; % pre
                             PostType(end+1,1) = 2; % post-OR
                         end
+                    case ActivityPrecedence.POST_CACHE
+                        for poa=1:length(act_prec_tp(ap).postActs)
+                            EndNodes(end+1,1) = findstring(self.lqnGraph.Nodes.Node, act_prec_tp(ap).preActs{1});
+                            EndNodes(end,2) = findstring(self.lqnGraph.Nodes.Node, act_prec_tp(ap).postActs{poa});
+                            Weight(end+1,1) = 1.0;
+                            EdgeType(end+1,1) = 0; % within task
+                            PreType(end+1,1) = 0; % pre
+                            PostType(end+1,1) = 2; % post-OR
+                        end                        
                     case ActivityPrecedence.POST_LOOP
                         for poa=1:length(act_prec_tp(ap).postActs)
                             EndNodes(end+1,1) = findstring(self.lqnGraph.Nodes.Node, act_prec_tp(ap).preActs{1});
@@ -279,7 +298,7 @@ for a=find(cellfun(@(c) strcmpi(c,'NaN'),self.lqnGraph.Nodes.Entry))'
 end
 
 % put hosts as target of hosted task
-keep = ([findstring(self.lqnGraph.Nodes.Type,'H'); findstring(self.lqnGraph.Nodes.Type,'R'); findstring(self.lqnGraph.Nodes.Type,'T')]);
+keep = ([findstring(self.lqnGraph.Nodes.Type,'H'); findstring(self.lqnGraph.Nodes.Type,'R'); findstring(self.lqnGraph.Nodes.Type,'C');findstring(self.lqnGraph.Nodes.Type,'T')]);
 self.taskGraph = self.lqnGraph.subgraph(keep(keep>0)); % ignore missing types
 % now H contains all tasks and edges to the hosts they run on
 % we add external calls
@@ -290,7 +309,7 @@ for s = actset(actset>0)
     source_task = self.getNodeTask(source_activity);
     entryset = self.lqnGraph.successors(s)';
     for t = entryset(entryset>0)
-        if strcmpi(self.getNodeType(t),'E')
+        if strcmpi(self.getNodeType(t),'E') || strcmpi(self.getNodeType(t),'I')
             target_task = self.getNodeTask(t);
             edge_index = self.findEdgeIndex(s, t);
             edge_data = self.lqnGraph.Edges(edge_index, 2:end);
@@ -310,13 +329,13 @@ if isempty(self.indexes.reftasks)
     self.indexes.reftasks = findstring(self.lqnGraph.Nodes.Type, 'R');
 end
 if isempty(self.indexes.entries)
-    self.indexes.entries = findstring(self.lqnGraph.Nodes.Type, 'E');
+    self.indexes.entries = sort([findstring(self.lqnGraph.Nodes.Type, 'E');findstring(self.lqnGraph.Nodes.Type, 'I')]);
 end
 if isempty(self.indexes.hosts)
     self.indexes.hosts = findstring(self.lqnGraph.Nodes.Type, 'H');
 end
 if isempty(self.indexes.tasks)
-    self.indexes.tasks = findstring(self.lqnGraph.Nodes.Type, 'T');
+    self.indexes.tasks = sort([findstring(self.lqnGraph.Nodes.Type, 'T');findstring(self.lqnGraph.Nodes.Type, 'C')]);
 end
 if isempty(self.indexes.activities)
     self.indexes.activities = findstring(self.lqnGraph.Nodes.Type, 'A');

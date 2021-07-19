@@ -3,6 +3,7 @@ function plot(self,useNodes, showProcs)
 
 % Copyright (c) 2012-2021, Imperial College London
 % All rights reserved.
+
 if nargin<2 %~exist('useNodes','var')
     useNodes = true;
 end

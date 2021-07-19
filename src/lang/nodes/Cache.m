@@ -22,6 +22,9 @@ classdef Cache < StatefulNode
             % SELF = CACHE(MODEL, NAME, NITEMS, ITEMLEVELCAP, REPLPOLICY)
             
             self@StatefulNode(name);
+            if ~exist('itemLevelCap','var')
+                levels = 1;
+            end
             classes = model.classes;
             self.input = Buffer(classes);
             self.output = Dispatcher(classes);
@@ -33,9 +36,13 @@ classdef Cache < StatefulNode
             self.accessProb = {};
             self.itemLevelCap = itemLevelCap; % item capacity
             if sum(itemLevelCap) > nitems
-                line_error(mfilename,'The number of items is smaller than the capacity of %s.',name);
+                line_error(mfilename,sprintf('The number of items is smaller than the capacity of %s.',name));
             end
-            self.replacementPolicy = ReplacementStrategy.toId(replPolicy);
+            if ~ischar(replPolicy)
+                self.replacementPolicy = replPolicy;
+            else
+                self.replacementPolicy = ReplacementStrategy.toId(replPolicy);
+            end
             self.server =  CacheClassSwitcher(classes, self.nLevels, itemLevelCap); % replace Server created by Queue
             self.popularity = {};
             self.setModel(model);
@@ -84,6 +91,14 @@ classdef Cache < StatefulNode
             self.server.actualMissProb = actualMissProb;
         end
         
+        function p = getResultHitProb(self)
+            p = self.server.actualHitProb;
+        end
+        
+        function p = getResultMissProb(self)
+            p = self.server.actualMissProb;
+        end
+        
         function setHitClass(self, jobinclass, joboutclass)
             % SETHITCLASS(JOBINCLASS, JOBOUTCLASS)
             
@@ -96,14 +111,16 @@ classdef Cache < StatefulNode
             self.server.missClass(jobinclass.index) = joboutclass.index;
         end
         
+       
         function setRead(self, jobclass, distribution)
             % SETREAD(JOBCLASS, DISTRIBUTION)
             
             itemclass = self.items;
             if distribution.isDiscrete
+                self.server.inputJobClasses{jobclass.index} = {jobclass, self.schedPolicy, DropStrategy.WaitingQueue};
                 self.popularity{itemclass.index, jobclass.index} = distribution.copy;
                 if self.popularity{itemclass.index, jobclass.index}.support(2) ~= itemclass.nitems
-                    line_error(mfilename,'The reference model is defined on a number of items different from the ones used to instantiate %s.',self.name);
+                    line_error(mfilename,sprintf('The reference model is defined on a number of items different from the ones used to instantiate %s.',self.name));
                 end
                 switch class(distribution)
                     case 'Zipf'
@@ -115,6 +132,21 @@ classdef Cache < StatefulNode
             end
         end
         
+        function setReadItemEntry(self, jobclass, popularity, cardinality)
+            % SETREAD(JOBCLASS, DISTRIBUTION)
+            
+            if popularity.isDiscrete
+                
+                self.popularity{jobclass.index} = popularity.copy;
+                switch class(popularity)
+                    case 'Zipf'
+                        self.popularity{jobclass.index}.setParam(2, 'n', cardinality, 'java.lang.Integer');
+                end
+                
+            else
+                line_error(mfilename,'A discrete popularity distribution is required.');
+            end
+        end
         function setAccessProb(self, R)
             % SETACCESSCOSTS(R)
             

@@ -18,7 +18,7 @@ classdef Model < Copyable
         function self = Model(name)
             % SELF = MODEL(NAME)
             %[~,lineVersion] = system('git describe'); 
-            lineVersion = '2.0.13';
+            lineVersion = '2.0.14';
             %persistent lineSplashScreenShown
             %if isempty(lineSplashScreenShown) || lineSplashScreenShown
             %    lineSplashScreenShown = true;

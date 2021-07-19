@@ -55,7 +55,7 @@ for ind=1:I
                 %    ist = sn.nodeToStation(ind);
                 %    ANn(ind, r) =  TN(ist,r);
                 %else
-                ANn(ind, r) =  (sn.nodevisits{c}(ind,r) / sum(sn.visits{c}(refstat,inchain))) * TN(refstat,r);
+                ANn(ind, r) =  (sn.nodevisits{c}(ind,r) / sum(sn.visits{c}(refstat,inchain))) * sum(TN(refstat,inchain));
                 %end
             end
             %end

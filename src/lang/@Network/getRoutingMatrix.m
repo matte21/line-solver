@@ -19,29 +19,29 @@ rtNodesByClass = {};
 rtNodesByStation = {};
 hasOpen = hasOpenClasses(self);
 
-M = self.getNumberOfNodes;
+I = self.getNumberOfNodes;
 K = self.getNumberOfClasses;
 NK = self.getNumberOfJobs;
-rtNodes = zeros(M*K);
+rtNodes = zeros(I*K);
 % The first loop considers the class at which a job enters the
 % target station
-for i=1:M
-    node_i = nodes{i};
+for ind=1:I
+    node_i = nodes{ind};
     switch class(node_i.output)
         case 'Forker'
-            for j=1:M
+            for jnd=1:I
                 for k=1:K
-                    if connections(i,j)>0
-                        rtNodes((i-1)*K+k,(j-1)*K+k)=1.0;
+                    if connections(ind,jnd)>0
+                        rtNodes((ind-1)*K+k,(jnd-1)*K+k)=1.0;
                         outputStrategy_k = node_i.output.outputStrategy{k};
                         switch outputStrategy_k{2}
                             case RoutingStrategy.PROB
-                                if length(outputStrategy_k{end}) ~= sum(connections(i,:))
+                                if length(outputStrategy_k{end}) ~= sum(connections(ind,:))
                                     line_error(mfilename,'Fork must have 1.0 routing probability towards all outgoing links.');
                                 end
                                 for t=1:length(outputStrategy_k{end}) % for all outgoing links
                                     if outputStrategy_k{end}{t}{2} ~= 1.0
-                                        line_error(mfilename,'Fork must have 1.0 routing probability towards all outgoing links, but a routing probability is at %f.',outputStrategy_k{end}{t}{2});
+                                        line_error(mfilename,sprintf('Fork must have 1.0 routing probability towards all outgoing links, but a routing probability is at %f.',outputStrategy_k{end}{t}{2}));
                                     end
                                 end
                         end
@@ -57,40 +57,41 @@ for i=1:M
                         if isinf(NK(k)) || ~isSink_i
                             for t=1:length(outputStrategy_k{end}) % for all outgoing links
                                 %j = findstring(nodeNames, outputStrategy_k{end}{t}{1}.name);
-                                j = outputStrategy_k{end}{t}{1}.index;
-                                rtNodes((i-1)*K+k,(j-1)*K+k) = outputStrategy_k{end}{t}{2};
+                                jnd = outputStrategy_k{end}{t}{1}.index;
+                                rtNodes((ind-1)*K+k,(jnd-1)*K+k) = outputStrategy_k{end}{t}{2};
                             end
                         end
                     case RoutingStrategy.DISABLED
-                        % set a small numerical tolerance to avoid messing
-                        % up with routing chain CTMC solution
-                        for j=1:M
-                            if connections(i,j)>0
-                                %rtNodes((i-1)*K+k,(j-1)*K+k) = Distrib.Zero;
+                        % we set this to be non-zero as otherwise the
+                        % classes that do not visit a class switch are
+                        % misconfigured in JMT
+                        for jnd=1:I
+                            if connections(ind,jnd)>0
+                               rtNodes((ind-1)*K+k,(jnd-1)*K+k) = 1/sum(connections(ind,:)); 
                             end
                         end
                     case {RoutingStrategy.RAND, RoutingStrategy.RRB, RoutingStrategy.JSQ}
                         if isinf(NK(k)) % open class
-                            for j=1:M
-                                if connections(i,j)>0
-                                    rtNodes((i-1)*K+k,(j-1)*K+k)=1/sum(connections(i,:));
+                            for jnd=1:I
+                                if connections(ind,jnd)>0
+                                    rtNodes((ind-1)*K+k,(jnd-1)*K+k)=1/sum(connections(ind,:));
                                 end
                             end
                         elseif ~isa(node_i,'Source') && ~isSink_i % don't route closed classes out of source nodes
                             connectionsClosed = connections;
-                            if connectionsClosed(i,self.getNodeIndex(self.getSink))
-                                connectionsClosed(i,self.getNodeIndex(self.getSink)) = 0;
+                            if connectionsClosed(ind,self.getNodeIndex(self.getSink))
+                                connectionsClosed(ind,self.getNodeIndex(self.getSink)) = 0;
                             end
-                            for j=1:M
-                                if connectionsClosed(i,j)>0
-                                    rtNodes((i-1)*K+k,(j-1)*K+k)=1/(sum(connectionsClosed(i,:)));
+                            for jnd=1:I
+                                if connectionsClosed(ind,jnd)>0
+                                    rtNodes((ind-1)*K+k,(jnd-1)*K+k)=1/(sum(connectionsClosed(ind,:)));
                                 end
                             end
                         end
                     otherwise
-                        for j=1:M
-                            if connections(i,j)>0
-                                rtNodes((i-1)*K+k,(j-1)*K+k) = Distrib.Zero;
+                        for jnd=1:I
+                            if connections(ind,jnd)>0
+                                rtNodes((ind-1)*K+k,(jnd-1)*K+k) = Distrib.Zero;
                             end
                         end
                         %line_error([outputStrategy_k{2},' routing policy is not yet supported.']);
@@ -103,67 +104,67 @@ end
 % the class of the job in the service section.
 
 
-for i=1:self.getNumberOfNodes % source
-    if isa(nodes{i}.server,'StatelessClassSwitcher')
-        Pi = rtNodes(((i-1)*K+1):i*K,:);
-        Pcs = nodes{i}.server.csFun(1:K,1:K);
-        rtNodes(((i-1)*K+1):i*K,:) = 0;
-        for j=1:M % destination
-            Pij = Pi(:,((j-1)*K+1):j*K); %Pij(r,s)
+for ind=1:self.getNumberOfNodes % source
+    if isa(nodes{ind}.server,'StatelessClassSwitcher')
+        Pi = rtNodes(((ind-1)*K+1):ind*K,:);        
+        Pcs = nodes{ind}.server.csFun(1:K,1:K);
+        rtNodes(((ind-1)*K+1):ind*K,:) = 0;
+        for jnd=1:I % destination
+            Pij = Pi(:,((jnd-1)*K+1):jnd*K); %Pij(r,s)
             % Find the routing probability section determined by the router section in the first loop
-            rtNodes(((i-1)*K+1) : ((i-1)*K+K),(j-1)*K+(1:K)) = Pcs.*repmat(diag(Pij)',K,1);
+            rtNodes(((ind-1)*K+1) : ((ind-1)*K+K),(jnd-1)*K+(1:K)) = Pcs.*repmat(diag(Pij)',K,1);
         end
-    elseif isa(nodes{i}.server,'StatefulClassSwitcher')
-        Pi = rtNodes(((i-1)*K+1):i*K,:);
+    elseif isa(nodes{ind}.server,'StatefulClassSwitcher')
+        Pi = rtNodes(((ind-1)*K+1):ind*K,:);
         for r=1:K
             for s=1:K
-                Pcs(r,s) = nodes{i}.server.csFun(r,s,[],[]); % get csmask
+                Pcs(r,s) = nodes{ind}.server.csFun(r,s,[],[]); % get csmask
             end
         end
-        rtNodes(((i-1)*K+1):i*K,:) = 0;
-        if isa(nodes{i}.server,'CacheClassSwitcher')
+        rtNodes(((ind-1)*K+1):ind*K,:) = 0;
+        if isa(nodes{ind}.server,'CacheClassSwitcher')
             for r=1:K
-                if (isempty(find(r == nodes{i}.server.hitClass)) && isempty(find(r == nodes{i}.server.missClass)))
+                if (isempty(find(r == nodes{ind}.server.hitClass)) && isempty(find(r == nodes{ind}.server.missClass)))
                     Pcs(r,:) = Pcs(r,:)/sum(Pcs(r,:));
                 end
             end
             
             for r=1:K
-                if (isempty(find(r == nodes{i}.server.hitClass)) && isempty(find(r == nodes{i}.server.missClass)))
-                    for j=1:M % destination
+                if (isempty(find(r == nodes{ind}.server.hitClass)) && isempty(find(r == nodes{ind}.server.missClass)))
+                    for jnd=1:I % destination
                         for s=1:K
-                            Pi((i-1)*K+r,(j-1)*K+s) = 0;
+                            Pi((ind-1)*K+r,(jnd-1)*K+s) = 0;
                         end
                     end
                 end
             end
             
             for r=1:K
-                if length(nodes{i}.server.actualHitProb)>=r && length(nodes{i}.server.hitClass)>=r
-                    ph = nodes{i}.server.actualHitProb(r);
-                    pm = nodes{i}.server.actualMissProb(r);
-                    h = nodes{i}.server.hitClass(r);
-                    m = nodes{i}.server.missClass(r);
-                    rtNodes((i-1)*K+r,(i-1)*K+h) = ph;
-                    rtNodes((i-1)*K+r,(i-1)*K+m) = pm;
+                if length(nodes{ind}.server.actualHitProb)>=r && length(nodes{ind}.server.hitClass)>=r
+                    ph = nodes{ind}.server.actualHitProb(r);
+                    pm = nodes{ind}.server.actualMissProb(r);
+                    h = nodes{ind}.server.hitClass(r);
+                    m = nodes{ind}.server.missClass(r);
+                    rtNodes((ind-1)*K+r,(ind-1)*K+h) = ph;
+                    rtNodes((ind-1)*K+r,(ind-1)*K+m) = pm;
                 else
-                    if length(nodes{i}.server.hitClass)>=r
-                        h = nodes{i}.server.hitClass(r);
-                        m = nodes{i}.server.missClass(r);
-                        rtNodes((i-1)*K+r,(i-1)*K+h) = NaN;
-                        rtNodes((i-1)*K+r,(i-1)*K+m) = NaN;
+                    if length(nodes{ind}.server.hitClass)>=r
+                        h = nodes{ind}.server.hitClass(r);
+                        m = nodes{ind}.server.missClass(r);
+                        rtNodes((ind-1)*K+r,(ind-1)*K+h) = NaN;
+                        rtNodes((ind-1)*K+r,(ind-1)*K+m) = NaN;
                     end
                 end
             end
             
-            for j=1:M % destination
-                Pij = Pi(1:K,((j-1)*K+1):j*K); %Pij(r,s)
+            for jnd=1:I % destination
+                Pij = Pi(1:K,((jnd-1)*K+1):jnd*K); %Pij(r,s)
                 for r=1:K
-                    if ~(isempty(find(r == nodes{i}.server.hitClass)) && isempty(find(r == nodes{i}.server.missClass)))
+                    if ~(isempty(find(r == nodes{ind}.server.hitClass)) && isempty(find(r == nodes{ind}.server.missClass)))
                         for s=1:K
                             % Find the routing probability section determined by the router section in the first loop
                             %Pnodes(((i-1)*K+1):i*K,((j-1)*K+1):j*K) = Pcs*Pij;
-                            rtNodes((i-1)*K+r,(j-1)*K+s) = Pcs(r,s)*Pij(s,s);
+                            rtNodes((ind-1)*K+r,(jnd-1)*K+s) = Pcs(r,s)*Pij(s,s);
                         end
                     end
                 end
@@ -227,19 +228,19 @@ for i=1:self.getNumberOfNodes % source
     % correct transition probabilities, that includes the effects
     % of the non-stateful nodes (e.g., ClassSwitch)
     statefulNodesClasses = [];
-    for i=getIndexStatefulNodes(self)
-        statefulNodesClasses(end+1:end+K)= ((i-1)*K+1):(i*K);
+    for ind=getIndexStatefulNodes(self)
+        statefulNodesClasses(end+1:end+K)= ((ind-1)*K+1):(ind*K);
     end
     
     % Hide the nodes that are not stateful
     rt = dtmc_stochcomp(rtNodes,statefulNodesClasses);
     if nargout >= 4
-        rtNodesByClass = cellzeros(K,K,M,M);
-        for i=1:M
-            for j=1:M
+        rtNodesByClass = cellzeros(K,K,I,I);
+        for ind=1:I
+            for jnd=1:I
                 for r=1:K
                     for s=1:K
-                        rtNodesByClass{s,r}(i,j) = rtNodes((i-1)*K+s,(j-1)*K+r);
+                        rtNodesByClass{s,r}(ind,jnd) = rtNodes((ind-1)*K+s,(jnd-1)*K+r);
                     end
                 end
             end
@@ -257,12 +258,12 @@ for i=1:self.getNumberOfNodes % source
     
     %
     if nargout >= 5
-        rtNodesByStation = cellzeros(M,M,K,K);
-        for i=1:M
-            for j=1:M
+        rtNodesByStation = cellzeros(I,I,K,K);
+        for ind=1:I
+            for jnd=1:I
                 for r=1:K
                     for s=1:K
-                        rtNodesByStation{i,j}(r,s) = rtNodes((i-1)*K+s,(j-1)*K+r);
+                        rtNodesByStation{ind,jnd}(r,s) = rtNodes((ind-1)*K+s,(jnd-1)*K+r);
                     end
                 end
             end

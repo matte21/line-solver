@@ -371,7 +371,7 @@ if sn.isstation(ind)
                                         space_srv(en_wbuf,Ks(sept_class)+kentry) = space_srv(en_wbuf,Ks(sept_class)+kentry) - 1; % bring job in service
                                     end
                                 otherwise
-                                    line_error(mfilename,'Scheduling strategy %s is not supported.', sn.sched{ist});
+                                    line_error(mfilename,sprintf('Scheduling strategy %s is not supported.', sn.sched{ist}));
                             end
                         end
                     end

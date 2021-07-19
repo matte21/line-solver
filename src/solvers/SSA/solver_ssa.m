@@ -164,7 +164,7 @@ while samples_collected < options.samples && cur_time <= options.timespan(2)
                             % simulate also self-loops as we need to log them
                             %if any(~cellfun(@isequal,newStateCell{act},stateCell))
                             if node_p{act} < local && ~csmask(class_a{act}, class_p{act}) && sn.nodetype(node_p{act})~=NodeType.Source && (rate_a{act}(ia) * prob_sync_p{act} >0)
-                                line_error(mfilename,'Error: state-dependent routing at node %d (%s) violates the class switching mask (node %d -> node %d, class %d -> class %d).', node_a{act}, sn.nodenames{node_a{act}}, node_a{act}, node_p{act}, class_a{act}, class_p{act});
+                                line_error(mfilename,sprintf('Error: state-dependent routing at node %d (%s) violates the class switching mask (node %d -> node %d, class %d -> class %d).', node_a{act}, sn.nodenames{node_a{act}}, node_a{act}, node_p{act}, class_a{act}, class_p{act}));
                             end
                             enabled_rates(ctr) = rate_a{act}(ia) * prob_sync_p{act};
                             enabled_sync{ctr} = act;

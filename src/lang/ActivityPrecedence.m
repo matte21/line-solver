@@ -12,6 +12,7 @@ classdef ActivityPrecedence
         POST_AND = 'post-AND';
         POST_OR = 'post-OR';
         POST_LOOP = 'post-LOOP';
+        POST_CACHE = 'post-CACHE';
         
         ID_PRE_SEQ  = 1;
         ID_PRE_AND = 2;
@@ -20,6 +21,7 @@ classdef ActivityPrecedence
         ID_POST_AND = 12;
         ID_POST_OR = 13;
         ID_POST_LOOP = 14;
+        ID_POST_CACHE = 15;
     end
     
     properties
@@ -93,6 +95,8 @@ classdef ActivityPrecedence
                     typeId = ActivityPrecedence.ID_POST_OR;
                 case ActivityPrecedence.POST_LOOP
                     typeId = ActivityPrecedence.ID_POST_LOOP;
+                case ActivityPrecedence.POST_CACHE
+                    typeId = ActivityPrecedence.ID_POST_CACHE;                    
                 otherwise
                     line_error(mfilename,'Unrecognized precedence type.');
             end
@@ -182,6 +186,19 @@ classdef ActivityPrecedence
             end
             ap = ActivityPrecedence({preAct},postActs,ActivityPrecedence.PRE_SEQ,ActivityPrecedence.POST_LOOP,[],counts);
         end
+        function ap = CacheAccess(preAct, postActs)
+            % AP = ORFORK(PREACT, POSTACTS, PROBS)
+            
+            if isa(preAct,'Activity')
+                preAct = preAct.name;
+            end
+            for a = 1:length(postActs)
+                if isa(postActs{a},'Activity')
+                    postActs{a} = postActs{a}.name;
+                end
+            end
+            ap = ActivityPrecedence({preAct},postActs,ActivityPrecedence.PRE_SEQ,ActivityPrecedence.POST_CACHE);
+        end        
     end
     
 end

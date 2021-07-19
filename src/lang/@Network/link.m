@@ -12,7 +12,7 @@ if ~isempty(self.sn)
     self.resetNetwork; % remove artificial class switch nodes
 end
 R = self.getNumberOfClasses;
-M = self.getNumberOfNodes;
+Mnodes = self.getNumberOfNodes;
 
 if ~iscell(P) && R>1
     line_error(mfilename,'Multiclass model: the linked routing matrix P must be a cell array, e.g., P = model.initRoutingMatrix; P{1} = Pclass1; P{2} = Pclass2.');
@@ -32,7 +32,7 @@ if size(P,1) == size(P,2)
     % routing is state-dependent and therefore some zero entries are
     % actually unspecified
     %cacheNodes = find(cellfun(@(c) isa(c,'Cache'), self.getStatefulNodes));
-    for ind=1:M
+    for ind=1:Mnodes
         switch class(self.nodes{ind})
             case 'Cache'
                 % note that since a cache needs to distinguish hits and
@@ -117,9 +117,9 @@ if ~iscell(P)
         P = cell(R,R);
         for r=1:R
             for s=1:R
-                P{r,s} = zeros(M);
-                for i=1:M
-                    for j=1:M
+                P{r,s} = zeros(Mnodes);
+                for i=1:Mnodes
+                    for j=1:Mnodes
                         P{r,s}(i,j) = Pmat((i-1)*R+r,(j-1)*R+s);
                     end
                 end
@@ -140,7 +140,7 @@ if numel(P) == R
     for r=1:R
         P{r,r} = Pmat{r};
         for s=setdiff(1:R,r)
-            P{r,s} = zeros(M);
+            P{r,s} = zeros(Mnodes);
         end
     end
 end
@@ -151,7 +151,7 @@ for r=1:R
     for s=1:R
         if isempty(P{r,s})
             isemptyP(r,s)= true;
-            P{r,s} = zeros(M);
+            P{r,s} = zeros(Mnodes);
         else
             for i=ispool_nnz
                 P{r,s}(i,:)=0;
@@ -160,9 +160,9 @@ for r=1:R
     end
 end
 
-csMatrix = cell(M,M);
-for i=1:M
-    for j=1:M
+csMatrix = cell(Mnodes,Mnodes);
+for i=1:Mnodes
+    for j=1:Mnodes
         csMatrix{i,j} = zeros(R);
     end
 end
@@ -193,8 +193,8 @@ self.sn.rtorig = P;
 
 % As we will now create a CS for each link i->j,
 % we now condition on the job going from node i to j
-for i=1:M
-    for j=1:M
+for i=1:Mnodes
+    for j=1:Mnodes
         for r=1:R
             S = sum(csMatrix{i,j}(r,:));
             if S>0
@@ -206,10 +206,10 @@ for i=1:M
     end
 end
 
-csid = zeros(M);
+csid = zeros(Mnodes);
 nodeNames = self.getNodeNames;
-for i=1:M
-    for j=1:M
+for i=1:Mnodes
+    for j=1:Mnodes
         if ~isdiag(csMatrix{i,j})
             self.nodes{end+1} = ClassSwitch(self, sprintf('CS_%s_to_%s',nodeNames{i},nodeNames{j}),csMatrix{i,j});
             csid(i,j) = length(self.nodes);
@@ -222,12 +222,12 @@ Mplus = length(self.nodes); % number of nodes after addition of cs nodes
 % resize matrices
 for r=1:R
     for s=1:R
-        P{r,s}((M+1):Mplus,(M+1):Mplus)=0;
+        P{r,s}((Mnodes+1):Mplus,(Mnodes+1):Mplus)=0;
     end
 end
 
-for i=1:M
-    for j=1:M
+for i=1:Mnodes
+    for j=1:Mnodes
         if csid(i,j)>0
             % re-route
             for r=1:R
@@ -263,7 +263,7 @@ isAboveOne = pSum > 1.0 + Distrib.Zero;
 if any(isAboveOne)
     for i=find(isAboveOne)
         if SchedStrategy.toId(self.nodes{i}.schedStrategy) ~= SchedStrategy.ID_FORK
-            line_error(mfilename,'The total routing probability for jobs leaving node %s in class %s is greater than 1.0.',self.nodes{i}.name,self.classes{r}.name);
+            line_error(mfilename,sprintf('The total routing probability for jobs leaving node %s in class %s is greater than 1.0.',self.nodes{i}.name,self.classes{r}.name));
         end
         %        elseif pSum < 1.0 - Distrib.Zero % we cannot check this case as class r may not reach station i, in which case its outgoing routing prob is zero
         %            if self.nodes{i}.schedStrategy ~= SchedStrategy.EXT % if not a sink
@@ -272,7 +272,7 @@ if any(isAboveOne)
     end
 end
 
-for i=1:M
+for i=1:Mnodes
     if isa(self.nodes{i},'Place')
         self.nodes{i}.init;
     end

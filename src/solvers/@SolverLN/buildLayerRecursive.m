@@ -5,6 +5,7 @@ callresptproc = self.callresptproc;
 model = Network(lqn.hashnames{idx});
 model.setChecks(false); % fast mode
 model.attribute = struct('hosts',[],'tasks',[],'entries',[],'activities',[],'calls',[],'serverIdx',0);
+iscachelayer = all(lqn.iscache(callers)) && ishostlayer;
 if ishostlayer | any(any(lqn.issynccaller(callers, lqn.entriesof{idx}))) %#ok<OR2>
     clientDelay = Delay(model, 'Clients');
     model.attribute.clientIdx = 1;
@@ -25,6 +26,10 @@ for m=1:nreplicas
     serverStation{m}.setNumberOfServers(lqn.mult(idx));
     serverStation{m}.attribute.ishost = ishostlayer;
     serverStation{m}.attribute.idx = idx;
+end
+if iscachelayer
+    cacheNode = Cache(model, lqn.hashnames{callers}, lqn.nitems{callers}, lqn.itemlevelcap{callers}, lqn.replacementpolicy{callers}); 
+    model.attribute.cacheIdx = 3;
 end
 aidxClass = cell(1,lqn.nentries+lqn.nacts);
 cidxClass = cell(1,0);
@@ -93,6 +98,9 @@ for tidx_caller = callers
             end
             if ~strcmp(lqn.schedid(tidx_caller),SchedStrategy.ID_REF) % in 'ref' case the service activity is constant
                 % updmap(end+1,:) = [idx, aidx, 1, idxClass{aidx}.index];
+            end
+            if iscachelayer && full(lqn.graph(eidx,aidx))
+                clientDelay.setService(aidxClass{aidx}, self.svctproc{aidx});
             end
         end
         % add a class for each outgoing call from this activity
@@ -330,6 +338,7 @@ self.ensemble{idx} = model;
                 if (lqn.parent(aidx) == lqn.parent(nextaidx))
                     if jobPos == 1 % at node 1
                         if ishostlayer
+                            if ~iscachelayer
                             for m=1:nreplicas
                                 P{curClass, aidxClass{nextaidx}}(clientDelay,serverStation{m}) = full(lqn.graph(aidx,nextaidx));
                                 serverStation{m}.setService(aidxClass{nextaidx}, lqn.hostdem{nextaidx});
@@ -337,6 +346,21 @@ self.ensemble{idx} = model;
                             jobPos = 2;
                             curClass = aidxClass{nextaidx};
                             self.svctmap{idx}(end+1,:) = [idx, nextaidx, 2, aidxClass{nextaidx}.index];
+                        else
+                                P{curClass, aidxClass{nextaidx}}(clientDelay,cacheNode) = full(lqn.graph(aidx,nextaidx));
+
+                                cacheNode.setReadItemEntry(aidxClass{nextaidx},lqn.itemsdistribution{aidx},lqn.nitemsof{aidx}); 
+                                lqn.hitmissaidx = find(lqn.graph(nextaidx,:));
+                                lqn.hitaidx = lqn.hitmissaidx(1);
+                                lqn.missaidx = lqn.hitmissaidx(2);
+                                
+                                cacheNode.setHitClass(aidxClass{nextaidx},aidxClass{lqn.hitaidx}); 
+                                cacheNode.setMissClass(aidxClass{nextaidx},aidxClass{lqn.missaidx});     
+                                
+                                jobPos = 3;
+                                curClass = aidxClass{nextaidx};
+    
+                            end
                         else
                             P{curClass, aidxClass{nextaidx}}(clientDelay,clientDelay) = full(lqn.graph(aidx,nextaidx));
                             jobPos = 1;
@@ -346,9 +370,17 @@ self.ensemble{idx} = model;
                         end
                     else % at node 2
                         if ishostlayer
+                            if iscachelayer
+                                curClass = aidxClass{nextaidx};                                
+                                for m=1:nreplicas
+                                    P{curClass, aidxClass{nextaidx}}(cacheNode,serverStation{m}) = full(lqn.graph(aidx,nextaidx));
+                                    serverStation{m}.setService(aidxClass{nextaidx}, lqn.hostdem{nextaidx});
+                                end                                
+                            else                                
                             for m=1:nreplicas
                                 P{curClass, aidxClass{nextaidx}}(serverStation{m},serverStation{m}) = full(lqn.graph(aidx,nextaidx));
                                 serverStation{m}.setService(aidxClass{nextaidx}, lqn.hostdem{nextaidx});
+                            end
                             end
                             jobPos = 2;
                             curClass = aidxClass{nextaidx};

@@ -11,6 +11,7 @@ classdef Host  < LayeredNetworkElement
         quantum;            %double
         speedFactor;        %double
         tasks = [];         %list of tasks
+        ID;                 %int
     end
     
     methods

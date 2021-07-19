@@ -20,7 +20,7 @@ for ind=1:sn.nnodes
             case {SchedStrategy.ID_EXT}
                 state_i(:,1) = Inf; % fluid does not model infinite buffer?
                 for r=1:size(kir_i,2)
-                    for k=1:length(sn.mu{ist,r})
+                    for k=1:length(sn.mu{ist}{r})
                         state_i(:,end+1) = kir_i(:,r,k);
                         if ~isnan(sn.rates(ist,r))
                             init_sol_i(:,end+1) = kir_i(:,r,k);

@@ -7,14 +7,12 @@ if size(self.lqn.iscaller,2) > 0 % ignore task models if no callers
         tidx = self.lqn.tshift + t;
         tidx_thinkTime = self.lqn.think{tidx}.getMean;
         if ~isnan(self.idxhash(tidx)) % this skips all REF tasks
-%             self.tput(tidx) = self.lqn.repl(tidx)*sum(self.results{end,self.idxhash(tidx)}.TN(self.ensemble{self.idxhash(tidx)}.attribute.serverIdx,:),2); % throughput of t as a server, sum is correct since servoice only entries
             try
                 self.tput(tidx) = self.lqn.repl(tidx)*sum(self.results{end,self.idxhash(tidx)}.TN(self.ensemble{self.idxhash(tidx)}.attribute.serverIdx,:),2); % throughput of t as a server, sum is correct since servoice only entries
             catch
                 self.tput(tidx) = 0;
             end
             if self.lqn.schedid(tidx) == SchedStrategy.ID_INF
-%                 self.util(tidx) = sum(self.results{end,self.idxhash(tidx)}.UN(self.ensemble{self.idxhash(tidx)}.attribute.serverIdx,:),2);
                 try
                     self.util(tidx) = sum(self.results{end,self.idxhash(tidx)}.UN(self.ensemble{self.idxhash(tidx)}.attribute.serverIdx,:),2);
                 catch
@@ -34,7 +32,11 @@ if size(self.lqn.iscaller,2) > 0 % ignore task models if no callers
                 end
                 self.idlet(tidx) = (njobs-self.util(tidx)) / self.tput(tidx) - tidx_thinkTime;
             else
-                self.util(tidx) = sum(self.results{end,self.idxhash(tidx)}.UN(self.ensemble{self.idxhash(tidx)}.attribute.serverIdx,:),2); % utilization of t as a server
+                try
+                    self.util(tidx) = sum(self.results{end,self.idxhash(tidx)}.UN(self.ensemble{self.idxhash(tidx)}.attribute.serverIdx,:),2); % utilization of t as a server
+                catch
+                    self.util(tidx) = 0;
+                end
                 njobs = self.lqn.mult(tidx)*self.lqn.repl(tidx);
                 self.idlet(tidx) = njobs*abs(1-self.util(tidx)) / self.tput(tidx) - tidx_thinkTime;
             end            
