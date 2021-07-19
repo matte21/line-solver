@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmnExtensions>
+<resource id="sales" name = "Sales Clerk" multiplicity="1" scheduling="ps"> 
+ <assignment taskID="obj.28224" meanExecutionTime="00:000:00:10:00"/>
+ <assignment taskID="obj.28227" meanExecutionTime="00:000:00:2:00"/>
+ <assignment taskID="obj.28239" meanExecutionTime="00:000:00:5:00"/> 
+</resource>
+<resource id="depot" name = "Depot Clerk" multiplicity="1" scheduling="fcfs"> 
+ <assignment taskID="obj.28230" meanExecutionTime="00:000:00:20:00"/>
+ <assignment taskID="obj.28267" meanExecutionTime="00:000:00:30:00"/>
+ <assignment taskID="obj.29688" meanExecutionTime="00:000:00:05:00"/>
+ <assignment taskID="obj.29692" meanExecutionTime="00:000:00:03:00"/>
+ <assignment taskID="obj.29700" meanExecutionTime="00:000:00:05:00"/>
+</resource>
+<resource id="inspector" name = "Inspector 2nd Warehouse" multiplicity="1" scheduling="ps"> 
+ <assignment taskID="obj.28293" meanExecutionTime="00:000:00:20:00"/>
+ <assignment taskID="obj.29696" meanExecutionTime="00:000:00:05:00"/>
+</resource>
+<exclusiveGateway id="obj.28221">
+ <outgoingLink outgoingLinkID="con.28251" probability="0.2"/>
+ <outgoingLink outgoingLinkID="con.28279" probability="0.8"/>
+</exclusiveGateway>
+<exclusiveGateway id="obj.28259">
+ <outgoingLink outgoingLinkID="con.28280" probability="0.4"/>
+ <outgoingLink outgoingLinkID="con.28281" probability="0.6"/>
+</exclusiveGateway>
+<exclusiveGateway id="obj.29680">
+ <outgoingLink outgoingLinkID="con.29705" probability="0.9"/>
+ <outgoingLink outgoingLinkID="con.29706" probability="0.1"/>
+</exclusiveGateway>
+<startEvent id="obj.28218" meanThinkTime="00:000:00:10:00" multiplicity="10"/>
+</bpmnExtensions>

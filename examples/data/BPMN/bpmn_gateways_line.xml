@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<cqn-model xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="CQNmodel">
+   <processor name="Sales Clerk_processor" util="5.901827461243485e-01"/>
+   <processor name="Depot Clerk_processor" util="1.000000000000000e+00"/>
+   <processor name="Inspector 2nd Warehouse_processor" util="4.596969811882831e-02"/>
+   <processor name="Sales clerk_processor" util="3.832349023558091e-01"/>
+   <workload name="Sales clerk_processor" responseTime="1.505747972039439e+04" throughput="6.387248372596820e-04">
+      <station name="Sales Clerk_processor" responseTime="9.240000000000000e+02"/>
+      <station name="Depot Clerk_processor" responseTime="1.406147972039439e+04"/>
+      <station name="Inspector 2nd Warehouse_processor" responseTime="7.200000000000000e+01"/>
+      <station name="Sales clerk_processor" responseTime="6.000000000000000e+02"/>
+      <responseTimeDistribution>
+         <percentile level="1.000000000000000e-01" value="8.575756983230020e+02"/>
+         <percentile level="2.000000000000000e-01" value="2.228687898024888e+03"/>
+         <percentile level="3.000000000000000e-01" value="5.528216020086407e+03"/>
+         <percentile level="4.000000000000000e-01" value="8.249813263612723e+03"/>
+         <percentile level="5.000000000000000e-01" value="1.105647546396813e+04"/>
+         <percentile level="6.000000000000000e-01" value="1.430822921594738e+04"/>
+         <percentile level="7.000000000000000e-01" value="1.842554617892732e+04"/>
+         <percentile level="8.000000000000000e-01" value="2.424089568714676e+04"/>
+         <percentile level="9.000000000000000e-01" value="3.434957509282604e+04"/>
+      </responseTimeDistribution>
+   </workload>
+</cqn-model>
