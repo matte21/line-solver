@@ -65,7 +65,7 @@ Tstart = tic;
 
 switch options.method
     case {'exact','mva'}
-        if all(isfinite(Nchain)) % if closed
+        if all(isfinite(Nchain)) % if closed            
             [~,~,Rchain,Tchain,~, Xchain, lG] = solver_mva(STchain, Vchain, Nchain, S, options, sn.schedid, refstatchain);
         elseif any(isfinite(Nchain)) % if mixed
             [~,~,Rchain,Tchain,~, Xchain, lG] = solver_mva(STchain, Vchain, Nchain, S, options, sn.schedid, refstatchain);
@@ -74,7 +74,7 @@ switch options.method
         end
     case {'default','amva'}
         [~,Uchain,Rchain,Tchain,~, Xchain] = solver_amva(STchain, Vchain, Nchain, S, SCVchain, options, sn.schedid, sn.schedparam, refstatchain);
-        lG = - log(prod(1-sum(Uchain,2))); % approximation
+        lG = - log(prod(1-sum(Uchain,2))); % normalizing constant approximation
     otherwise
         line_error(mfilename,'Unsupported SolverMVA method.');
 end

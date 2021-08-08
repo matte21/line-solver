@@ -100,7 +100,14 @@ for i=1:length(node_name)
                             %     end
                             
                             xput_strategy{i} = xsection_i_par{i};
-                            xput_strategy{i}= {xput_strategy{i}(4).subParameter.ATTRIBUTE};
+                            switch xput_strategy{i}(3).ATTRIBUTE.name
+                                case 'retrialDistributions'
+                                    % new XML format from 1.2.0
+                                        %xretrial_strategy{i}= {xput_strategy{i}(4)};                            
+                                        xput_strategy{i}= {xput_strategy{i}(5).subParameter.ATTRIBUTE};                            
+                                otherwise
+                                        xput_strategy{i}= {xput_strategy{i}(4).subParameter.ATTRIBUTE};
+                            end
                             switch xput_strategy{i}{1}.name
                                 case 'TailStrategy'
                                     strategy{i} = SchedStrategy.FCFS;
@@ -302,6 +309,12 @@ for i=1:length(node_name)
                             node{i}.setDistribution(m,Uniform(lambda, lambda1));
                         case 'Replayer'
                             node{i}.setDistribution(m,Replayer(lambda));
+                        case 'Weibull'
+                            lambda1 = xsection_i{1, i}(2).parameter(3).subParameter(m).subParameter(2).subParameter(2).value;
+                            node{i}.setDistribution(m,Weibull(lambda1, lambda)); % scale and shape are inverted in the constructor
+                        case 'Lognormal'
+                            lambda1 = xsection_i{1, i}(2).parameter(3).subParameter(m).subParameter(2).subParameter(2).value;
+                            node{i}.setDistribution(m,Lognormal(lambda, lambda1));
                         otherwise
                             error('The model includes an arrival distribution not supported by the model-to-model transformation from JMT.')
                             node{i}.setDistribution(m,Exp(1));
@@ -375,6 +388,12 @@ for i=1:length(node_name)
                     case 'Pareto'
                         par={xarv_sec{i}{r}.subParameter}; par=par{2};
                         node{i}.setArrival(jobclass{r}, Pareto(par(1).value, par(2).value));
+                    case 'Weibull'
+                        par={xarv_sec{i}{r}.subParameter}; par=par{2};
+                        node{i}.setArrival(jobclass{r}, Weibull(par(1).value, par(2).value));
+                    case 'Lognormal'
+                        par={xarv_sec{i}{r}.subParameter}; par=par{2};
+                        node{i}.setArrival(jobclass{r}, Lognormal(par(1).value, par(2).value));
                     case 'Gamma'
                         par={xarv_sec{i}{r}.subParameter}; par=par{2};
                         node{i}.setArrival(jobclass{r}, Gamma(par(1).value, par(2).value));
@@ -440,6 +459,12 @@ for i=1:length(node_name)
                 case 'Pareto'
                     par={xsvc_sec{i}{r}.subParameter}; par=par{2};
                     node{i}.setService(jobclass{r}, Pareto(par(1).value, par(2).value));
+                case 'Weibull'
+                    par={xsvc_sec{i}{r}.subParameter}; par=par{2};
+                    node{i}.setService(jobclass{r}, Weibull(par(1).value, par(2).value));
+                case 'Lognormal'
+                    par={xsvc_sec{i}{r}.subParameter}; par=par{2};
+                    node{i}.setService(jobclass{r}, Lognormal(par(1).value, par(2).value));
                 case 'Gamma'
                     par={xsvc_sec{i}{r}.subParameter}; par=par{2};
                     node{i}.setService(jobclass{r}, Gamma(par(1).value, par(2).value));

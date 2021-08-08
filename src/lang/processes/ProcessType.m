@@ -16,6 +16,8 @@ classdef (Sealed) ProcessType
         COXIAN = 'coxian';% renewal
         GAMMA = 'gamma';% renewal
         PARETO = 'pareto';% renewal
+        WEIBULL = 'weibull';% renewal
+        LOGNORMAL = 'lognormal';% renewal
         MMPP2 = 'mmpp2';
         REPLAYER = 'trace';
         TRACE = 'trace';
@@ -40,6 +42,8 @@ classdef (Sealed) ProcessType
         ID_IMMEDIATE = 13;
         ID_DISABLED = 14;
         ID_COX2 = 15;
+        ID_WEIBULL = 16;
+        ID_LOGNORMAL = 17;
     end
     
     methods (Static)        
@@ -72,10 +76,14 @@ classdef (Sealed) ProcessType
                     t = ProcessType.MMPP2;
                 case ProcessType.ID_TRACE
                     t = ProcessType.TRACE;
-                case ProcessType.ID_IMMEDIAYE
+                case ProcessType.ID_IMMEDIATE
                     t = ProcessType.IMMEDIATE;
                 case ProcessType.ID_DISABLED
                     t = ProcessType.DISABLED;
+                case ProcessType.ID_WEIBULL
+                    t = ProcessType.WEIBULL;
+                case ProcessType.ID_LOGNORMAL
+                    t = ProcessType.LOGNORMAL;
             end
         end
         
@@ -112,6 +120,12 @@ classdef (Sealed) ProcessType
                     id = 13;
                 case ProcessType.DISABLED
                     id = 14;
+                case ProcessType.COX2
+                    id = 15;
+                case ProcessType.WEIBULL
+                    id = 16;
+                case ProcessType.LOGNORMAL
+                    id = 17;
             end
         end
         
@@ -150,6 +164,10 @@ classdef (Sealed) ProcessType
                     t = ProcessType.DISABLED;
                 case 'Cox2'
                     t = ProcessType.COX2;
+                case 'Weibull'
+                    t = ProcessType.WEIBULL;
+                case 'Lognormal'
+                    t = ProcessType.LOGNORMAL;
             end
         end
         
@@ -188,6 +206,10 @@ classdef (Sealed) ProcessType
                     text = 'Disabled';
                 case ProcessType.COX2
                     text = 'Cox2';
+                case ProcessType.WEIBULL
+                    text = 'Weibull';
+                case ProcessType.LOGNORMAL
+                    text = 'Lognormal';
             end
             
         end

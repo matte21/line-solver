@@ -1,5 +1,10 @@
-function [XN,QN,UN,CN,lGN,isNumStable,pi]=pfqn_mvald(L,N,Z,mu)
+function [XN,QN,UN,CN,lGN,isNumStable,pi]=pfqn_mvald(L,N,Z,mu,stabilize)
 % [XN,QN,UN,CN,LGN]=PFQN_MVALD(L,N,Z,MU)
+
+% stabilize ensures that probabilities do not become negative
+if nargin<5
+    stabilize = true;
+end
 
 warn = true;
 isNumStable = true;
@@ -40,14 +45,18 @@ while n~=-1
     % compute pi(0|n)
     for i=1:M
         p0 = 1-sum(pi(i,(1:sum(n))+1,hashpop(n,N)));
-        if p0<eps 
+        if p0<0
             if warn
                 line_warning(mfilename,'MVA-LD is numerically unstable on this model, forcing all probabilities to be non-negative.'); 
 %                N
                 warn=false;
                 isNumStable = false;
             end
-            pi(i,(0)+1,hashpop(n,N)) = eps;
+            if stabilize
+                pi(i,(0)+1,hashpop(n,N)) = eps;
+            else
+                pi(i,(0)+1,hashpop(n,N)) = p0;                
+            end
         else
             pi(i,(0)+1,hashpop(n,N)) = p0;
         end

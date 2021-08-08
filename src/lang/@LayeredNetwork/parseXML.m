@@ -26,7 +26,11 @@ end
 dbFactory = DocumentBuilderFactory.newInstance();
 dBuilder = dbFactory.newDocumentBuilder();
 
-doc = dBuilder.parse(filename);
+if isempty(fileparts(filename))
+    doc = dBuilder.parse(which(filename));
+else
+    doc = dBuilder.parse(filename);
+end
 doc.getDocumentElement().normalize();
 if verbose > 0
     line_printf(['Parsing LQN file: ',filename]);

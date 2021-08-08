@@ -168,6 +168,12 @@ for m=1:numOfModes
             case ProcessType.ID_PARETO
                 javaClass = 'jmt.engine.random.Pareto';
                 javaParClass = 'jmt.engine.random.ParetoPar';
+            case ProcessType.ID_WEIBULL
+                javaClass = 'jmt.engine.random.Weibull';
+                javaParClass = 'jmt.engine.random.WeibullPar';
+            case ProcessType.ID_LOGNORMAL
+                javaClass = 'jmt.engine.random.Lognormal';
+                javaParClass = 'jmt.engine.random.LognormalPar';
             case ProcessType.ID_UNIFORM
                 javaClass = 'jmt.engine.random.Uniform';
                 javaParClass = 'jmt.engine.random.UniformPar';
@@ -298,6 +304,10 @@ for m=1:numOfModes
                 % subParNodeAlpha.appendChild(subParValue);
                 % distrParNode.appendChild(subParNodeAlpha);
             case ProcessType.ID_PARETO
+                line_error(mfilename,sprintf('Unsupported firing distribution for mode %d',m));
+            case ProcessType.ID_WEIBULL
+                line_error(mfilename,sprintf('Unsupported firing distribution for mode %d',m));
+            case ProcessType.ID_LOGNORMAL
                 line_error(mfilename,sprintf('Unsupported firing distribution for mode %d',m));
                 % shape = sqrt(1+1/sn.scv(i,r))+1;
                 % scale = 1/sn.rates(i,r) *  (shape - 1) / shape;

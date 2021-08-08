@@ -9,7 +9,7 @@ if nargin<2
     hardRefresh = true;
 end
 
-% store invariant information
+%% store invariant information
 if self.hasStruct && ~hardRefresh
     rtorig = self.sn.rtorig; % this must be destroyed with resetNetwork
 end
@@ -27,6 +27,7 @@ else
 end
 njobs = getNumberOfJobs(self);
 numservers = getStationServers(self);
+lldscaling = getLimitedLoadDependence(self);
 
 %% init minimal structure
 sn = NetworkStruct(); % create in self to ensure propagation
@@ -70,6 +71,7 @@ sn.space = cell(sn.nstations,1);
 sn.routing = routing;
 sn.chains = [];
 sn.lst = {};
+sn.lldscaling = lldscaling;
 sn.nodetype = nodetypes;
 sn.nstations = sum(sn.isstation);
 sn.isstateful = NodeType.isStateful(nodetypes);

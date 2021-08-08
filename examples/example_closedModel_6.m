@@ -1,4 +1,3 @@
-clear;
 model = Network('model');
 
 node{1} = ClassSwitch(model,'CS',[0,1;1,0]);
@@ -36,9 +35,10 @@ node{4}.setRouting(jobclass{2},RoutingStrategy.RRB);
 
 simoptions = Solver.defaultOptions; 
 simoptions.verbose = true;
+simoptions.seed = 23000;
 solver = {};
 solver{end+1} = SolverJMT(model, simoptions);
 for s=1:length(solver)
     fprintf(1,'SOLVER: %s\n',solver{s}.getName());    
-    AvgTable = solver{s}.getAvgTable()
+    AvgTable{s} = solver{s}.getAvgTable()
 end

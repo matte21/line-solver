@@ -16,6 +16,7 @@ classdef Activity < LayeredNetworkElement
         syncCallMeans = [];        %integer array
         asyncCallDests = cell(0);  %string array
         asyncCallMeans = [];       %integer array
+        scheduling = [];
     end
     
     methods

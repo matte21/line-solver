@@ -24,6 +24,11 @@ classdef SolverNC < NetworkSolver
         Pn   = getProbSysAggr(self)
         RD = getCdfRespT(self, R, config);
         
+        function [normConst,lNormConst] = getNormalizingConstant(self)
+            normConst = exp(getProbNormConstAggr(self));
+            lNormConst = getProbNormConstAggr(self);
+        end
+        
         [lNormConst] = getProbNormConstAggr(self)
         
         function sn = getStruct(self)

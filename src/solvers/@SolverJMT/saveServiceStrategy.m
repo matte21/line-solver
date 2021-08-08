@@ -170,6 +170,12 @@ for r=1:numOfClasses
             case ProcessType.ID_PARETO
                 javaClass = 'jmt.engine.random.Pareto';
                 javaParClass = 'jmt.engine.random.ParetoPar';
+            case ProcessType.ID_WEIBULL
+                javaClass = 'jmt.engine.random.Weibull';
+                javaParClass = 'jmt.engine.random.WeibullPar';
+            case ProcessType.ID_LOGNORMAL
+                javaClass = 'jmt.engine.random.Lognormal';
+                javaParClass = 'jmt.engine.random.LognormalPar';
             case ProcessType.ID_UNIFORM
                 javaClass = 'jmt.engine.random.Uniform';
                 javaParClass = 'jmt.engine.random.UniformPar';
@@ -310,6 +316,42 @@ for r=1:numOfClasses
                 subParNodeAlpha.setAttribute('name', 'k'); % scale
                 subParValue = simDoc.createElement('value');
                 subParValue.appendChild(simDoc.createTextNode(sprintf('%.12f',scale)));
+                subParNodeAlpha.appendChild(subParValue);
+                distrParNode.appendChild(subParNodeAlpha);
+            case ProcessType.ID_WEIBULL
+                c = sqrt(sn.scv(i,r));
+                rval = c^(-1.086); % Justus approximation (1976)
+                alpha =  1/sn.rates(i,r) / gamma(1+1/rval);                
+                subParNodeAlpha = simDoc.createElement('subParameter');
+                subParNodeAlpha.setAttribute('classPath', 'java.lang.Double');
+                subParNodeAlpha.setAttribute('name', 'alpha'); % shape
+                subParValue = simDoc.createElement('value');
+                subParValue.appendChild(simDoc.createTextNode(sprintf('%.12f',alpha)));
+                subParNodeAlpha.appendChild(subParValue);
+                distrParNode.appendChild(subParNodeAlpha);
+                subParNodeAlpha = simDoc.createElement('subParameter');
+                subParNodeAlpha.setAttribute('classPath', 'java.lang.Double');
+                subParNodeAlpha.setAttribute('name', 'r'); % scale
+                subParValue = simDoc.createElement('value');
+                subParValue.appendChild(simDoc.createTextNode(sprintf('%.12f',rval)));
+                subParNodeAlpha.appendChild(subParValue);
+                distrParNode.appendChild(subParNodeAlpha);
+            case ProcessType.ID_LOGNORMAL
+                c = sqrt(sn.scv(i,r));
+                mu = log(1/sn.rates(i,r)  / sqrt(c*c + 1));
+                sigma = sqrt(log(c*c + 1));                            
+                subParNodeAlpha = simDoc.createElement('subParameter');
+                subParNodeAlpha.setAttribute('classPath', 'java.lang.Double');
+                subParNodeAlpha.setAttribute('name', 'mu'); % shape
+                subParValue = simDoc.createElement('value');
+                subParValue.appendChild(simDoc.createTextNode(sprintf('%.12f',mu)));
+                subParNodeAlpha.appendChild(subParValue);
+                distrParNode.appendChild(subParNodeAlpha);
+                subParNodeAlpha = simDoc.createElement('subParameter');
+                subParNodeAlpha.setAttribute('classPath', 'java.lang.Double');
+                subParNodeAlpha.setAttribute('name', 'sigma'); % scale
+                subParValue = simDoc.createElement('value');
+                subParValue.appendChild(simDoc.createTextNode(sprintf('%.12f',sigma)));
                 subParNodeAlpha.appendChild(subParValue);
                 distrParNode.appendChild(subParNodeAlpha);
             case ProcessType.ID_UNIFORM

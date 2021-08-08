@@ -22,6 +22,12 @@ if useNodes
 else
     h = plot(lqnGraph,'Layout','layered','EdgeLabel',lqnGraph.Edges.Weight,'NodeLabel',lqnGraph.Nodes.Name);
 end
+row = dataTipTextRow('multiplicity',lqnGraph.Nodes.Mult);
+h.DataTipTemplate.DataTipRows(2) = row;
+row = dataTipTextRow('hostDemand',lqnGraph.Nodes.D);
+h.DataTipTemplate.DataTipRows(3) = row;
+row = dataTipTextRow('scheduling',cellfun(@(c) c.scheduling,lqnGraph.Nodes.Object,'UniformOutput',false));
+h.DataTipTemplate.DataTipRows(end+1) = row;
 title(['Model: ',self.name]);
 
 if showProcs

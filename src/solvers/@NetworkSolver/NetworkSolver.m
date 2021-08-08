@@ -260,12 +260,12 @@ classdef NetworkSolver < Solver
             if isnan(U), U=[]; end
             if isnan(X), X=[]; end
             if isnan(C), C=[]; end
-            self.result.Avg.Q = Q;
-            self.result.Avg.R = R;
-            self.result.Avg.X = X;
-            self.result.Avg.U = U;
-            self.result.Avg.T = T;
-            self.result.Avg.C = C;
+            self.result.Avg.Q = real(Q);
+            self.result.Avg.R = real(R);
+            self.result.Avg.X = real(X);
+            self.result.Avg.U = real(U);
+            self.result.Avg.T = real(T);
+            self.result.Avg.C = real(C);
             self.result.Avg.runtime = runtime;
             if getOptions(self).verbose
                 try

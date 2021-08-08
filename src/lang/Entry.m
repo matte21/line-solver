@@ -8,6 +8,7 @@ classdef Entry < LayeredNetworkElement
         parent;
         replyActivity = {};
         openArrivalRate;
+        scheduling = [];
     end
     
     methods

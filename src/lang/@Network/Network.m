@@ -171,6 +171,7 @@ classdef Network < Model
         
         rtTypes = getRoutingStrategies(self)
         ind = getNodeIndex(self, name)
+        lldScaling = getLimitedLoadDependence(self)
         
         function stationIndex = getStationIndex(self, name)
             % STATIONINDEX = GETSTATIONINDEX(NAME)
@@ -415,6 +416,15 @@ classdef Network < Model
             [ni, nir, sir, kir] = snInitToMarginal(self.getStruct);
         end
         
+        function islld = isLimitedLoadDependent(self)
+            sn = self.getStruct;
+            if isempty(sn.lldscaling)
+                islld = false;
+            else
+                islld = true;                
+            end
+        end
+        
         function [isvalid] = isStateValid(self)
             % [ISVALID] = ISSTATEVALID()
             
@@ -618,6 +628,8 @@ classdef Network < Model
             if featUsed.MMPP2, bool = false; end
             if featUsed.Normal, bool = false; end
             if featUsed.Pareto, bool = false; end
+            if featUsed.Weibull, bool = false; end
+            if featUsed.Lognormal, bool = false; end
             if featUsed.Replayer, bool = false; end
             if featUsed.Uniform, bool = false; end
             if featUsed.Fork, bool = false; end

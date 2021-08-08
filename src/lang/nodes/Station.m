@@ -8,6 +8,7 @@ classdef Station < StatefulNode
         numberOfServers;
         cap;
         classCap;        
+        lldScaling; % limited load-dependence scaling factors
         stationIndex;
     end
     
@@ -19,6 +20,7 @@ classdef Station < StatefulNode
             self@StatefulNode(name);
             self.cap = Inf;
             self.classCap = [];
+            self.lldScaling = [];
         end
     end
     
@@ -51,6 +53,20 @@ classdef Station < StatefulNode
             % SETCAPACITY(VALUE)
             
             self.cap = value;
+        end
+        
+        function setLoadDependence(self, alpha)
+            % SETLOADDEPENDENCE(self, alpha)
+            % alpha(ni) is the service rate scaling when there are ni>=1
+            % jobs in the system            
+            setLimitedLoadDependence(self, alpha);
+        end
+        
+        function setLimitedLoadDependence(self, alpha)
+            % SETLIMITEDLOADDEPENDENCE(self, alpha)
+            % alpha(ni) is the service rate scaling when there are ni>=1
+            % jobs in the system            
+            self.lldScaling = alpha;
         end
         
         function setChainCapacity(self, values)

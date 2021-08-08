@@ -32,6 +32,12 @@ fprintf(1,'This example shows a model with round-robin scheduling.\n');
 clear; example_closedModel_6; fprintf(1,'Pausing...'); pause(3.0);
 
 %%
+fprintf(1,'\n<strong>RUNNING: example_loadDependent_*</strong>');
+fprintf(1,'\n\nExample: <strong>example_loadDependent_1</strong>\n');
+fprintf(1,'This example shows all solvers on a basic single-class closed model.\n')
+clear; example_loadDependent_1; fprintf(1,'Pausing...'); pause(3.0);
+
+%%
 fprintf(1,'\n<strong>RUNNING: example_initState_*</strong>');
 fprintf(1,'\n\nExample: <strong>example_initState_1</strong>\n');
 fprintf(1,'This example shows the execution of the transient solver on a 2-class 2-node class-switching model.')

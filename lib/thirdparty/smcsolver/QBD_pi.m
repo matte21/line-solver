@@ -99,7 +99,8 @@ if (isempty(options.Boundary))
     sumpi=sum(pi);
     numit=1;
     while (sumpi < 1-10^(-10) && numit < 1+options.MaxNumComp)
-        pi(numit+1,1:m)=pi(numit,:)*R; % compute pi_(numit+1)
+        pvec = pi(numit,:)*R;
+        pi(numit+1,1:m)=pvec; % compute pi_(numit+1)
         numit=numit+1;
         sumpi=sumpi+sum(pi(numit,:));
         if (~mod(numit,options.Verbose))

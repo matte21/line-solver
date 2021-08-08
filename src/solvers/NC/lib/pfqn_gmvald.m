@@ -4,15 +4,30 @@ function [G,lG]=pfqn_gmvald(L,N,mu,options)
 % G=pfqn_gmvald(L,N,mu)
 % mu: MxN matrix of load-dependent rates
 [M,R]=size(L);
+if M==1       
+    lG = factln(sum(N)) - sum(factln(N)) + N(L>0)*log(L(L>0))' - sum(log(mu(1,1:sum(N))));
+    G = exp(lG);
+    return
+end
+
+if R==1
+    G = pfqn_gmvaldsingle(L,N,mu);
+    lG = log(G);
+    return
+end
+
 if isempty(L)
     G = 0; lG = -Inf; return
 end
+
 if nargin==2
     mu=ones(M,sum(N));
 end
+
 if nargin<4
     options = SolverNC.defaultOptions;
 end
+
 isLoadDep = false;
 isInfServer = [];
 for i=1:M
@@ -39,7 +54,9 @@ if ~isLoadDep
         Zli = 0*N;
     end
     options.method='exact';
-    G = pfqn_nc(Lli,N,Zli, options);
+    lG = pfqn_nc(Lli,N,sum(Zli,1), options);
+    G = exp(lG);
+    return
 end
 
 G=0;

@@ -1,26 +1,60 @@
-function [lGN,Cgamma] = pfqn_rd(L,N,Z,mu)
+function [lGN,Cgamma] = pfqn_rd(L,N,Z,mu,options)
+[M,R]=size(L);
 if sum(N)<0
     lGN=-Inf;
     return
+end
+% L
+% N
+% Z
+% mu
+for i=1:M
+    if all(mu(i,:)==mu(i,1)) % LI station
+        L(i,:) = L(i,:) / mu(i,1);
+        mu(i,:) = 1;
+        %isLI(i) = true;
+    end
 end
 if sum(N)==0
     lGN=0;
     return
 end
-if min(mu(:))==max(mu(:))
-    options = SolverNC.defaultOptions;
-    lGN = pfqn_nc(L/mu(1),N,Z,options);
-    return
-end
-
-[M,R]=size(L);
 gamma = ones(M,sum(N));
 mu = mu(:,1:sum(N));
-s = sum(N)*ones(1,M);
+%mu(mu==0)=Inf;
+mu(isnan(mu))=Inf;
+s = zeros(M,1);
+for i=1:M    
+    if isfinite(mu(i,end))
+    s(i) = min(find(abs(mu(i,:)-mu(i,end))<options.tol));
+    if s(i)==0
+        s(i) = sum(N);
+    end    
+    else
+        s(i) = sum(N);
+    end
+end
+isDelay = false(M,1);
+isLI = false(M,1);
+y = L;
+
+for i=1:M
+    y(i,:) = y(i,:) / mu(i,s(i));
+end
 for i=1:M
     gamma(i,:) = mu(i,:)/mu(i,s(i));
+    if max(abs(mu(i,:)-(1:sum(N)))) < options.tol
+        %isDelay(i) = true;
+    end
 end
-
+% eliminating the delays seems to produce problems
+% Z = sum([Z; L(isDelay,:)],1);
+% L(isDelay,:)=[];
+% mu(isDelay,:)=[];
+% gamma(isDelay,:)=[];
+% y(isDelay,:)=[];
+% isLI(isDelay) = [];
+% M = M - sum(isDelay);
 beta = ones(M,sum(N));
 for i=1:M
     beta(i,1) = gamma(i,1) / (1-gamma(i,1)) ;
@@ -29,56 +63,30 @@ for i=1:M
     end
 end
 beta(isnan(beta))=Inf;
-beta(isinf(beta))=Inf;
-
-y = L;
-for i=1:M
-    y(i,:) = y(i,:) / (mu(i,end));
-end
-
-Cgamma=0;
-sld = s(s>1);
-vmax = min(sum(sld-1),sum(N));
-
-Y = pfqn_aql(y,N,Z);
-[~,~,~,~,lEN,isNumStable] = pfqn_mvald(y*Y',vmax,0,beta);
-%[~,~,lEN] = gmvaldsingle(y*Y',vmax,beta);
-
-for vtot=0:vmax
-    EN = exp(lEN(vtot+1));
-    Cgamma = Cgamma + ((sum(N)-max(0,max(vtot-1)))/sum(N)) * EN;
-end
-%[~,lGN] = pfqn_mci(y,N,Z,1e5);
-options = SolverNC.defaultOptions;
-if sum(Z)>0
-    options.method='comom';
-else
+if (all(beta==Inf))
     options.method='adaptive';
-end
-lGN = pfqn_nc(y,N,Z,options);
-%[~,lGN] = pfqn_ca(y,N,Z);
-lGN = lGN + log(Cgamma);
-end
-
-function [G,g,lGN]=gmvaldsingle(L,N,mu)
-[M,R]=size(L);
-scaleFactor = max(L,[],1);
-L=L./repmat(scaleFactor,M,1);
-g=zeros(M+1,N+1,1+1);
-g(1,1,1)=L(1,1)*0;
-for n=1:N
-    g(0 +1,n +1, 1 +1)=0;
-end
-for m=1:M
-    for tm=1:(N+1)
-        g(m +1,0 +1,tm +1)=1;
+    lGN = pfqn_nc(L,N,Z,options);
+    return
+else
+    Cgamma=0;
+    sld = s(s>1);
+    vmax = min(sum(sld-1),sum(N));
+    
+    Y = pfqn_mva(y,N,0*N);
+    rhoN = y*Y';
+    for vtot=1:vmax
+        [~,lEN(vtot+1)]=pfqn_gmvald(rhoN,vtot,beta);
+        %lEN(vtot+1)=pfqn_asympt_lld(rhoN,vtot,beta(:,1:vtot),s);
     end
-    for n=1:N
-        for tm=1:(N-n+1)
-            g(m +1, n +1, tm +1)= g(m-1 +1, n +1, 1 +1)+L(m)*g(m +1, n-1 +1, tm+1 +1)/mu(m,tm);
-        end
+    
+    lEN = real(lEN);
+    
+    for vtot=0:vmax
+        EN = exp(lEN(vtot+1));
+        Cgamma = Cgamma + ((sum(N)-max(0,max(vtot-1)))/sum(N)) * EN;
     end
+    options.method='adaptive';
+    lGN = pfqn_nc(y,N,Z,options);
+    lGN = lGN + log(Cgamma);
 end
-G=scaleFactor^sum(N)*g(M+1,N+1,1+1);
-lGN=log(g(M+1,:,1+1))+sum(N)*log(scaleFactor);
 end
