@@ -27,7 +27,7 @@ function model = initDefaultCustom(model, nodes)
                     state_i = [state_i, 1:qn.nvars(i)];
             end
             switch qn.routing(i)
-                case RoutingStrategy.ID_RRB
+                case RoutingStrategy.ID_RROBIN
                     % start from first connected queue
                     state_i = [state_i, find(qn.rt(i,:),1)];
             end

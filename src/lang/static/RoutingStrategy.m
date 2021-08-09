@@ -7,12 +7,12 @@ classdef (Sealed) RoutingStrategy
     properties (Constant)
         ID_RAND = 0;
         ID_PROB = 1;
-        ID_RRB = 2;
+        ID_RROBIN = 2;
         ID_JSQ = 3;
         ID_FIRING = 4;
         ID_DISABLED = -1;
         RAND = 'Random';
-        RRB = 'RoundRobin';
+        RROBIN = 'RoundRobin';
         PROB = 'Probabilities';
         JSQ = 'JoinShortestQueue';
         DISABLED = 'Disabled';
@@ -27,7 +27,7 @@ classdef (Sealed) RoutingStrategy
                 case 'Random'
                     type = RoutingStrategy.RAND;
                 case 'RoundRobin'
-                    type = RoutingStrategy.RRB;
+                    type = RoutingStrategy.RROBIN;
                 case RoutingStrategy.PROB
                     type = RoutingStrategy.PROB;
                 case 'JoinShortestQueue'
@@ -44,8 +44,8 @@ classdef (Sealed) RoutingStrategy
             switch type
                 case RoutingStrategy.RAND
                     feature = 'RoutingStrategy_RAND';
-                case RoutingStrategy.RRB
-                    feature = 'RoutingStrategy_RRB';
+                case RoutingStrategy.RROBIN
+                    feature = 'RoutingStrategy_RROBIN';
                 case RoutingStrategy.PROB
                     feature = 'RoutingStrategy_PROB';
                 case RoutingStrategy.JSQ
@@ -65,7 +65,7 @@ classdef (Sealed) RoutingStrategy
             switch type
                 case RoutingStrategy.RAND
                     text = 'Random';
-                case RoutingStrategy.RRB
+                case RoutingStrategy.RROBIN
                     text = 'RoundRobin';
                 case RoutingStrategy.PROB
                     text = RoutingStrategy.PROB;

@@ -34,7 +34,7 @@ for i=nodes
                 state_i = 0; % for now PNs are single class
         end
         switch sn.routing(i)
-            case RoutingStrategy.ID_RRB
+            case RoutingStrategy.ID_RROBIN
                 % start from first connected queue
                 state_i = [state_i, find(sn.rt(i,:),1)];
         end

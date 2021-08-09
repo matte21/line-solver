@@ -17,7 +17,7 @@ if detnH<0
     detnH=det(-H);
 end
 if detnH<0
-    warning('det(-H)<0')
+    warning('laplaceapprox.m: det(-H)<0')
 end
 I = h(x0) * sqrt((2*pi)^d/detnH);
 logI = log(h(x0)) + (d/2)*log(2*pi) - log(detnH);

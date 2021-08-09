@@ -9,8 +9,8 @@ for ind=1:self.getNumberOfNodes
                 rtTypes(ind,r) = RoutingStrategy.ID_RAND;
             case RoutingStrategy.PROB
                 rtTypes(ind,r) = RoutingStrategy.ID_PROB;
-            case RoutingStrategy.RRB
-                rtTypes(ind,r) = RoutingStrategy.ID_RRB;
+            case RoutingStrategy.RROBIN
+                rtTypes(ind,r) = RoutingStrategy.ID_RROBIN;
             case RoutingStrategy.JSQ
                 rtTypes(ind,r) = RoutingStrategy.ID_JSQ;
             case RoutingStrategy.DISABLED

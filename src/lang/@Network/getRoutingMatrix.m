@@ -70,7 +70,7 @@ for ind=1:I
                                rtNodes((ind-1)*K+k,(jnd-1)*K+k) = 1/sum(connections(ind,:)); 
                             end
                         end
-                    case {RoutingStrategy.RAND, RoutingStrategy.RRB, RoutingStrategy.JSQ}
+                    case {RoutingStrategy.RAND, RoutingStrategy.RROBIN, RoutingStrategy.JSQ}
                         if isinf(NK(k)) % open class
                             for jnd=1:I
                                 if connections(ind,jnd)>0

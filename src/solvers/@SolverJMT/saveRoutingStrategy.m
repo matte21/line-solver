@@ -26,7 +26,7 @@ for r=1:K
             concStratNode = simDoc.createElement('subParameter');
             concStratNode.setAttribute('classPath', 'jmt.engine.NetStrategies.RoutingStrategies.RandomStrategy');
             concStratNode.setAttribute('name', 'Random');
-        case RoutingStrategy.ID_RRB
+        case RoutingStrategy.ID_RROBIN
             concStratNode = simDoc.createElement('subParameter');
             concStratNode.setAttribute('classPath', 'jmt.engine.NetStrategies.RoutingStrategies.RoundRobinStrategy');
             concStratNode.setAttribute('name', 'Round Robin');

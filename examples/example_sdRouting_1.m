@@ -17,7 +17,7 @@ model.addLink(node{1}, node{3});
 model.addLink(node{2}, node{1});
 model.addLink(node{3}, node{1});
 
-node{1}.setRouting(jobclass{1},RoutingStrategy.RRB);
+node{1}.setRouting(jobclass{1},RoutingStrategy.RROBIN);
 node{2}.setProbRouting(jobclass{1}, node{1}, 1.0)
 node{3}.setProbRouting(jobclass{1}, node{1}, 1.0)
 

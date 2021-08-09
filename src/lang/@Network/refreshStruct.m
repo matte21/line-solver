@@ -48,8 +48,8 @@ for ind=1:sn.nnodes
                 routing(ind,r) = RoutingStrategy.ID_RAND;
             case RoutingStrategy.PROB
                 routing(ind,r) = RoutingStrategy.ID_PROB;
-            case RoutingStrategy.RRB
-                routing(ind,r) = RoutingStrategy.ID_RRB;
+            case RoutingStrategy.RROBIN
+                routing(ind,r) = RoutingStrategy.ID_RROBIN;
             case RoutingStrategy.JSQ
                 routing(ind,r) = RoutingStrategy.ID_JSQ;
             case RoutingStrategy.DISABLED
@@ -88,7 +88,7 @@ for ind=1:sn.nnodes
     end
     for r=1:sn.nclasses
         switch sn.routing(ind,r)
-            case {RoutingStrategy.ID_RRB, RoutingStrategy.ID_JSQ}
+            case {RoutingStrategy.ID_RROBIN, RoutingStrategy.ID_JSQ}
                 sn.isstatedep(ind,3) = true; % state dependent routing
         end
     end

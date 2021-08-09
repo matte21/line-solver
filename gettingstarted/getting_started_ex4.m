@@ -20,6 +20,6 @@ model.addLinks([source, lb;
 lb.setRouting(oclass, RoutingStrategy.RAND);
 jmtAvgTable = SolverJMT(model,'seed',23000).getAvgTable
 
-lb.setRouting(oclass, RoutingStrategy.RRB);
+lb.setRouting(oclass, RoutingStrategy.RROBIN);
 model.reset();
 jmtAvgTableRR = SolverJMT(model,'seed',23000).getAvgTable

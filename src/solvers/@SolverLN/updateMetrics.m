@@ -55,7 +55,7 @@ switch self.getOptions.method
         end
     end
 
-    case "moment3"
+    case 'moment3'
     if self.whetherConverge == 0
             % first obtain svct of activities at hostlayers
         self.svct = zeros(self.lqn.nidx,1);

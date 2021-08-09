@@ -26,12 +26,12 @@ model.addLink(node{1}, node{4});
 node{1}.setRouting(jobclass{1},RoutingStrategy.RAND);
 node{2}.setRouting(jobclass{1},RoutingStrategy.RAND);
 node{3}.setRouting(jobclass{1},RoutingStrategy.RAND);
-node{4}.setRouting(jobclass{1},RoutingStrategy.RRB);
+node{4}.setRouting(jobclass{1},RoutingStrategy.RROBIN);
 
 node{1}.setRouting(jobclass{2},RoutingStrategy.RAND);
 node{2}.setRouting(jobclass{2},RoutingStrategy.RAND);
 node{3}.setRouting(jobclass{2},RoutingStrategy.RAND);
-node{4}.setRouting(jobclass{2},RoutingStrategy.RRB);
+node{4}.setRouting(jobclass{2},RoutingStrategy.RROBIN);
 
 simoptions = Solver.defaultOptions; 
 simoptions.verbose = true;

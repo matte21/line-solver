@@ -63,7 +63,7 @@ for ind=1:self.getNumberOfNodes
         end
     end
     switch self.sn.routing(ind)
-        case RoutingStrategy.ID_RRB
+        case RoutingStrategy.ID_RROBIN
             nvars(ind) = nvars(ind) + 1;
             % save indexes of outgoing links
             if isempty(varsparam) % reinstantiate if not a cache

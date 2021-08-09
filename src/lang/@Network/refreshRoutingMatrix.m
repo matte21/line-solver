@@ -41,7 +41,7 @@ if isStateDep
                 for s=1:K
                     if sn.isstatedep(ind,3)
                         switch sn.routing(ind,r)
-                            case RoutingStrategy.ID_RRB
+                            case RoutingStrategy.ID_RROBIN
                                 rnodefuncell{(ind-1)*K+r, (jnd-1)*K+s} = @(state_before, state_after) sub_rr(ind, jnd, r, s, linksmat, state_before, state_after);
                             case RoutingStrategy.ID_JSQ
                                 rnodefuncell{(ind-1)*K+r, (jnd-1)*K+s} = @(state_before, state_after) sub_jsq(ind, jnd, r, s, linksmat, state_before, state_after);

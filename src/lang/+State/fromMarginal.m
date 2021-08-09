@@ -152,7 +152,7 @@ switch sn.nodetype(ind)
                 line_error(mfilename,'The scheduling policy does not admit a discrete state space.\n');
         end
         switch sn.routing(ind)
-            case RoutingStrategy.ID_RRB
+            case RoutingStrategy.ID_RROBIN
                 space = State.decorate(space, sn.varsparam{ind}.outlinks(:));
         end
     case NodeType.Cache
@@ -166,7 +166,7 @@ switch sn.nodetype(ind)
                 space = State.decorate(space,state);
         end
         switch sn.routing(ind)
-            case RoutingStrategy.ID_RRB
+            case RoutingStrategy.ID_RROBIN
                 space = State.decorate(space, sn.varsparam{ind}.outlinks(:));
         end
 end
