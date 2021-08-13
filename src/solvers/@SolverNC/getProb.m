@@ -12,6 +12,10 @@ else
     ist = node;    
 end
 sn.state{ist} = state;
+
+options = self.getOptions;
+Solver.resetRandomGeneratorSeed(options.seed);
+
 if isfield(self.result.Prob,'logNormConstAggr') && isfinite(self.result.Prob.logNormConstAggr)
     [Pnir,lG] = solver_nc_marg(sn, self.options, self.result.Prob.logNormConstAggr);
 else

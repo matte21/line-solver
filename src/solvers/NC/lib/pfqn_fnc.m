@@ -9,10 +9,15 @@ if nargin<2
         mu = pfqn_fnc(alpha,c);
     end
     dt = 0;
+    it = 0;
     while ~all(isfinite(mu)) % randomize c if need be but unlikely
-        dt = dt + 0.01;
-        c = -0.5-dt;
+        it = it +1;
+        dt = dt + 0.05;
+        c = -1/2+dt;
         mu = pfqn_fnc(alpha,c);
+        if c>=2
+            break
+        end
     end
     return
 end
@@ -29,5 +34,13 @@ for i=1:M
         mu(i,n) = mu(i,n)/(1-rho);
     end
 end
-mu(isnan(mu)) = 0;
+mu(isnan(mu)) = Inf;
+mu(mu==0) = Inf;
+mu(abs(mu)>1e15) = Inf;
+for i=1:M
+    if any(isinf(mu(i,:)))
+        s = min(find(isinf(mu(i,:))));
+        mu(i,s:end)=Inf;
+    end
+end
 end

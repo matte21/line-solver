@@ -24,12 +24,12 @@ mu = mu(:,1:sum(N));
 %mu(mu==0)=Inf;
 mu(isnan(mu))=Inf;
 s = zeros(M,1);
-for i=1:M    
+for i=1:M
     if isfinite(mu(i,end))
-    s(i) = min(find(abs(mu(i,:)-mu(i,end))<options.tol));
-    if s(i)==0
-        s(i) = sum(N);
-    end    
+        s(i) = min(find(abs(mu(i,:)-mu(i,end))<options.tol));
+        if s(i)==0
+            s(i) = sum(N);
+        end
     else
         s(i) = sum(N);
     end
@@ -39,6 +39,10 @@ isLI = false(M,1);
 y = L;
 
 for i=1:M
+    if isinf(mu(i,s(i)))
+        lastfinite=max(find(isfinite(mu(i,:))))
+        s(i) = lastfinite;
+    end
     y(i,:) = y(i,:) / mu(i,s(i));
 end
 for i=1:M
@@ -63,6 +67,7 @@ for i=1:M
     end
 end
 beta(isnan(beta))=Inf;
+
 if (all(beta==Inf))
     options.method='adaptive';
     lGN = pfqn_nc(L,N,Z,options);
@@ -71,14 +76,11 @@ else
     Cgamma=0;
     sld = s(s>1);
     vmax = min(sum(sld-1),sum(N));
-    
     Y = pfqn_mva(y,N,0*N);
     rhoN = y*Y';
     for vtot=1:vmax
-        [~,lEN(vtot+1)]=pfqn_gmvald(rhoN,vtot,beta);
-        %lEN(vtot+1)=pfqn_asympt_lld(rhoN,vtot,beta(:,1:vtot),s);
+        lEN(vtot+1) = pfqn_gmvaldsingle(rhoN,vtot,beta);
     end
-    
     lEN = real(lEN);
     
     for vtot=0:vmax

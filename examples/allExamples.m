@@ -109,15 +109,15 @@ fprintf(1,'\n\nExample: <strong>example_randomEnvironment_3</strong>\n');
 clear; example_randomEnvironment_3; fprintf(1,'Pausing...'); pause(3.0);
 
 %%
-%try % LQNS must be available on the system path
+try % LQNS must be available on the system path
 fprintf(1,'\n<strong>RUNNING: example_layeredModel_*</strong>');
 fprintf(1,'\n\nExample: <strong>example_layeredModel_1</strong>\n');
     clear; example_layeredModel_1; fprintf(1,'Pausing...'); pause(3.0);
 fprintf(1,'\n\nExample: <strong>example_layeredModel_2</strong>\n');
     clear; example_layeredModel_2; fprintf(1,'Pausing...'); pause(3.0);
-%catch
+catch
     warning('LQNS is not available on this computer. Skipping LQN tests.');
-%end
+end
 
 %%
 fprintf(1,'\n<strong>RUNNING: example_misc_*</strong>');

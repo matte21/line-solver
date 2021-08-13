@@ -645,7 +645,11 @@ classdef Network < Model
             % modelling features
             if self.hasMultiClassFCFS, bool = false; end
         end
-        
+        function plot(self)     
+            % PLOT()
+            
+            plot(self.getGraph);
+        end
     end
     
     methods (Static)

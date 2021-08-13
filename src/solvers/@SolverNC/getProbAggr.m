@@ -10,6 +10,9 @@ end
 ist = sn.nodeToStation(node.index);
 sn.state{ist} = state_a;
 
+options = self.getOptions;
+Solver.resetRandomGeneratorSeed(options.seed);
+
 self.result.('solver') = getName(self);
 if isfield(self.result,'Prob') && isfield(self.result.Prob,'logNormConstAggr') && isfinite(self.result.Prob.logNormConstAggr)
     [Pnir,lG] = solver_nc_margaggr(sn, self.options, self.result.Prob.logNormConstAggr);

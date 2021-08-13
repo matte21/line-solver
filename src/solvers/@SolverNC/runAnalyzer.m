@@ -16,6 +16,7 @@ if self.enableChecks && ~self.supports(self.model)
     ME = MException('Line:FeatureNotSupportedBySolver', 'This model contains features not supported by the solver.');
     throw(ME);
 end
+
 Solver.resetRandomGeneratorSeed(options.seed);
 
 if sn.nclosedjobs == 0 && length(sn.nodetype)==3 && all(sort(sn.nodetype)' == sort([NodeType.Source,NodeType.Cache,NodeType.Sink])) % is a non-rentrant cache

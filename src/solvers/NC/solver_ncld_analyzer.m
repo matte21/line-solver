@@ -100,9 +100,6 @@ while max(abs(1-eta./eta_1)) > options.iter_tol && it < options.iter_max
         case {'default','exact'}
             [~,lG]=pfqn_gmvald(Lms, Nchain, mu, options);
         case 'rd'
-            %if debug
-            %    [~,lG_ex]=pfqn_gmvald(Lms, Nchain, mu, options)
-            %end
             [lG]=pfqn_rd(Lms, Nchain, 0*Nchain, mu, options);
         case {'nrp','nr.probit'}
             [lG]=pfqn_nrp(Lms, Nchain, 0*Nchain, mu, options);
@@ -156,21 +153,9 @@ while max(abs(1-eta./eta_1)) > options.iter_tol && it < options.iter_max
                                     [~,lGr_i(r)] = pfqn_gmvald(Lms_i,Nchain_r, mu_i, options);
                                     [~,lGhati(r)] = pfqn_gmvald(Lms,Nchain_r, muhati, options);
                                 case 'rd'
-                                    %if debug
-                                    %    [~,lGhat_fnci_ex(r)] = pfqn_gmvald([Lms;Lms(i,:)],Nchain_r, [muhati;muhati_f], options)
-                                    %end
                                     [lGhat_fnci(r)] = pfqn_rd([Lms;Lms(i,:)], Nchain_r, 0*Nchain, [muhati;muhati_f], options);
-                                    %if debug
-                                    %    [~,lGhatir_ex(r)] = pfqn_gmvald(Lms,Nchain_r, muhati, options)
-                                    %end
                                     [lGhatir(r)] = pfqn_rd(Lms,Nchain_r, 0*Nchain, muhati, options);
-                                    %if debug
-                                    %    [~,lGr_i_ex(r)] = pfqn_gmvald(Lms_i,Nchain_r, mu_i, options)
-                                    %end
                                     [lGr_i(r)] = pfqn_rd(Lms_i,Nchain_r, 0*Nchain, mu_i, options);
-                                    %if debug
-                                    %    [~,lGhati_ex(r)] = pfqn_gmvald(Lms,Nchain_r, muhati, options)
-                                    %end
                                     [lGhati(r)] = pfqn_rd(Lms,Nchain_r, 0*Nchain, muhati, options);
                                 case {'nrp','nr.probit'}
                                     [lGhat_fnci(r)] = pfqn_nrp([Lms;Lms(i,:)],Nchain_r, 0*Nchain, [muhati;muhati_f], options);

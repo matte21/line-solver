@@ -72,13 +72,16 @@ state = model.getState;
 
 tic;
 solver = Solver.load('ctmc',model,'seed',23000);
-ATex=solver.getAvgTable
+Pr_ctmc = solver.getProbSysAggr()
+
 toc
 tic;
-solver = SolverMVA(model,'method','exact','seed',23000);
-ATmva=solver.getAvgTable
+solver = SolverJMT(model,'seed',23000);
+Pr_jmt = solver.getProbSysAggr()
+
 toc
 tic;
 solver = SolverNC(model,'method','ls','seed',23000,'samples',1000);
-ATls=solver.getAvgTable
+Pr_nc = solver.getProbSysAggr()
+
 toc
