@@ -12,8 +12,10 @@ extFilename = fullfile(pwd,'data', 'BPMN','bpmn_ext_gateways.xml');
 
 verbose = 1;
 %% input files parsing
+model = BPMN.parseXML_BPMN(filename, verbose);
+modelExt = BPMN.parseXML_BPMNextensions(extFilename, verbose);
 %% create lqn model from bpmn
-myLQN = BPMN2LQN(filename, extFilename, verbose);
+myLQN = BPMN2LQN(model, modelExt);
 
 %% obtain line performance model from lqn
 options = SolverLQNS.defaultOptions;

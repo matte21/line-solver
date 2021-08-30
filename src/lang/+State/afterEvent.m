@@ -21,6 +21,21 @@ outprob = 1;
 % ind: node index
 isf = sn.nodeToStateful(ind);
 
+lldscaling = sn.lldscaling;
+if isempty(lldscaling)
+    lldlimit = max(sum(sn.nclosedjobs),1);
+    lldscaling = ones(M,lldlimit);
+else
+    lldlimit = size(lldscaling,2);
+end
+
+cdscaling = sn.cdscaling;
+if isempty(cdscaling)
+    for i=1:M
+        cdscaling{i} = @(ni) 1;
+    end
+end
+
 hasOnlyExp = false; % true if all service processes are exponential
 if sn.isstation(ind)
     ist = sn.nodeToStation(ind);
@@ -91,12 +106,14 @@ if sn.isstation(ind)
                     case {SchedStrategy.ID_FCFS, SchedStrategy.ID_HOL, SchedStrategy.ID_LCFS}
                         % find states with all servers busy - this
                         % needs not to be moved
-                        all_busy_srv = find(sum(space_srv_k,2) >= S(ist));
+                        all_busy_srv = sum(space_srv_k,2) >= S(ist);
                         
                         % find and modify states with an idle server
                         idle_srv = sum(space_srv_k,2) < S(ist);
                         space_srv_k(idle_srv, end-sum(K)+Ks(class)+kentry) = space_srv_k(idle_srv,end-sum(K)+Ks(class)+kentry) + 1; % job enters service
                         
+                        % this section dynamicaly grows the number of
+                        % elements in the buffer
                         if isSimulation
                             if ni < capacity(ist) && nir(class) < classcap(ist,class) % if there is room
                                 if ~any(space_buf_k(:)==0) % but the buffer has no empty slots
@@ -120,24 +137,96 @@ if sn.isstation(ind)
                         if any(wbuf_empty)
                             space_srv_k = space_srv_k(wbuf_empty,:);
                             space_buf_k = space_buf_k(wbuf_empty,:);
+                            space_var_k = space_var_k(wbuf_empty,:);
                             empty_slots = empty_slots(wbuf_empty);
                             space_buf_k(sub2ind(size(space_buf_k),1:size(space_buf_k,1),empty_slots')) = class;
                             %outspace(all_busy_srv(wbuf_empty),:) = [space_buf, space_srv, space_var];
                         end
                         outprob_k = pentry(kentry)*ones(size(space_srv_k,1));
+                    case SchedStrategy.ID_LCFSPR
+                        % find states with all servers busy - this
+                        % must not be moved
+                        all_busy_srv = sum(space_srv_k,2) >= S(ist);
+                        % find states with an idle server
+                        idle_srv = sum(space_srv_k,2) < S(ist);
+                        
+                        % reorder states so that idle ones come first
+                        space_buf_k_reord = space_buf_k(idle_srv,:);
+                        space_srv_k_reord = space_srv_k(idle_srv,:);
+                        space_var_k_reord = space_var_k(idle_srv,:);
+                        
+                        % if idle, the job enters service in phase kentry
+                        if any(idle_srv)
+                            space_srv_k_reord(:, end-sum(K)+Ks(class)+kentry) = space_srv_k_reord(:,end-sum(K)+Ks(class)+kentry) + 1;
+                        end
+                        
+                        % if all busy, expand output states for all possible choices of job class to preempt
+                        psentry = ones(size(space_buf_k_reord,1),1); % probability scaling due to preemption
+                        for classpreempt = 1:R
+                            for phasepreempt = 1:K(classpreempt) % phase of job to preempt
+                                si_preempt = sum(space_srv_k(:, (end-sum(K)+Ks(classpreempt)+phasepreempt)),2);
+                                busy_preempt = si_preempt > 0; % states where there is at least on class-r job in execution
+                                if any(busy_preempt)
+                                    psentry = [psentry; si_preempt(busy_preempt) ./ sum(space_srv_k,2)];
+                                    space_srv_k_preempt = space_srv_k(busy_preempt,:);
+                                    space_buf_k_preempt = space_buf_k(busy_preempt,:);
+                                    space_var_k_preempt = space_var_k(busy_preempt,:);
+                                    space_srv_k_preempt(:, end-sum(K)+Ks(classpreempt)+phasepreempt) = space_srv_k_preempt(:,end-sum(K)+Ks(classpreempt)+phasepreempt) - 1; % remove preempted job
+                                    space_srv_k_preempt(:, end-sum(K)+Ks(class)+kentry) = space_srv_k_preempt(:,end-sum(K)+Ks(class)+kentry) + 1;
+                                    
+                                    % dynamically grow buffer lenght in
+                                    % simulation
+                                    if isSimulation
+                                        if ni < capacity(ist) && nir(class) < classcap(ist,class) % if there is room
+                                            if ~any(space_buf_k_preempt(:)==0) % but the buffer has no empty slots
+                                                % append job slot
+                                                space_buf_k_preempt = [zeros(size(space_buf_k_preempt,1),2),space_buf_k]; % append two columns for (class, preempt-phase)
+                                            end
+                                        end
+                                    end
+                                    
+                                    %get position of first empty slot
+                                    empty_slots = -1*ones(sum(busy_preempt),1);
+                                    if size(space_buf_k_preempt,2) == 0
+                                        empty_slots(busy_preempt) = false;
+                                    elseif size(space_buf_k_preempt,2) == 2 % 2 due to (class, preempt-phase) pairs
+                                        empty_slots(busy_preempt) = space_buf_k_preempt(busy_preempt,1:2:end)==0;
+                                    else
+                                        empty_slots(busy_preempt) = max(bsxfun(@times, space_buf_k_preempt(busy_preempt,:)==0, [1:size(space_buf_k_preempt,2)]),[],2)-1; %-1 due to (class, preempt-phase) pairs
+                                    end
+                                    
+                                    % ignore states where the buffer has no empty slots
+                                    wbuf_empty = empty_slots>0;
+                                    if any(wbuf_empty)
+                                        space_srv_k_preempt = space_srv_k_preempt(wbuf_empty,:);
+                                        space_buf_k_preempt = space_buf_k_preempt(wbuf_empty,:);
+                                        space_var_k_preempt = space_var_k_preempt(wbuf_empty,:);
+                                        empty_slots = empty_slots(wbuf_empty);
+                                        space_buf_k_preempt(sub2ind(size(space_buf_k_preempt),1:size(space_buf_k_preempt,1),empty_slots')+1) = phasepreempt;
+                                        space_buf_k_preempt(sub2ind(size(space_buf_k_preempt),1:size(space_buf_k_preempt,1),empty_slots')) = classpreempt;
+                                        %outspace(all_busy_srv(wbuf_empty),:) = [space_buf, space_srv, space_var];
+                                    end
+                                    space_srv_k_reord = [space_srv_k_reord; space_srv_k_preempt];
+                                    space_buf_k_reord = [space_buf_k_reord; space_buf_k_preempt];
+                                    space_var_k_reord = [space_var_k_reord; space_var_k_preempt];
+                                end
+                            end
+                        end
+                        outprob_k = pentry(kentry) * psentry .* ones(size(space_srv_k_reord,1),1);
+                        space_buf_k = space_buf_k_reord; % save reordered output states
+                        space_srv_k = space_srv_k_reord; % save reordered output states
+                        space_var_k = space_var_k_reord; % save reordered output states
                 end
                 outspace_k = [space_buf_k, space_srv_k, space_var_k];
                 % remove states where new arrival violates capacity or cutoff constraints
                 en = classcap(ist,class)> nir(:,class) | capacity(ist)*ones(size(ni,1),1) > ni;
                 outspace = [outspace; outspace_k(en,:)];
-                
-                outrate = [outrate; -1*ones(size(outspace_k,1))]; % passive action, rate is unspecified
-                outprob = [outprob; outprob_k];
+                outrate = [outrate; -1*ones(size(outspace_k(en,:),1),1)]; % passive action, rate is unspecified
+                outprob = [outprob; outprob_k(en,:)];
             end
             if isSimulation
                 if size(outprob,1) > 1
-                    tot_prob = sum(outprob);
-                    cum_prob = cumsum(outprob) / tot_prob;
+                    cum_prob = cumsum(outprob) / sum(outprob);
                     firing_ctr = 1 + max([0,find( rand > cum_prob' )]); % select action
                     outspace = outspace(firing_ctr,:);
                     outrate = -1;
@@ -180,7 +269,11 @@ if sn.isstation(ind)
                                             space_srv(en,Ks(class)+k) = space_srv(en,Ks(class)+k) - 1; % record departure
                                             space_srv(en,Ks(class)+kentry) = space_srv(en,Ks(class)+kentry) + 1; % new job
                                             outspace = [outspace; space_buf(en,:), space_srv(en,:), space_var(en,:)];
-                                            outrate = [outrate; pentry(kentry)*mu{ist}{class}(k)*phi{ist}{class}(k)*ones(size(inspace(en,:),1),1)];
+                                            if isinf(ni) % hit limited load-dependence
+                                                outrate = [outrate; cdscaling{ist}(nir).*lldscaling(ist,end).*pentry(kentry)*mu{ist}{class}(k)*phi{ist}{class}(k)*ones(size(inspace(en,:),1),1)];
+                                            else
+                                                outrate = [outrate; cdscaling{ist}(nir).*lldscaling(ist,min(ni,lldlimit)).*pentry(kentry)*mu{ist}{class}(k)*phi{ist}{class}(k)*ones(size(inspace(en,:),1),1)];
+                                            end
                                             outprob = [outprob; ones(size(space_buf(en,:),1),1)];
                                         end
                                     end
@@ -189,14 +282,22 @@ if sn.isstation(ind)
                                     rate(en) = mu{ist}{class}(k)*(phi{ist}{class}(k)).*kir(en,class,k); % assume active
                                     % if state is unchanged, still add with rate 0
                                     outspace = [outspace; space_buf(en,:), space_srv(en,:), space_var(end,:)];
-                                    outrate = [outrate; rate(en,:)];
+                                    if isinf(ni) % hit limited load-dependence
+                                        outrate = [outrate; cdscaling{ist}(nir).*lldscaling(ist,end).*rate(en,:)];
+                                    else
+                                        outrate = [outrate; cdscaling{ist}(nir).*lldscaling(ist,min(ni,lldlimit)).*rate(en,:)];
+                                    end
                                     outprob = [outprob; ones(size(rate(en,:),1),1)];
                                 case SchedStrategy.ID_PS % move first job in service
                                     space_srv(en,Ks(class)+k) = space_srv(en,Ks(class)+k) - 1; % record departure
                                     rate(en) = mu{ist}{class}(k)*(phi{ist}{class}(k)).*(kir(en,class,k)./ni(en)).*min(ni(en),S(ist)); % assume active
                                     % if state is unchanged, still add with rate 0
                                     outspace = [outspace; space_buf(en,:), space_srv(en,:), space_var(en,:)];
-                                    outrate = [outrate; rate(en,:)];
+                                    if isinf(ni) % hit limited load-dependence
+                                        outrate = [outrate; cdscaling{ist}(nir).*lldscaling(ist,end).*rate(en,:)];
+                                    else
+                                        outrate = [outrate; cdscaling{ist}(nir).*lldscaling(ist,min(ni,lldlimit)).*rate(en,:)];
+                                    end
                                     outprob = [outprob; ones(size(rate(en,:),1),1)];
                                 case SchedStrategy.ID_DPS
                                     space_srv(en,Ks(class)+k) = space_srv(en,Ks(class)+k) - 1; % record departure
@@ -209,7 +310,11 @@ if sn.isstation(ind)
                                     rate(en) = mu{ist}{class}(k)*(phi{ist}{class}(k))*(kir(en,class,k)/nir(class))*w_i(class)*nir(class)./(sum(repmat(w_i,sum(en),1)*nir',2));
                                     % if state is unchanged, still add with rate 0
                                     outspace = [outspace; space_buf(en,:), space_srv(en,:), space_var(en,:)];
-                                    outrate = [outrate; rate(en,:)];
+                                    if isinf(ni) % hit limited load-dependence
+                                        outrate = [outrate; cdscaling{ist}(nir).*lldscaling(ist,end).*rate(en,:)];
+                                    else
+                                        outrate = [outrate; cdscaling{ist}(nir).*lldscaling(ist,min(ni,lldlimit)).*rate(en,:)];
+                                    end
                                     outprob = [outprob; ones(size(rate(en,:),1),1)];
                                 case SchedStrategy.ID_GPS
                                     space_srv(en,Ks(class)+k) = space_srv(en,Ks(class)+k) - 1; % record departure
@@ -223,7 +328,11 @@ if sn.isstation(ind)
                                     rate = mu{ist}{class}(k)*(phi{ist}{class}(k))*(kir(en,class,k)/nir(class))*w_i(class)/(w_i*cir(:)); % assume active
                                     % if state is unchanged, still add with rate 0
                                     outspace = [outspace; space_buf(en,:), space_srv(en,:), space_var(en,:)];
-                                    outrate = [outrate; rate(en,:)];
+                                    if isinf(ni) % hit limited load-dependence
+                                        outrate = [outrate; cdscaling{ist}(nir).*lldscaling(ist,end).*rate(en,:)];
+                                    else
+                                        outrate = [outrate; cdscaling{ist}(nir).*lldscaling(ist,min(ni,lldlimit)).*rate(en,:)];
+                                    end
                                     outprob = [outprob; ones(size(rate(en,:),1),1)];
                                 case SchedStrategy.ID_FCFS % move first job in service
                                     space_srv(en,Ks(class)+k) = space_srv(en,Ks(class)+k) - 1; % record departure
@@ -231,7 +340,11 @@ if sn.isstation(ind)
                                     en_wbuf = en & ni>S(ist); %states with jobs in buffer
                                     en_wobuf = ~en_wbuf;
                                     outspace = [outspace; space_buf(en_wobuf,:), space_srv(en_wobuf,:), space_var(en_wobuf,:)];
-                                    outrate = [outrate; rate(en_wobuf,:)];
+                                    if isinf(ni) % hit limited load-dependence
+                                        outrate = [outrate; cdscaling{ist}(nir).*lldscaling(ist,end).*rate(en_wobuf,:)];
+                                    else
+                                        outrate = [outrate; cdscaling{ist}(nir).*lldscaling(ist,min(ni,lldlimit)).*rate(en_wobuf,:)];
+                                    end
                                     outprob = [outprob; ones(size(rate(en_wobuf,:),1),1)];
                                     if any(en_wbuf)
                                         start_svc_class = space_buf(en_wbuf,end);
@@ -243,7 +356,11 @@ if sn.isstation(ind)
                                                 outspace = [outspace; space_buf(en,:), space_srv(en,:), space_var(en,:)];
                                                 rate_k = rate;
                                                 rate_k(en_wbuf,:) = rate(en_wbuf,:)*pentry_svc_class(kentry);
-                                                outrate = [outrate; rate_k(en,:)];
+                                                if isinf(ni) % hit limited load-dependence
+                                                    outrate = [outrate; cdscaling{ist}(nir).*lldscaling(ist,end).*rate_k(en,:)];
+                                                else
+                                                    outrate = [outrate; cdscaling{ist}(nir).*lldscaling(ist,min(ni,lldlimit)).*rate_k(en,:)];
+                                                end
                                                 outprob = [outprob; ones(size(rate(en,:),1),1)];
                                                 space_srv(en_wbuf,Ks(start_svc_class)+kentry) = space_srv(en_wbuf,Ks(start_svc_class)+kentry) - 1;
                                             end
@@ -263,7 +380,11 @@ if sn.isstation(ind)
                                     rightmostMaxPos = size(isrowmax,2) - rightmostMaxPosFlipped + 1;
                                     start_svc_class = space_buf(en_wbuf, rightmostMaxPos);
                                     outspace = [outspace; space_buf(en_wobuf,:), space_srv(en_wobuf,:), space_var(en_wobuf,:)];
-                                    outrate = [outrate; rate(en_wobuf,:)];
+                                    if isinf(ni) % hit limited load-dependence
+                                        outrate = [outrate; cdscaling{ist}(nir).*lldscaling(ist,end).*rate(en_wobuf,:)];
+                                    else
+                                        outrate = [outrate; cdscaling{ist}(nir).*lldscaling(ist,min(ni,lldlimit)).*rate(en_wobuf,:)];
+                                    end
                                     outprob = [outprob; ones(size(rate(en_wobuf,:),1),1)];
                                     if start_svc_class > 0
                                         pentry_svc_class = pie{ist}{start_svc_class};
@@ -278,7 +399,11 @@ if sn.isstation(ind)
                                             outspace = [outspace; space_buf_k(en_wbuf,:), space_srv_k(en_wbuf,:), space_var(en_wbuf,:)];
                                             rate_k = rate;
                                             rate_k(en_wbuf,:) = rate(en_wbuf,:) * pentry_svc_class(kentry);
-                                            outrate = [outrate; rate_k(en_wbuf,:)];
+                                            if isinf(ni) % hit limited load-dependence
+                                                outrate = [outrate; cdscaling{ist}(nir).*lldscaling(ist,end).*rate_k(en_wbuf,:)];
+                                            else
+                                                outrate = [outrate; cdscaling{ist}(nir).*lldscaling(ist,min(ni,lldlimit)).*rate_k(en_wbuf,:)];
+                                            end
                                             outprob = [outprob; ones(size(rate_k(en_wbuf,:),1),1)];
                                         end
                                     end
@@ -291,7 +416,11 @@ if sn.isstation(ind)
                                     space_buf(en_wbuf,colfirstnnz)=0;
                                     if isempty(start_svc_class)
                                         outspace = [outspace; space_buf(en,:), space_srv(en,:), space_var(en,:)];
-                                        outrate = [outrate; rate(en,:)];
+                                        if isinf(ni) % hit limited load-dependence
+                                            outrate = [outrate; cdscaling{ist}(nir).*lldscaling(ist,end).*rate(en,:)];
+                                        else
+                                            outrate = [outrate; cdscaling{ist}(nir).*lldscaling(ist,min(ni,lldlimit)).*rate(en,:)];
+                                        end
                                         outprob = [outprob; ones(size(rate(en,:),1),1)];
                                         return
                                     end
@@ -302,10 +431,42 @@ if sn.isstation(ind)
                                         outspace = [outspace; space_buf(en,:), space_srv(en,:), space_var(en,:)];
                                         rate_k = rate;
                                         rate_k(en_wbuf,:) = rate(en_wbuf,:)*pentry_svc_class(kentry);
-                                        outrate = [outrate; rate_k(en,:)];
+                                        if isinf(ni) % hit limited load-dependence
+                                            outrate = [outrate; cdscaling{ist}(nir).*lldscaling(ist,end).*rate_k(en,:)];
+                                        else
+                                            outrate = [outrate; cdscaling{ist}(nir).*lldscaling(ist,min(ni,lldlimit)).*rate_k(en,:)];
+                                        end
                                         outprob = [outprob; ones(size(rate(en,:),1),1)];
                                         space_srv(en_wbuf,Ks(start_svc_class)+kentry) = space_srv(en_wbuf,Ks(start_svc_class)+kentry) - 1;
                                     end
+                                case SchedStrategy.ID_LCFSPR % move last job in service
+                                    space_srv(en,Ks(class)+k) = space_srv(en,Ks(class)+k) - 1; % record departure
+                                    rate(en) = mu{ist}{class}(k)*(phi{ist}{class}(k)).*kir(:,class,k); % assume active
+                                    en_wbuf = en & ni>S(ist); %states with jobs in buffer
+                                    [~, colfirstnnz] = max( space_buf(en_wbuf,:) ~=0, [], 2 ); % find first nnz column
+                                    start_svc_class = space_buf(en_wbuf,colfirstnnz); % job entering service
+                                    kentry = space_buf(en_wbuf,colfirstnnz+1); % entry phase of job starting or resuming service
+                                    space_buf(en_wbuf,colfirstnnz)=0;% zero popped job
+                                    space_buf(en_wbuf,colfirstnnz+1)=0; % zero popped phase
+                                    if isempty(start_svc_class)
+                                        outspace = [outspace; space_buf(en,:), space_srv(en,:), space_var(en,:)];
+                                        if isinf(ni) % hit limited load-dependence
+                                            outrate = [outrate; cdscaling{ist}(nir).*lldscaling(ist,end).*rate(en,:)];
+                                        else
+                                            outrate = [outrate; cdscaling{ist}(nir).*lldscaling(ist,min(ni,lldlimit)).*rate(en,:)];
+                                        end
+                                        outprob = [outprob; ones(size(rate(en,:),1),1)];
+                                        return
+                                    end
+                                    space_srv(en_wbuf,Ks(start_svc_class)+kentry) = space_srv(en_wbuf,Ks(start_svc_class)+kentry) + 1;
+                                    % if state is unchanged, still add with rate 0
+                                    outspace = [outspace; space_buf(en,:), space_srv(en,:), space_var(en,:)];
+                                    if isinf(ni) % hit limited load-dependence
+                                        outrate = [outrate; cdscaling{ist}(nir).*lldscaling(ist,end).*rate(en,:)];
+                                    else
+                                        outrate = [outrate; cdscaling{ist}(nir).*lldscaling(ist,min(ni,lldlimit)).*rate(en,:)];
+                                    end
+                                    outprob = [outprob; ones(size(rate(en,:),1),1)];
                                 case SchedStrategy.ID_SIRO
                                     rate = zeros(size(space_srv,1),1);
                                     rate(en) = mu{ist}{class}(k)*(phi{ist}{class}(k)).*kir(:,class,k); % this is for states not in en_buf
@@ -314,7 +475,11 @@ if sn.isstation(ind)
                                     % first record departure in states where the buffer is empty
                                     en_wobuf = en & sum(space_buf(en,:),2) == 0;
                                     outspace = [outspace; space_buf(en_wobuf,:), space_srv(en_wobuf,:), space_var(en_wobuf,:)];
-                                    outrate = [outrate; rate(en_wobuf,:)];
+                                    if isinf(ni) % hit limited load-dependence
+                                        outrate = [outrate; cdscaling{ist}(nir).*lldscaling(ist,end).*rate(en_wobuf,:)];
+                                    else
+                                        outrate = [outrate; cdscaling{ist}(nir).*lldscaling(ist,min(ni,lldlimit)).*rate(en_wobuf,:)];
+                                    end
                                     outprob = [outprob; ones(size(rate(en_wobuf,:),1),1)];
                                     % let's go now to states where the buffer is non-empty
                                     for r=1:R % pick a job of a random class
@@ -333,7 +498,11 @@ if sn.isstation(ind)
                                             outspace = [outspace; space_buf(en_wbuf,:), space_srv_r(en_wbuf,:), space_var(en_wbuf,:)];
                                             rate_k = rate_r;
                                             rate_k(en_wbuf,:) = rate_k(en_wbuf,:) * pentry_svc_class(kentry);
-                                            outrate = [outrate; rate_k(en_wbuf,:)];
+                                            if isinf(ni) % hit limited load-dependence
+                                                outrate = [outrate; cdscaling{ist}(nir).*lldscaling(ist,end).*rate_k(en_wbuf,:)];
+                                            else
+                                                outrate = [outrate; cdscaling{ist}(nir).*lldscaling(ist,min(ni,lldlimit)).*rate_k(en_wbuf,:)];
+                                            end
                                             outprob = [outprob; ones(size(rate(en_wbuf,:),1),1)];
                                             space_srv_r(en_wbuf,Ks(r)+kentry) = space_srv_r(en_wbuf,Ks(r)+kentry) - 1; % bring job in service
                                         end
@@ -359,13 +528,21 @@ if sn.isstation(ind)
                                             outspace = [outspace; space_buf(en,:), space_srv(en,:), space_var(en,:)];
                                             rate_k = rate;
                                             rate_k(en,:) = rate_k(en,:) * pentry(kentry);
-                                            outrate = [outrate; rate_k(en,:)];
+                                            if isinf(ni) % hit limited load-dependence
+                                                outrate = [outrate; cdscaling{ist}(nir).*lldscaling(ist,end).*rate_k(en,:)];
+                                            else
+                                                outrate = [outrate; cdscaling{ist}(nir).*lldscaling(ist,min(ni,lldlimit)).*rate_k(en,:)];
+                                            end
                                             outprob = [outprob; ones(size(rate(en,:),1),1)];
                                         else
                                             outspace = [outspace; space_buf(en,:), space_srv(en,:), space_var(en,:)];
                                             rate_k = rate;
                                             rate_k(en,:) = rate_k(en,:) * pentry(kentry);
-                                            outrate = [outrate; rate_k(en,:)];
+                                            if isinf(ni) % hit limited load-dependence
+                                                outrate = [outrate; cdscaling{ist}(nir).*lldscaling(ist,end).*rate_k(en,:)];
+                                            else
+                                                outrate = [outrate; cdscaling{ist}(nir).*lldscaling(ist,min(ni,lldlimit)).*rate_k(en,:)];
+                                            end
                                             outprob = [outprob; ones(size(rate(en,:),1),1)];
                                         end
                                         space_srv(en_wbuf,Ks(sept_class)+kentry) = space_srv(en_wbuf,Ks(sept_class)+kentry) - 1; % bring job in service
@@ -425,12 +602,16 @@ if sn.isstation(ind)
                                     w_i = sn.schedparam(ist,:); w_i = w_i / sum(w_i);
                                     rate = proc{ist}{class}{1}(k,kdest)*kir(:,class,k)/nir(class)*w_i(class)/(w_i*cir(:)); % assume active
                                     
-                                case {SchedStrategy.ID_FCFS, SchedStrategy.ID_HOL, SchedStrategy.ID_LCFS, SchedStrategy.ID_SIRO, SchedStrategy.ID_SEPT, SchedStrategy.ID_LEPT}
+                                case {SchedStrategy.ID_FCFS, SchedStrategy.ID_HOL, SchedStrategy.ID_LCFS, SchedStrategy.ID_LCFSPR, SchedStrategy.ID_SIRO, SchedStrategy.ID_SEPT, SchedStrategy.ID_LEPT}
                                     rate = proc{ist}{class}{1}(k,kdest)*kir(:,class,k); % assume active
                             end
                             % if the class cannot be served locally,
                             % then rate = NaN since mu{i,class}=NaN
-                            outrate = [outrate; rate];
+                            if isinf(ni) % hit limited load-dependence
+                                outrate = [outrate; cdscaling{ist}(nir).*lldscaling(ist,end).*rate];
+                            else
+                                outrate = [outrate; cdscaling{ist}(nir).*lldscaling(ist,min(ni,lldlimit)).*rate];
+                            end
                             outspace = [outspace; space_buf_k, space_srv_k, space_var_k];
                             outprob = [outprob; ones(size(rate,1),1)];
                         end
@@ -467,7 +648,7 @@ elseif sn.isstateful(ind)
                 case EventType.ID_READ
                     n = sn.varsparam{ind}.nitems; % n items
                     m = sn.varsparam{ind}.cap; % capacity
-                    ac = sn.varsparam{ind}.accost; % access cost                    
+                    ac = sn.varsparam{ind}.accost; % access cost
                     hitclass = sn.varsparam{ind}.hitclass;
                     missclass = sn.varsparam{ind}.missclass;
                     h = length(m);
@@ -550,7 +731,7 @@ elseif sn.isstateful(ind)
                                                     %varp(cpos(i,j)) = var(cpos(i+1,m(i+1)));
                                                     %varp(cpos(i+1,2):cpos(i+1,m(i+1))) = var(cpos(i+1,1):cpos(i+1,m(i+1)-1));
                                                     %varp(cpos(i+1,1)) = k;
-                                                                                                        
+                                                    
                                                     space_srv_k = [space_srv_k; space_srv_e];
                                                     space_var_k = [space_var_k; varp];
                                                     outrate(end+1,1) = Distrib.InfRate;
@@ -622,7 +803,7 @@ elseif sn.isstateful(ind)
                                                 space_var_k = [space_var_k; (var)];
                                                 if isSimulation
                                                     outrate(end+1,1) = Distrib.InfRate;
-                                                else                                                    
+                                                else
                                                     outrate(end+1,1) = ac{class,k}(1+h,1+h) * p(k) * Distrib.InfRate;
                                                 end
                                             case {ReplacementStrategy.ID_FIFO, ReplacementStrategy.ID_SFIFO}

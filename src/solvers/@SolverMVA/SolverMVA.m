@@ -19,7 +19,7 @@ classdef SolverMVA < NetworkSolver
             sn = self.model.getStruct(false);
         end
         
-        [runtime, analyzer] = runAnalyzer(self, options, config);        
+        [runtime, analyzer] = runAnalyzer(self, options);        
         [lNormConst] = getProbNormConstAggr(self);        
         [Pnir,logPnir] = getProbAggr(self, ist);        
         [Pnir,logPn] = getProbSysAggr(self);
@@ -40,6 +40,7 @@ classdef SolverMVA < NetworkSolver
                 'Server','JobSink','RandomSource','ServiceTunnel',...
                 'SchedStrategy_INF','SchedStrategy_PS',...
                 'SchedStrategy_DPS','SchedStrategy_FCFS',...
+                'SchedStrategy_LCFSPR',...
                 'RoutingStrategy_PROB','RoutingStrategy_RAND',...
                 'ClosedClass','OpenClass','Replayer'});
         end

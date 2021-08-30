@@ -1,5 +1,9 @@
-function [lG,G]=pfqn_gmvaldsingle(L,N,mu)
+function [lG,G]=pfqn_gmvaldsingle(L,N,mu,options)
 % G=PFQN_GMVALDSINGLE(L,N,MU)
+
+if nargin<4
+    options = [];
+end
 
 [M,R]=size(L);
 if R>1

@@ -1,12 +1,13 @@
-function RD = getCdfRespT(self, R, config)
+function RD = getCdfRespT(self, R)
 % RD = GETCDFRESPT(R)
 T0 = tic;
 if nargin<2 || isempty(R) %~exist('R','var')
     R = self.getAvgRespTHandles;
 end
-if nargin<3 %~exist('config','var')
-    config = self.getOptions.config;
-    config.algorithm = 'exact';
+
+config = self.getOptions.praqma;
+if ~isfield(config,'algorithm')
+	config.algorithm = 'exact';
 end
 RD = {};
 sn = self.getStruct;

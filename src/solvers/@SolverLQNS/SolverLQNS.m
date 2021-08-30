@@ -15,7 +15,7 @@ classdef SolverLQNS < LayeredNetworkSolver
             end
         end
         
-        function runtime = runAnalyzer(self, options, config)
+        function runtime = runAnalyzer(self, options)
             % RUNTIME = RUN()
             % Run the solver
             
@@ -370,9 +370,9 @@ classdef SolverLQNS < LayeredNetworkSolver
         
         function plot(model)
             lastwd = pwd;
-            cwd = [lineRootFolder,filesep,'workspace'];
+            cwd = [lineRootFolder,filesep,'workspace',filesep,'lqns'];
             cd(cwd)
-            fname = tempname([lineRootFolder,filesep,'workspace']);
+            fname = tempname([lineRootFolder,filesep,'workspace',filesep,'lqns']);
             model.writeXML(fname);
             [d,f]=fileparts(fname);
             system(sprintf('lqn2ps %s',f));

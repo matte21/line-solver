@@ -10,6 +10,7 @@ end
 switch options.method
     case {'default','serial'}
         [~, tranSystemState, tranSync] = self.runAnalyzer(options);
+		
         tranSysState = struct();
         tranSysState.handle = self.model.getStatefulNodes';
         tranSysState.t = tranSystemState{1};
@@ -35,8 +36,7 @@ switch options.method
                 tranSysState.event{end}.t = tranSysState.t(e);
             end
         end
-        tranSysState.isaggregate = false;        
-        
+        tranSysState.isaggregate = false;                
     otherwise
         line_error(mfilename,'sampleSys is not available in SolverSSA with the chosen method.');
 end

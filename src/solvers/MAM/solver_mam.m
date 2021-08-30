@@ -1,4 +1,4 @@
-function [QN,UN,RN,TN,CN,XN] = solver_mam(sn, options, config)
+function [QN,UN,RN,TN,CN,XN] = solver_mam(sn, options)
 %[Q,U,R,T,C,X] = SOLVER_MAM(QN, PH, OPTIONS)
 
 %Copyright (c) 2012-2021, Imperial College London
@@ -7,6 +7,8 @@ global SCVmam
 global BuToolsVerbose;
 global BuToolsCheckInput;
 global BuToolsCheckPrecision;
+
+config = options.config;
 
 PH = sn.proc;
 I = sn.nnodes;
@@ -36,7 +38,7 @@ for k=1:K
     chain(k) = find(sn.chains(:,k));
 end
 
-if all(isinf(sn.njobs)) % is open 
+if all(isinf(sn.njobs)) % is open
     %    open queueing system (one node is the external world)
     BuToolsVerbose = false;
     BuToolsCheckInput = false;
@@ -87,7 +89,7 @@ if all(isinf(sn.njobs)) % is open
                     if length(ARV{ind}{1}) > config.space_max
                         line_printf('\nArrival process at node %d is now at %d states. Compressing.',ind,length(ARV{ind}{1}));
                         ARV{ind} = mmap_compress(ARV{ind});
-                    end                    
+                    end
                     [Qret{1:K}, ncDistr] = MMAPPH1FCFS({ARV{ind}{[1,3:end]}}, {pie{ist}{:}}, {D0{ist,:}}, 'ncMoms', 1, 'ncDistr',2);
                     for k=1:K
                         QN(ist,k) = sum(Qret{k});

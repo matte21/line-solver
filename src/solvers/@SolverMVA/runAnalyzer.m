@@ -1,13 +1,10 @@
-function [runtime, analyzer] = runAnalyzer(self, options, config)
+function [runtime, analyzer] = runAnalyzer(self, options)
 % RUNTIME = RUN()
 % Run the solver
 
 T0=tic;
 if nargin<2
     options = self.getOptions;
-end
-if nargin<3
-    config = [];
 end
 
 QN = []; UN = [];
@@ -74,7 +71,7 @@ elseif sn.nclosedjobs == 0 && length(sn.nodetype)==3 && all(sort(sn.nodetype)' =
         end
     end
     self.model.refreshChains;
-else % queueing network    
+else % queueing network
     % random initialization
     for ind = 1:sn.nnodes
         if sn.nodetype(ind) == NodeType.Cache
@@ -88,8 +85,12 @@ else % queueing network
             if nargout > 1
                 analyzer = @(sn) solver_mva_bound_analyzer(sn, options);
             end
-        otherwise
-            [QN,UN,RN,TN,CN,XN,lG,runtime] = solver_mva_analyzer(sn, options);
+        otherwise           
+            if ~isempty(sn.lldscaling) || ~isempty(sn.cdscaling)
+                [QN,UN,RN,TN,CN,XN,lG,runtime] = solver_mvald_analyzer(sn, options);
+            else                
+                [QN,UN,RN,TN,CN,XN,lG,runtime] = solver_mva_analyzer(sn, options);
+            end
             if nargout > 1
                 analyzer = @(sn) solver_mva_analyzer(sn, options);
             end

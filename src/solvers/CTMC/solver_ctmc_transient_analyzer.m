@@ -9,35 +9,12 @@ RNt=[]; CNt=[];  XNt=[];
 M = sn.nstations;    %number of stations
 K = sn.nclasses;    %number of classes
 fname = '';
-rt = sn.rt;
-S = sn.nservers;
-NK = sn.njobs';  % initial population per class
-schedid = sn.schedid;
-
 Tstart = tic;
-
+S = sn.nservers;
+schedid = sn.schedid;
 PH = sn.proc;
 
-myP = cell(K,K);
-for k = 1:K
-    for c = 1:K
-        myP{k,c} = zeros(M);
-    end
-end
-
-for i=1:M
-    for j=1:M
-        for k = 1:K
-            for c = 1:K
-                % routing table for each class
-                myP{k,c}(i,j) = rt((i-1)*K+k,(j-1)*K+c);
-            end
-        end
-    end
-end
-
 [InfGen,StateSpace,StateSpaceAggr,EventFiltration,~,depRates,sn] = solver_ctmc(sn, options); % sn is updated with the state space
-
 
 if options.keep
     fname = lineTempName;

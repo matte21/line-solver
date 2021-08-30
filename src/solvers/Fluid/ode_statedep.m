@@ -50,6 +50,7 @@ for i = 1:M
             end
         case SchedStrategy.ID_EXT  %EXT
             % todo
+            line_error(mfilename,'State dependent ODE method does not support open models. Try with default method.');
         case SchedStrategy.ID_PS
             idxIni = q_indices(i,1);
             idxEnd = q_indices(i,K) + Kic(i,K) - 1;

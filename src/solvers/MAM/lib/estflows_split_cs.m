@@ -12,11 +12,11 @@ n = length(MMAP);
 M = round(J/R);
 
 SMMAP = cell(1,M);
-for j=1:M    
+for j=1:M
     SMMAP{j} = cell(1,2+R);
     SMMAP{j}{1} = MMAP{1} + MMAP{2};
     SMMAP{j}{2} = 0*MMAP{2};
-    for s=1:R        
+    for s=1:R
         SMMAP{j}{2+s} = SMMAP{j}{1} * 0;
         for r=1:R
             SMMAP{j}{2+s} = SMMAP{j}{2+s} + MMAP{2+r}*P(r,(j-1)*R+s);

@@ -79,7 +79,7 @@ else
     Y = pfqn_mva(y,N,0*N);
     rhoN = y*Y';
     for vtot=1:vmax
-        lEN(vtot+1) = pfqn_gmvaldsingle(rhoN,vtot,beta);
+        lEN(vtot+1) = pfqn_gldsingle(rhoN,vtot,beta);
     end
     lEN = real(lEN);
     

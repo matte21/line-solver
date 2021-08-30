@@ -15,22 +15,17 @@ ST = 1 ./ sn.rates;
 ST(isnan(ST))=0;
 ST0=ST;
 
-alpha = zeros(sn.nstations,sn.nclasses);
-Vchain = zeros(sn.nstations,sn.nchains);
+[~,~,Vchain,alpha] = snGetDemandsChain(sn);
 V = zeros(sn.nstations,sn.nclasses);
 for c=1:sn.nchains
     inchain = find(sn.chains(c,:));
     for i=1:sn.nstations
-        Vchain(i,c) = sum(sn.visits{c}(i,inchain)) / sum(sn.visits{c}(sn.refstat(inchain(1)),inchain));
         for k=inchain
             V(i,k) = sn.visits{c}(i,k);
-            alpha(i,k) = alpha(i,k) + sn.visits{c}(i,k) / sum(sn.visits{c}(i,inchain));
         end
     end
 end
-Vchain(~isfinite(Vchain))=0;
-alpha(~isfinite(alpha))=0;
-alpha(alpha<1e-12)=0;
+
 eta_1 = zeros(1,M);
 eta = ones(1,M);
 ca = ones(1,M);
@@ -237,7 +232,7 @@ state = sn.state;
 G = exp(lG);
 
 if strcmpi(method,'exact')
-    G = pfqn_gmvald(Lchain, Nchain, mu);
+    G = exp(pfqn_ncld(Lchain, Nchain, 0*Nchain, mu));
 end
 Pr = 1;
 for ist=1:M
@@ -247,11 +242,11 @@ for ist=1:M
     nivec_chain = nivec * sn.chains';
     if any(nivec_chain>0)
         % note that these terms have just one station so fast to compute
-        %F_i = pfqn_gmvald(Lchain(i,:), nivec_chain, mu(i,:));
-        %g0_i = pfqn_gmvald(ST(i,:).*alpha(i,:),nivec, mu(i,:));
-        %G0_i = pfqn_gmvald(STchain(i,:),nivec_chain, mu(i,:));
+        %F_i = exp(pfqn_ncld(Lchain(i,:), nivec_chain, mu(i,:));
+        %g0_i = exp(pfqn_ncld(ST(i,:).*alpha(i,:),nivec, mu(i,:));
+        %G0_i = exp(pfqn_ncld(STchain(i,:),nivec_chain, mu(i,:));
         %Pr = Pr * g0_i * (F_i / G0_i);
-        F_i = pfqn_gmvald(ST(ist,:).*V(ist,:), nivec, mu(ist,:), options);
+        F_i = exp(pfqn_ncld(ST(ist,:).*V(ist,:), nivec, 0*nivec, mu(ist,:), options));
         Pr = Pr * F_i ;
     end
 end

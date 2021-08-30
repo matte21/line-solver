@@ -185,7 +185,7 @@ end
 %                   line_error(mfilename,'Invalid routing probabilities (Node %d departures, switching from class %d).',minpos(Psum),r);
 %                 end
 %                 if max(Psum)>1+1e-4
-%                   line_error(sprintf('Invalid routing probabilities (Node %d departures, switching from class %d).',maxpos(Psum),r));
+%                   line_error(mfilename,sprintf('Invalid routing probabilities (Node %d departures, switching from class %d).',maxpos(Psum),r));
 %                 end
 %             end
 

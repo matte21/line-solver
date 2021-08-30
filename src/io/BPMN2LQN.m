@@ -1,4 +1,4 @@
-function myLQN = BPMN2LQN(bp, bp_ext, verbose)
+function myLQN = BPMN2LQN(bp, bp_ext)
 
     import BPMN.*;
 
@@ -110,11 +110,11 @@ function myLQN = BPMN2LQN(bp, bp_ext, verbose)
 
         % buils a list of all messages: ID - sourceProcess - sourceElement - targetProcess - targetElement
         msgList = createMsgList(bp); 
-        disp(msgList);
+        %disp(msgList);
 
         % create a request-reply list, specifying, for each request message the corresponding reply message
         reqReply = createReqReplyList(bp, refProcesses, msgList); 
-        disp(reqReply);
+        %disp(reqReply);
         % check there is only one reference process
         if sum(refProcesses) > 1
             % throw exception - more than one start event 
@@ -302,7 +302,8 @@ function newTask = generateTaskActivityGraph(proc, newTask, initElemID, bp_ext, 
             end
         end
     end
-    disp(flowElements);
+    %disp("All elements in this example:");
+    %disp(flowElements);
     % list of links in the process - nx3 sring cell, each row with id -
     % source - target
     links = cell(length(proc.sequenceFlows),3);
@@ -320,6 +321,10 @@ function newTask = generateTaskActivityGraph(proc, newTask, initElemID, bp_ext, 
     idxToCheck = zeros(n,1);  % 0-1 vector, 1 for a flow element discovered but not checked
     idxToCheck(currIdx) = 1;
     startPoint = 1;
+    
+    preTypes = {ActivityPrecedence.PRE_SEQ,ActivityPrecedence.PRE_AND,ActivityPrecedence.PRE_OR};
+    postTypes = {ActivityPrecedence.POST_SEQ,ActivityPrecedence.POST_AND,ActivityPrecedence.POST_OR,ActivityPrecedence.POST_LOOP};
+        
     while sum(idxChecked) < n
         currIdx = find(idxToCheck,1);
         currType = flowElements{currIdx,2};
@@ -385,14 +390,16 @@ function newTask = generateTaskActivityGraph(proc, newTask, initElemID, bp_ext, 
         inLinks = currElement.incoming; 
         m_in = size(inLinks,1);
 
-        preTypes = {ActivityPrecedence.PRE_SEQ,ActivityPrecedence.PRE_AND,ActivityPrecedence.PRE_OR};
-        postTypes = {ActivityPrecedence.POST_SEQ,ActivityPrecedence.POST_AND,ActivityPrecedence.POST_OR,ActivityPrecedence.POST_LOOP};
         posts = cell(m_out,1); 
-        postParams = zeros(m_out,1);
-        pres = cell(m_in,1); 
+        pres = cell(m_in,1);         
 
         if m_in  > 1
-            preType = preTypes{3};
+            if strcmp(currType, 'parallelGateways')
+                preType = preTypes{2};
+            else
+                preType = preTypes{3};
+            end
+            
             preParams = [];
             for j = 1:m_in
                 inLinkIdx = getIndexCellString(links(:,1), inLinks{j});
@@ -441,7 +448,9 @@ function newTask = generateTaskActivityGraph(proc, newTask, initElemID, bp_ext, 
         pres{1} = flowElements{currIdx,1};
         preType = preTypes{1};
         preParams = [];
-
+        nextType = flowElements{outIdx,2};
+        nextElement = eval(['proc.',nextType,'(',flowElements{outIdx,3},')']);
+        
         if m_out > 1
             if strcmp(currType, 'exclusiveGateways')
                 postType = postTypes{3};
@@ -450,14 +459,49 @@ function newTask = generateTaskActivityGraph(proc, newTask, initElemID, bp_ext, 
                     elemIdx = getIndexCellString( bp_ext.exclusiveGateways(gateIdx).outgoingLinks(:,1), currElement.outgoing{j});
                     postParams(j) = bp_ext.exclusiveGateways(gateIdx).outgoingLinks{elemIdx,2};
                 end
+            else % parallelGateways
+                postType = postTypes{2};
+                postParams = [];
             end
         else
-            postType = postTypes{1};
-            postParams = [];
+            if strcmp(nextType, 'tasks') && ~isempty(nextElement.loopCharacteristics)
+                postType = postTypes{4};
+                postParams = nextElement.loopCharacteristics{3};
+                posts{1} = flowElements{outIdx,1};
+                next_outLinks = nextElement.outgoing;
+                next_outLinkIdx = getIndexCellString(links(:,1), next_outLinks{1});
+                % index of target node 
+                next_outIdx = getIndexCellString(flowElements(:,1), links{next_outLinkIdx,3});
+                nnextType = flowElements{next_outIdx,2};
+                nnextElement = eval(['proc.',nnextType,'(',flowElements{next_outIdx,3},')']);
+                while strcmp(nnextType, 'tasks') && ~isempty(nnextElement.loopCharacteristics) 
+                    
+                    posts{end+1} = flowElements{next_outIdx,1};
+                    % add out nodes not checked yet to list of nodes to check 
+                    if idxToCheck(next_outIdx) == 0 && idxChecked(next_outIdx) == 0 
+                        idxChecked(next_outIdx) = 1; 
+                    end
+                    next_outLinks = nnextElement.outgoing;
+                    next_outLinkIdx = getIndexCellString(links(:,1), next_outLinks{1});
+                    % index of target node 
+                    next_outIdx = getIndexCellString(flowElements(:,1), links{next_outLinkIdx,3});
+                    nnextType = flowElements{next_outIdx,2};
+                    nnextElement = eval(['proc.',nnextType,'(',flowElements{next_outIdx,3},')']);
+                end
+                %posts{end+1} = flowElements{next_outIdx,1};
+                %idxChecked(outIdx) = 1;
+                %idxToCheck(outIdx) = 0;
+                %if idxToCheck(next_outIdx) == 0 && idxChecked(next_outIdx) == 0 
+                        %idxToCheck(next_outIdx) = 1;
+                %end
+            else
+                postType = postTypes{1};
+                postParams = [];
+            end
         end
-
-        nextType = flowElements{outIdx,2};
-        nextElement = eval(['proc.',nextType,'(',flowElements{outIdx,3},')']);
+        if strcmp(currType, 'tasks') && ~isempty(currElement.loopCharacteristics) && strcmp(nextType, 'tasks') && ~isempty(nextElement.loopCharacteristics)
+            posts = [];
+        end
         next_in = nextElement.incoming;
         if strcmp(currType, 'sendTasks')
             numNextIn = 1;

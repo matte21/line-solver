@@ -27,7 +27,7 @@ classdef SolverFluid < NetworkSolver
         
         
         % solve method is supplied by Solver superclass
-        runtime = runAnalyzer(self, options, config);
+        runtime = runAnalyzer(self, options);
     end
     
     methods (Static)

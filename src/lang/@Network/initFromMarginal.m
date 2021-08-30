@@ -31,7 +31,7 @@ for ind=1:sn.nnodes
                 self.nodes{ind}.setState(State.fromMarginal(sn,ind,n(ist,:)));
         end
         if isempty(self.nodes{ind}.getState)
-            line_error(sprintf('Invalid state assignment for station %d.',ind));
+            line_error(mfilename,sprintf('Invalid state assignment for station %d.',ind));
         end
     end
 end

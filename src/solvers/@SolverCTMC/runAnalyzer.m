@@ -1,4 +1,4 @@
-function runtime = runAnalyzer(self, options, config)
+function runtime = runAnalyzer(self, options)
 % RUNTIME = RUN()
 % Run the solver
 
@@ -6,9 +6,6 @@ T0=tic;
 
 if nargin<2
     options = self.getOptions;
-end
-if nargin<3
-    config = [];
 end
 
 if ~isinf(options.timespan(1)) && (options.timespan(1) == options.timespan(2))
@@ -70,13 +67,9 @@ if isinf(options.timespan(1))
         self.model.nodes{ind}.setState(sn.state{isf});
         switch class(self.model.nodes{sn.statefulToNode(isf)})
             case 'Cache'
-                try
-            self.model.nodes{sn.statefulToNode(isf)}.setResultHitProb(sn.varsparam{ind}.actualhitprob);
-            self.model.nodes{sn.statefulToNode(isf)}.setResultMissProb(sn.varsparam{ind}.actualmissprob);
-                    self.model.refreshChains();
-                catch
-                    keyboard
-                end
+                self.model.nodes{sn.statefulToNode(isf)}.setResultHitProb(sn.varsparam{ind}.actualhitprob);
+                self.model.nodes{sn.statefulToNode(isf)}.setResultMissProb(sn.varsparam{ind}.actualmissprob);
+                self.model.refreshChains();
         end
     end
     %sn.space = SS;

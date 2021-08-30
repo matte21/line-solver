@@ -1,20 +1,21 @@
-function [XN,UN,QN,RN,TN,CN,qnc]=solver_ssa_analyzer_spmd(laboptions, sn, PH)
+function [XN,UN,QN,RN,TN,CN,tranSysState,tranSync,snc]=solver_ssa_analyzer_spmd(sn, laboptions)
 % [XN,UN,QN,RN,TN,CN]=SOLVER_SSA_ANALYZER_SPMD(LABOPTIONS, QN, PH)
 
-qnc = sn;
-M = qnc.nstations;    %number of stations
-K = qnc.nclasses;    %number of classes
+snc = sn; % required due to spmn parallelism
+M = snc.nstations;    %number of stations
+K = snc.nclasses;    %number of classes
+PH = sn.proc;
+S = snc.nservers;
+NK = snc.njobs';  % initial population per class
 
-S = qnc.nservers;
-NK = qnc.njobs';  % initial population per class
 spmd
     laboptions.samples = ceil(laboptions.samples / numlabs);
     laboptions.verbose = false;
     switch laboptions.method
         case {'para','parallel'}
-            [probSysState,SSq,arvRates,depRates,~,~,qnc] = solver_ssa(qnc, laboptions);
+            [probSysState,SSq,arvRates,depRates,~,~,snc] = solver_ssa(snc, laboptions);
         case {'para.hash','parallel.hash'}
-            [probSysState,SSq,arvRates,depRates,qnc] = solver_ssa_hashed(qnc, laboptions);
+            [probSysState,SSq,arvRates,depRates,snc] = solver_ssa_hashed(snc, laboptions);
     end
     XN = NaN*zeros(1,K);
     UN = NaN*zeros(M,K);
@@ -23,13 +24,13 @@ spmd
     TN = NaN*zeros(M,K);
     CN = NaN*zeros(1,K);    
     for k=1:K
-        refsf = qnc.stationToStateful(qnc.refstat(k));
-        XN(k) = probSysState*arvRates(:,refsf,k);
+        refsf = snc.stationToStateful(snc.refstat(k));
+        XN(k) = probSysState*depRates(:,refsf,k);
         for i=1:M
-            isf = qnc.stationToStateful(i);
+            isf = snc.stationToStateful(i);
             TN(i,k) = probSysState*depRates(:,isf,k);
             QN(i,k) = probSysState*SSq(:,(i-1)*K+k);
-            switch qnc.schedid(i)
+            switch snc.schedid(i)
                 case SchedStrategy.ID_INF
                     UN(i,k) = QN(i,k);
                 otherwise
@@ -63,8 +64,8 @@ spmd
     
     % now update the routing probabilities in nodes with state-dependent routing
     for k=1:K
-        for isf=1:qnc.nstateful
-            if qnc.nodetype(isf) == NodeType.Cache
+        for isf=1:snc.nstateful
+            if snc.nodetype(isf) == NodeType.Cache
                 TNcache(isf,k) = probSysState*depRates(:,isf,k);
             end
         end
@@ -72,14 +73,14 @@ spmd
     
     % updates cache actual hit and miss data
     for k=1:K
-        for isf=1:qnc.nstateful
-            if qnc.nodetype(isf) == NodeType.Cache
-                ind = qnc.statefulToNode(isf);
-                if length(qnc.varsparam{ind}.hitclass)>=k
-                    h = qnc.varsparam{ind}.hitclass(k);
-                    m = qnc.varsparam{ind}.missclass(k);
-                    qnc.varsparam{ind}.actualhitprob(k) = TNcache(isf,h)/sum(TNcache(isf,[h,m]));
-                    qnc.varsparam{ind}.actualmissprob(k) = TNcache(isf,m)/sum(TNcache(isf,[h,m]));
+        for isf=1:snc.nstateful
+            if snc.nodetype(isf) == NodeType.Cache
+                ind = snc.statefulToNode(isf);
+                if length(snc.varsparam{ind}.hitclass)>=k
+                    h = snc.varsparam{ind}.hitclass(k);
+                    m = snc.varsparam{ind}.missclass(k);
+                    snc.varsparam{ind}.actualhitprob(k) = TNcache(isf,h)/sum(TNcache(isf,[h,m]));
+                    snc.varsparam{ind}.actualmissprob(k) = TNcache(isf,m)/sum(TNcache(isf,[h,m]));
                 end
             end
         end
@@ -101,7 +102,7 @@ for k=1:K
             sn.varsparam{ind}.actualhitprob(k) = 0;
             sn.varsparam{ind}.actualmissprob(k) = 0;
             for l=1:nLabs
-                qntmp = qnc{l};                
+                qntmp = snc{l};                
                 if length(qntmp.varsparam{ind}.hitclass)>=k                
                     sn.varsparam{ind}.actualhitprob(k) = sn.varsparam{ind}.actualhitprob(k) + (1/nLabs) * qntmp.varsparam{ind}.actualhitprob(k);
                     sn.varsparam{ind}.actualmissprob(k) = sn.varsparam{ind}.actualmissprob(k) + (1/nLabs) * qntmp.varsparam{ind}.actualmissprob(k);
@@ -110,5 +111,7 @@ for k=1:K
         end
     end
 end
-qnc = sn;
+snc = sn;
+tranSysState=[];
+tranSync=[];
 end

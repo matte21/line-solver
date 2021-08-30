@@ -52,14 +52,14 @@ while (isfinite(timespan(2)) && T < timespan(2)) || (goon && iter < iter_max)
     
     try
         if stiff
-            [t_iter, ymean_t_iter] = solveodestiff(ode_h, trange, y0, odeopt, options);
+            [t_iter, ymean_t_iter] = ode_solve_stiff(ode_h, trange, y0, odeopt, options);
         else
-            [t_iter, ymean_t_iter] = solveode(ode_h, trange, y0, odeopt, options);
+            [t_iter, ymean_t_iter] = ode_solve(ode_h, trange, y0, odeopt, options);
         end
     catch me
         line_printf('\nThe initial point is invalid, Fluid solver switching to default initialization.');
         odeopt = odeset('AbsTol', tol, 'RelTol', tol, 'NonNegative', 1:length(ydefault));
-        [t_iter, ymean_t_iter] = solveode(ode_h, trange, ydefault, odeopt, options);
+        [t_iter, ymean_t_iter] = ode_solve(ode_h, trange, ydefault, odeopt, options);
     end
     ymean_t(end+1:end+size(ymean_t_iter,1),:) = ymean_t_iter;
     t(end+1:end+size(t_iter,1),:) = t_iter;

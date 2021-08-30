@@ -1,4 +1,4 @@
-function [QN,UN,RN,TN,CN,XN] = solver_mam_basic(sn, options, config)
+function [QN,UN,RN,TN,CN,XN] = solver_mam_basic(sn, options)
 % [Q,U,R,T,C,X] = SOLVER_MAM(QN, PH, OPTIONS)
 
 % Copyright (c) 2012-2021, Imperial College London
@@ -7,6 +7,8 @@ function [QN,UN,RN,TN,CN,XN] = solver_mam_basic(sn, options, config)
 global BuToolsVerbose;
 global BuToolsCheckInput;
 global BuToolsCheckPrecision;
+
+config = options.config;
 
 PH = sn.proc;
 %% generate local state spaces
@@ -101,7 +103,7 @@ if all(isinf(sn.njobs)) % is open
                         TN(ist,k) = lambda(k)*V(ist,k);
                         UN(ist,k) = map_mean(PH{ist}{k})*TN(ist,k);
                     end
-                    sum(UN(ist,:))
+                    
                     for k=1:K
                         QN(ist,k) = UN(ist,k)/(1-sum(UN(ist,:)));
                         RN(ist,k) = QN(ist,k)/TN(ist,k);
@@ -146,7 +148,7 @@ if all(isinf(sn.njobs)) % is open
         else % not a station
             switch sn.nodetype(ind)
                 case NodeType.Fork
-                    
+                    line_error(mfilename,'Fork nodes not supported yet by MAM solver.');
             end
         end
     end

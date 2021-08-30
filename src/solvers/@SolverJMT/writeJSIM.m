@@ -20,7 +20,7 @@ for i=1:numOfNodes
     for j=1:length(nodeSections)
         xml_section = simXMLDoc.createElement('section');
         currentSection = nodeSections{1,j};
-        if ~isempty(currentSection)
+        if ~isempty(currentSection)            
             xml_section.setAttribute('className', currentSection.className);
             switch currentSection.className
                 case 'Buffer'
@@ -29,7 +29,7 @@ for i=1:numOfNodes
                     [simXMLDoc, xml_section] = saveDropStrategy(self, simXMLDoc, xml_section, ind); % unfinished
                     [simXMLDoc, xml_section] = saveGetStrategy(self, simXMLDoc, xml_section);
                     [simXMLDoc, xml_section] = savePutStrategy(self, simXMLDoc, xml_section, ind);
-                case 'Server'
+                case {'Server','PreemptiveServer'}
                     [simXMLDoc, xml_section] = saveNumberOfServers(self, simXMLDoc, xml_section, ind);
                     [simXMLDoc, xml_section] = saveServerVisits(self, simXMLDoc, xml_section);
                     [simXMLDoc, xml_section] = saveServiceStrategy(self, simXMLDoc, xml_section, ind);

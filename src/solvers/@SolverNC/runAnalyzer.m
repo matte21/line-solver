@@ -1,4 +1,4 @@
-function runtime = runAnalyzer(self, options, config)
+function runtime = runAnalyzer(self, options)
 % RUNTIME = RUN()
 % Run the solver
 
@@ -7,9 +7,6 @@ sn = getStruct(self); % doesn't need initial state
 T0=tic;
 if nargin<2
     options = self.getOptions;
-end
-if nargin<3
-    config = [];
 end
 
 if self.enableChecks && ~self.supports(self.model)
@@ -59,17 +56,7 @@ else % queueing network
     if any(sn.nodetype == NodeType.Cache)
         line_error(mfilename,'Caching analysis not supported yet by NC in general networks.');
     end
-%     configLDSolver = false;
-%     if isfield(options,'config')
-%         for c=1:2:length(options.config)
-%             switch options.config{c}
-%                 case 'ld'
-%                     configLDSolver = options.config{c+1};
-%             end
-%         end
-%     end
-%    if configLDSolver
-    if ~isempty(sn.lldscaling)        
+    if ~isempty(sn.lldscaling) || ~isempty(sn.cdscaling)        
         [QN,UN,RN,TN,CN,XN,lG,runtime] = solver_ncld_analyzer(sn, options);        
     else
         [QN,UN,RN,TN,CN,XN,lG,runtime] = solver_nc_analyzer(sn, options);

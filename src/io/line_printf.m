@@ -13,7 +13,7 @@ else
         if contains(MSG,'Summary')
             fprintf(1, sprintf('%s\n',sprintf(MSG, varargin{:})));
         elseif contains(MSG,'Iter')
-            fprintf(1, sprintf('%s',sprintf(MSG, varargin{:})));
+            fprintf(1, sprintf('%s',sprintf(MSG, varargin{:})));        
         else
             fprintf(1, '%s\n', sprintf(MSG, varargin{:}));
         end

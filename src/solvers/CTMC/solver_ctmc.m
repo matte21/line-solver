@@ -1,4 +1,4 @@
-function [Q,SS,SSq,Dfilt,arvRates,depRates,sn]=solver_ctmc(sn,options)
+function [Q,stateSpace,stateSpaceAggr,Dfilt,arvRates,depRates,sn]=solver_ctmc(sn,options)
 % [Q,SS,SSQ,DFILT,ARVRATES,DEPRATES,QN]=SOLVER_CTMC(QN,OPTIONS)
 %
 % Copyright (c) 2012-2021, Imperial College London
@@ -13,77 +13,53 @@ csmask = sn.csmask;
 if isoctave
     %warning off;
 end
-
-[SS,SSh,qnc] = State.spaceGenerator(sn, options.cutoff, options);
-sn.space = qnc.space;
-if options.verbose
-    line_printf('\nCTMC state space size: %d states. ',size(SS,1));
-end
 if ~isfield(options, 'hide_immediate')
     options.hide_immediate = true;
 end
 
+%% generate state spaces, detailed and aggregate
+[stateSpace, stateSpaceAggr, stateSpaceHashed,~,sn] = ctmc_ssg(sn,options);
+
 %size(SS)
 %%
-Q = sparse(eye(size(SSh,1))); % the diagonal elements will be removed later
+Q = sparse(eye(size(stateSpaceHashed,1))); % the diagonal elements will be removed later
 A = length(sync);
 Dfilt = cell(1,A);
 for a=1:A
     Dfilt{a} = 0*Q;
 end
 local = sn.nnodes+1; % passive action
-arvRates = zeros(size(SSh,1),nstateful,nclasses);
-depRates = zeros(size(SSh,1),nstateful,nclasses);
-SSq = zeros(size(SSh));
-
-% for all synchronizations
-for a=1:A
-    stateCell = cell(nstateful,1);
-    for s=1:size(SSh,1)
-        state = SSh(s,:);
-        % update state cell array and SSq
-        for ind = 1:sn.nnodes
-            if sn.isstateful(ind)
-                isf = sn.nodeToStateful(ind);
-                stateCell{isf} = sn.space{isf}(state(isf),:);
-                if sn.isstation(ind)
-                    ist = sn.nodeToStation(ind);
-                    [~,nir] = State.toMarginal(sn,ind,stateCell{isf});
-                    SSq(s,((ist-1)*nclasses+1):ist*nclasses) = nir;
-                end
-            end
-        end
-    end
-end
+arvRates = zeros(size(stateSpaceHashed,1),nstateful,nclasses);
+depRates = zeros(size(stateSpaceHashed,1),nstateful,nclasses);
 
 %% for all synchronizations
 for a=1:A
     stateCell = cell(nstateful,1);
     %sn.sync{a}.active{1}.print
-    for s=1:size(SSh,1)
+    for s=1:size(stateSpaceHashed,1)
         %[a,s]
-        state = SSh(s,:);
+        state = stateSpaceHashed(s,:);
         % update state cell array and SSq
         for ind = 1:sn.nnodes
             if sn.isstateful(ind)
                 isf = sn.nodeToStateful(ind);
                 stateCell{isf} = sn.space{isf}(state(isf),:);
-                if sn.isstation(ind)
-                    ist = sn.nodeToStation(ind);
-                    [~,nir] = State.toMarginal(sn,ind,stateCell{isf});
-                end
+                %                if sn.isstation(ind)
+                %                    ist = sn.nodeToStation(ind);
+                %                    [~,nir] = State.toMarginal(sn,ind,stateCell{isf});
+                %                end
             end
         end
         node_a = sync{a}.active{1}.node;
         state_a = state(sn.nodeToStateful(node_a));
         class_a = sync{a}.active{1}.class;
         event_a = sync{a}.active{1}.event;
-        [new_state_a, rate_a] = State.afterEventHashed( sn, node_a, state_a, event_a, class_a);        
+        [new_state_a, rate_a] = State.afterEventHashed( sn, node_a, state_a, event_a, class_a);
         %% debugging block
-%        if true%options.verbose == 2
-%            line_printf('---\n');
-%            sync{a}.active{1}.print,
-%        end
+        %        if true%options.verbose == 2
+        %            line_printf('---\n');
+        %            sync{a}.active{1}.print,
+        %        end
         %%
         if new_state_a == -1 % hash not found
             continue
@@ -134,7 +110,7 @@ for a=1:A
                                 new_state(sn.nodeToStateful(node_a)) = new_state_a(ia);
                                 new_state(sn.nodeToStateful(node_p)) = new_state_p(ip);
                             end
-                            ns = matchrow(SSh, new_state);
+                            ns = matchrow(stateSpaceHashed, new_state);
                             if ns>0
                                 if ~isnan(rate_a)
                                     if node_p < local && ~csmask(class_a, class_p) && rate_a(ia) * prob_sync_p >0 && (sn.nodetype(node_p)~=NodeType.Source)
@@ -154,7 +130,7 @@ for a=1:A
                         new_state = state;
                         new_state(sn.nodeToStateful(node_a)) = new_state_a(ia);
                         prob_sync_p = 1;
-                        ns = matchrow(SSh, new_state);
+                        ns = matchrow(stateSpaceHashed, new_state);
                         if ns>0
                             if ~isnan(rate_a)
                                 if size(Dfilt{a}) >= [s,ns] % needed for sparse matrix
@@ -184,7 +160,7 @@ for a=1:A
     if event_a == EventType.ID_DEP
         node_a_sf = sn.nodeToStateful(node_a);
         node_p_sf = sn.nodeToStateful(node_p);
-        for s=1:size(SSh,1)
+        for s=1:size(stateSpaceHashed,1)
             depRates(s,node_a_sf,class_a) = depRates(s,node_a_sf,class_a) + sum(Dfilt{a}(s,:));
             arvRates(s,node_p_sf,class_p) = arvRates(s,node_p_sf,class_p) + sum(Dfilt{a}(s,:));
         end
@@ -206,7 +182,7 @@ for a=1:A
 end
 
 if options.verbose == 2
-    SolverCTMC.printInfGen(Q,SS);
+    SolverCTMC.printInfGen(Q,stateSpace);
 end
 Q = ctmc_makeinfgen(Q);
 
@@ -219,12 +195,12 @@ if options.hide_immediate % if want to remove immediate transitions
     imm=[];
     for st = statefuls(:)'
         imm_st = find(sum(sn.space{st}(:,1:nclasses),2)>0);
-        imm = [imm; find(arrayfun(@(a) any(a==imm_st),SSh(:,st)))];
+        imm = [imm; find(arrayfun(@(a) any(a==imm_st),stateSpaceHashed(:,st)))];
     end
     imm = unique(imm);
     nonimm = setdiff(1:size(Q,1),imm);
-    SS(imm,:) = [];
-    SSq(imm,:) = [];
+    stateSpace(imm,:) = [];
+    stateSpaceAggr(imm,:) = [];
     arvRates(imm,:,:) = [];
     depRates(imm,:,:) = [];
     [Q,~,~,~,~,T] = ctmc_stochcomp(Q, nonimm);

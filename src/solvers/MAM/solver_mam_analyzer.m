@@ -9,24 +9,26 @@ K = sn.nclasses;    %number of classes
 
 Tstart = tic;
 
-config = struct();
-config.merge = 'super';
-%config.compress = 'mixture.order1';
-config.compress = 'none';
-config.space_max = 128;
+if nargin<2 || isempty(options.config) || ~isfield(options.config,'merge')
+    options.config = struct();
+    options.config.merge = 'super';
+    %options.config.compress = 'mixture.order1';
+    options.config.compress = 'none';
+    options.config.space_max = 128;
+end
 
 switch options.method
     case 'dec.mmap'
         % service distributuion per class scaled by utilization used as
         % departure process
-        [QN,UN,RN,TN,CN,XN] = solver_mam(sn, options, config);
+        [QN,UN,RN,TN,CN,XN] = solver_mam(sn, options);
     case {'default', 'dec.source'}
         % arrival process per chain rescaled by visits at each node
-        [QN,UN,RN,TN,CN,XN] = solver_mam_basic(sn, options, config);
+        [QN,UN,RN,TN,CN,XN] = solver_mam_basic(sn, options);
     case 'dec.poisson'
         % analyze the network with Poisson streams
         config.space_max = 1;
-        [QN,UN,RN,TN,CN,XN] = solver_mam_basic(sn, options, config);
+        [QN,UN,RN,TN,CN,XN] = solver_mam_basic(sn, options);
     otherwise
         line_error(mfilename,'Unknown method.');
 end
@@ -39,5 +41,4 @@ XN(isnan(XN))=0;
 TN(isnan(TN))=0;
 
 runtime = toc(Tstart);
-
 end

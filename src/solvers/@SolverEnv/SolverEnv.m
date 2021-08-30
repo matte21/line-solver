@@ -218,7 +218,7 @@ classdef SolverEnv < EnsembleSolver
             stageEvents = cell(1,E);
             for e=1:E
                 if isa(self.solvers{e},'SolverCTMC')
-                    [stageInfGen{e}, stageEventFilt{e}, stageEvents{e}] = self.solvers{e}.getGenerator(true);
+                    [stageInfGen{e}, stageEventFilt{e}, stageEvents{e}] = self.solvers{e}.getGenerator();
                 else
                     line_error(mfilename,'This method requires SolverENV to be instantiated with the CTMC solver.');
                 end

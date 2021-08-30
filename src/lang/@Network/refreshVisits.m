@@ -17,7 +17,7 @@ end
 for c=1:size(chains,1)
     if sum(refstat(inchain{c}) == refstat(inchain{c}(1))) ~= length(inchain{c})
         refstat(inchain{c}) = refstat(inchain{c}(1));
-        %        line_error(sprintf('Classes in chain %d have different reference stations. Chain %d classes: %s', c, c, int2str(inchain{c})));
+        %        line_error(mfilename,sprintf('Classes in chain %d have different reference stations. Chain %d classes: %s', c, c, int2str(inchain{c})));
     end
 end
 
@@ -34,7 +34,7 @@ for c=1:size(chains,1)
     visited = sum(Pchain,2) > 0;
     %                Pchain(visited,visited)
     %                if ~dtmc_isfeasible(Pchain(visited,visited))
-    %                    line_error(sprintf('The routing matrix in chain %d is not stochastic. Chain %d classes: %s',c, c, int2str(inchain{c})));
+    %                    line_error(mfilename,sprintf('The routing matrix in chain %d is not stochastic. Chain %d classes: %s',c, c, int2str(inchain{c})));
     %                end
     alpha_visited = dtmc_solve(Pchain(visited,visited));
     alpha = zeros(1,M*K); alpha(visited) = alpha_visited;

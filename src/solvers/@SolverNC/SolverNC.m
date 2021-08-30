@@ -17,12 +17,12 @@ classdef SolverNC < NetworkSolver
             end
         end
         
-        runtime = runAnalyzer(self, options, config)
+        runtime = runAnalyzer(self, options)
         Pnir = getProb(self, node, state)
         Pnir = getProbAggr(self, node, state_a)
         Pn   = getProbSys(self)
         Pn   = getProbSysAggr(self)
-        RD = getCdfRespT(self, R, config);
+        RD = getCdfRespT(self, R);
         
         function [normConst,lNormConst] = getNormalizingConstant(self)
             normConst = exp(getProbNormConstAggr(self));

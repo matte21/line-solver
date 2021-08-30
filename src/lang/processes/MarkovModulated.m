@@ -27,6 +27,12 @@ classdef MarkovModulated < PointProcess
                 line_error(mfilename,'This process is infeasible (negative rates).');
             end
         end
+        
+        function pie = getEmbeddedProb(self)
+            % PIE = GETEMBEDDEDPROB()
+            
+            pie = map_pie(self.getRepresentation);
+        end
     end
     
     methods %(Abstract) % implemented with errors for Octave compatibility

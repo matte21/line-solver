@@ -50,5 +50,6 @@ solver{end+1} = SolverFluid(model,options);
 solver{end+1} = SolverMVA(model,options);
 for s=1:length(solver)
     fprintf(1,'SOLVER: %s\n',solver{s}.getName());
-    AvgTable{s} = solver{s}.getAvgTable()
+    AvgTable{s} = solver{s}.getAvgTable();
+    AvgTable{s}
 end

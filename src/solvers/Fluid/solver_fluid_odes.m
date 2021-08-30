@@ -9,30 +9,38 @@ K = length(Mu{1});   % number of classes
 w = ones(M,K);
 
 enabled = false(M,K); % indicates whether a class is served at a station
-for i = 1:M
-    for c = 1:K
-        %enabled(i,c) = sum( P(:,(i-1)*K+c) ) > 0;
-        %changed to consider rows instead of colums, for response time
-        %analysis (first articial class never returns to delay node)
-        enabled(i,c) = sum( P((i-1)*K+c,:) ) > 0;
-    end
-end
+% for i = 1:M
+%     for c = 1:K
+%         %enabled(i,c) = sum( P(:,(i-1)*K+c) ) > 0;
+%         %changed to consider rows instead of columns, for response time
+%         %analysis (first articial class never returns to delay node)
+%         enabled(i,c) = sum( P((i-1)*K+c,:) ) > 0;
+%     end
+% end
 
 q_indices = zeros(M,K);
 Kic = zeros(M,K);
 cumsum = 1;
 for i = 1 : M
-    for c = 1:K
-        q_indices(i,c) = cumsum;
+    for c = 1:K       
         if isnan(Mu{i}{c})
             numphases = 0;
+            enabled(i,c) = false;
+            q_indices(i,c) = cumsum;
+        elseif isempty(Mu{i}{c})
+            enabled(i,c) = false;
+            numphases = 0;
+            q_indices(i,c) = cumsum;
         else
-            numphases = length(Mu{i}{c});
+            numphases = length(Mu{i}{c});            
+            q_indices(i,c) = cumsum;
+            enabled(i,c) = true;
         end
         Kic(i,c) = numphases;
         cumsum = cumsum + numphases;
     end
 end
+
 % to speed up convert sched strings in numerical values
 schedid = zeros(1,M);
 for i = 1 : M
@@ -53,7 +61,7 @@ switch options.method
         % determines a vector with the fixed part of the rates,
         % and defines the indexes that correspond to the events that occur
         [rateBase, eventIdx] = ode_rate_base(phi, Mu, PH, M, K, enabled, q_indices, P, Kic, schedid, all_jumps);
-        ode_si_h = @(t,x) all_jumps * ode_rates_stateindep(x, M, K, q_indices, Kic, nservers, w, schedid, rateBase, eventIdx);
+        ode_si_h = @(t,x) all_jumps * ode_rates_stateindep(x, M, K, enabled, q_indices, Kic, nservers, w, schedid, rateBase, eventIdx);
         ode_h = ode_si_h;
     case 'statedep'
         ode_sd_h = @(t,x) ode_statedep(x, phi, Mu, PH, M, K, enabled, q_indices, P, Kic, nservers, w, schedid);

@@ -54,7 +54,7 @@ if ~isLoadDep
         Zli = 0*N;
     end
     options.method='exact';
-    lG = pfqn_nc(Lli,N,sum(Zli,1), options);
+    lG = pfqn_nc(Lli, N, sum(Zli,1), options);
     G = exp(lG);
     return
 end

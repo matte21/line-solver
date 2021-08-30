@@ -30,6 +30,9 @@ clear; example_closedModel_5; fprintf(1,'Pausing...'); pause(3.0);
 fprintf(1,'\n\nExample: <strong>example_closedModel_6</strong>\n');
 fprintf(1,'This example shows a model with round-robin scheduling.\n');
 clear; example_closedModel_6; fprintf(1,'Pausing...'); pause(3.0);
+fprintf(1,'\n\nExample: <strong>example_closedModel_7</strong>\n');
+fprintf(1,'This example shows equivalnce of models due to product-form solution (BCMP theorem).\n');
+clear; example_closedModel_7; fprintf(1,'Pausing...'); pause(3.0);
 
 %%
 fprintf(1,'\n<strong>RUNNING: example_loadDependent_*</strong>');

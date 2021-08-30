@@ -1,13 +1,10 @@
-function runtime = runAnalyzer(self, options, config)
+function runtime = runAnalyzer(self, options)
 % RUNTIME = RUN()
 % Run the solver
 
 T0=tic;
 if nargin<2
     options = self.getOptions;
-end
-if nargin<3
-    config = [];
 end
 
 

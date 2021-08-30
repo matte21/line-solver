@@ -54,7 +54,7 @@ switch options.method
 end
 
 for r = 1:sn.nclasses
-    if length(ch.hitclass)>=r & ch.missclass(r)>0 & ch.hitclass(r)>0
+    if length(ch.hitclass)>=r && ch.missclass(r)>0 && ch.hitclass(r)>0
         XN(ch.missclass(r)) = XN(ch.missclass(r)) + missRate(r);
         XN(ch.hitclass(r)) = XN(ch.hitclass(r)) + (sourceRate(r) - missRate(r));
     end

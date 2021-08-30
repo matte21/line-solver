@@ -22,47 +22,8 @@ for k = 1:K
 end
 ST(isnan(ST))=0;
 
-alpha = zeros(sn.nstations,sn.nclasses);
-Vchain = zeros(sn.nstations,sn.nchains);
-for c=1:sn.nchains
-    inchain = find(sn.chains(c,:));
-    for i=1:sn.nstations
-        Vchain(i,c) = sum(sn.visits{c}(i,inchain)) / sum(sn.visits{c}(sn.refstat(inchain(1)),inchain));
-        for k=inchain
-            alpha(i,k) = alpha(i,k) + sn.visits{c}(i,k) / sum(sn.visits{c}(i,inchain)); % isn't alpha(i,j) always zero when entering here?
-        end
-    end
-end
+[~,~,Vchain,alpha,Nchain] = snGetDemandsChain(sn);
 
-Vchain(~isfinite(Vchain))=0;
-alpha(~isfinite(alpha))=0;
-
-Lchain = zeros(M,C);
-STchain = zeros(M,C);
-
-Nchain = zeros(1,C);
-refstatchain = zeros(C,1);
-for c=1:sn.nchains
-    inchain = find(sn.chains(c,:));
-    isOpenChain = any(isinf(sn.njobs(inchain)));
-    for i=1:sn.nstations
-        % we assume that the visits in L(i,inchain) are equal to 1
-        STchain(i,c) = ST(i,inchain) * alpha(i,inchain)';
-        if isOpenChain && i == sn.refstat(inchain(1)) % if this is a source ST = 1 / arrival rates
-            STchain(i,c) = 1 / sumfinite(sn.rates(i,inchain)); % ignore degenerate classes with zero arrival rates
-        else
-            STchain(i,c) = ST(i,inchain) * alpha(i,inchain)';
-        end
-        Lchain(i,c) = Vchain(i,c) * ST(i,inchain) * alpha(i,inchain)';
-    end
-    Nchain(c) = sum(NK(inchain));
-    refstatchain(c) = sn.refstat(inchain(1));
-    if any((sn.refstat(inchain(1))-refstatchain(c))~=0)
-        line_error(sprintf('Classes in chain %d have different reference station.',c));
-    end
-end
-STchain(~isfinite(STchain))=0;
-Lchain(~isfinite(Lchain))=0;
 Tstart = tic;
 
 [M,K]=size(STchain);
@@ -78,16 +39,16 @@ for i=1:M
     end
 end
 
-G = pfqn_gmvald(Lchain, Nchain, mu_chain);
+G = exp(pfqn_ncld(Lchain, Nchain, 0*Nchain, mu_chain));
 Pr = 1;
 for i=1:M
     isf = sn.stationToStateful(i);
     state_i = state{isf};
     [~,nivec] = State.toMarginal(sn, i, state{isf});
     nivec_chain = nivec * sn.chains';
-    F_i = pfqn_gmvald(Lchain(i,:), nivec_chain, mu_chain(i,:));
-    g0_i = pfqn_gmvald(ST(i,:).*alpha(i,:),nivec, mu_chain(i,:));
-    G0_i = pfqn_gmvald(STchain(i,:),nivec_chain, mu_chain(i,:));
+    F_i = exp(pfqn_ncld(Lchain(i,:), nivec_chain, 0*nivec_chain,mu_chain(i,:)));
+    g0_i = exp(pfqn_ncld(ST(i,:).*alpha(i,:), nivec, 0*nivec, mu_chain(i,:)));
+    G0_i = exp(pfqn_ncld(STchain(i,:), nivec_chain, 0*nivec_chain, mu_chain(i,:)));
     Pr = Pr * F_i * (g0_i / G0_i);
 end
 Pr = Pr / G;

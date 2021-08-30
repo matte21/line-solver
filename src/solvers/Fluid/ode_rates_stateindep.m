@@ -1,4 +1,4 @@
-function rates = ode_rates_stateindep(x, M, K, q_indices, Kic, nservers, w, sched_id, rateBase, eventIdx)
+function rates = ode_rates_stateindep(x, M, K, enabled, q_indices, Kic, nservers, w, sched_id, rateBase, eventIdx)
 % RATES = ODE_RATES_STATEINDEP(X, M, K, Q_INDICES, KIC, NSERVERS, W, STRATEGY, RATEBASE, EVENTIDX)
 
 rates = x; % basic vector valid for INF and PS case min(ni,nservers(i))=ni
@@ -12,7 +12,9 @@ for i = 1:M
             for k=1:K
                 idxIni = q_indices(i,k);
                 idxEnd = q_indices(i,k) + Kic(i,k) - 1;
-                rates(idxIni) = 1-sum(x(idxIni+1:idxEnd)); % keep total mass 1 into the source for all classes at all times, not needed for idxIni+1:idxEnd as rates is initialized equal to x
+                if enabled(i,k)
+                    rates(idxIni) = 1-sum(x(idxIni+1:idxEnd)); % keep total mass 1 into the source for all classes at all times, not needed for idxIni+1:idxEnd as rates is initialized equal to x
+                end
             end
         case SchedStrategy.ID_PS
             idxIni = q_indices(i,1);
@@ -35,12 +37,16 @@ for i = 1:M
             for k=1:K
                 idxIni = q_indices(i,k);
                 idxEnd = q_indices(i,k) + Kic(i,k) - 1;
-                ni = ni + sum( w(i,k)*x(idxIni:idxEnd) );
+                if enabled(i,k)
+                    ni = ni + sum( w(i,k)*x(idxIni:idxEnd) );
+                end
             end
             for k=1:K
                 idxIni = q_indices(i,k);
                 idxEnd = q_indices(i,k) + Kic(i,k) - 1;
-                rates(idxIni:idxEnd) = w(i,k)*x(idxIni:idxEnd)/ni * nservers(i); % not needed for idxIni+1:idxEnd as rates is initiliazed equal to x
+                if enabled(i,k)
+                    rates(idxIni:idxEnd) = w(i,k)*x(idxIni:idxEnd)/ni * nservers(i); % not needed for idxIni+1:idxEnd as rates is initiliazed equal to x
+                end
             end
     end
 end

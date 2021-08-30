@@ -148,6 +148,13 @@ ARGS = cell(1,1);
 ARGS{1} = cell(1,1);
 ARGS{1}{1} = coder.typeof(0,[1 Inf],[0 1]); 
 codegen -config cfg probchoose -args ARGS{1}
+%% 'softmin'.
+ARGS = cell(1,1);
+ARGS{1} = cell(3,1);
+ARGS{1}{1} = coder.typeof(0);
+ARGS{1}{2} = coder.typeof(0);
+ARGS{1}{3} = coder.typeof(0);
+codegen -config cfg softmin -args ARGS{1}
 %% 'sumfinite'.
 % ARGS = cell(1,1);
 % ARGS{1} = cell(2,1);

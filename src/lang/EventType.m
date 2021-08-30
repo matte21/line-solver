@@ -28,15 +28,15 @@ classdef EventType < Copyable
             % TEXT = TOTEXT(TYPE)
             
             switch type
-                case EventType.ARV
+                case EventType.ID_ARV
                     text = 'ARV';
-                case EventType.DEP
+                case EventType.ID_DEP
                     text = 'DEP';
-                case EventType.PHASE
+                case EventType.ID_PHASE
                     text = 'PHASE';
-                case EventType.READ
+                case EventType.ID_READ
                     text = 'READ';
-                case EventType.STAGE
+                case EventType.ID_STAGE
                     text = 'STAGE';
             end
         end

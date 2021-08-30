@@ -65,7 +65,7 @@ for i=1:M
                 %keyboard
                 taggedModel.link(Plinked);
                 
-                [Qir,Fir,ev] = SolverCTMC(taggedModel).getGenerator(true);
+                [Qir,Fir,ev] = SolverCTMC(taggedModel).getGenerator();
                 
                 for v=1:length(ev)
                     if ev{v}.passive{1}.event == EventType.ID_ARV && ev{v}.passive{1}.class == r && ev{v}.passive{1}.node == i

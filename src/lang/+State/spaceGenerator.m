@@ -11,11 +11,11 @@ function [SS,SSh,sn] = spaceGenerator(sn, cutoff, options)
 N = sn.njobs';
 Np = N;
 
-if ~exist('cutoff','var') & any(isinf(Np)) % if has open classes
+if ~exist('cutoff','var') && any(isinf(Np)) % if the model has open classes
     line_error(mfilename,'Unspecified cutoff for open classes in state space generator.');
 end
 
-if prod(size(cutoff))==1
+if numel(cutoff)==1
     cutoff = cutoff * ones(sn.nstations, sn.nclasses);
 end
 

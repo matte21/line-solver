@@ -1,5 +1,5 @@
 classdef CTMC < Process
-    % An abstract class for a continuous time Markov chain
+    % A class for a continuous time Markov chain
     %
     % Copyright (c) 2012-2021, Imperial College London
     % All rights reserved.
@@ -11,16 +11,20 @@ classdef CTMC < Process
     end
     
     methods
-        function self = CTMC(InfGen, isFinite)
-            % SELF = CTMC(InfGen, isInfinite)
+        function self = CTMC(InfGen, isFinite, stateSpace)
+            % SELF = CTMC(InfGen, isInfinite, stateSpace)
             self@Process('CTMC', 1);
             
             self.infGen = ctmc_makeinfgen(InfGen);
-            self.stateSpace = [];
             if nargin < 2
                 self.isfinite = true;
             else
                 self.isfinite = isFinite;
+            end
+            if nargin > 2
+                self.stateSpace = stateSpace;
+            else
+                self.stateSpace = [];
             end
         end
         
@@ -39,6 +43,11 @@ classdef CTMC < Process
         
         function setStateSpace(self,stateSpace)
             self.stateSpace  = stateSpace;
+        end
+        
+        function plot3(self)
+            G = digraph(self.infGen-diag(diag(self.infGen)));
+            h = plot(G,'Layout','force3');
         end
         
         function plot(self)
@@ -82,12 +91,29 @@ classdef CTMC < Process
             % Get generator
             Q = self.infGen;
         end
-
+        
+        function [pi_i, num, den] = getProbState(self, state)
+            % Use Cramer's rule to compute the probability of a single
+            % state            
+            i = matchrow(self.stateSpace, state);
+            Q = self.infGen; Q(:,1)=1;
+            Q_i=Q; Q_i(i,:)=0; Q_i(i,1)=1;
+            num=det(Q_i);
+            den=det(Q);
+            if issym(Q)
+                pi_i=simplify(num/den);
+            end            
+        end
+        
+        function pi = solve(self)
+            pi = ctmc_solve(self.infGen);
+        end
+        
     end
     
     methods (Static)
-        function ctmcObj=rand(nStates) % creates a random CTMC            
+        function ctmcObj=rand(nStates) % creates a random CTMC
             ctmcObj = CTMC(ctmc_rand(nStates));
-        end        
+        end
     end
 end

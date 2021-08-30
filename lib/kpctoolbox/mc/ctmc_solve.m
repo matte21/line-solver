@@ -25,16 +25,26 @@ end
 Q = ctmc_makeinfgen(Q); % so that spurious diagonal elements are set to 0
 n = length(Q);
 
-B = abs(Q+Q')>0;
+if issym(Q)
+    symvariables = symvar(Q); % find all symbolic variables
+    B = double(subs(Q+Q',symvariables,ones(size(symvariables)))); % replace all symbolic variables with 1.0
+else
+    B = abs(Q+Q')>0;
+end
 [nConnComp, connComp] = weaklyconncomp(B);
 if nConnComp > 1
     % reducible generator - solve each component recursively
-    p = zeros(1,n);
-     for c=1:nConnComp
-         Qc = Q(connComp==c,connComp==c);
-         Qc = ctmc_makeinfgen(Qc);
-         p(connComp==c) = ctmc_solve(Qc);
-     end
+    if issym(Q)
+        p = sym(zeros(1,n));
+    else
+        p = zeros(1,n);
+    end
+    
+    for c=1:nConnComp
+        Qc = Q(connComp==c,connComp==c);
+        Qc = ctmc_makeinfgen(Qc);
+        p(connComp==c) = ctmc_solve(Qc);
+    end
     p = p /sum(p);
     return
 end
@@ -123,6 +133,10 @@ else
         otherwise
             p(nnzel)=Qnnz'\ bnnz;
     end
+end
+
+if issym(Q)
+    Q=simplify(Q);
 end
 
 end

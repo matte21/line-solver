@@ -18,7 +18,6 @@ P{1,1} = model.serialRouting(node);
 P{2,2} = model.serialRouting(node);
 model.link(P);
 
-solver = {};
 msT=SolverMVA(model,'exact').getAvgTable
 %%
 ldmodel = Network('ldmodel');
@@ -37,10 +36,12 @@ P{1,1} = ldmodel.serialRouting(node);
 P{2,2} = ldmodel.serialRouting(node);
 ldmodel.link(P);
 
-solver = {};
-lldAvgTableDefault=SolverNC(ldmodel).getAvgTable %exact
+lldAvgTableCTMC=SolverCTMC(ldmodel).getAvgTable %exact
+
+lldAvgTableNC=SolverNC(ldmodel).getAvgTable %exact
 lldAvgTableRD=SolverNC(ldmodel,'method','rd').getAvgTable
 lldAvgTableNRP=SolverNC(ldmodel,'method','nr.probit').getAvgTable
 lldAvgTableNRL=SolverNC(ldmodel,'method','nr.logit').getAvgTable
 
-
+lldAvgTableMVALD=SolverMVA(ldmodel,'method','exact').getAvgTable
+lldAvgTableAMVAQD=SolverMVA(ldmodel,'method','amva').getAvgTable

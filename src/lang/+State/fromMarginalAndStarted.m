@@ -107,25 +107,25 @@ switch sn.nodetype(ind)
                 % the jobs in the servers
                 
                 % build list of job classes in the buffer, with repetition
-                vi = [];
+                inbuf = [];
                 for r=1:R
                     if n(r)>0
-                        vi=[vi, r*ones(1,n(r)-s(r))];
+                        inbuf=[inbuf, r*ones(1,n(r)-s(r))];
                     end
                 end
                 
                 sizeEstimator = multinomialln(n);
                 sizeEstimator = round(sizeEstimator/log(10));
-                if sizeEstimator > 2                    
+                if sizeEstimator > 2
                     if ~isfield(options,'force') || options.force == false
-                        line_warning(sprintf('State space size is very large: 1e%d states. Cannot generate valid state space. Initializing station $d from a default state.\n',sizeEstimator,ind));              
-                            state = vi;                            
+                        line_warning(sprintf('State space size is very large: 1e%d states. Cannot generate valid state space. Initializing station $d from a default state.\n',sizeEstimator,ind));
+                        state = inbuf;
                         return
                     end
                 end
                 
                 % gen permutation of their positions in the fcfs buffer
-                mi = uniqueperms(vi);
+                mi = uniqueperms(inbuf);
                 if isempty(mi)
                     mi_buf = zeros(1,max(1,sum(n)-S(ist)));
                     state = zeros(1,sum(K));
@@ -161,7 +161,88 @@ switch sn.nodetype(ind)
                         state = [state; repmat(mi_buf(b,:),size(kstate,1),1), kstate];
                     end
                 end
-                space = state;                
+                space = state;
+            case SchedStrategy.ID_LCFSPR
+                %% TODO
+                if sum(n) == 0
+                    space = zeros(1,1+sum(K));
+                    return
+                end
+                % in these policies we track an ordered buffer and
+                % the jobs in the servers
+                
+                % build list of job classes in the buffer, with repetition
+                inbuf = [];
+                for r=1:R
+                    if n(r)>0
+                        inbuf=[inbuf, r*ones(1,n(r)-s(r))];
+                    end
+                end
+                
+                sizeEstimator = multinomialln(n);
+                sizeEstimator = round(sizeEstimator/log(10));
+                if sizeEstimator > 2
+                    if ~isfield(options,'force') || options.force == false
+                        line_warning(sprintf('State space size is very large: 1e%d states. Cannot generate valid state space. Initializing station $d from a default state.\n',sizeEstimator,ind));
+                        state = inbuf;
+                        return
+                    end
+                end
+                
+                % gen permutation of their positions in the fcfs buffer
+                mi = uniqueperms(inbuf);
+                if isempty(mi)
+                    mi_buf = zeros(1,max(1,sum(n)-S(ist)));
+                    state = zeros(1,sum(K));
+                    state = [mi_buf,state];
+                else
+                    % mi_buf: class of job in buffer position i (0=empty)
+                    if sum(n)>sum(s)
+                        mi_buf = mi(:,1:(sum(n)-sum(s)));
+                    else % set an empty buffer
+                        mi_buf = 0;
+                    end
+                end
+                
+                % mi_srv: class of jobs running in the server of i
+                mi_srv = [];
+                for r=1:R
+                    mi_srv = [mi_srv, r*ones(1,s(r))];
+                end
+                % si: number of class r jobs that are running
+                si = s;
+                %si = unique(si,'rows');
+                for b=1:size(mi_buf,1)
+                    for k=1:size(si,1)
+                        % determine number of class r jobs running in phase
+                        % j in server state mi_srv(kjs,:) and build
+                        % state
+                        kstate=[];
+                        for r=1:R
+                            % kstate = State.decorate(kstate,State.spaceClosedSingle(K(r),si(k,r)));
+                            init = State.spaceClosedSingle(K(r),0);
+                            init(1) = si(k,r);
+                            kstate = State.decorate(kstate,init);
+                        end
+                        
+                        bkstate = [];
+                        for j=mi_buf(b,:) % for each job in the buffer
+                            if j>0
+                                bkstate = State.decorate(bkstate,[1:K(j)]');
+                            else
+                                bkstate = 0;
+                            end
+                        end
+                        bufstate_tmp = State.decorate(mi_buf(b,:), bkstate);
+                        % here interleave positions of class and phases in
+                        % buf
+                        bufstate = zeros(size(bufstate_tmp));
+                        bufstate(:,1:2:end)=bufstate_tmp(:,1:size(mi_buf,2));
+                        bufstate(:,2:2:end)=bufstate_tmp(:,(size(mi_buf,2)+1):end);
+                        state = [state; State.decorate(bufstate, kstate)];
+                    end
+                end
+                space = state;
             case {SchedStrategy.ID_SJF, SchedStrategy.ID_LJF}
                 % in these policies the state space includes continuous
                 % random variables for the service times

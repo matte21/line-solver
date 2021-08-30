@@ -13,6 +13,11 @@ if nargin < 3
 end
 [~,~,RN,TN] = self.getAvg([],[],R,T);
 
+if self.model.hasJoin
+    line_warning(mfilename,'System response time computation not yet supported with join nodes.');
+    RN = RN*NaN;
+end
+
 refstats = sn.refstat;
 completes = true(1,sn.nclasses);
 for r=1:sn.nclasses

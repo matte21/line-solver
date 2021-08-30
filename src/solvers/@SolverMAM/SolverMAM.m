@@ -19,7 +19,7 @@ classdef SolverMAM < NetworkSolver
             sn = self.model.getStruct(true);
         end
         
-        runtime = runAnalyzer(self, options, config);
+        runtime = runAnalyzer(self, options);
         RD = getCdfRespT(self, R);
     end
     

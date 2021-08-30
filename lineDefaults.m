@@ -7,7 +7,7 @@ end
 options = struct();
 options.cache = true;
 options.cutoff = Inf;
-options.config = {};
+options.config = struct();
 options.force = false;
 options.hide_immediate = true; % hide immediate transitions if possible
 options.init_sol = [];

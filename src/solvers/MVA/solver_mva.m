@@ -1,122 +1,132 @@
-function [Q,U,R,T,C,X,lG] = solver_mva(ST,V,N,S,~,schedid,refstat)
-% [Q,U,R,T,C,X,LG] = SOLVER_MVA(ST,V,N,S,OPTIONS,SCHEDID,REFSTAT)
+function [Q,U,R,T,C,X,lG] = solver_mva(sn,options)
+% [Q,U,R,T,C,X,LG] = SOLVER_MVA(SN,OPTIONS)
 
 % Copyright (c) 2012-2021, Imperial College London
 % All rights reserved.
-[M,K]=size(ST);
 
-if nargin < 6 %schedid
-    schedid = nan(M,1);
-    for i=1:M
-        if isinf(S(i))
-            schedid(i) = SchedStrategy.ID_INF;
-        else
-            schedid(i) = SchedStrategy.ID_PS; % default for non-inf servers is PS
-        end
+% aggregate chains
+
+if nargin < 2
+    options = SolverMVA.defaultOptions;
+end
+
+[Lchain,STchain,Vchain,alpha,Nchain,~,refstatchain] = snGetDemandsChain(sn);
+
+nservers = sn.nservers;
+schedid = sn.schedid;
+M = sn.nstations;
+K = sn.nchains;
+
+infSET =[]; % set of infinite server stations
+qSET =[]; % set of other product-form stations
+for i=1:M
+    switch schedid(i)
+        case SchedStrategy.ID_EXT
+            % no-op
+        case SchedStrategy.ID_INF
+            infSET(1,end+1) = i;
+        case {SchedStrategy.ID_PS, SchedStrategy.ID_LCFSPR}
+            qSET(1,end+1) = i; 
+        case {SchedStrategy.ID_FCFS, SchedStrategy.ID_SIRO}
+            if range(sn.rates(i,:))==0
+                qSET(end+1) = i;
+            end
+        otherwise
+            line_error(mfilename, sprintf('Unsupported exact MVA analysis for %s scheduling.',SchedStrategy.toFeature(SchedStrategy.fromId(schedid(i)))));
     end
 end
 
-infSET = find(schedid==SchedStrategy.ID_INF);
-if K==1
-    pfSET = find(schedid==SchedStrategy.ID_SIRO | schedid==SchedStrategy.ID_PS | schedid==SchedStrategy.ID_FCFS);
-else
-    pfSET = find(schedid==SchedStrategy.ID_SIRO | schedid==SchedStrategy.ID_PS);
-end
-
-U = zeros(M,K);
-T = zeros(M,K);
-C = zeros(1,K);
-W = zeros(M,K);
-Q = zeros(M,K);
+Uchain = zeros(M,K); Tchain = zeros(M,K); C = zeros(1,K); Wchain = zeros(M,K); Qchain = zeros(M,K);
 
 lambda = zeros(1,K);
-ocl = find(isinf(N));
-if any(isinf(N))
+ocl = find(isinf(Nchain));
+if any(isinf(Nchain))
     for r=ocl % open classes
-        lambda(r) = 1 ./ ST(refstat(r),r);
-        Q(refstat(r),r) = Inf;
+        lambda(r) = 1 ./ STchain(refstatchain(r),r);
+        Qchain(refstatchain(r),r) = Inf;
     end
 end
-rset = setdiff(1:K,find(N==0));
+rset = setdiff(1:K,find(Nchain==0));
 
-[X,Qpf,U,~,lG] = pfqn_mvams(lambda,ST(pfSET,:).*V(pfSET,:),N,ST(infSET,:).*V(infSET,:),ones(length(pfSET),1),S(pfSET));
-Q(pfSET,:) = Qpf;
-Q(infSET,:) = repmat(X,numel(infSET),1) .* ST(infSET,:) .* V(infSET,:);
+[Xchain,Qpf,Uchain,~,lG] = pfqn_mvams(lambda,STchain(qSET,:).*Vchain(qSET,:),Nchain,STchain(infSET,:).*Vchain(infSET,:),ones(length(qSET),1),nservers(qSET));
+Qchain(qSET,:) = Qpf;
+Qchain(infSET,:) = repmat(Xchain,numel(infSET),1) .* STchain(infSET,:) .* Vchain(infSET,:);
 
-ccl = find(isfinite(N));
+ccl = find(isfinite(Nchain));
 for r=rset
     for k=infSET(:)'
-        W(k,r) = ST(k,r);
+        Wchain(k,r) = STchain(k,r);
     end
-    for k=pfSET(:)'
-        if isinf(S(k)) % infinite server
-            W(k,r) = ST(k,r);
+    for k=qSET(:)'
+        if isinf(nservers(k)) % infinite server
+            Wchain(k,r) = STchain(k,r);
         else
-            if V(k,r) == 0 || X(r) == 0
-                W(k,r) = 0;
+            if Vchain(k,r) == 0 || Xchain(r) == 0
+                Wchain(k,r) = 0;
             else
-                W(k,r) = Q(k,r) / (X(r) * V(k,r));
+                Wchain(k,r) = Qchain(k,r) / (Xchain(r) * Vchain(k,r));
             end
         end
     end
 end
 
 for r=rset
-    if sum(W(:,r)) == 0
-        X(r) = 0;
+    if sum(Wchain(:,r)) == 0
+        Xchain(r) = 0;
     else
-        if isinf(N(r))
-            C(r) = V(:,r)'*W(:,r);
+        if isinf(Nchain(r))
+            C(r) = Vchain(:,r)'*Wchain(:,r);
             % X(r) remains constant
-        elseif N(r)==0
-            X(r) = 0;
+        elseif Nchain(r)==0
+            Xchain(r) = 0;
             C(r) = 0;
         else
-            C(r) = V(:,r)'*W(:,r);
-            X(r) = N(r) / C(r);
+            C(r) = Vchain(:,r)'*Wchain(:,r);
+            Xchain(r) = Nchain(r) / C(r);
         end
     end
     
     for k=1:M
-        Q(k,r) = X(r) * V(k,r) * W(k,r);
-        T(k,r) = X(r) * V(k,r);
+        Qchain(k,r) = Xchain(r) * Vchain(k,r) * Wchain(k,r);
+        Tchain(k,r) = Xchain(r) * Vchain(k,r);
     end
 end
 
 for k=1:M
     for r=rset
-        if isinf(S(k)) % infinite server
-            U(k,r) = V(k,r)*ST(k,r)*X(r);
+        if isinf(nservers(k)) % infinite server
+            Uchain(k,r) = Vchain(k,r)*STchain(k,r)*Xchain(r);
         else
-            U(k,r) = V(k,r)*ST(k,r)*X(r)/S(k);
+            Uchain(k,r) = Vchain(k,r)*STchain(k,r)*Xchain(r)/nservers(k);
         end
     end
 end
 
 for k=1:M
     for r=1:K
-        if V(k,r)*ST(k,r)>0
+        if Vchain(k,r)*STchain(k,r) > options.tol
             switch schedid(k)
                 case {SchedStrategy.ID_FCFS,SchedStrategy.ID_PS}
-                    if sum(U(k,:))>1
-                        U(k,r) = min(1,sum(U(k,:))) * V(k,r)*ST(k,r)*X(r) / ((V(k,:).*ST(k,:))*X(:));
+                    if sum(Uchain(k,:))>1+options.tol
+                        Uchain(k,r) = min(1,sum(Uchain(k,:))) * Vchain(k,r)*STchain(k,r)*Xchain(r) / ((Vchain(k,:).*STchain(k,:))*Xchain(:));
                     end
             end
         end
     end
 end
 
-R = Q./T;
-X(~isfinite(X))=0;
-U(~isfinite(U))=0;
-Q(~isfinite(Q))=0;
-R(~isfinite(R))=0;
+Rchain = Qchain./Tchain;
+Xchain(~isfinite(Xchain))=0;
+Uchain(~isfinite(Uchain))=0;
+Qchain(~isfinite(Qchain))=0;
+Rchain(~isfinite(Rchain))=0;
 
-X(N==0)=0;
-U(:,N==0)=0;
-Q(:,N==0)=0;
-R(:,N==0)=0;
-T(:,N==0)=0;
-W(:,N==0)=0;
+Xchain(Nchain==0)=0;
+Uchain(:,Nchain==0)=0;
+Qchain(:,Nchain==0)=0;
+Rchain(:,Nchain==0)=0;
+Tchain(:,Nchain==0)=0;
+Wchain(:,Nchain==0)=0;
 
+[Q,U,R,T,C,X] = snDeaggregateChainResults(sn, Lchain, [], STchain, Vchain, alpha, [], [], Rchain, Tchain, [], Xchain);
 end

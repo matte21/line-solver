@@ -2,7 +2,6 @@ model = Network('model');
 
 node{1} = DelayStation(model, 'InfiniteServer');
 node{2} = Queue(model, 'Queue1', SchedStrategy.PS);
-
 node{2}.setNumServers(2);
 
 jobclass{1} = ClosedClass(model, 'Class1', 3, node{1}, 0);

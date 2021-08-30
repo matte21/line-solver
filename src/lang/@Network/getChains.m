@@ -8,34 +8,17 @@ if nargin<2 %~exist('rt','var')
     rt = getRoutingMatrix(self);
 end
 
-refstat = getReferenceStations(self);
-% getChains
-[C, inChain] = weaklyconncomp(rt+rt');
-chainCandidates = cell(1,C);
-for c=1:C
-    chainCandidates{c} = find(inChain==c);
-end
-
-K = getNumberOfClasses(self);
-M = getNumberOfStations(self);
-
-chains = [];
-for t=1:length(chainCandidates)
-    if length(chainCandidates{t})>1
-        chains(end+1,unique(mod(chainCandidates{t}-1,K)+1)) = 1;
-    end
-end
-try
-    chains = sortrows(chains,'descend');
-catch
-    chains = sortrows(chains,-(1:size(chains,2)));
-end
+sn = self.getStruct;
+M = sn.nstations;
+K = sn.nclasses;
+chains = sn.chains;
+refstat = sn.refstat;
 
 for c=1:size(chains,1)
     inchain = find(chains(c,:));
     if sum(refstat(inchain) == refstat(inchain(1))) ~= length(inchain)
         refstat(inchain) = refstat(inchain(1));
-        %        line_error(sprintf('Classes in chain %d have different reference stations. Chain %d classes: %s', c, c, int2str(inchain)));
+        %        line_error(mfilename,sprintf('Classes in chain %d have different reference stations. Chain %d classes: %s', c, c, int2str(inchain)));
     end
 end
 
@@ -53,7 +36,7 @@ for c=1:size(chains,1)
     
     %                Pchain(visited,visited)
     %                if ~dtmc_isfeasible(Pchain(visited,visited))
-    %                    line_error(sprintf('The routing matrix in chain %d is not stochastic. Chain %d classes: %s',c, c, int2str(inchain)));
+    %                    line_error(mfilename,sprintf('The routing matrix in chain %d is not stochastic. Chain %d classes: %s',c, c, int2str(inchain)));
     %                end
     alpha_visited = dtmc_solve(Pchain(visited,visited));
     alpha = zeros(1,M*K); alpha(visited) = alpha_visited;

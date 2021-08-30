@@ -14,7 +14,6 @@ node{1}.setService(jobclass{2}, HyperExp(0.5,3.0,10.0));
 
 node{2}.setService(jobclass{1}, HyperExp(0.1,1.0,10.0));
 node{2}.setService(jobclass{2}, MMPP2(1,2,3,4));
-%node{2}.setService(jobclass{2}, Exp(2));
 
 node{3}.setService(jobclass{1}, HyperExp(0.1,1.0,10.0));
 node{3}.setService(jobclass{2}, Erlang(1,2));
@@ -38,12 +37,13 @@ node{3}.setRouting(jobclass{2},RoutingStrategy.RAND);
 solver={};
 options = Solver.defaultOptions;
 options.seed = 23000;
-solver{end+1} = SolverCTMC(model,options);
+%solver{end+1} = SolverCTMC(model,options);
 solver{end+1} = SolverJMT(model,options);
-solver{end+1} = SolverSSA(model,options);
-solver{end+1} = SolverFluid(model,options);
-solver{end+1} = SolverMVA(model,options);
-solver{end+1} = SolverNC(model,options);
+%solver{end+1} = SolverSSA(model,options);
+%solver{end+1} = SolverFluid(model,options);
+%solver{end+1} = SolverMVA(model,options);
+%solver{end+1} = SolverNC(model,options);
+%solver{end+1} = SolverMAM(model,options);
 
 for s=1:length(solver)
     fprintf(1,'SOLVER: %s\n',solver{s}.getName());

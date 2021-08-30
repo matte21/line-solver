@@ -4,10 +4,17 @@ function [Q,U,R,T,C,X,lG,runtime] = solver_ncld_analyzer(sn, options)
 % Copyright (c) 2012-2021, Imperial College London
 % All rights reserved.
 M = sn.nstations;    %number of stations
+K = sn.nclasses;
 nservers = sn.nservers;
+
 if nservers(isfinite(nservers))>1
-    error('The load-dependent solver does not support multi-server stations. Specify multi-server stations via limited load-dependence.');
+    error('The load-dependent solver does not support multi-server stations yet. Specify multi-server stations via limited load-dependence.');
 end
+
+if ~isempty(sn.cdscaling) && strcmpi(options.method, 'exact')
+    line_error(mfilename,'Exact class-dependent solver not yet available in NC.');
+end
+
 NK = sn.njobs';  % initial population per class
 schedid = sn.schedid;
 %chains = sn.chains;
@@ -17,21 +24,13 @@ ST = 1 ./ sn.rates;
 ST(isnan(ST))=0;
 ST0=ST;
 lldscaling = sn.lldscaling;
-
-alpha = zeros(sn.nstations,sn.nclasses);
-Vchain = zeros(sn.nstations,sn.nchains);
-for c=1:sn.nchains
-    inchain = find(sn.chains(c,:));
-    for i=1:sn.nstations
-        Vchain(i,c) = sum(sn.visits{c}(i,inchain)) / sum(sn.visits{c}(sn.refstat(inchain(1)),inchain));
-        for k=inchain
-            alpha(i,k) = alpha(i,k) + sn.visits{c}(i,k) / sum(sn.visits{c}(i,inchain));
-        end
-    end
+Nt = sum(NK(isfinite(NK)));
+if isempty(lldscaling)
+    lldscaling = ones(M,Nt);
 end
-Vchain(~isfinite(Vchain))=0;
-alpha(~isfinite(alpha))=0;
-alpha(alpha<1e-12)=0;
+
+[~,~,Vchain,alpha] = snGetDemandsChain(sn);
+
 eta_1 = zeros(1,M);
 eta = ones(1,M);
 ca_1 = ones(1,M);
@@ -96,16 +95,7 @@ while max(abs(1-eta./eta_1)) > options.iter_tol && it < options.iter_max
     end
     Qchain = zeros(M,C);
     % step 1
-    switch options.method
-        case {'default','exact'}
-            [~,lG]=pfqn_gmvald(Lms, Nchain, mu, options);
-        case 'rd'
-            [lG]=pfqn_rd(Lms, Nchain, 0*Nchain, mu, options);
-        case {'nrp','nr.probit'}
-            [lG]=pfqn_nrp(Lms, Nchain, 0*Nchain, mu, options);
-        case {'nrl','nr.logit'}
-            [lG]=pfqn_nrl(Lms, Nchain, 0*Nchain, mu, options);
-    end
+    lG = pfqn_ncld(Lms, Nchain, 0*Nchain, mu, options);
     lG = real(lG);
     Xchain=[];
     Qchain=[];
@@ -114,19 +104,7 @@ while max(abs(1-eta./eta_1)) > options.iter_tol && it < options.iter_max
         for r=1:C
             %r
             Nchain_r =oner(Nchain,r);
-            switch options.method
-                case {'default','exact'}
-                    [~,lGr(r)] = pfqn_gmvald(Lms,Nchain_r, mu, options);
-                case 'rd'
-                    %if debug
-                    %    [~,lGr_ex(r)] = pfqn_gmvald(Lms,Nchain_r, mu, options)
-                    %end
-                    [lGr(r)] = pfqn_rd(Lms,Nchain_r,0*Nchain,mu,options);
-                case {'nrp','nr.probit'}
-                    [lGr(r)] = pfqn_nrp(Lms,Nchain_r,0*Nchain,mu,options);
-                case {'nrl','nr.logit'}
-                    [lGr(r)] = pfqn_nrl(Lms,Nchain_r,0*Nchain,mu,options);
-            end
+            [lGr(r)] = pfqn_ncld(Lms,Nchain_r,0*Nchain,mu,options);
             lGr = real(lGr);
             Xchain(r) = exp(lGr(r) - lG);
             for i=1:M
@@ -146,28 +124,10 @@ while max(abs(1-eta./eta_1)) > options.iter_tol && it < options.iter_max
                         if  i==M && sum(isfinite(nservers))==1 % normalize queue-lengths to Nchain(r)
                             Qchain(i,r) = max(0,real(Nchain(r) - sum(Lchain(isinf(nservers),r)) * Xchain(r)) - sum(Qchain(setdiff(1:(M-1),find(isinf(nservers))),r)));
                         else
-                            switch options.method
-                                case {'default','exact'}
-                                    [~,lGhat_fnci(r)] = pfqn_gmvald([Lms;Lms(i,:)],Nchain_r, [muhati;muhati_f], options);
-                                    [~,lGhatir(r)] = pfqn_gmvald(Lms,Nchain_r, muhati, options);
-                                    [~,lGr_i(r)] = pfqn_gmvald(Lms_i,Nchain_r, mu_i, options);
-                                    [~,lGhati(r)] = pfqn_gmvald(Lms,Nchain_r, muhati, options);
-                                case 'rd'
-                                    [lGhat_fnci(r)] = pfqn_rd([Lms;Lms(i,:)], Nchain_r, 0*Nchain, [muhati;muhati_f], options);
-                                    [lGhatir(r)] = pfqn_rd(Lms,Nchain_r, 0*Nchain, muhati, options);
-                                    [lGr_i(r)] = pfqn_rd(Lms_i,Nchain_r, 0*Nchain, mu_i, options);
-                                    [lGhati(r)] = pfqn_rd(Lms,Nchain_r, 0*Nchain, muhati, options);
-                                case {'nrp','nr.probit'}
-                                    [lGhat_fnci(r)] = pfqn_nrp([Lms;Lms(i,:)],Nchain_r, 0*Nchain, [muhati;muhati_f], options);
-                                    [lGhatir(r)] = pfqn_nrp(Lms,Nchain_r, 0*Nchain, muhati, options);
-                                    [lGr_i(r)] = pfqn_nrp(Lms_i,Nchain_r, 0*Nchain, mu_i, options);
-                                    [lGhati(r)] = pfqn_nrp(Lms,Nchain_r, 0*Nchain, muhati, options);
-                                case {'nrl','nr.logit'}
-                                    [lGhat_fnci(r)] = pfqn_nrl([Lms;Lms(i,:)],Nchain_r, 0*Nchain, [muhati;muhati_f], options);
-                                    [lGhatir(r)] = pfqn_nrl(Lms,Nchain_r, 0*Nchain, muhati, options);
-                                    [lGr_i(r)] = pfqn_nrl(Lms_i,Nchain_r, 0*Nchain, mu_i, options);
-                                    [lGhati(r)] = pfqn_nrl(Lms,Nchain_r, 0*Nchain, muhati, options);
-                            end
+                            [lGhat_fnci(r)] = pfqn_ncld([Lms;Lms(i,:)],Nchain_r, 0*Nchain, [muhati;muhati_f], options);
+                            [lGhatir(r)] = pfqn_ncld(Lms,Nchain_r, 0*Nchain, muhati, options);
+                            [lGr_i(r)] = pfqn_ncld(Lms_i,Nchain_r, 0*Nchain, mu_i, options);
+                            [lGhati(r)] = pfqn_ncld(Lms,Nchain_r, 0*Nchain, muhati, options);
                             dlGa = real(lGhat_fnci(r)) - real(lGhatir(r));
                             dlG_i = real(lGr_i(r)) - real(lGhatir(r));
                             CQchain(i) = (exp(dlGa) - 1) + c*(exp(dlG_i)-1); % conditional qlen
@@ -301,7 +261,7 @@ while max(abs(1-eta./eta_1)) > options.iter_tol && it < options.iter_max
                 if range(ST0(i,sd))>0 && (max(SCV(i,sd))>1 - Distrib.Zero || min(SCV(i,sd))<1 + Distrib.Zero) % check if non-product-form
                     for k=1:K
                         if sn.rates(i,k)>0
-                            ST(i,k) = (1-rho(i)^4)*ST0(i,k) + rho(i)^4*((1-rho(i)^4) * gamma(i)*nservers(i)/sum(T(i,sd)) +  rho(i)^4* eta(i)*nservers(i)/sum(T(i,sd)) );
+                            ST(i,k) = (1-rho(i)^8)*ST0(i,k) + rho(i)^8*((1-rho(i)^8) * gamma(i)*nservers(i)/sum(T(i,sd)) +  rho(i)^8* eta(i)*nservers(i)/sum(T(i,sd)) );
                         end
                     end
                 end

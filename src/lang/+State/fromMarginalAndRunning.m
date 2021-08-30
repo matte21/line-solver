@@ -95,10 +95,10 @@ switch sn.nodetype(ind)
                 end
             case {SchedStrategy.ID_FCFS, SchedStrategy.ID_HOL, SchedStrategy.ID_LCFS}
                 sizeEstimator = multinomialln(n-s);
-				sizeEstimator = round(sizeEstimator/log(10));													
+                sizeEstimator = round(sizeEstimator/log(10));
                 if sizeEstimator > 2
                     if ~isfield(options,'force') || options.force == false
-                        line_error(sprintf('State space size is very large: 1e%d states. Stopping execution. Set options.force=true to bypass this control.\n',round(sizeEstimator/log(10))));
+                        line_warning(mfilename,sprintf('State space size is very large: 1e%d states. Stopping execution. Set options.force=true to bypass this control.\n',round(sizeEstimator/log(10))));
                     end
                 end
                 if sum(n) == 0
@@ -109,15 +109,15 @@ switch sn.nodetype(ind)
                 % the jobs in the servers
                 
                 % build list of job classes in the buffer, with repetition
-                vi = [];
+                inbuf = [];
                 for r=1:R
                     if n(r)>s(r)
-                        vi=[vi, r*ones(1,n(r))];
+                        inbuf=[inbuf, r*ones(1,n(r)-s(r))];
                     end
                 end
                 
                 % gen permutation of their positions in the fcfs buffer
-                mi = uniqueperms(vi); %unique(perms(vi),'rows) is notoriously slow
+                mi = uniqueperms(inbuf); %unique(perms(vi),'rows) is notoriously slow
                 if isempty(mi)
                     mi_buf = zeros(1,max(0,sum(n)-S(ist)));
                     state = zeros(1,R);
@@ -144,6 +144,76 @@ switch sn.nodetype(ind)
                                 kstate = State.decorate(kstate,init);
                             end
                             state = [state; repmat(mi_buf(b,:),size(kstate,1),1), kstate];
+                        end
+                    end
+                end
+                space = state;
+            case SchedStrategy.ID_LCFSPR
+                %% TODO
+                sizeEstimator = multinomialln(n-s);
+                sizeEstimator = round(sizeEstimator/log(10));
+                if sizeEstimator > 2
+                    if ~isfield(options,'force') || options.force == false
+                        line_warning(mfilename,sprintf('State space size is very large: 1e%d states. Stopping execution. Set options.force=true to bypass this control.\n',round(sizeEstimator/log(10))));
+                    end
+                end
+                if sum(n) == 0
+                    space = zeros(1,1+sum(K));
+                    return
+                end
+                % in these policies we track an ordered buffer and
+                % the jobs in the servers
+                
+                % build list of job classes in the buffer, with repetition
+                inbuf = [];
+                for r=1:R
+                    if n(r)>s(r)
+                        inbuf=[inbuf, r*ones(1,n(r)-s(r))];
+                    end
+                end
+                
+                % gen permutation of their positions in the fcfs buffer
+                mi = uniqueperms(inbuf); %unique(perms(vi),'rows) is notoriously slow
+                if isempty(mi)
+                    mi_buf = zeros(1,max(0,sum(n)-S(ist)));
+                    state = zeros(1,R);
+                    state = State.decorate(state,[mi_buf,state]);
+                else
+                    % mi_buf: class of job in buffer position i (0=empty)
+                    if sum(n)>sum(s)
+                        mi_buf = mi(:,1:(sum(n)-sum(s)));
+                    else % set an empty buffer
+                        mi_buf = 0;
+                    end
+                    % si: number of class r jobs that are running
+                    si = s;
+                    %si = unique(si,'rows');
+                    for b=1:size(mi_buf,1)
+                        for k=1:size(si,1)
+                            % determine number of classs r jobs running in phase
+                            % j in server state mi_srv(kjs,:) and build
+                            % state
+                            kstate=[];
+                            for r=1:R
+                                % kstate = State.decorate(kstate,State.spaceClosedSingle(K(r),si(k,r)));
+                                init = State.spaceClosedSingle(K(r),si(k,r));
+                                kstate = State.decorate(kstate,init);
+                            end
+                            bkstate = [];
+                            for j=mi_buf(b,:) % for each job in the buffer
+                                if j>0
+                                    bkstate = State.decorate(bkstate,[1:K(j)]');
+                                else
+                                    bkstate = 0;
+                                end
+                            end
+                            bufstate_tmp = State.decorate(mi_buf(b,:), bkstate);
+                            % here interleave positions of class and phases in
+                            % buf
+                            bufstate = zeros(size(bufstate_tmp));
+                            bufstate(:,1:2:end)=bufstate_tmp(:,1:size(mi_buf,2));
+                            bufstate(:,2:2:end)=bufstate_tmp(:,(size(mi_buf,2)+1):end);
+                            state = [state; State.decorate(bufstate, kstate)];
                         end
                     end
                 end

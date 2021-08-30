@@ -15,20 +15,8 @@ ST = 1 ./ sn.rates;
 ST(isnan(ST))=0;
 ST0=ST;
 
-alpha = zeros(sn.nstations,sn.nclasses);
-Vchain = zeros(sn.nstations,sn.nchains);
-for c=1:sn.nchains
-    inchain = find(sn.chains(c,:));
-    for i=1:sn.nstations
-        Vchain(i,c) = sum(sn.visits{c}(i,inchain)) / sum(sn.visits{c}(sn.refstat(inchain(1)),inchain));
-        for k=inchain
-            alpha(i,k) = alpha(i,k) + sn.visits{c}(i,k) / sum(sn.visits{c}(i,inchain));
-        end
-    end
-end
-Vchain(~isfinite(Vchain))=0;
-alpha(~isfinite(alpha))=0;
-alpha(alpha<1e-12)=0;
+[~,~,Vchain,alpha] = snGetDemandsChain(sn);
+
 eta_1 = zeros(1,M);
 eta = ones(1,M);
 ca_1 = ones(1,M);
@@ -156,48 +144,13 @@ while max(abs(1-eta./eta_1)) > options.iter_tol && it < options.iter_max
     end
     
     Z = sum(Z(1:M,:),1);
-    
     Rchain = Qchain ./ repmat(Xchain,M,1) ./ Vchain;
     Rchain(infServers,:) = Lchain(infServers,:) ./ Vchain(infServers,:);
     Tchain = repmat(Xchain,M,1) .* Vchain;
     Uchain = Tchain .* Lchain;
     Cchain = Nchain ./ Xchain - Z;
     
-    Xchain(~isfinite(Xchain))=0;
-    Uchain(~isfinite(Uchain))=0;
-    Qchain(~isfinite(Qchain))=0;
-    Rchain(~isfinite(Rchain))=0;
-    
-    Xchain(Nchain==0)=0;
-    Uchain(:,Nchain==0)=0;
-    Qchain(:,Nchain==0)=0;
-    Rchain(:,Nchain==0)=0;
-    Tchain(:,Nchain==0)=0;
-    
-    for c=1:sn.nchains
-        inchain = find(sn.chains(c,:));
-        for k=inchain(:)'
-            X(k) = Xchain(c) * alpha(sn.refstat(k),k);
-            for i=1:sn.nstations
-                if isinf(nservers(i))
-                    U(i,k) = ST(i,k) * (Xchain(c) * Vchain(i,c) / Vchain(sn.refstat(k),c)) * alpha(i,k);
-                else
-                    U(i,k) = ST(i,k) * (Xchain(c) * Vchain(i,c) / Vchain(sn.refstat(k),c)) * alpha(i,k) / nservers(i);
-                end
-                if Lchain(i,c) > 0
-                    Q(i,k) = Rchain(i,c) * ST(i,k) / STchain(i,c) * Xchain(c) * Vchain(i,c) / Vchain(sn.refstat(k),c) * alpha(i,k);
-                    T(i,k) = Tchain(i,c) * alpha(i,k);
-                    R(i,k) = Q(i,k) / T(i,k);
-                    % R(i,k) = Rchain(i,c) * ST(i,k) / STchain(i,c) * alpha(i,k) / sum(alpha(sn.refstat(k),inchain)');
-                else
-                    T(i,k) = 0;
-                    R(i,k) = 0;
-                    Q(i,k) = 0;
-                end
-            end
-            C(k) = sn.njobs(k) / X(k);
-        end
-    end
+    [Q,U,R,T,C,X] = snDeaggregateChainResults(sn, Lchain, ST, STchain, Vchain, alpha, [], [], Rchain, Tchain, [], Xchain);
     
     for i=1:M
         rho(i) = sum(U(i,:)); % true utilization of each server, critical to use this
@@ -205,7 +158,7 @@ while max(abs(1-eta./eta_1)) > options.iter_tol && it < options.iter_max
     
     if it==1
         ca= zeros(M,1);
-        ca_1 = ones(M,1);
+        %ca_1 = ones(M,1);
         cs_1 = ones(M,1);
         for i=1:M
             sd = sn.rates(i,:)>0;
@@ -245,7 +198,7 @@ while max(abs(1-eta./eta_1)) > options.iter_tol && it < options.iter_max
                     %eta(i) = rho(i);
                 end
         end
-    end    
+    end
     
     for i=1:M
         sd = sn.rates(i,:)>0;

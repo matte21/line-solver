@@ -28,6 +28,7 @@ end
 njobs = getNumberOfJobs(self);
 numservers = getStationServers(self);
 lldscaling = getLimitedLoadDependence(self);
+cdscaling = getLimitedClassDependence(self);
 
 %% init minimal structure
 sn = NetworkStruct(); % create in self to ensure propagation
@@ -72,6 +73,7 @@ sn.routing = routing;
 sn.chains = [];
 sn.lst = {};
 sn.lldscaling = lldscaling;
+sn.cdscaling = cdscaling;
 sn.nodetype = nodetypes;
 sn.nstations = sum(sn.isstation);
 sn.isstateful = NodeType.isStateful(nodetypes);

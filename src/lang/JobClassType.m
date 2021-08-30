@@ -7,6 +7,8 @@ classdef JobClassType < NetworkElement
     properties (Constant)
         OPEN = 'open';
         CLOSED = 'closed';
+        DISABLED = 'disabled';
+        ID_DISABLED = -1;
         ID_OPEN = 0;
         ID_CLOSED = 1;
     end

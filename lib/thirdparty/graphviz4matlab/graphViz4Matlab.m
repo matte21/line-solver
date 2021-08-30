@@ -384,7 +384,7 @@ classdef graphViz4Matlab < handle
         
         function createWindow(obj)
             % Create the main window
-            obj.fig = figure(floor(1000*rand) + 2000);
+            obj.fig = figure(floor(1000*rand) + 1000);
             set(obj.fig,'Name','graphViz4Matlab',...
                 'NumberTitle' ,'off',...
                 'Color','w'   ,'Toolbar','none');
@@ -402,10 +402,10 @@ classdef graphViz4Matlab < handle
             obj.ax = axes('Parent',obj.fig,'box','off','UserData','main'); % modified by LINE
             outerpos = get(obj.ax,'OuterPosition');
             axpos = outerpos;
-            axpos(4) = 0.90*1.5;
+            axpos(4) = 0.90;
             axpos(2) = 0.03;
             axis manual
-            %axis off % added by LINE
+            axis off % added by LINE
             if(obj.square)
                 axis square
             end

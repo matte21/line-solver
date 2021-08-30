@@ -1,5 +1,6 @@
-%@todo unfinished
 function [QN,UN,RN,TN,CN,XN,runtime] = solver_jmt_analysis(sn, options)
+% [QN,UN,RN,TN,CN,XN,runtime] = SOLVER_JMT_ANALYSIS(SN, OPTIONS)
+
 self.writeJSIM;
 cmd = ['java -cp "',getJMTJarPath(self),filesep,'JMT.jar" jmt.commandline.Jmt sim "',getFilePath(self),'jsim',filesep,getFileName(self),'.jsim" -seed ',num2str(options.seed),' --illegal-access=permit'];
 if options.verbose

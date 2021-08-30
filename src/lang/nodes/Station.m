@@ -9,6 +9,7 @@ classdef Station < StatefulNode
         cap;
         classCap;        
         lldScaling; % limited load-dependence scaling factors
+        lcdScaling; % limited class-dependence scaling factors
         stationIndex;
     end
     
@@ -22,6 +23,31 @@ classdef Station < StatefulNode
             self.classCap = [];
             self.lldScaling = [];
         end
+        
+        % don't expose to avoid accidental call without checking the queue
+        % scheduling discipline
+        function setLimitedLoadDependence(self, alpha)
+            % SETLIMITEDLOADDEPENDENCE(self, alpha)
+            % alpha(ni) is the service rate scaling when there are ni>=1
+            % jobs in the system            
+            self.lldScaling = alpha;
+        end
+        
+        % don't expose to avoid accidental call without checking the queue
+        % scheduling discipline
+        function setLimitedClassDependence(self, gamma)
+            % SETLIMITEDCLASSDEPENDENCE(self, gamma)
+            % 
+            % gamma(ni) is a function handle, where ni=[ni1,...,niR] 
+            % is the service rate scaling when there are nir jobs at 
+            % station i in class r
+            if isa(gamma,'function_handle')
+                self.lcdScaling = gamma;
+            else
+                line_error(mfilename, 'Class dependence must be specified through a function handle.');
+            end
+        end
+        
     end
     
     methods
@@ -54,21 +80,7 @@ classdef Station < StatefulNode
             
             self.cap = value;
         end
-        
-        function setLoadDependence(self, alpha)
-            % SETLOADDEPENDENCE(self, alpha)
-            % alpha(ni) is the service rate scaling when there are ni>=1
-            % jobs in the system            
-            setLimitedLoadDependence(self, alpha);
-        end
-        
-        function setLimitedLoadDependence(self, alpha)
-            % SETLIMITEDLOADDEPENDENCE(self, alpha)
-            % alpha(ni) is the service rate scaling when there are ni>=1
-            % jobs in the system            
-            self.lldScaling = alpha;
-        end
-        
+                        
         function setChainCapacity(self, values)
             % SETCHAINCAPACITY(VALUES)
             

@@ -9,36 +9,17 @@ function [QN,UN,RN,TN,CN,XN,InfGen,StateSpace,StateSpaceAggr,EventFiltration,run
 %    sn.lst = {};
 %    qn_json = jsonencode(sn);
 %    sn = NetworkStruct.fromJSON(qn_json)
-    %return
+%return
 %end
 
 M = sn.nstations;    %number of stations
 K = sn.nclasses;    %number of classes
-rt = sn.rt;
 S = sn.nservers;
 NK = sn.njobs';  % initial population per class
 schedid = sn.schedid;
 
 Tstart = tic;
 PH = sn.proc;
-
-myP = cell(K,K);
-for k = 1:K
-    for c = 1:K
-        myP{k,c} = zeros(M);
-    end
-end
-
-for i=1:M
-    for j=1:M
-        for k = 1:K
-            for c = 1:K
-                % routing table for each class
-                myP{k,c}(i,j) = rt((i-1)*K+k,(j-1)*K+c);
-            end
-        end
-    end
-end
 
 if any(sn.nodetype == NodeType.Cache)
     options.hide_immediate = false;
@@ -70,22 +51,22 @@ end
 wset = 1:length(InfGen);
 
 % for caches we keep the immediate transitions to give hit/miss rates
-[pi, ~, nConnComp, connComp] = ctmc_solve(InfGen, options);
+[probSysState, ~, nConnComp, connComp] = ctmc_solve(InfGen, options);
 
-if any(isnan(pi))
+if any(isnan(probSysState))
     if nConnComp > 1
         % the matrix was reducible
         initState = matchrow(StateSpace, cell2mat(sn.state'));
         % determine the weakly connected component associated to the initial state
         wset = find(connComp == connComp(initState));
-        pi = ctmc_solve(InfGen(wset, wset), options);
+        probSysState = ctmc_solve(InfGen(wset, wset), options);
         InfGen = InfGen(wset, wset);
         StateSpace = StateSpace(wset,:);
     end
 end
 
-pi(pi<1e-14)=0;
-pi = pi/sum(pi);
+probSysState(probSysState<1e-14)=0;
+probSysState = probSysState/sum(probSysState);
 
 XN = NaN*zeros(1,K);
 UN = NaN*zeros(M,K);
@@ -94,22 +75,69 @@ RN = NaN*zeros(M,K);
 TN = NaN*zeros(M,K);
 CN = NaN*zeros(1,K);
 
+istSpaceShift = zeros(1,M);
+for i=1:M
+    if i==1
+        istSpaceShift(i) = 0;
+    else
+        istSpaceShift(i) = istSpaceShift(i-1) + size(sn.space{i-1},2);
+    end
+end
 
 for k=1:K
     refsf = sn.stationToStateful(sn.refstat(k));
-    XN(k) = pi*arvRates(wset,refsf,k);
-    for i=1:M
-        isf = sn.stationToStateful(i);
-        TN(i,k) = pi*depRates(wset,isf,k);
-        QN(i,k) = pi*StateSpaceAggr(wset,(i-1)*K+k);       
-        switch schedid(i)
-            case SchedStrategy.ID_INF
+    XN(k) = probSysState*arvRates(wset,refsf,k);
+end
+
+for i=1:M
+    isf = sn.stationToStateful(i);
+    for k=1:K
+        TN(i,k) = probSysState*depRates(wset,isf,k);
+        QN(i,k) = probSysState*StateSpaceAggr(wset,(i-1)*K+k);
+    end
+    switch schedid(i)
+        case SchedStrategy.ID_INF
+            for k=1:K
                 UN(i,k) = QN(i,k);
-            otherwise
-                if ~isempty(PH{i}{k})
-                    UN(i,k) = pi*arvRates(wset,isf,k)*map_mean(PH{i}{k})/S(i);
+            end
+        case {SchedStrategy.ID_PS, SchedStrategy.ID_DPS, SchedStrategy.ID_GPS}
+            if isempty(sn.lldscaling) && isempty(sn.cdscaling)
+                for k=1:K
+                    if ~isempty(PH{i}{k})
+                        UN(i,k) = probSysState*arvRates(wset,isf,k)*map_mean(PH{i}{k})/S(i);
+                    end
                 end
-        end
+            else % lld/cd cases
+                ind = sn.stationToNode(i);
+                UN(i,1:K) = 0;
+                for st = wset
+                    [ni,nir] = State.toMarginal(sn, ind, StateSpace(st,(istSpaceShift(i)+1):(istSpaceShift(i)+size(sn.space{i},2))));
+                    if ni>0                        
+                        for k=1:K
+                            UN(i,k) = UN(i,k) + probSysState(st)*nir(k)*sn.schedparam(i,k)/(nir*sn.schedparam(i,:)');
+                        end
+                    end
+                end
+            end
+        otherwise
+            if isempty(sn.lldscaling) && isempty(sn.cdscaling)
+                for k=1:K
+                    if ~isempty(PH{i}{k})
+                        UN(i,k) = probSysState*arvRates(wset,isf,k)*map_mean(PH{i}{k})/S(i);
+                    end
+                end
+            else % lld/cd cases
+                ind = sn.stationToNode(i);
+                UN(i,1:K) = 0;
+                for st = wset
+                    [ni,~,sir] = State.toMarginal(sn, ind, StateSpace(st,(istSpaceShift(i)+1):(istSpaceShift(i)+size(sn.space{i},2))));
+                    if ni>0
+                        for k=1:K
+                            UN(i,k) = UN(i,k) + probSysState(st)*sir(k)/S(i);
+                        end
+                    end
+                end
+            end
     end
 end
 
@@ -136,8 +164,8 @@ runtime = toc(Tstart);
 % now update the routing probabilities in nodes with state-dependent routing
 for k=1:K
     for isf=1:sn.nstateful
-        if sn.nodetype(isf) == NodeType.Cache            
-            TNcache(isf,k) = pi*depRates(wset,isf,k);
+        if sn.nodetype(isf) == NodeType.Cache
+            TNcache(isf,k) = probSysState*depRates(wset,isf,k);
         end
     end
 end

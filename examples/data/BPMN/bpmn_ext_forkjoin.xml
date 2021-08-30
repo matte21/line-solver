@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmnExtensions>
+<resource id="1" name = "Resource1" multiplicity="1" scheduling="ps"> 
+ <assignment taskID="AuthorSOP" meanExecutionTime="00:000:00:10:00"/>
+ <assignment taskID="ManufacturingReview" meanExecutionTime="00:000:00:2:00"/>
+</resource>
+<resource id="2" name = "Resource2" multiplicity="1" scheduling="fcfs"> 
+ <assignment taskID="DocumentationReview" meanExecutionTime="00:000:00:05:00"/>
+ <assignment taskID="QualityCheck" meanExecutionTime="00:000:00:03:00"/>
+</resource>
+<startEvent id="StartEvent" meanThinkTime="00:000:00:10:00" multiplicity="10"/>
+</bpmnExtensions>

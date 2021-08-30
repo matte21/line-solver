@@ -7,26 +7,7 @@ function [Pnir,runtime,fname] = solver_ctmc_jointaggr(sn, options)
 M = sn.nstations;    %number of stations
 K = sn.nclasses;    %number of classes
 fname = '';
-rt = sn.rt;
 Tstart = tic;
-
-myP = cell(K,K);
-for k = 1:K
-    for c = 1:K
-        myP{k,c} = zeros(sn.nstations);
-    end
-end
-
-for i=1:sn.nstations
-    for j=1:sn.nstations
-        for k = 1:K
-            for c = 1:K
-                % routing table for each class
-                myP{k,c}(i,j) = rt((i-1)*K+k,(j-1)*K+c);
-            end
-        end
-    end
-end
 
 [Q,~,SSq,~,~,~,sn] = solver_ctmc(sn, options);
 % SSq is an aggregate state space

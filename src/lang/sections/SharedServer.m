@@ -1,5 +1,6 @@
 classdef SharedServer < ServiceSection
-    % A service section for serving jobs preemptively
+    % A service section for serving jobs with processor sharing type
+    % policies
     %
     % Copyright (c) 2012-2021, Imperial College London
     % All rights reserved.

@@ -33,37 +33,37 @@ algTypeElement = mvaDoc.createElement('algType');
 switch self.options.method
     case {'jmva.recal'}
         if max(sn.nservers(isfinite(sn.nservers))) > 1
-            line_error(sprintf('%s does not support multi-server stations.',self.options.method));
+            line_error(mfilename,sprintf('%s does not support multi-server stations.',self.options.method));
         end
         algTypeElement.setAttribute('name','RECAL');
     case {'jmva.comom'}
         if max(sn.nservers(isfinite(sn.nservers))) > 1
-            line_error(sprintf('%s does not support multi-server stations.',self.options.method));
+            line_error(mfilename,sprintf('%s does not support multi-server stations.',self.options.method));
         end
         algTypeElement.setAttribute('name','CoMoM');
     case {'jmva.chow'}
         if max(sn.nservers(isfinite(sn.nservers))) > 1
-            line_error(sprintf('%s does not support multi-server stations.',self.options.method));
+            line_error(mfilename,sprintf('%s does not support multi-server stations.',self.options.method));
         end
         algTypeElement.setAttribute('name','Chow');
     case {'jmva.bs','jmva.amva'}
         if max(sn.nservers(isfinite(sn.nservers))) > 1
-            line_error(sprintf('%s does not support multi-server stations.',self.options.method));
+            line_error(mfilename,sprintf('%s does not support multi-server stations.',self.options.method));
         end
         algTypeElement.setAttribute('name','Bard-Schweitzer');
     case {'jmva.aql'}
         if max(sn.nservers(isfinite(sn.nservers))) > 1
-            line_error(sprintf('%s does not support multi-server stations.',self.options.method));
+            line_error(mfilename,sprintf('%s does not support multi-server stations.',self.options.method));
         end
         algTypeElement.setAttribute('name','AQL');
     case {'jmva.lin'}
         if max(sn.nservers(isfinite(sn.nservers))) > 1
-            line_error(sprintf('%s does not support multi-server stations.',self.options.method));
+            line_error(mfilename,sprintf('%s does not support multi-server stations.',self.options.method));
         end
         algTypeElement.setAttribute('name','Linearizer');
     case {'jmva.dmlin'}
         if max(sn.nservers(isfinite(sn.nservers))) > 1
-            line_error(sprintf('%s does not support multi-server stations.',self.options.method));
+            line_error(mfilename,sprintf('%s does not support multi-server stations.',self.options.method));
         end
         algTypeElement.setAttribute('name','De Souza-Muntz Linearizer');
     case {'jmva.ls'}
@@ -85,49 +85,8 @@ ST = 1./sn.rates;
 ST(isnan(sn.rates))=0;
 SCV(isnan(SCV))=1;
 
-alpha = zeros(sn.nstations,sn.nclasses);
-Vchain = zeros(sn.nstations,sn.nchains);
-for c=1:sn.nchains
-    inchain = find(sn.chains(c,:));
-    for i=1:sn.nstations
-        Vchain(i,c) = sum(sn.visits{c}(i,inchain)) / sum(sn.visits{c}(sn.refstat(inchain(1)),inchain));
-        for k=inchain
-            alpha(i,k) = alpha(i,k) + sn.visits{c}(i,k) / sum(sn.visits{c}(i,inchain));
-        end
-    end
-end
-Vchain(~isfinite(Vchain))=0;
-alpha(~isfinite(alpha))=0;
-alpha(alpha<1e-12)=0;
+[Lchain,STchain,Vchain,alpha,Nchain,SCVchain] = snGetDemandsChain(sn);
 
-Lchain = zeros(M,C);
-STchain = zeros(M,C);
-
-SCVchain = zeros(M,C);
-Nchain = zeros(1,C);
-refstatchain = zeros(C,1);
-for c=1:sn.nchains
-    inchain = find(sn.chains(c,:));
-    isOpenChain = any(isinf(sn.njobs(inchain)));
-    for i=1:sn.nstations
-        % we assume that the visits in L(i,inchain) are equal to 1
-        Lchain(i,c) = Vchain(i,c) * ST(i,inchain) * alpha(i,inchain)';
-        STchain(i,c) = ST(i,inchain) * alpha(i,inchain)';
-        if isOpenChain && i == sn.refstat(inchain(1)) % if this is a source ST = 1 / arrival rates
-            STchain(i,c) = 1 / sumfinite(sn.rates(i,inchain)); % ignore degenerate classes with zero arrival rates
-        else
-            STchain(i,c) = ST(i,inchain) * alpha(i,inchain)';
-        end
-        SCVchain(i,c) = SCV(i,inchain) * alpha(i,inchain)';
-    end
-    Nchain(c) = sum(NK(inchain));
-    refstatchain(c) = sn.refstat(inchain(1));
-    if any((sn.refstat(inchain(1))-refstatchain(c))~=0)
-        line_error(sprintf('Classes in chain %d have different reference station.',c));
-    end
-end
-STchain(~isfinite(STchain))=0;
-Lchain(~isfinite(Lchain))=0;
 %%%%%%%%%%
 parametersElem = mvaDoc.createElement('parameters');
 classesElem = mvaDoc.createElement('classes');
@@ -211,6 +170,12 @@ for i=1:sn.nstations
     statElem.appendChild(visitsElem);
     
     stationsElem.appendChild(statElem);
+end
+
+refstatchain = zeros(C,1);
+for c=1:sn.nchains
+    inchain = find(sn.chains(c,:));
+    refstatchain(c) = sn.refstat(inchain(1));
 end
 
 for c=1:sn.nchains

@@ -11,7 +11,7 @@ classdef SolverCTMC < NetworkSolver
             self.setOptions(Solver.parseOptions(varargin, self.defaultOptions));
         end
         
-        runtime = runAnalyzer(self, options, config)
+        runtime = runAnalyzer(self, options)
         Pnir = getProb(self, node, state)
         Pn = getProbSys(self)
         Pnir = getProbAggr(self, ist)
@@ -23,12 +23,13 @@ classdef SolverCTMC < NetworkSolver
         [Pi_t, SSnode] = getTranProb(self, node)
         %RD = getCdfRespT(self, R)
         
-        [stateSpace,nodeStateSpace] = getStateSpace(self)
+        [stateSpace,nodeStateSpace] = getStateSpace(self, options)
         stateSpaceAggr = getStateSpaceAggr(self)
             
-        [infGen, eventFilt, ev] = getSymbolicGenerator(self)
-        [infGen, eventFilt, ev] = getInfGen(self)        
-        [infGen, eventFilt, ev] = getGenerator(self, force)
+        [infGen, eventFilt, synchInfo, stateSpace, nodeStateSpace] = getSymbolicGenerator(self, invertSymbol, primeNumbers)
+        [infGen, eventFilt, synchInfo] = getInfGen(self, options)        
+        [infGen, eventFilt, synchInfo] = getGenerator(self, options)
+        
         tstate = sampleSys(self, numevents)
         sampleAggr = sampleAggr(self, node, numSamples)
         
@@ -57,6 +58,7 @@ classdef SolverCTMC < NetworkSolver
                 'SchedStrategy_SIRO','SchedStrategy_SEPT',...
                 'SchedStrategy_LEPT','SchedStrategy_FCFS',...
                 'SchedStrategy_HOL','SchedStrategy_LCFS',...
+                'SchedStrategy_LCFSPR',...
                 'RoutingStrategy_RROBIN',...
                 'RoutingStrategy_PROB','RoutingStrategy_RAND',...
                 'ClosedClass','OpenClass','Replayer'});

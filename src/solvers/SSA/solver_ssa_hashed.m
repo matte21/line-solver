@@ -21,7 +21,7 @@ sync = sn.sync;
 csmask = sn.csmask;
 
 cutoff = options.cutoff;
-if prod(size(cutoff))==1
+if numel(cutoff)==1
     cutoff = cutoff * ones(sn.nstations, sn.nclasses);
 end
 

@@ -1,4 +1,3 @@
-model = Network('model');
 % Block 1: nodes
 model = Network('model');
 % Block 1: nodes

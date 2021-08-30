@@ -46,23 +46,23 @@ for i= 1:sn.nnodes
         case NodeType.Sink
             fprintf(fid,'node{%d} = Sink(model, ''%s'');\n',i,sn.nodenames{i});
         case NodeType.ClassSwitch
-%            csMatrix = eye(sn.nclasses);
-%            fprintf(fid,'\ncsMatrix%d = zeros(%d);\n',i,sn.nclasses);
-%             for k = 1:sn.nclasses
-%                 for c = 1:sn.nclasses
-%                     for m=1:sn.nnodes
-%                         % routing matrix for each class
-%                         csMatrix(k,c) = csMatrix(k,c) + rtnodes((i-1)*sn.nclasses+k,(m-1)*sn.nclasses+c);
-%                     end
-%                 end
-%             end
-%            for k = 1:sn.nclasses
-%                for c = 1:sn.nclasses
-%                    if csMatrix(k,c)>0
-%                        fprintf(fid,'csMatrix%d(%d,%d) = %f; %% %s -> %s\n',i,k,c,csMatrix(k,c),sn.classnames{k},sn.classnames{c});
-%                    end
-%                end
-%            end
+            %            csMatrix = eye(sn.nclasses);
+            %            fprintf(fid,'\ncsMatrix%d = zeros(%d);\n',i,sn.nclasses);
+            %             for k = 1:sn.nclasses
+            %                 for c = 1:sn.nclasses
+            %                     for m=1:sn.nnodes
+            %                         % routing matrix for each class
+            %                         csMatrix(k,c) = csMatrix(k,c) + rtnodes((i-1)*sn.nclasses+k,(m-1)*sn.nclasses+c);
+            %                     end
+            %                 end
+            %             end
+            %            for k = 1:sn.nclasses
+            %                for c = 1:sn.nclasses
+            %                    if csMatrix(k,c)>0
+            %                        fprintf(fid,'csMatrix%d(%d,%d) = %f; %% %s -> %s\n',i,k,c,csMatrix(k,c),sn.classnames{k},sn.classnames{c});
+            %                    end
+            %                end
+            %            end
             %fprintf(fid,'node{%d} = ClassSwitch(model, ''%s'', csMatrix%d);\n',i,sn.nodenames{i},i);
             fprintf(fid,'node{%d} = ClassSwitch(model, ''%s'', eye(%d)); %% Class switching is embedded in the routing matrix P \n',i,sn.nodenames{i},sn.nclasses);
     end
@@ -96,8 +96,8 @@ for k = 1:sn.nclasses
 end
 fprintf(fid,'\n');
 %% arrival and service processes
-for k=1:sn.nclasses
-    for i=1:sn.nstations
+for i=1:sn.nstations
+    for k=1:sn.nclasses
         if sn.nodetype(sn.stationToNode(i)) ~= NodeType.Join
             if isprop(model.stations{i},'serviceProcess') && strcmp(class(model.stations{i}.serviceProcess{k}),'Replayer')
                 switch sn.schedid(i)
@@ -143,7 +143,7 @@ for k=1:sn.nclasses
                     end
                 end
             end
-        end        
+        end
     end
 end
 

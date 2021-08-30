@@ -67,7 +67,7 @@ classdef SolverAuto < NetworkSolver
             end
         end
         
-        function runtime = runAnalyzer(self, options, config) % generic method to run the solver
+        function runtime = runAnalyzer(self, options) % generic method to run the solver
             %RUNTIME = RUN()
             %Run the solver % GENERIC METHOD TO RUN THE SOLVER
             

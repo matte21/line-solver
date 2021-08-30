@@ -36,6 +36,9 @@ classdef Queue < Station
                     case {SchedStrategy.ID_PS, SchedStrategy.ID_DPS,SchedStrategy.ID_GPS}
                         self.schedPolicy = SchedStrategyType.PR;
                         self.server = SharedServer(classes);
+                    case SchedStrategy.ID_LCFSPR
+                        self.schedPolicy = SchedStrategyType.PR;
+                        self.server = PreemptiveServer(classes);                        
                     case {SchedStrategy.ID_FCFS, SchedStrategy.ID_LCFS, SchedStrategy.ID_SIRO, SchedStrategy.ID_SEPT, SchedStrategy.ID_LEPT, SchedStrategy.ID_SJF, SchedStrategy.ID_LJF}
                         self.schedPolicy = SchedStrategyType.NP;
                         self.server = Server(classes);
@@ -47,8 +50,26 @@ classdef Queue < Station
                         self.schedPolicy = SchedStrategyType.NP;
                         self.server = Server(classes);
                     otherwise
-                        line_error(sprintf('The specified scheduling strategy (%s) is unsupported.',schedStrategy));
+                        line_error(mfilename,sprintf('The specified scheduling strategy (%s) is unsupported.',schedStrategy));
                 end
+            end
+        end
+                
+        function setLoadDependence(self, alpha)
+            switch SchedStrategy.toId(self.schedStrategy)
+                case {SchedStrategy.ID_PS, SchedStrategy.ID_FCFS}
+                    setLimitedLoadDependence(self, alpha);                    
+                otherwise
+                    line_error(mfilename,'Load-dependence supported only for processor sharing (PS) and first-come first-serve (FCFS) stations.');
+            end
+        end
+        
+        function setClassDependence(self, beta)            
+            switch SchedStrategy.toId(self.schedStrategy)
+                case {SchedStrategy.ID_PS, SchedStrategy.ID_FCFS}
+                    setLimitedClassDependence(self, beta);                    
+                otherwise
+                    line_error(mfilename,'Class-dependence supported only for processor sharing (PS) and first-come first-serve (FCFS) stations.');
             end
         end
         
@@ -89,7 +110,7 @@ classdef Queue < Station
             if nargin<2 %~exist('class','var')
                 for s = 1:length(self.model.classes)
                     distribution{s} = self.server.serviceProcess{1, self.model.classes{s}}{3};
-                end                
+                end
             else
                 try
                     distribution = self.server.serviceProcess{1, class.index}{3};
@@ -109,7 +130,7 @@ classdef Queue < Station
             % SETSERVICE(CLASS, DISTRIBUTION, WEIGHT)
             if nargin<4 %~exist('weight','var')
                 weight=1.0;
-            end            
+            end
             resetInitState = false;
             if length(self.server.serviceProcess) >= class.index % this is to enable the next if
                 if length(self.server.serviceProcess{1,class.index})<= 3 % if the distribution was already configured
@@ -120,7 +141,7 @@ classdef Queue < Station
             end
             self.serviceProcess{class.index} = distribution;
             self.input.inputJobClasses{class.index} = {class, self.schedPolicy, DropStrategy.WaitingQueue};
-            self.server.serviceProcess{1, class.index}{2} = ServiceStrategy.LI;                        
+            self.server.serviceProcess{1, class.index}{2} = ServiceStrategy.LI;
             if distribution.isImmediate()
                 self.server.serviceProcess{1, class.index}{3} = Immediate.getInstance();
             else
@@ -135,7 +156,7 @@ classdef Queue < Station
                 self.model.setInitialized(false); % this is a better way to invalidate to avoid that sequential calls to setService all trigger an initDefault
             end
             %if self.model.hasStruct
-                %self.model.refreshService(self.stationIndex,class.index);
+            %self.model.refreshService(self.stationIndex,class.index);
             %end
         end
         

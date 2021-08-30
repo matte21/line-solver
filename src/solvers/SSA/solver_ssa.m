@@ -21,7 +21,7 @@ sync = sn.sync;
 csmask = sn.csmask;
 
 cutoff = options.cutoff;
-if prod(size(cutoff))==1
+if numel(cutoff)==1
     cutoff = cutoff * ones(sn.nstations, sn.nclasses);
 end
 
@@ -264,8 +264,8 @@ for ind=1:sn.nnodes
         isf = sn.nodeToStateful(ind);
         if sn.isstation(ind)
             ist = sn.nodeToStation(ind);
-            K = sn.phasessz(ist,:);
-            Ks = sn.phaseshift(ist,:);
+            %K = sn.phasessz(ist,:);
+            %Ks = sn.phaseshift(ist,:);
         end
         for s=1:size(u,1)
             for r=1:R

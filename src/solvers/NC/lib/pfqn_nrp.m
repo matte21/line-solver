@@ -6,7 +6,7 @@ if sum(Z)>0
     alpha(end+1,:)=1:Nt;    
 end
 if M==1
-    [~,lG] = pfqn_gmvald(L,N,alpha);
+    [~,lG] = pfqn_gld(L,N,alpha);
     return
 else
     Lmax = max(L); 

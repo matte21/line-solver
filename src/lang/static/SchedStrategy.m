@@ -8,6 +8,7 @@ classdef (Sealed) SchedStrategy
         INF = 'inf'; % infinite server
         FCFS = 'fcfs';
         LCFS = 'lcfs';
+        LCFSPR = 'lcfspr';
         SIRO = 'siro'; % service in random order
         SJF = 'sjf';
         LJF = 'ljf';
@@ -36,6 +37,7 @@ classdef (Sealed) SchedStrategy
         ID_FORK = 12;
         ID_EXT = 13;
         ID_REF = 14;
+        ID_LCFSPR = 15;
     end
     
     methods (Static)
@@ -72,6 +74,8 @@ classdef (Sealed) SchedStrategy
                     id = 13;
                 case SchedStrategy.REF
                     id = 14;
+                case SchedStrategy.LCFSPR
+                    id = 15;
             end
         end
 
@@ -108,6 +112,8 @@ classdef (Sealed) SchedStrategy
                     type=SchedStrategy.EXT;
                 case SchedStrategy.ID_REF
                     type=SchedStrategy.REF;
+                case SchedStrategy.ID_LCFSPR
+                    type=SchedStrategy.LCFSPR;
             end
         end
         
@@ -144,6 +150,8 @@ classdef (Sealed) SchedStrategy
                     text = 'ext';
                 case SchedStrategy.REF
                     text = 'ref';
+                case SchedStrategy.LCFSPR
+                    text = 'lcfspr';
             end
         end
         
@@ -180,6 +188,8 @@ classdef (Sealed) SchedStrategy
                     type = SchedStrategy.EXT;
                 case 'ref'
                     type = SchedStrategy.REF;
+                case 'lcfspr'
+                    type = SchedStrategy.LCFSPR;
             end
         end        
         
@@ -221,6 +231,8 @@ classdef (Sealed) SchedStrategy
                     property = 'REF';
                 case 'ext'
                     property = 'EXT';
+                case 'lcfspr'
+                    property = 'LCFSPR';
             end
         end
         
@@ -258,6 +270,8 @@ classdef (Sealed) SchedStrategy
                     text = 'SchedStrategy_EXT';
                 case SchedStrategy.REF
                     text = 'SchedStrategy_REF';
+                case SchedStrategy.LCFSPR
+                    text = 'SchedStrategy_LCFSPR';
             end
         end
     end

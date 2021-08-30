@@ -252,7 +252,7 @@ for ind=1:self.getNumberOfNodes % source
     try
         eigen = eig(rt); % exception if rt has NaN or Inf
         if sum(eigen>=1)>1
-            line_warning(mfilename, 'Solutions may be invalid, the routing matrix is reducible. The path of two or more classes can be analyzed with independent models.');
+            line_warning(mfilename, 'Solutions may be invalid, the routing matrix is reducible. The path of two or more classes form independent non-interacting models.');
         end
     end
     

@@ -1,4 +1,4 @@
-function [lGn,X,Q] = pfqn_nc(L,N,Z,varargin)
+function [lG,X,Q] = pfqn_nc(L,N,Z,varargin)
 % [LGN] = PFQN_NC(L,N,Z,VARARGIN)
 
 options = Solver.parseOptions(varargin, SolverNC.defaultOptions);
@@ -34,9 +34,9 @@ L = L(demStations,:);
 if any(N((sum(L,1) + sum(Z,1)) == 0)>0) % if there is a class with jobs but L and Z all zero
     line_warning(mfilename,'The model has no positive demands in any class.');
     if isempty(Z) || sum(Z(:))<options.tol
-        lGn = 0;
+        lG = 0;
     else
-        lGn = - sum(factln(N)) + sum(N.*log(sum(Z,1))) + N*log(scalevec)';
+        lG = - sum(factln(N)) + sum(N.*log(sum(Z,1))) + N*log(scalevec)';
     end
     return
 end
@@ -47,13 +47,13 @@ end
 % return immediately if degenerate case
 if isempty(L) || sum(L(:))<options.tol % all demands are zero
     if isempty(Z) || sum(Z(:))<options.tol
-        lGn = 0;
+        lG = 0;
     else
-        lGn = - sum(factln(N)) + sum(N.*log(sum(Z,1))) + N*log(scalevec)';
+        lG = - sum(factln(N)) + sum(N.*log(sum(Z,1))) + N*log(scalevec)';
     end
     return
 elseif M==1 && (isempty(Z) || sum(Z(:))<options.tol) % single node and no think time
-    lGn = factln(sum(N)) - sum(factln(N)) + sum(N.*log(sum(L,1))) + N*log(scalevec)';
+    lG = factln(sum(N)) - sum(factln(N)) + sum(N.*log(sum(L,1))) + N*log(scalevec)';
     return
 end
 
@@ -79,9 +79,9 @@ Zz = Z(:,zeroDemandClasses);
 Z = Z(:,nonzeroDemandClasses);
 scalevecz = scalevec(nonzeroDemandClasses);
 % compute G for classes No with non-zero demand
-[lGnnzdem,Xnnzdem,Qnnzdem] = sub_method(L, N, Z, options);
+[lGnzdem,Xnnzdem,Qnnzdem] = compute_norm_const(L, N, Z, options);
 
-if isempty(Xnnzdem)
+if isempty(Xnnzdem) % the NC method as a by-product doesn't return metrics
     X = [];
     Q = [];
 else
@@ -99,13 +99,13 @@ else
     Q(demStations,[zClasses, nnzClasses]) = [Qz, Qnnz];
 end
 % scale back to original demands
-lGn = lGnnzdem + lGzdem + N*log(scalevecz)';
+lG = lGnzdem + lGzdem + N*log(scalevecz)';
 end
 
 
 
-function [lG,X,Q] = sub_method(L,N,Z,options)
-% LG = SUB_METHOD(L,N,Z,OPTIONS)
+function [lG,X,Q] = compute_norm_const(L,N,Z,options)
+% LG = COMPUTE_NORM_CONST(L,N,Z,OPTIONS)
 [M,R] = size(L);
 X=[];Q=[];
 switch options.method

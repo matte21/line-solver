@@ -19,11 +19,11 @@ for i=1:M
 end
 Nt = sum(Nchain(isfinite(Nchain)));
 
-G = pfqn_gmva(L,Nchain,Z);
+G = exp(pfqn_ncld(L,Nchain,Z,options));
 for r=1:K
-    Xchain(r) = pfqn_gmva(L,oner(Nchain,r),Z) / G;
+    Xchain(r) = exp(pfqn_ncld(L,oner(Nchain,r),Z,options)) / G;
     for i=1:M
-        Qchain(i,r) = L(i,r) * pfqn_gmva(Ladd(L,i),oner(Nchain,r),Z) / G;
+        Qchain(i,r) = L(i,r) * exp(pfqn_ncld(Ladd(L,i),oner(Nchain,r),Z,options)) / G;
     end
 end
 
@@ -44,5 +44,4 @@ Uchain(:,Nchain==0)=0;
 Qchain(:,Nchain==0)=0;
 Rchain(:,Nchain==0)=0;
 Tchain(:,Nchain==0)=0;
-
 end

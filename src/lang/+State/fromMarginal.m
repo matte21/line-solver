@@ -88,12 +88,12 @@ switch sn.nodetype(ind)
                         space = [space; state];
                     end
                 end
-            case {SchedStrategy.ID_FCFS, SchedStrategy.ID_HOL, SchedStrategy.ID_LCFS}
+            case SchedStrategy.ID_LCFSPR
                 sizeEstimator = multinomialln(n) - gammaln(sum(n)) + gammaln(1+sn.cap(ist));
                 sizeEstimator = round(sizeEstimator/log(10));
-                if sizeEstimator > 2
+                if sizeEstimator > 3
                     if ~isfield(options,'force') || options.force == false
-                        %line_warning(mfilename,sprintf('fromMarginal(): Marginal state space size is very large: 1e%d states. Set options.force=true to bypass this control.\n',sizeEstimator));
+                        %line_warning(mfilename,sprintf('Marginal state space size is in the order of thousands of states. Computation may be slow.',sizeEstimator));
                     end
                 end
                 
@@ -112,13 +112,95 @@ switch sn.nodetype(ind)
                     end
                 end
                 
-                % gen permutation of their positions in the fcfs buffer
+                % gen permutation of their positions in the waiting buffer
                 mi = uniqueperms(vi);
+                % now generate server states
                 if isempty(mi)
                     mi_buf = zeros(1,max(0,sum(n)-S(ist)));
                     state = zeros(1,R);
                     state = State.decorate(state,[mi_buf,state]);
-                else                    
+                else
+                    mi = mi(:,(end-min(sum(n),sn.cap(ist))+1):end); % n(r) may count more than once elements within the same chain
+                    mi = unique(mi,'rows');
+                    % mi_buf: class of job in buffer position i (0=empty)
+                    mi_buf = [zeros(size(mi,1),min(sum(n),sn.cap(ist))-S(ist)-size(mi(:,1:end-S(ist)),2)), mi(:,1:end-S(ist))];
+                    if isempty(mi_buf)
+                        mi_buf = zeros(size(mi,1),1);
+                    end
+                    mi_buf_kstate = [];
+                    %if mi_buf(1)>0
+                    % generate job phases for all buffer states                    
+                    %for k=1:size(mi_buf,1)
+                    %    mi_buf_kstate(end+1:end+size(bkstate,1),1:size(bkstate,2)) = bkstate;
+                    %end         
+                    %end
+                    % mi_srv: class of job running in server i
+                    mi_srv = mi(:,max(size(mi,2)-S(ist)+1,1):end);
+                    % si: number of class r jobs that are running
+                    si =[];
+                    for k=1:size(mi_srv,1)
+                        si(k,1:R) = hist(mi_srv(k,:),1:R);
+                    end
+                    %si = unique(si,'rows');
+                    for k=1:size(si,1)
+                        % determine number of class r jobs running in phase
+                        % j in server state mi_srv(kjs,:) and build
+                        % state
+                        kstate=[];
+                        for r=1:R
+                            kstate = State.decorate(kstate,State.spaceClosedSingle(K(r),si(k,r)));
+                        end
+                        % generate job phases for all buffer states
+                        bkstate = [];
+                        for j=mi_buf(k,:) % for each job in the buffer
+                            if j>0
+                                bkstate = State.decorate(bkstate,[1:K(j)]');
+                            else 
+                                bkstate = 0;
+                            end
+                        end                        
+                        bufstate_tmp = State.decorate(mi_buf(k,:), bkstate);
+                        % here interleave positions of class and phases in
+                        % buf
+                        bufstate = zeros(size(bufstate_tmp));
+                        bufstate(:,1:2:end)=bufstate_tmp(:,1:size(mi_buf,2));
+                        bufstate(:,2:2:end)=bufstate_tmp(:,(size(mi_buf,2)+1):end);                        
+                        state = [state; State.decorate(bufstate, kstate)];
+                    end
+                end
+                space = state;
+          case {SchedStrategy.ID_FCFS, SchedStrategy.ID_HOL, SchedStrategy.ID_LCFS}  
+                sizeEstimator = multinomialln(n) - gammaln(sum(n)) + gammaln(1+sn.cap(ist));
+                sizeEstimator = round(sizeEstimator/log(10));
+                if sizeEstimator > 3
+                    if ~isfield(options,'force') || options.force == false
+                        %line_warning(mfilename,sprintf('Marginal state space size is in the order of thousands of states. Computation may be slow.',sizeEstimator));
+                    end
+                end
+                
+                if sum(n) == 0
+                    space = zeros(1,1+sum(K)); % unclear if this should 1+sum(K), was sum(K) but State.fromMarginalAndStarted uses 1+sum(K) so was changed here as well
+                    return
+                end
+                % in these policies we track an ordered buffer and
+                % the jobs in the servers
+                
+                % build list of job classes in the node, with repetition
+                vi = [];
+                for r=1:R
+                    if n(r)>0
+                        vi=[vi, r*ones(1,n(r))];
+                    end
+                end
+                
+                % gen permutation of their positions in the waiting buffer
+                mi = uniqueperms(vi);
+                % now generate server states
+                if isempty(mi)
+                    mi_buf = zeros(1,max(0,sum(n)-S(ist)));
+                    state = zeros(1,R);
+                    state = State.decorate(state,[mi_buf,state]);
+                else
                     mi = mi(:,(end-min(sum(n),sn.cap(ist))+1):end); % n(r) may count more than once elements within the same chain
                     mi = unique(mi,'rows');
                     % mi_buf: class of job in buffer position i (0=empty)
@@ -145,7 +227,7 @@ switch sn.nodetype(ind)
                         state = [state; repmat(mi_buf(k,:),size(kstate,1),1), kstate];
                     end
                 end
-                space = state;
+                space = state;                
             case {SchedStrategy.ID_SJF, SchedStrategy.ID_LJF}
                 % in these policies the state space includes continuous
                 % random variables for the service times

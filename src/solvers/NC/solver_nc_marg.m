@@ -32,65 +32,23 @@ for c=1:sn.nchains
     V = V + sn.visits{c};
 end
 
-alpha = zeros(sn.nstations,sn.nclasses);
-Vchain = zeros(sn.nstations,sn.nchains);
-REFchain = zeros(sn.nstations,sn.nchains);
-for c=1:sn.nchains
-    inchain = find(sn.chains(c,:));
-    for i=1:sn.nstations
-        Vchain(i,c) = sum(sn.visits{c}(i,inchain)) / sum(sn.visits{c}(sn.refstat(inchain(1)),inchain));
-        REFchain(i,c) = 1 / sum(sn.visits{c}(sn.refstat(inchain(1)),inchain));
-        for k=inchain
-            alpha(i,k) = alpha(i,k) + sn.visits{c}(i,k) / sum(sn.visits{c}(i,inchain)); % isn't alpha(i,j) always zero when entering here?
-        end
-    end
-end
+[Lchain,STchain,~,~,Nchain] = snGetDemandsChain(sn);
 
-Vchain(~isfinite(Vchain))=0;
-alpha(~isfinite(alpha))=0;
-
-Lchain = zeros(M,C);
-STchain = zeros(M,C);
-
-Nchain = zeros(1,C);
-refstatchain = zeros(C,1);
-for c=1:sn.nchains
-    inchain = find(sn.chains(c,:));
-    isOpenChain = any(isinf(sn.njobs(inchain)));
-    for i=1:sn.nstations
-        % we assume that the visits in L(i,inchain) are equal to 1
-        STchain(i,c) = ST(i,inchain) * alpha(i,inchain)';
-        if isOpenChain && i == sn.refstat(inchain(1)) % if this is a source ST = 1 / arrival rates
-            STchain(i,c) = 1 / sumfinite(sn.rates(i,inchain)); % ignore degenerate classes with zero arrival rates
-        else
-            STchain(i,c) = ST(i,inchain) * alpha(i,inchain)';
-        end
-    end
-    Nchain(c) = sum(NK(inchain));
-    refstatchain(c) = sn.refstat(inchain(1));
-    if any((sn.refstat(inchain(1))-refstatchain(c))~=0)
-        line_error(sprintf('Classes in chain %d have different reference station.',c));
-    end
-end
-STchain(~isfinite(STchain))=0;
 Tstart = tic;
 
 [M,K]=size(STchain);
 
-Lchain = zeros(M,K);
 mu = ones(M,sum(Nchain));
 for i=1:M
-    Lchain(i,:) = STchain(i,:) .* Vchain(i,:);
     if isinf(S(i)) % infinite server
         mu(i,1:sum(Nchain)) = 1:sum(Nchain);
     else
         mu(i,1:sum(Nchain)) = min(1:sum(Nchain), S(i)*ones(1,sum(Nchain)));
     end
 end
-Lchain(~isfinite(Lchain))=0;
 
 if isnan(lG)
-    G = pfqn_gmvald(Lchain, Nchain, mu);
+    G = exp(pfqn_ncld(Lchain, Nchain, 0*Nchain, mu));
 else
     G = exp(lG);
 end
@@ -104,7 +62,7 @@ for ist=1:sn.nstations
     else
         set_ist = setdiff(1:sn.nstations,ist);
         nivec_chain = nirvec * sn.chains';
-        G_minus_i = pfqn_gmvald(Lchain(set_ist,:), Nchain-nivec_chain, mu(set_ist,:), options);
+        G_minus_i = exp(pfqn_ncld(Lchain(set_ist,:), Nchain-nivec_chain, 0*Nchain, mu(set_ist,:), options));
         F_i = 1;
         switch sn.schedid(ist)
             case SchedStrategy.ID_FCFS
@@ -141,7 +99,7 @@ for ist=1:sn.nstations
                 end
                 ci = find(sivec);
                 if ~isempty(ci)
-                    F_i = (nirvec(ci)/sum(nirvec)) * pfqn_gmvald(ST(ist,:).*V(ist,:), nirvec, mu(ist,:), options);
+                    F_i = (nirvec(ci)/sum(nirvec)) * exp(pfqn_ncldld(ST(ist,:).*V(ist,:), nirvec, 0*nirvec, mu(ist,:), options));
                 else
                     F_i = 1;
                 end

@@ -12,8 +12,8 @@ end
 if ~sn.isstation(ind) && sn.isstateful(ind) % if stateful node
     ni = sum(state_i(1:(end-sum(sn.nvars(ind,:)))));
     nir = state_i(1:(end-sum(sn.nvars(ind,:))));
-    sir = nir;
-    kir = sir;
+    sir = nir; % jobs in service
+    kir = sir; % jobs per phase
     return
 end
 
@@ -83,6 +83,16 @@ switch sn.schedid(ist)
     case SchedStrategy.ID_LCFS
         for r=1:R
             nir(:,r) = sir(:,r) + sum(space_buf==r,2); % class-r jobs in station
+        end
+    case SchedStrategy.ID_LCFSPR
+        if length(space_buf)>1
+            space_buf = space_buf(1:2:end);
+            space_bufphase = space_buf(2:2:end);            
+            for r=1:R
+                nir(:,r) = sir(:,r) + sum(space_buf==r,2); % class-r jobs in station
+            end
+        else
+            nir = sir;
         end
     case SchedStrategy.ID_SIRO
         for r=1:R

@@ -216,7 +216,7 @@ for i = 0:procList.getLength()-1
                 tempTask = task(id, name); 
                 tempTask = addOutFlows(tempTask, taskNode, prefix);
                 tempTask = addInFlows(tempTask, taskNode, prefix);
-                
+                tempTask = addLoop(tempTask, taskNode, prefix);               
                 tempProc = tempProc.addTask(tempTask);
             end
         end
@@ -372,6 +372,24 @@ end
 
 
 
+end
+%% add loop charateristics
+function tempObj = addLoop(tempObj, node, prefix)
+    import org.w3c.dom.Node;
+    import BPMN.*;
+    loopList = node.getElementsByTagName([prefix,'standardLoopCharacteristics']); 
+    for j = 0:loopList.getLength()-1
+        loopNode = loopList.item(j);
+        if loopNode.getNodeType() == Node.ELEMENT_NODE
+            loopElement = loopNode;
+            %disp(class(outElement));
+            if ~isempty(loopElement)
+                testbefore = char(loopElement.getAttribute('testBefore'));
+                loopMax = char(loopElement.getAttribute('loopMaximum'));
+                tempObj = addLoopCharacteristics(tempObj,"Standard", testbefore, loopMax);
+            end
+        end
+    end
 end
 
 

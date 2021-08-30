@@ -62,7 +62,7 @@ classdef PointProcess < Process
         %Constructor
         function self = PointProcess(name, numParam)
             % SELF = POINTPROCESS(NAME, NUMPARAM)
-            self@Process('PointProcess', numParam);
+            self@Process(name, numParam);
         end
                
         function bool = isDisabled(self)

@@ -26,7 +26,7 @@ end
 
 for r=1:self.sn.nclasses
     if all(self.sn.routing(:,r) == -1)
-        line_error(sprintf('Routing strategy in class %d is unspecified at all nodes.',r));
+        line_error(mfilename,sprintf('Routing strategy in class %d is unspecified at all nodes.',r));
     end
 end
 

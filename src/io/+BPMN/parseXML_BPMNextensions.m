@@ -126,7 +126,7 @@ for i = 0:eventList.getLength()-1
         multiplicity = str2double(char(eventElement.getAttribute('multiplicity')));
         myStartEvent.multiplicity = multiplicity; 
         
-        myGateway.outgoingLinks = outgoingLinks;
+        %myGateway.outgoingLinks = outgoingLinks;
         startEvents = [startEvents; myStartEvent];
     end
 end

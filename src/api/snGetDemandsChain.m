@@ -1,18 +1,15 @@
-function [Dchain,STchain,Vchain,alpha] = snGetDemandsChain(sn)
+function [Lchain,STchain,Vchain,alpha,Nchain,SCVchain,refstatchain] = snGetDemandsChain(sn)
 
 M = sn.nstations;    %number of stations
 K = sn.nclasses;    %number of classes
 C = sn.nchains;
+N = sn.njobs';  % initial population per class
 
 PH = sn.proc;
-
+SCV = sn.scv;
+SCV(isnan(SCV))=1;
 % determine service times
-ST = zeros(M,K);
-for k = 1:K
-    for i=1:M
-        ST(i,k) = 1 ./ map_lambda(PH{i}{k});
-    end
-end
+ST = 1./sn.rates; 
 ST(isnan(ST))=0;
 
 alpha = zeros(sn.nstations,sn.nclasses);
@@ -28,14 +25,17 @@ for c=1:sn.nchains
 end
 Vchain(~isfinite(Vchain))=0;
 alpha(~isfinite(alpha))=0;
+alpha(alpha<1e-12)=0;
 
-Dchain = zeros(M,C);
+Lchain = zeros(M,C);
 STchain = zeros(M,C);
-
+SCVchain = zeros(1,C);
+Nchain = zeros(1,C);
 refstatchain = zeros(C,1);
 for c=1:sn.nchains
     inchain = find(sn.chains(c,:));
-    isOpenChain = any(isinf(sn.njobs(inchain)));
+    Nchain(c) = sum(N(inchain));
+    isOpenChain = any(isinf(N(inchain)));
     for i=1:sn.nstations
         % we assume that the visits in L(i,inchain) are equal to 1
         STchain(i,c) = ST(i,inchain) * alpha(i,inchain)';
@@ -44,12 +44,14 @@ for c=1:sn.nchains
         else
             STchain(i,c) = ST(i,inchain) * alpha(i,inchain)';
         end
-        Dchain(i,c) = Vchain(i,c) * STchain(i,c);
+        Lchain(i,c) = Vchain(i,c) * STchain(i,c);
+        SCVchain(i,c) = SCV(i,inchain) * alpha(i,inchain)' / sum(alpha(i,inchain(isfinite(SCV(i,inchain))))');
     end
     refstatchain(c) = sn.refstat(inchain(1));
     if any((sn.refstat(inchain(1))-refstatchain(c))~=0)
-        line_error(sprintf('Classes in chain %d have different reference station.',c));
+        line_error(mfilename,sprintf('Classes in chain %d have different reference station.',c));
     end
 end
-Dchain(~isfinite(Dchain))=0;
+Lchain(~isfinite(Lchain))=0;
+STchain(~isfinite(STchain))=0;
 end

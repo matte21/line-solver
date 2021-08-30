@@ -10,7 +10,7 @@ for i=1:self.getNumberOfNodes
     if self.nodes{i}.isStateful
         self.nodes{i}.setState(State.fromMarginalAndRunning(sn,i,n(i,:),s(i,:)));
         if isempty(self.nodes{i}.getState)
-            line_error(sprintf('Invalid state assignment for station %d\n',i));
+            line_error(mfilename,sprintf('Invalid state assignment for station %d\n',i));
         end
     end
 end

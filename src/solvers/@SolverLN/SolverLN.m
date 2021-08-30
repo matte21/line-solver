@@ -173,7 +173,7 @@ classdef SolverLN < LayeredNetworkSolver & EnsembleSolver
                             self.ensemble{e}.reset();
                         end
                         if self.options.verbose
-                            line_printf( '\b Testing convergence.'); %Deep reset.');
+                            line_printf(sprintf('\b Testing convergence.')); %Deep reset.');
                         end
                         self.insist = false;
                     else
@@ -240,7 +240,7 @@ classdef SolverLN < LayeredNetworkSolver & EnsembleSolver
                 %end
                 switch self.solvers{e}.name
                     case {'SolverMVA', 'SolverNC'} %no need to refresh phases
-                        refreshRates(self.ensemble{e});
+                        refreshRates(self.ensemble{e}); % note: this does not refresh the sn.proc field, only sn.rates and sn.scv
                     otherwise
                         refreshService(self.ensemble{e});
                 end

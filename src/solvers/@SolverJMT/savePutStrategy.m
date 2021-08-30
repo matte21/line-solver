@@ -47,6 +47,10 @@ for r=1:numOfClasses
                 subParameterNode2 = simDoc.createElement('subParameter');
                 subParameterNode2.setAttribute('classPath', 'jmt.engine.NetStrategies.QueuePutStrategies.HeadStrategy');
                 subParameterNode2.setAttribute('name', 'HeadStrategy');
+            case SchedStrategy.ID_LCFSPR
+                subParameterNode2 = simDoc.createElement('subParameter');
+                subParameterNode2.setAttribute('classPath', 'jmt.engine.NetStrategies.QueuePutStrategies.LCFSPRStrategy');
+                subParameterNode2.setAttribute('name', 'LCFSPRStrategy');
             case SchedStrategy.ID_HOL
                 subParameterNode2 = simDoc.createElement('subParameter');
                 subParameterNode2.setAttribute('classPath', 'jmt.engine.NetStrategies.QueuePutStrategies.TailStrategyPriority');

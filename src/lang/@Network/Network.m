@@ -143,6 +143,12 @@ classdef Network < Model
             bool = any(cellfun(@(c) isa(c,'ClassSwitch'), self.nodes));
         end
         
+        function bool = hasJoin(self)
+            % BOOL = HASJOIN()
+            
+            bool = any(cellfun(@(c) isa(c,'Join'), self.nodes));
+        end
+        
         function bool = hasClosedClasses(self)
             % BOOL = HASCLOSEDCLASSES()
             
@@ -172,6 +178,7 @@ classdef Network < Model
         rtTypes = getRoutingStrategies(self)
         ind = getNodeIndex(self, name)
         lldScaling = getLimitedLoadDependence(self)
+		lcdScaling = getLimitedClassDependence(self)
         
         function stationIndex = getStationIndex(self, name)
             % STATIONINDEX = GETSTATIONINDEX(NAME)
@@ -272,8 +279,14 @@ classdef Network < Model
             end
         end
         
-        function getStateSpace(self, varargin)
-            line_error(mfilename,'This method is no longer supported. Use SolverCTMC(model,...).getStateSpace(...) instead.');
+        function [infGen, eventFilt, ev] =  getGenerator(self, varargin)
+            line_warning(mfilename,'Results will not be cached. Use SolverCTMC(model,...).getGenerator(...) instead.\n');
+            [infGen, eventFilt, ev] = SolverCTMC(self).getGenerator(varargin{:});
+        end
+        
+        function [stateSpace,nodeStateSpace] = getStateSpace(self, varargin)            
+            line_warning(mfilename,'Results will not be cached. Use SolverCTMC(model,...).getStateSpace(...) instead.\n');
+            [stateSpace,nodeStateSpace] = SolverCTMC(self).getStateSpace(varargin{:});
         end
         
         function summary(self)
@@ -645,10 +658,13 @@ classdef Network < Model
             % modelling features
             if self.hasMultiClassFCFS, bool = false; end
         end
+        
         function plot(self)     
             % PLOT()
-            
-            plot(self.getGraph);
+            [~,H] = self.getGraph;
+            H.Nodes.Name=strrep(H.Nodes.Name,'_','\_');                        
+            h=plot(H,'EdgeLabel',H.Edges.Weight,'Layout','Layered');
+            highlight(h,self.getNodeTypes==3,'NodeColor','r'); % class-switch nodes
         end
     end
     
@@ -674,7 +690,7 @@ classdef Network < Model
             for i=1:M
                 strategy{Mz+i} = SchedStrategy.PS;
             end
-            model = Network.tandem(lambda,[D;Z],strategy);
+            model = Network.tandem(lambda,[Z;D],strategy);
         end
         
         function model = tandemFcfs(lambda,D)
@@ -698,7 +714,7 @@ classdef Network < Model
             for i=1:M
                 strategy{Mz+i} = SchedStrategy.FCFS;
             end
-            model = Network.tandem(lambda,[D;Z],strategy);
+            model = Network.tandem(lambda,[Z;D],strategy);
         end
         
         function model = tandem(lambda,S,strategy)

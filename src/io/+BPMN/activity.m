@@ -4,13 +4,13 @@ classdef activity < BPMN.flowNode
 % Properties:
 % property      list of modeler-defined properties (cell of string)
 %
-% Copyright (c) 2012-2016, Imperial College London 
+% Copyright (c) 2012-2021, Imperial College London 
 % All rights reserved.
 
 properties
     property;               % list of modeler-defined properties (cell of string)
     resourceRole;           % resources responsible for performing the activity - IDs (cell of string)
-    loopCharacteristics;    % defines if and the activity is repeated - ID (string)
+    loopCharacteristics;    % defines if the activity is repeated and loop properties- Type, Testbefore, loopmaximum (cell of string)
 end
 
 methods
@@ -49,6 +49,16 @@ methods
             end
        end
     end
+    
+    function obj = addLoopCharacteristics(obj, type, testbefore, loopmax)
+        if nargin > 1
+            obj.loopCharacteristics = cell(3);
+            obj.loopCharacteristics{1} = type;
+            obj.loopCharacteristics{2} = testbefore;
+            obj.loopCharacteristics{3} = loopmax;
+        end
+    end
+    
     
     %toString
     function myString = toString(obj)

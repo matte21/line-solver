@@ -9,30 +9,8 @@ M = sn.nstations;    %number of stations
 K = sn.nclasses;    %number of classes
 state = sn.state;
 fname = '';
-rt = sn.rt;
-S = sn.nservers;
-NK = sn.njobs';  % initial population per class
-sched = sn.sched;
 
 Tstart = tic;
-
-myP = cell(K,K);
-for k = 1:K
-    for c = 1:K
-        myP{k,c} = zeros(sn.nstations);
-    end
-end
-
-for ist=1:sn.nstations
-    for jst=1:sn.nstations
-        for k = 1:K
-            for c = 1:K
-                % routing table for each class
-                myP{k,c}(ist,jst) = rt((ist-1)*K+k,(jst-1)*K+c);
-            end
-        end
-    end
-end
 
 [Q,SS,SSq,~,~,~,sn] = solver_ctmc(sn, options);
 if options.keep
