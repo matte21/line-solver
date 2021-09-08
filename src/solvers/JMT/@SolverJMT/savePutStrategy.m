@@ -54,7 +54,7 @@ for r=1:numOfClasses
             case SchedStrategy.ID_HOL
                 subParameterNode2 = simDoc.createElement('subParameter');
                 subParameterNode2.setAttribute('classPath', 'jmt.engine.NetStrategies.QueuePutStrategies.TailStrategyPriority');
-                subParameterNode2.setAttribute('name', 'TailStrategy');
+                subParameterNode2.setAttribute('name', 'TailStrategyPriority');
             otherwise % treat as FCFS - this is required for PS
                 subParameterNode2 = simDoc.createElement('subParameter');
                 subParameterNode2.setAttribute('classPath', 'jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy');

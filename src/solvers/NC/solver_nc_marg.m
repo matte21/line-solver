@@ -130,7 +130,7 @@ end
 runtime = toc(Tstart);
 Pr(isnan(Pr))=0;
 lG = log(G);
-if options.verbose > 0
+if options.verbose
     line_printf('\nNormalizing constant (NC) analysis completed. Runtime: %f seconds.\n',runtime);
 end
 return

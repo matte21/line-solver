@@ -1,5 +1,5 @@
-function [outputFileName] = writeJMVA(self, outputFileName)
-% [OUTPUTFILENAME] = WRITEJMVA(OUTPUTFILENAME)
+function [outputFileName] = writeJMVA(self, sn, outputFileName)
+% FNAME = WRITEJMVA(SN, FNAME)
 
 % Copyright (c) 2012-2021, Imperial College London
 % All rights reserved.
@@ -23,11 +23,9 @@ end
 
 mvaElem.setAttribute('xmlns:xsi', self.xmlnsXsi);
 mvaElem.setAttribute('xsi:noNamespaceSchemaLocation', 'JMTmodel.xsd');
-if nargin<2 %~exist('outFileName','var')
+if nargin<3 %~exist('outFileName','var')
     outputFileName = getJMVATempPath(self);
 end
-
-sn = getStruct(self);
 
 algTypeElement = mvaDoc.createElement('algType');
 switch self.options.method

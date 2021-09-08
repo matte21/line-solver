@@ -1,13 +1,24 @@
 function [QN,UN,RN,TN,CN,XN,runtime] = solver_jmt_analysis(sn, options)
 % [QN,UN,RN,TN,CN,XN,runtime] = SOLVER_JMT_ANALYSIS(SN, OPTIONS)
 
-self.writeJSIM;
-cmd = ['java -cp "',getJMTJarPath(self),filesep,'JMT.jar" jmt.commandline.Jmt sim "',getFilePath(self),'jsim',filesep,getFileName(self),'.jsim" -seed ',num2str(options.seed),' --illegal-access=permit'];
+self.writeJSIM(sn);
+
+cmd = ['java -cp "',getJMTJarPath(self),filesep,'JMT.jar" jmt.commandline.Jmt sim "',getFilePath(self),'jsim',filesep,getFileName(self),'.jsim" -seed ',num2str(options.seed)];
 if options.verbose
     line_printf('\nJMT model: %s',[getFilePath(self),'jsim',filesep,getFileName(self),'.jsim']);
     line_printf('\nJMT command: %s',cmd);
 end
-[~, result] = system(cmd);
+
+status = system(cmd);
+if  status > 0
+    cmd = ['java -cp "',getJMTJarPath(self),filesep,'JMT.jar" jmt.commandline.Jmt sim "',getFilePath(self),'jsim',filesep,getFileName(self),'.jsim" -seed ',num2str(options.seed),' --illegal-access=permit'];
+    [status] = system(cmd);
+    if status > 0
+        rt = java.lang.Runtime.getRuntime();
+        rt.exec(cmd);
+    end
+end
+
 runtime = toc(Tstart);
 self.getResults;
 end

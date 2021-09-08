@@ -1,12 +1,14 @@
-function fname = writeJSIM(self)
-% FNAME = WRITEJSIM()
+function outputFileName = writeJSIM(self, sn, outputFileName)
+% FNAME = WRITEJSIM(SN, FNAME)
 
 % Copyright (c) 2012-2021, Imperial College London
 % All rights reserved.
 [simXMLElem, simXMLDoc] = saveXMLHeader(self, self.model.getLogPath);
 [simXMLElem, simXMLDoc] = saveClasses(self, simXMLElem, simXMLDoc);
 
-sn = self.getStruct;
+if nargin<3 %~exist('outFileName','var')
+    outputFileName = getJSIMTempPath(self);
+end
 
 numOfClasses = sn.nclasses;
 numOfNodes = sn.nnodes;
@@ -126,16 +128,14 @@ if hasReferenceNodes
     simXMLElem.appendChild(preloadNode);
 end
 
-fname = getJSIMTempPath(self);
-
 try
-    xmlwrite(fname, simXMLDoc);
+    xmlwrite(outputFileName, simXMLDoc);
 catch ME
     ME
     ME.stack
     javaaddpath(which('xercesImpl-2.11.0.jar'));
     javaaddpath(which('xml-apis-2.11.0.jar'));
     pkg load io;
-    xmlwrite(fname, simXMLDoc);
+    xmlwrite(outputFileName, simXMLDoc);
 end
 end

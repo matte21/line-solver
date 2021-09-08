@@ -37,3 +37,6 @@ model.link(P);
 % We use getAvgNodeTable to see the throuhgputs of sink1 and sink2
 AvgTable = SolverMVA(model).getAvgTable
 AvgNodeTable = SolverMVA(model).getAvgNodeTable
+
+AvgTableMAM = SolverMAM(model).getAvgTable
+AvgNodeTableMAM = SolverMAM(model).getAvgNodeTable

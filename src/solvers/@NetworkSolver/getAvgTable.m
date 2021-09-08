@@ -1,5 +1,5 @@
-function [AvgTable,QT,UT,RT,TT] = getAvgTable(self,Q,U,R,T,keepDisabled)
-% [AVGTABLE,QT,UT,RT,TT] = GETAVGTABLE(SELF,Q,U,R,T,KEEPDISABLED)
+function [AvgTable,QT,UT,RT,WT,TT] = getAvgTable(self,Q,U,R,T,keepDisabled)
+% [AVGTABLE,QT,UT,RT,WT,TT] = GETAVGTABLE(SELF,Q,U,R,T,KEEPDISABLED)
 % Return table of average station metrics
 %
 % Copyright (c) 2012-2021, Imperial College London
@@ -27,6 +27,7 @@ if isfinite(self.getOptions.timespan(2))
     UN = cellfun(@(c) c.metric(end),UNt);
     TN = cellfun(@(c) c.metric(end),TNt);
     RN = zeros(size(QN));
+    WN = zeros(size(QN));
 else
     [QN,UN,RN,TN] = self.getAvg(Q,U,R,T);
 end
@@ -37,6 +38,7 @@ if isempty(QN)
     UT = Table();
     RT = Table();
     TT = Table();
+    WT = Table();
     AT = Table();
 elseif ~keepDisabled
     V = cellsum(sn.visits);
@@ -83,8 +85,9 @@ elseif ~keepDisabled
     Util = Uval(:); % we need to save first in a variable named like the column
     UT = Table(Station,JobClass,Util);
     RespT = Rval(:); % we need to save first in a variable named like the column
-    ResidT = Residval(:); % we need to save first in a variable named like the column
     RT = Table(Station,JobClass,RespT);
+    ResidT = Residval(:); % we need to save first in a variable named like the column
+    WT = Table(Station,JobClass,ResidT);
     Tput = Tval(:); % we need to save first in a variable named like the column
     TT = Table(Station,JobClass,Tput);
     %AvgTable = Table(Station,JobClass,QLen,Util,RespT,Tput);
@@ -133,6 +136,7 @@ else
     RespT = Rval(:); % we need to save first in a variable named like the column
     RT = Table(Station,JobClass,RespT);
     ResidT = Residval(:); % we need to save first in a variable named like the column
+    WT = Table(Station,JobClass,ResidT);
     Tput = Tval(:); % we need to save first in a variable named like the column
     TT = Table(Station,JobClass,Tput);
     %AvgTable = Table(Station,JobClass,QLen,Util,RespT,Tput);

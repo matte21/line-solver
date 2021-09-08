@@ -11,7 +11,7 @@ switch options.method
             line_error(mfilename,'Exact class-dependent solver not available in MVA.');
         end        
         [Q,U,R,T,C,X,lG] = solver_mvald(sn, options);
-    case {'default','amva','qd'}
+    case {'default','amva','qd','aql','qdaql'}
         [Q,U,R,T,C,X,lG] = solver_amva(sn, options);
     otherwise
         line_error(mfilename,sprintf('The %s method is not supported by the load-dependent MVA solver.',options.method));
@@ -19,7 +19,7 @@ end
 
 runtime = toc(Tstart);
 
-if options.verbose > 0
+if options.verbose
     %    line_printf('\nMVA load-dependent analysis completed. Runtime: %f seconds.\n',runtime);
 end
 return

@@ -47,10 +47,6 @@ classdef CTMC < Process
         
         function plot3(self)
             G = digraph(self.infGen-diag(diag(self.infGen)));
-            h = plot(G,'Layout','force3');
-        end
-        
-        function plot(self)
             nodeLbl = {};
             if ~isempty(self.stateSpace)
                 for s=1:size(self.stateSpace,1)
@@ -68,21 +64,53 @@ classdef CTMC < Process
                 for t=1:length(I)
                     edgeLbl{end+1,1} = nodeLbl{I(t)};
                     edgeLbl{end,2} = nodeLbl{J(t)};
-                    edgeLbl{end,3} = sprintf('%.2f',(q(t)));
+                    edgeLbl{end,3} = sprintf('%.4f',(q(t)));
                 end
             else
                 for t=1:length(I)
                     edgeLbl{end+1,1} = num2str(I(t));
                     edgeLbl{end,2} = num2str(J(t));
-                    edgeLbl{end,3} = sprintf('%.2f',(q(t)));
+                    edgeLbl{end,3} = sprintf('%.4f',(q(t)));
                 end
             end
-            if length(nodeLbl) <= 6
-                colors = cell(1,length(nodeLbl)); for i=1:length(nodeLbl), colors{i}='w'; end
-                graphViz4Matlab('-adjMat',Q0,'-nodeColors',colors,'-nodeLabels',nodeLbl,'-edgeLabels',edgeLbl,'-layout',Circularlayout);
-            else
-                graphViz4Matlab('-adjMat',Q0,'-nodeLabels',nodeLbl,'-edgeLabels',edgeLbl,'-layout',Springlayout);
+            h = plot(G,'Layout','force3','NodeLabel',nodeLbl,'EdgeLabel',edgeLbl(:,3));
+        end
+        
+        function plot(self)
+            G = digraph(self.infGen-diag(diag(self.infGen)));
+            nodeLbl = {};
+            if ~isempty(self.stateSpace)
+                for s=1:size(self.stateSpace,1)
+                    if size(self.stateSpace,2)>1
+                        nodeLbl{s} = sprintf('%s%d', sprintf('%d,', self.stateSpace(s,1:end-1)), self.stateSpace(s,end));
+                    else
+                        nodeLbl{s} = sprintf('%d', self.stateSpace(s,end));
+                    end
+                end
             end
+            Q0 = self.infGen - diag(diag(self.infGen));
+            [I,J,q]=find(Q0);
+            edgeLbl = {};
+            if ~isempty(self.stateSpace)
+                for t=1:length(I)
+                    edgeLbl{end+1,1} = nodeLbl{I(t)};
+                    edgeLbl{end,2} = nodeLbl{J(t)};
+                    edgeLbl{end,3} = sprintf('%.4f',(q(t)));
+                end
+            else
+                for t=1:length(I)
+                    edgeLbl{end+1,1} = num2str(I(t));
+                    edgeLbl{end,2} = num2str(J(t));
+                    edgeLbl{end,3} = sprintf('%.4f',(q(t)));
+                end
+            end
+%             if length(nodeLbl) <= 6
+%                 colors = cell(1,length(nodeLbl)); for i=1:length(nodeLbl), colors{i}='w'; end
+%                 graphViz4Matlab('-adjMat',Q0,'-nodeColors',colors,'-nodeLabels',nodeLbl,'-edgeLabels',edgeLbl,'-layout',Circularlayout);
+%             else
+%                 graphViz4Matlab('-adjMat',Q0,'-nodeLabels',nodeLbl,'-edgeLabels',edgeLbl,'-layout',Springlayout);
+%             end
+            h = plot(G,'Layout','force','NodeLabel',nodeLbl,'EdgeLabel',edgeLbl(:,3));
         end
         
         function Q = getGenerator(self)

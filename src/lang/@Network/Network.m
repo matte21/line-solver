@@ -174,6 +174,7 @@ classdef Network < Model
         nodeTypes = getNodeTypes(self)
         
         P = initRoutingMatrix(self)
+        P = allCyclicRoutingMatrix(self)
         
         rtTypes = getRoutingStrategies(self)
         ind = getNodeIndex(self, name)

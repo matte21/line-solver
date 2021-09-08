@@ -20,7 +20,7 @@ classdef MAP < MarkovModulated
         end
         
         function meant = getMeanT(self,t)
-            % MEANT = GETMEANT(SELF,T)            
+            % MEANT = GETMEANT(SELF,T)
             D0 =  self.getParam(1).paramValue;
             D1 =  self.getParam(2).paramValue;
             lambda = map_lambda({D0,D1});
@@ -75,7 +75,7 @@ classdef MAP < MarkovModulated
         end
         
         function n = getNumberOfPhases(self)
-            % N = GETNUMBEROFMAPASES()        
+            % N = GETNUMBEROFMAPASES()
             D0 =  self.getParam(1).paramValue;
             n = length(D0);
         end
@@ -84,20 +84,45 @@ classdef MAP < MarkovModulated
             % MU = GETMU()
             % Aggregate departure rate from each state
             MAP = getProcess(self);
-            mu = sum(MAP{2},2); % sum D1 rows / diag -D0                        
+            mu = sum(MAP{2},2); % sum D1 rows / diag -D0
         end
         
         function phi = getPhi(self)
             % MAPI = GETMAPI()
             % Return the exit vector of the underlying MAP
             MAP = getProcess(self);
-            phi = sum(MAP{2},2) ./ diag(-MAP{1}); % sum D1 rows / diag -D0            
+            phi = sum(MAP{2},2) ./ diag(-MAP{1}); % sum D1 rows / diag -D0
         end
         
         function bool = isImmmediate(self)
             % BOOL = ISIMMMEDIATE()
             
             bool = getMean(self) == 0;
+        end
+    end
+    
+    methods (Static)
+        function [MAP, logL] = emfit(trace, order, iter_max, iter_tol, verbose)
+            % MAP = EMFIT(TRACE, ORDERS)
+            
+            % MAP = EMFIT(TRACE, ORDERS, ITER_MAX, ITER_TOL, VERBOSE)
+            %
+            % X = MAP.emfit(S, 4) % attempt all possible ER-CHMM structures in a MAP(4)
+            % X = MAP.emfit(S, [1,3]) % attemp a ER-CHMM structure with an exponential and an Erlang-3
+            
+            if nargin< 3
+                iter_max = 100;
+            end
+            
+            if nargin< 4
+                iter_tol = 1e-7; % stop condition on the iterations
+            end
+            
+            if nargin< 5
+                verbose = true;
+            end
+            
+            [MAP, logL] = erchmm_emfit(trace, order, iter_max, iter_tol, verbose);
         end
     end
 end

@@ -20,10 +20,9 @@ nservers = sn.nservers;
 
 Uchain = zeros(M,K);
 Tchain = zeros(M,K);
-Cchain = zeros(1,K);
+Cchain_s = zeros(1,K);
 
 %% initialize Q,X, U
-iter = 0;
 Qchain = options.init_sol;
 if isempty(Qchain)
     % balanced initialization
@@ -49,79 +48,153 @@ for k=1:M
     end
 end
 
+if ~isfield(options.config,'np_priority')
+    options.config.np_priority = 'default';
+end
 if ~isfield(options.config,'multiserver')
     options.config.multiserver = 'default';
 end
 
-%% main loop
-while (iter < 2 || max(max(abs(Qchain-Qchain_1))) > tol) && iter <= options.iter_max
-    iter = iter + 1;
-    
-    Qchain_1 = Qchain;
-    Xchain_1 = Xchain;
-    Uchain_1 = Uchain;
-        
-    [Wchain, STeff] = solver_amva_iter(sn, Qchain_1, Xchain_1, Uchain_1, STchain, Vchain, Nchain, SCVchain, options);
-    
-    %% update other metrics
-    for r=nnzclasses
-        if sum(Wchain(:,r)) == 0
-            Xchain(r) = 0;
+switch options.method
+    case 'default'
+        if Nt<=2
+            options.method = 'bs';
         else
-            if isinf(Nchain(r))
-                Cchain(r) = Vchain(:,r)'*Wchain(:,r);
-                % X(r) remains constant
-            elseif Nchain(r)==0
-                Xchain(r) = 0;
-                Cchain(r) = 0;
-            else
-                Cchain(r) = Vchain(:,r)'*Wchain(:,r);
-                Xchain(r) = Nchain(r) / Cchain(r);
-            end
+            options.method = 'lin';
         end
-        for k=1:M
-            Rchain(k,r) = Vchain(k,r) * Wchain(k,r);
-            Qchain(k,r) = Xchain(r) * Vchain(k,r) * Wchain(k,r);
-            Tchain(k,r) = Xchain(r) * Vchain(k,r);
+end
+
+switch options.method
+    case {'default','amva.lin','lin','amva.qdlin','qdlin'}
+        gamma = zeros(K,M,K); % class-based customer fraction corrections
+        tau = zeros(1,K); % throughput difference
+    otherwise
+        gamma = zeros(K,M); % total customer fraction corrections
+        tau = zeros(1,K); % throughput difference
+end
+
+%% main loop
+outer_iter = 0;
+while (outer_iter < 2 || max(max(abs(Qchain-QchainOuter_1))) > tol) && outer_iter <= options.iter_max
+    outer_iter = outer_iter + 1;
+    
+    QchainOuter_1 = Qchain;
+    XchainOuter_1 = Xchain;
+    UchainOuter_1 = Uchain;
+    
+    if isfinite(Nt) && Nt>0
+        switch options.method
+            case {'default','aql','qdaql','lin','qdlin'}
+                % iteration at population N-1_s
+                for s=1:K
+                    if isfinite(Nchain(s)) % don't recur on open classes
+                        iter_s = 0;
+                        Nchain_s = oner(Nchain,s);
+                        Qchain_s = Qchain * (Nt-1)/Nt;
+                        Xchain_s = Xchain * (Nt-1)/Nt;
+                        Uchain_s = Uchain * (Nt-1)/Nt;
+                        while (iter_s < 2 || max(max(abs(Qchain_s-Qchain_s_1))) > tol) && iter_s <= options.iter_max
+                            iter_s = iter_s + 1;
+                            
+                            Qchain_s_1 = Qchain_s;
+                            Xchain_s_1 = Xchain_s;
+                            Uchain_s_1 = Uchain_s;
+                            
+                            [Wchain_s, STeff_s] = solver_amva_iter(sn, gamma, tau, Qchain_s_1, Xchain_s_1, Uchain_s_1, STchain, Vchain, Nchain_s, SCVchain, options);
+                            
+                            %% update other metrics
+                            for r=nnzclasses
+                                if sum(Wchain_s(:,r)) == 0
+                                    Xchain_s(r) = 0;
+                                else
+                                    if isinf(Nchain_s(r))
+                                        Cchain_s(r) = Vchain(:,r)' * Wchain_s(:,r);
+                                        % X(r) remains constant
+                                    elseif Nchain(r)==0
+                                        Xchain_s(r) = 0;
+                                        Cchain_s(r) = 0;
+                                    else
+                                        Cchain_s(r) = Vchain(:,r)' * Wchain_s(:,r);
+                                        Xchain_s(r) = Nchain_s(r) / Cchain_s(r);
+                                    end
+                                end
+                                for k=1:M
+                                    Rchain_s(k,r) = Vchain(k,r) * Wchain_s(k,r);
+                                    Qchain_s(k,r) = Xchain_s(r) * Vchain(k,r) * Wchain_s(k,r);
+                                    Tchain_s(k,r) = Xchain_s(r) * Vchain(k,r);
+                                    Uchain_s(k,r) = Vchain(k,r) * STeff_s(k,r) * Xchain_s(r);
+                                end
+                            end
+                        end
+                    end
+                    
+                    switch options.method
+                        case {'default', 'lin'}
+                            for k=1:M
+                                for r=nnzclasses
+                                    if ~isinf(Nchain(r)) && Nchain_s(r)>0
+                                        gamma(s,k,r) = Qchain_s_1(k,r)./Nchain_s(r) - QchainOuter_1(k,r)./Nchain(r);
+                                    end
+                                end
+                            end
+                        otherwise
+                            for k=1:M
+                                gamma(s,k) = sum(Qchain_s_1(k,:),2)/(Nt-1) - sum(QchainOuter_1(k,:),2)/Nt;
+                            end
+                    end
+
+                    tau(s) = XchainOuter_1(s)-Xchain_s_1(s); % save throughput for priority AMVA
+                end
         end
     end
-    for k=1:M
+    
+    iter = 0;
+    % iteration at population N
+    while (iter < 2 || max(max(abs(Qchain-Qchain_1))) > tol) && iter <= options.iter_max
+        iter = iter + 1;
+        
+        Qchain_1 = Qchain;
+        Xchain_1 = Xchain;
+        Uchain_1 = Uchain;
+        
+        [Wchain, STeff] = solver_amva_iter(sn, gamma, tau, Qchain_1, Xchain_1, Uchain_1, STchain, Vchain, Nchain, SCVchain, options);
+        
+        %% update other metrics
         for r=nnzclasses
-            if isinf(nservers(k)) % infinite server
-                Uchain(k,r) = Vchain(k,r)*STchain(k,r)*Xchain(r);
+            if sum(Wchain(:,r)) == 0
+                Xchain(r) = 0;
             else
-                if strcmpi(options.method,'default') || strcmpi(options.method,'amva') || strcmpi(options.method,'amva.qd') || strcmpi(options.method,'qd')
-                    Uchain(k,r) = Vchain(k,r)*STchain(k,r)*Xchain(r);
+                if isinf(Nchain(r))
+                    Cchain_s(r) = Vchain(:,r)'*Wchain(:,r);
+                    % X(r) remains constant
+                elseif Nchain(r)==0
+                    Xchain(r) = 0;
+                    Cchain_s(r) = 0;
                 else
-                    Uchain(k,r) = Vchain(k,r)*STchain(k,r)*Xchain(r)/nservers(k);
+                    Cchain_s(r) = Vchain(:,r)'*Wchain(:,r);
+                    Xchain(r) = Nchain(r) / Cchain_s(r);
                 end
             end
+            for k=1:M
+                Rchain(k,r) = Vchain(k,r) * Wchain(k,r);
+                Qchain(k,r) = Xchain(r) * Vchain(k,r) * Wchain(k,r);
+                Tchain(k,r) = Xchain(r) * Vchain(k,r);
+                Uchain(k,r) = Vchain(k,r) * STeff(k,r) * Xchain(r);
+            end
         end
     end
-    
 end
 
 % the next block is a coarse approximation for LD and CD, would need
 % cdterm and qterm in it but these are hidden within the iteration calls
 for k=1:M
     for r=1:K
-        if strcmpi(options.method,'default') || strcmpi(options.method,'amva') || strcmpi(options.method,'amva.qd') || strcmpi(options.method,'qd')
-            if Vchain(k,r) * STeff(k,r) >0
-                switch sn.schedid(k)
-                    case {SchedStrategy.ID_FCFS, SchedStrategy.ID_PS, SchedStrategy.ID_LCFSPR, SchedStrategy.ID_DPS}
-                        if sum(Uchain(k,:))>1 % in the next expression, qdterm simplifies
-                            Uchain(k,r) = min(1,sum(Uchain(k,:))) * Vchain(k,r) * STeff(k,r) * Xchain(r) / ((Vchain(k,:) .* STeff(k,:))*Xchain(:));
-                        end
-                end
-            end
-        else
-            if Vchain(k,r) * STchain(k,r) >0
-                switch sn.schedid(k)
-                    case {SchedStrategy.ID_FCFS, SchedStrategy.ID_PS, SchedStrategy.ID_LCFSPR, SchedStrategy.ID_DPS}
-                        if sum(Uchain(k,:))>1
-                            Uchain(k,r) = min(1,sum(Uchain(k,:))) * Vchain(k,r) * STchain(k,r) * Xchain(r) / ((Vchain(k,:) .* STchain(k,:)) * Xchain(:));
-                        end
-                end
+        if Vchain(k,r) * STeff(k,r) >0
+            switch sn.schedid(k)
+                case {SchedStrategy.ID_FCFS, SchedStrategy.ID_SIRO, SchedStrategy.ID_PS, SchedStrategy.ID_LCFSPR, SchedStrategy.ID_DPS, SchedStrategy.ID_HOL}
+                    if sum(Uchain(k,:))>1
+                        Uchain(k,r) = min(1,sum(Uchain(k,:))) * Vchain(k,r) * STeff(k,r) * Xchain(r) / ((Vchain(k,:) .* STeff(k,:)) * Xchain(:));
+                    end
             end
         end
     end

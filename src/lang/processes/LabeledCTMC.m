@@ -18,9 +18,13 @@ classdef LabeledCTMC < CTMC
             self.eventFilt = eventFilt;
         end
         
-        function pie = embeddedSolve(self)
-            % PIE = EMBEDDEDSOLVE()
-            for e=1:length(self.eventFilt) % for every event
+        function pie = embeddedSolve(self, evset)
+            % PIE = EMBEDDEDSOLVE(EVENTSET)
+            
+            if nargin<2
+                evset = 1:length(self.eventFilt);
+            end
+            for e=evset % for every event
                 eMAP = MAP(self.infGen - self.eventFilt{e}, self.eventFilt{e});
                 pie{e} = eMAP.getEmbeddedProb;
                 if issym(pie{e})

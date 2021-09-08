@@ -8,14 +8,14 @@ Tstart = tic;
 switch options.method
     case {'exact','mva'}
         [Q,U,R,T,C,X,lG] = solver_mva(sn, options);
-    case {'default','amva','bs','qd','qli','fli'}
+    case {'default','amva','bs','qd','qli','fli','aql','qdaql','lin','qdlin'}
         [Q,U,R,T,C,X,lG] = solver_amva(sn, options);
     otherwise
         line_error(mfilename,'Unsupported SolverMVA method.');
 end
 runtime = toc(Tstart);
 
-if options.verbose > 0
+if options.verbose
     %line_printf('\nMVA analysis completed. Runtime: %f seconds.\n',runtime);
 end
 

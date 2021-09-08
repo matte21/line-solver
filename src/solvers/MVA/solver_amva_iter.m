@@ -1,4 +1,4 @@
-function [Wchain, STeff] = solver_amva_iter(sn, Qchain, Xchain, Uchain, STchain, Vchain, Nchain, SCVchain, options)
+function [Wchain, STeff] = solver_amva_iter(sn, gamma, tau, Qchain, Xchain, Uchain, STchain, Vchain, Nchain, SCVchain, options)
 
 M = sn.nstations;
 K = sn.nchains;
@@ -7,8 +7,11 @@ schedparam = sn.schedparam;
 lldscaling = sn.lldscaling;
 cdscaling = sn.cdscaling;
 
-Wchain = zeros(M,K);
-Uhiprio = zeros(M,K); % utilization due to "permanent jobs" in DPS
+%Uhiprio = zeros(M,K); % utilization due to "permanent jobs" in DPS
+
+if isempty(gamma)
+    gamma = zeros(M,K);
+end
 
 Nt = sum(Nchain(isfinite(Nchain)));
 if all(isinf(Nchain))
@@ -20,21 +23,36 @@ deltaclass = (Nchain - 1) ./ Nchain;
 deltaclass(isinf(Nchain)) = 1;
 
 nnzclasses = find(Nchain>0);
+nnzclasses_eprio = {};
+nnzclasses_hprio = {};
+nnzclasses_ehprio = {};
+for r = nnzclasses
+    nnzclasses_eprio{r} = intersect(nnzclasses, find(sn.classprio == sn.classprio(r))); % equal prio
+    nnzclasses_hprio{r} = intersect(nnzclasses, find(sn.classprio > sn.classprio(r))); % higher prior
+    nnzclasses_ehprio{r} = intersect(nnzclasses, find(sn.classprio >= sn.classprio(r))); % equal or higher prio
+end
+
 ocl = find(isinf(Nchain));
-%ccl = find(isfinite(Nchain) & Nchain>0);
+ccl = find(isfinite(Nchain) & Nchain>0);
 
 %% evaluate lld and cd correction factors
-totArvlQlenSeenByOpen = zeros(M,1);
+totArvlQlenSeenByOpen = zeros(K,M,1);
 interpTotArvlQlen = zeros(M,1);
 totArvlQlenSeenByClosed = zeros(M,K);
 stationaryQlen = zeros(M,K);
 selfArvlQlenSeenByClosed = zeros(M,K);
 for k=1:M
-    totArvlQlenSeenByOpen(k) = sum(Qchain(k,nnzclasses));
     interpTotArvlQlen(k) = delta * sum(Qchain(k,nnzclasses));
     for r = nnzclasses
         selfArvlQlenSeenByClosed(k,r) = deltaclass(r) * Qchain(k,r); % qlen of same class as arriving one
-        totArvlQlenSeenByClosed(k,r) = deltaclass(r) * Qchain(k,r) + sum(Qchain(k,setdiff(nnzclasses,r)));
+        switch sn.schedid(k)
+            case {SchedStrategy.ID_HOL}
+                totArvlQlenSeenByOpen(r,k) = sum(Qchain(k,nnzclasses_ehprio{r}));
+                totArvlQlenSeenByClosed(k,r) = deltaclass(r) * Qchain(k,r) + sum(Qchain(k,setdiff(nnzclasses_ehprio{r},r)));
+            otherwise
+                totArvlQlenSeenByOpen(r,k) = sum(Qchain(k,nnzclasses));
+                totArvlQlenSeenByClosed(k,r) = deltaclass(r) * Qchain(k,r) + sum(Qchain(k,setdiff(nnzclasses,r)));
+        end
         stationaryQlen(k,r) = Qchain(k,r); % qlen of same class as arriving one
     end
 end
@@ -47,23 +65,47 @@ lldterm = pfqn_lldfun(1 + interpTotArvlQlen, lldscaling);
 
 cdterm = ones(M,K);
 for r=nnzclasses
-    if isfinite(Nchain(r))
-        cdterm(:,r) = pfqn_cdfun(1 + selfArvlQlenSeenByClosed, cdscaling); % qd-amva class-dependence term
-    else
-        cdterm(:,r) = pfqn_cdfun(1 + stationaryQlen, cdscaling); % qd-amva class-dependence term
+    if ~isempty(cdscaling)
+        if isfinite(Nchain(r))
+            cdterm(:,r) = pfqn_cdfun(1 + selfArvlQlenSeenByClosed, cdscaling); % qd-amva class-dependence term
+        else
+            cdterm(:,r) = pfqn_cdfun(1 + stationaryQlen, cdscaling); % qd-amva class-dependence term
+        end
     end
 end
 
 switch options.config.multiserver
     case 'softmin'
-        msterm = pfqn_lldfun(1 + interpTotArvlQlen, [], nservers); % if native qd then account for multiserver in the correciton terms
+        switch options.method
+            case {'default','amva.lin','lin', 'amva.qdlin','qdlin'} % Linearizer
+                g = 0;
+                for r=ccl
+                    g = g + ((Nt-1)/Nt) * Nchain(r) * gamma(ccl,k,r);
+                end
+                msterm = pfqn_lldfun(1 + interpTotArvlQlen + mean(g), [], nservers); % if native qd then account for multiserver in the correciton terms
+            otherwise
+                msterm = pfqn_lldfun(1 + interpTotArvlQlen + (Nt-1)*mean(gamma(ccl,k)), [], nservers); % if native qd then account for multiserver in the correciton terms
+        end
     case 'seidmann'
         msterm = ones(M,1) ./ nservers(:);
         msterm(msterm==0) = 1; % infinite server case
     case 'default'
-        msterm = pfqn_lldfun(1 + interpTotArvlQlen, [], nservers); % if native qd then account for multiserver in the correciton terms
-        fcfsset = sn.schedid==SchedStrategy.ID_FCFS;
-        msterm(fcfsset) = 1 / nservers(fcfsset);
+        switch options.method
+            case {'default','amva.lin','lin','amva.qdlin','qdlin'} % Linearizer
+                g = 0;
+                for r=ccl
+                    g = g + ((Nt-1)/Nt) * Nchain(r) * gamma(ccl,k,r);
+                end
+                msterm = pfqn_lldfun(1 + interpTotArvlQlen + mean(g), [], nservers); % if native qd then account for multiserver in the correciton terms
+            otherwise
+                g = 0;
+                for r=ccl
+                    g = g + (Nt-1)*gamma(r,k);
+                end
+                msterm = pfqn_lldfun(1 + interpTotArvlQlen + mean(g), [], nservers); % if native qd then account for multiserver in the correciton terms
+        end
+        fcfstypeset = find(sn.schedid==SchedStrategy.ID_FCFS | sn.schedid==SchedStrategy.ID_SIRO | sn.schedid==SchedStrategy.ID_LCFSPR);
+        msterm(fcfstypeset) = 1 ./ nservers(fcfstypeset);
     otherwise
         line_error(mfilename,'Unrecognize multiserver approximation method');
 end
@@ -77,45 +119,80 @@ for r=nnzclasses
     end
 end
 
-%% if amva.qli, update now totArvlQlenSeenByClosed with STeff
+%% if amva.qli or amva.fli, update now totArvlQlenSeenByClosed with STeff
 switch options.method
     case {'amva.qli','qli'} % Wang-Sevcik queue line
         infset = sn.schedid == SchedStrategy.ID_INF;
         for k=1:M
-            for r = nnzclasses
-                if Nchain(r) == 1
-                    totArvlQlenSeenByClosed(k,r) = sum(Qchain(k,nnzclasses)) - Qchain(k,r);
-                else
-                    qlinum = STeff(k,r) * (1+sum(Qchain(k,nnzclasses)) - Qchain(k,r));
-                    qliden = sum(STeff(infset,r));
-                    for m=1:M
-                        qliden = qliden + STeff(m,r) * (1+sum(Qchain(m,nnzclasses)) - Qchain(m,r));
+            switch sn.schedid(k)
+                case {SchedStrategy.ID_HOL}
+                    for r = nnzclasses
+                        if Nchain(r) == 1
+                            totArvlQlenSeenByClosed(k,r) = sum(Qchain(k,nnzclasses_ehprio{r})) - Qchain(k,r);
+                        else
+                            qlinum = STeff(k,r) * (1+sum(Qchain(k,nnzclasses_ehprio{r})) - Qchain(k,r));
+                            qliden = sum(STeff(infset,r));
+                            for m=1:M
+                                qliden = qliden + STeff(m,r) * (1+sum(Qchain(m,nnzclasses_ehprio{r})) - Qchain(m,r));
+                            end
+                            totArvlQlenSeenByClosed(k,r) = sum(Qchain(k,nnzclasses_ehprio{r})) - (1/(Nchain(r)-1))*(Qchain(k,r) - qlinum/qliden);
+                        end
                     end
-                    totArvlQlenSeenByClosed(k,r) = sum(Qchain(k,nnzclasses)) - (1/(Nchain(r)-1))*(Qchain(k,r) - qlinum/qliden);
-                end
+                otherwise
+                    for r = nnzclasses
+                        if Nchain(r) == 1
+                            totArvlQlenSeenByClosed(k,r) = sum(Qchain(k,nnzclasses)) - Qchain(k,r);
+                        else
+                            qlinum = STeff(k,r) * (1+sum(Qchain(k,nnzclasses)) - Qchain(k,r));
+                            qliden = sum(STeff(infset,r));
+                            for m=1:M
+                                qliden = qliden + STeff(m,r) * (1+sum(Qchain(m,nnzclasses)) - Qchain(m,r));
+                            end
+                            totArvlQlenSeenByClosed(k,r) = sum(Qchain(k,nnzclasses)) - (1/(Nchain(r)-1))*(Qchain(k,r) - qlinum/qliden);
+                        end
+                    end
             end
         end
     case {'amva.fli','fli'} % Wang-Sevcik fraction line
         infset = sn.schedid == SchedStrategy.ID_INF;
         for k=1:M
-            for r = nnzclasses
-                if Nchain(r) == 1
-                    totArvlQlenSeenByClosed(k,r) = sum(Qchain(k,nnzclasses)) - Qchain(k,r);
-                else
-                    qlinum = STeff(k,r) * (1+sum(Qchain(k,nnzclasses)) - Qchain(k,r));
-                    qliden = sum(STeff(infset,r));
-                    for m=1:M
-                        qliden = qliden + STeff(m,r) * (1+sum(Qchain(m,nnzclasses)) - Qchain(m,r));
+            switch sn.schedid(k)
+                case {SchedStrategy.ID_HOL}
+                    for r = nnzclasses
+                        if Nchain(r) == 1
+                            totArvlQlenSeenByClosed(k,r) = sum(Qchain(k,nnzclasses_ehprio{r})) - Qchain(k,r);
+                        else
+                            qlinum = STeff(k,r) * (1+sum(Qchain(k,nnzclasses_ehprio{r})) - Qchain(k,r));
+                            qliden = sum(STeff(infset,r));
+                            for m=1:M
+                                qliden = qliden + STeff(m,r) * (1+sum(Qchain(m,nnzclasses_ehprio{r})) - Qchain(m,r));
+                            end
+                            totArvlQlenSeenByClosed(k,r) = sum(Qchain(k,nnzclasses_ehprio{r})) - (2/Nchain(r))*Qchain(k,r) + qlinum/qliden;
+                        end
                     end
-                    totArvlQlenSeenByClosed(k,r) = sum(Qchain(k,nnzclasses)) - (2/Nchain(r))*Qchain(k,r) + qlinum/qliden;
-                end
+                otherwise
+                    for r = nnzclasses
+                        if Nchain(r) == 1
+                            totArvlQlenSeenByClosed(k,r) = sum(Qchain(k,nnzclasses)) - Qchain(k,r);
+                        else
+                            qlinum = STeff(k,r) * (1+sum(Qchain(k,nnzclasses)) - Qchain(k,r));
+                            qliden = sum(STeff(infset,r));
+                            for m=1:M
+                                qliden = qliden + STeff(m,r) * (1+sum(Qchain(m,nnzclasses)) - Qchain(m,r));
+                            end
+                            totArvlQlenSeenByClosed(k,r) = sum(Qchain(k,nnzclasses)) - (2/Nchain(r))*Qchain(k,r) + qlinum/qliden;
+                        end
+                    end
+                    
             end
         end
 end
 
 %% compute response times from current queue-lengths
 for r=nnzclasses
-    sd = setdiff(nnzclasses,r); % change here to add class priorities
+    sd = setdiff(nnzclasses,r);
+    sdprio = setdiff(nnzclasses_ehprio{r},r);
+    
     for k=1:M
         
         switch sn.schedid(k)
@@ -124,20 +201,30 @@ for r=nnzclasses
                 
             case SchedStrategy.ID_PS
                 switch options.method
-                    case {'default', 'amva', 'amva.qd', 'qd'} % QD-AMVA interpolation
+                    case {'default', 'amva', 'amva.qd', 'amva.qdamva', 'qd', 'qdamva', 'lin', 'qdlin'} % QD-AMVA interpolation
                         switch options.config.multiserver
                             case 'seidmann' % in this case, qd handles only lld and cd scalings
                                 Wchain(k,r) = STeff(k,r) * (nservers(k)-1); % multi-server correction with serial think time, (1/nservers(k)) term already in STeff
                                 if ismember(r,ocl)
-                                    Wchain(k,r) = Wchain(k,r) + STeff(k,r) * (1/nservers(k)) * (1 + totArvlQlenSeenByOpen(k));
+                                    Wchain(k,r) = Wchain(k,r) + STeff(k,r) * (1 + totArvlQlenSeenByOpen(r,k));
                                 else
-                                    Wchain(k,r) = Wchain(k,r) + STeff(k,r) * (1/nservers(k)) * (1 + interpTotArvlQlen(k));
+                                    switch options.method
+                                        case {'default', 'amva.lin', 'lin', 'amva.qdlin','qdlin'} % Linearizer
+                                            Wchain(k,r) = Wchain(k,r) + STeff(k,r) * (1 + interpTotArvlQlen(k) + Nchain(ccl)*permute(gamma(r,k,ccl),3:-1:1) - gamma(r,k,r));
+                                        otherwise
+                                            Wchain(k,r) = Wchain(k,r) + STeff(k,r) * (1 + interpTotArvlQlen(k) + (Nt-1)*gamma(r,k));
+                                    end
                                 end
                             case {'default','softmin'}
                                 if ismember(r,ocl)
-                                    Wchain(k,r) = STeff(k,r) * (1 + totArvlQlenSeenByOpen(k));
+                                    Wchain(k,r) = STeff(k,r) * (1 + totArvlQlenSeenByOpen(r,k));
                                 else
-                                    Wchain(k,r) = STeff(k,r) * (1 + interpTotArvlQlen(k));
+                                    switch options.method
+                                        case {'default', 'amva.lin', 'lin', 'amva.qdlin','qdlin'} % Linearizer
+                                            Wchain(k,r) = Wchain(k,r) + STeff(k,r) * (1 + interpTotArvlQlen(k) + Nchain(ccl)*permute(gamma(r,k,ccl),3:-1:1) - gamma(r,k,r));
+                                        otherwise
+                                            Wchain(k,r) = STeff(k,r) * (1 + interpTotArvlQlen(k) + (Nt-1)*gamma(r,k));
+                                    end
                                 end
                         end
                     otherwise % Bard-Schweitzer interpolation and Wang-Sevcik algorithms
@@ -145,15 +232,25 @@ for r=nnzclasses
                             case 'seidmann'
                                 Wchain(k,r) = STeff(k,r) * (nservers(k)-1); % multi-server correction with serial think time, (1/nservers(k)) term already in STeff
                                 if ismember(r,ocl)
-                                    Wchain(k,r) = Wchain(k,r) + STeff(k,r) * (1 + totArvlQlenSeenByOpen(k));
+                                    Wchain(k,r) = Wchain(k,r) + STeff(k,r) * (1 + totArvlQlenSeenByOpen(r,k));
                                 else
-                                    Wchain(k,r) = Wchain(k,r) + STeff(k,r) * (1 + totArvlQlenSeenByClosed(k));
+                                    switch options.method
+                                        case {'default', 'amva.lin', 'lin', 'amva.qdlin','qdlin'} % Linearizer
+                                            Wchain(k,r) = Wchain(k,r) + STeff(k,r) * (1 + totArvlQlenSeenByClosed(k) + Nchain(ccl)*permute(gamma(r,k,ccl),3:-1:1) - gamma(r,k,r));
+                                        otherwise
+                                            Wchain(k,r) = Wchain(k,r) + STeff(k,r) * (1 + totArvlQlenSeenByClosed(k) + (Nt-1)*gamma(r,k));
+                                    end
                                 end
                             case {'default','softmin'}
                                 if ismember(r,ocl)
-                                    Wchain(k,r) = Wchain(k,r) + STeff(k,r) * (1 + totArvlQlenSeenByOpen(k));
+                                    Wchain(k,r) = Wchain(k,r) + STeff(k,r) * (1 + totArvlQlenSeenByOpen(r,k));
                                 else
-                                    Wchain(k,r) = Wchain(k,r) + STeff(k,r) * (1 + totArvlQlenSeenByClosed(k));
+                                    switch options.method
+                                        case {'default', 'amva.lin', 'lin', 'amva.qdlin','qdlin'} % Linearizer
+                                            Wchain(k,r) = Wchain(k,r) + STeff(k,r) * (1 + totArvlQlenSeenByClosed(k) + Nchain(ccl)*permute(gamma(r,k,ccl),3:-1:1) - gamma(r,k,r));
+                                        otherwise
+                                            Wchain(k,r) = Wchain(k,r) + STeff(k,r) * (1 + totArvlQlenSeenByClosed(k) + (Nt-1)*gamma(r,k));
+                                    end
                                 end
                         end
                 end
@@ -161,14 +258,14 @@ for r=nnzclasses
             case SchedStrategy.ID_DPS
                 if nservers(k)>1
                     line_error(mfilename,'Multi-server DPS not supported yet in AMVA solver.')
-                else                    
-                    w = schedparam; % DPS weight                    
+                else
+                    w = schedparam; % DPS weight
                     tss = Inf; % time-scale separation threshold, this was originally at 5, presently it is disabled
                     %Uhiprio(k,r) = sum(Uchain(k,w(k,:)>tss*w(k,r))); % disabled at the moment
                     %STeff(k,r) = STeff(k,r) / (1-Uhiprio(k,r));
                     
                     Wchain(k,r) = STeff(k,r) * (1 + selfArvlQlenSeenByClosed(k,r)); % class-r
-                    for s=setdiff(sd,r) % slowdown due to classes s!=r
+                    for s=sd  % slowdown due to classes s!=r
                         if w(k,s) == w(k,r) % handle gracefully 0/0 case
                             Wchain(k,r) = Wchain(k,r) + STeff(k,r) * stationaryQlen(k,s);
                         elseif w(k,s)/w(k,r)<=tss
@@ -204,35 +301,143 @@ for r=nnzclasses
                     
                     if nservers(k)==1 && (~isempty(lldscaling) || ~isempty(cdscaling))
                         Wchain(k,r) = STeff(k,r) * lldterm(k) * cdterm(k,r) * (1 + SCVchain(k,r))/2; % high SCV
-                        if ismember(ocl,r)
+                        if any(ismember(ocl,r))
                             Wchain(k,r) = Wchain(k,r) + (STeff(k,r) * stationaryQlen(k,r) + STeff(k,sd)*stationaryQlen(k,sd)');
                         else
-                            Wchain(k,r) = Wchain(k,r) + (STeff(k,r) * selfArvlQlenSeenByClosed(k,r) + STeff(k,sd)*stationaryQlen(k,sd)');
+                            switch options.method
+                                case {'default', 'amva.lin', 'lin', 'amva.qdlin','qdlin'} % Linearizer
+                                    Wchain(k,r) = Wchain(k,r) + (STeff(k,r) * selfArvlQlenSeenByClosed(k,r) + STeff(k,sd)*stationaryQlen(k,sd)') + (STeff(k,ccl).*Nchain(ccl)*permute(gamma(r,k,ccl),3:-1:1) - STeff(k,r)*gamma(r,k,r));
+                                otherwise
+                                    Wchain(k,r) = Wchain(k,r) + (STeff(k,r) * selfArvlQlenSeenByClosed(k,r) + STeff(k,sd)*stationaryQlen(k,sd)');
+                            end
                         end
                     else
                         switch options.config.multiserver
                             case 'softmin'
                                 Wchain(k,r) = STchain(k,r) * lldterm(k) * cdterm(k,r) * (1 + SCVchain(k,r))/2; % high SCV
-                                if ismember(ocl,r)
+                                if any(ismember(ocl,r))
                                     Wchain(k,r) = Wchain(k,r) + STeff(k,r) * stationaryQlen(k,r) * Bk(r) + STeff(k,sd) * (stationaryQlen(k,sd) .* Bk(sd))';
                                 else
                                     % FCFS approximation + reducing backlog proportionally to server utilizations; somewhat similar to
                                     % Rolia-Sevcik -  method of layers - Sec IV.
-                                    Wchain(k,r) = Wchain(k,r) + STeff(k,r) * selfArvlQlenSeenByClosed(k,r) * Bk(r) + STeff(k,sd) * (stationaryQlen(k,sd) .* Bk(sd))';
+                                    switch options.method
+                                        case {'default', 'amva.lin', 'lin', 'amva.qdlin','qdlin'} % Linearizer
+                                            Wchain(k,r) = Wchain(k,r) + STeff(k,r) * selfArvlQlenSeenByClosed(k,r) * Bk(r) + STeff(k,sd) * (stationaryQlen(k,sd) .* Bk(sd))' + (STeff(k,ccl).*Nchain(ccl)*permute(gamma(r,k,ccl),3:-1:1) - STeff(k,r)*gamma(r,k,r));
+                                        otherwise
+                                            Wchain(k,r) = Wchain(k,r) + STeff(k,r) * selfArvlQlenSeenByClosed(k,r) * Bk(r) + STeff(k,sd) * (stationaryQlen(k,sd) .* Bk(sd))';
+                                    end
                                 end
                             case {'default','seidmann'}
                                 Wchain(k,r) = STeff(k,r) * (nservers(k)-1); % multi-server correction with serial think time, (1/nservers(k)) term already in STeff
                                 Wchain(k,r) = Wchain(k,r) + STeff(k,r) * (1 + SCVchain(k,r))/2; % high SCV
-                                if ismember(ocl,r)
+                                if any(ismember(ocl,r))
                                     Wchain(k,r) = Wchain(k,r) + (STeff(k,r) * deltaclass(r) * stationaryQlen(k,r)*Bk(r) + STeff(k,sd).*Bk(sd)*stationaryQlen(k,sd)');
                                 else
                                     % FCFS approximation + reducing backlog proportionally to server utilizations; somewhat similar to
                                     % Rolia-Sevcik -  method of layers - Sec IV. (1/nservers(k)) term already in STeff
-                                    Wchain(k,r) = Wchain(k,r) + (STeff(k,r) * selfArvlQlenSeenByClosed(k,r)*Bk(r) + STeff(k,sd).*Bk(sd)*stationaryQlen(k,sd)');
+                                    switch options.method
+                                        case {'default', 'amva.lin', 'lin', 'amva.qdlin','qdlin'} % Linearizer
+                                            Wchain(k,r) = Wchain(k,r) + (STeff(k,r) * selfArvlQlenSeenByClosed(k,r)*Bk(r) + STeff(k,sd).*Bk(sd)*stationaryQlen(k,sd)') + (STeff(k,ccl).*Nchain(ccl)*permute(gamma(r,k,ccl),3:-1:1) - STeff(k,r)*gamma(r,k,r));
+                                        otherwise
+                                            Wchain(k,r) = Wchain(k,r) + (STeff(k,r) * selfArvlQlenSeenByClosed(k,r)*Bk(r) + STeff(k,sd).*Bk(sd)*stationaryQlen(k,sd)');
+                                    end
                                 end
                         end
                     end
                 end
+                
+            case {SchedStrategy.ID_HOL} % non-preemptive priority
+                if STeff(k,r) > 0
+                    
+                    switch options.config.np_priority
+                        case {'default','cl'} % Chandy-Lakshmi
+                            UHigherPrio=0;
+                            for h=nnzclasses_hprio{r}
+                                UHigherPrio = UHigherPrio + Vchain(k,h)*STeff(k,h)*(Xchain(h)-Qchain(k,h)*tau(h));
+                            end
+                            prioScaling = min([max([options.tol,1-UHigherPrio]),1-options.tol]);
+                        case 'shadow' % Sevcik's shadow server
+                            UHigherPrio=0;
+                            for h=nnzclasses_hprio{r}
+                                UHigherPrio = UHigherPrio + Vchain(k,h)*STeff(k,h)*Xchain(h);
+                            end
+                            prioScaling = min([max([options.tol,1-UHigherPrio]),1-options.tol]);                            
+                    end
+                    
+                    if nservers(k)>1
+                        if sum(deltaclass .* Xchain .* Vchain(k,:) .* STeff(k,:)) < 0.75 % light-load case
+                            switch options.config.multiserver
+                                case 'softmin'
+                                    Bk = ((deltaclass .* Xchain .* Vchain(k,:) .* STeff(k,:))); % note: this is in 0-1 as a utilization
+                                case {'default','seidmann'}
+                                    Bk = ((deltaclass .* Xchain .* Vchain(k,:) .* STeff(k,:)) / nservers(k)); % note: this is in 0-1 as a utilization
+                            end
+                        else % high-load case
+                            switch options.config.multiserver
+                                case 'softmin'
+                                    Bk = (deltaclass .* Xchain .* Vchain(k,:) .* STeff(k,:)).^nservers(k); % Rolia
+                                case {'default','seidmann'}
+                                    Bk = (deltaclass .* Xchain .* Vchain(k,:) .* STeff(k,:) / nservers(k)).^nservers(k); % Rolia
+                            end
+                        end
+                    else
+                        Bk = ones(1,K);
+                    end
+                    
+                    if nservers(k)==1 && (~isempty(lldscaling) || ~isempty(cdscaling))
+                        Wchain(k,r) = STeff(k,r) * lldterm(k) * cdterm(k,r) * (1 + SCVchain(k,r))/2 / prioScaling; % high SCV
+                        if any(ismember(ocl,r))
+                            Wchain(k,r) = Wchain(k,r) + (STeff(k,r) * stationaryQlen(k,r)) / prioScaling;
+                        else
+                            switch options.method
+                                case {'default', 'amva.lin', 'lin', 'amva.qdlin','qdlin'} % Linearizer
+                                    %Wchain(k,r) = Wchain(k,r) + (STeff(k,r) * selfArvlQlenSeenByClosed(k,r) + STeff(k,sdprio)*stationaryQlen(k,sdprio)') + (STeff(k,[r,sdprio]).*Nchain([r,sdprio])*permute(gamma(r,k,[r,sdprio]),3:-1:1) - STeff(k,r)*gamma(r,k,r));
+                                    Wchain(k,r) = Wchain(k,r) + (STeff(k,r) * selfArvlQlenSeenByClosed(k,r) - STeff(k,r)*gamma(r,k,r)) / prioScaling;
+                                otherwise
+                                    %Wchain(k,r) = Wchain(k,r) + (STeff(k,r) * selfArvlQlenSeenByClosed(k,r) + STeff(k,sdprio)*stationaryQlen(k,sdprio)');
+                                    Wchain(k,r) = Wchain(k,r) + (STeff(k,r) * selfArvlQlenSeenByClosed(k,r)) / prioScaling;
+                            end
+                        end
+                    else
+                        switch options.config.multiserver
+                            case 'softmin'
+                                Wchain(k,r) = STchain(k,r) * lldterm(k) * cdterm(k,r) * (1 + SCVchain(k,r))/2 / prioScaling; % high SCV
+                                if any(ismember(ocl,r))
+                                    Wchain(k,r) = Wchain(k,r) + STeff(k,r) * stationaryQlen(k,r) * Bk(r) / prioScaling;
+                                else
+                                    % FCFS approximation + reducing backlog proportionally to server utilizations; somewhat similar to
+                                    % Rolia-Sevcik -  method of layers - Sec IV.
+                                    switch options.method
+                                        case {'default', 'amva.lin', 'lin', 'amva.qdlin','qdlin'} % Linearizer
+                                            %Wchain(k,r) = Wchain(k,r) + STeff(k,r) * selfArvlQlenSeenByClosed(k,r) * Bk(r) + STeff(k,sdprio) * (stationaryQlen(k,sdprio) .* Bk(sdprio))' + (STeff(k,[r,sdprio]).*Nchain([r,sdprio])*permute(gamma(r,k,[r,sdprio]),3:-1:1) - STeff(k,r)*gamma(r,k,r));
+                                            Wchain(k,r) = Wchain(k,r) + STeff(k,r) * selfArvlQlenSeenByClosed(k,r) * Bk(r) / prioScaling + (STeff(k,[r]).*Nchain([r])*permute(gamma(r,k,[r]),3:-1:1) - STeff(k,r)*gamma(r,k,r)) / prioScaling;
+                                        otherwise
+                                            %Wchain(k,r) = Wchain(k,r) + STeff(k,r) * selfArvlQlenSeenByClosed(k,r) * Bk(r) + STeff(k,sdprio) * (stationaryQlen(k,sdprio) .* Bk(sdprio))';
+                                            Wchain(k,r) = Wchain(k,r) + STeff(k,r) * selfArvlQlenSeenByClosed(k,r) * Bk(r) / prioScaling;
+                                    end
+                                end
+                            case {'default','seidmann'}
+                                Wchain(k,r) = STeff(k,r) * (nservers(k)-1)/prioScaling; % multi-server correction with serial think time, (1/nservers(k)) term already in STeff
+                                Wchain(k,r) = Wchain(k,r) + STeff(k,r) * (1 + SCVchain(k,r))/2/prioScaling; % high SCV
+                                if any(ismember(ocl,r))
+                                    %Wchain(k,r) = Wchain(k,r) + (STeff(k,r) * stationaryQlen(k,r)*Bk(r) + STeff(k,sdprio).*Bk(sdprio)*stationaryQlen(k,sdprio)');
+                                    Wchain(k,r) = Wchain(k,r) + (STeff(k,r) * stationaryQlen(k,r)*Bk(r))/prioScaling;
+                                else
+                                    % FCFS approximation + reducing backlog proportionally to server utilizations; somewhat similar to
+                                    % Rolia-Sevcik -  method of layers - Sec IV. (1/nservers(k)) term already in STeff
+                                    switch options.method
+                                        case {'default', 'amva.lin', 'lin', 'amva.qdlin','qdlin'} % Linearizer
+                                            %Wchain(k,r) = Wchain(k,r) + (STeff(k,r) * selfArvlQlenSeenByClosed(k,r)*Bk(r) + STeff(k,sdprio).*Bk(sdprio)*stationaryQlen(k,sdprio)') + (STeff(k,[r,sdprio]).*Nchain([r,sdprio])*permute(gamma(r,k,[r,sdprio]),3:-1:1) - STeff(k,r)*gamma(r,k,r));
+                                            Wchain(k,r) = Wchain(k,r) + STeff(k,r) * selfArvlQlenSeenByClosed(k,r)*Bk(r)/prioScaling + (STeff(k,r).*Nchain(r)*permute(gamma(r,k,r),3:-1:1) - STeff(k,r)*gamma(r,k,r))/prioScaling;
+                                        otherwise
+                                            %Wchain(k,r) = Wchain(k,r) + (STeff(k,r) * selfArvlQlenSeenByClosed(k,r)*Bk(r) + STeff(k,sdprio).*Bk(sdprio)*stationaryQlen(k,sdprio)');
+                                            Wchain(k,r) = Wchain(k,r) + STeff(k,r) * selfArvlQlenSeenByClosed(k,r)*Bk(r)/prioScaling;
+                                    end
+                                end
+                        end
+                    end
+                end
+                
         end
     end
 end

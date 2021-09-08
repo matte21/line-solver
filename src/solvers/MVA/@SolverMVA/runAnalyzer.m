@@ -75,7 +75,7 @@ else % queueing network
     % random initialization
     for ind = 1:sn.nnodes
         if sn.nodetype(ind) == NodeType.Cache
-            error('Integrated caching - queueing network models not supported yet.');
+            line_error(mfilename, 'Integrated caching - queueing network models not supported yet.');
         end
     end
     self.model.refreshChains();

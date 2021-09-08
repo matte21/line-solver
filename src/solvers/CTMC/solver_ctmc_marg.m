@@ -43,7 +43,7 @@ end
 
 runtime = toc(Tstart);
 
-if options.verbose > 0
+if options.verbose
     line_printf('\nCTMC analysis completed. Runtime: %f seconds.\n',runtime);
 end
 end

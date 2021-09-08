@@ -32,7 +32,7 @@ Pnir = pi(findrows(SS, statevec));
 
 runtime = toc(Tstart);
 
-if options.verbose > 0
+if options.verbose
     line_printf('CTMC analysis completed. Runtime: %f seconds.\n',runtime);
 end
 end

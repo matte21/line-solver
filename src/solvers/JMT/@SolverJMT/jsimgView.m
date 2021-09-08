@@ -19,7 +19,8 @@ elseif options.samples< 5e3
 end
 self.seed = options.seed;
 self.maxSamples = options.samples;
-writeJSIM(self);
+sn = self.getStruct;
+writeJSIM(self, sn);
 %            if options.verbose
 fileName = [getFilePath(self),'jsim',filesep, getFileName(self), '.jsim'];
 line_printf('\nJMT Model: %s',fileName);

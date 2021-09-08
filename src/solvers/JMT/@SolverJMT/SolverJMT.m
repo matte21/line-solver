@@ -84,8 +84,8 @@ classdef SolverJMT < NetworkSolver
         jsimwView(self, options)
         jsimgView(self, options)
         
-        [outputFileName] = writeJMVA(self, outputFileName)
-        [outputFileName] = writeJSIM(self, outputFileName)
+        [outputFileName] = writeJMVA(self, sn, outputFileName)
+        [outputFileName] = writeJSIM(self, sn, outputFileName)
         [result, parsed] = getResults(self)
         [result, parsed] = getResultsJSIM(self)
         [result, parsed] = getResultsJMVA(self)

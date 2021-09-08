@@ -62,11 +62,12 @@ if ~self.model.hasInitState
 end
 
 self.maxSamples = options.samples;
+sn = self.getStruct;
 
 switch options.method
     case {'jsim','default'}
         if isinf(options.timespan(2)) || ((options.timespan(2)) == (options.timespan(1)))
-            self.writeJSIM;
+            self.writeJSIM(sn);
             cmd = ['java -cp "',getJMTJarPath(self),filesep,'JMT.jar" jmt.commandline.Jmt sim "',getFilePath(self),'jsim',filesep,getFileName(self),'.jsim" -seed ',num2str(options.seed),' --illegal-access=permit'];
             if options.verbose
                 line_printf('\nJMT model: %s',[getFilePath(self),'jsim',filesep,getFileName(self),'.jsim']);
@@ -84,7 +85,6 @@ switch options.method
             initTimeSpan = self.options.timespan;
             self.options.timespan(1) = self.options.timespan(2);
             if isfield(options,'timespan')  && isfinite(options.timespan(2))
-                sn = self.getStruct;
                 tu = [];
                 for it=1:options.iter_max
                     self.options.seed = initSeed + it -1;
@@ -158,9 +158,12 @@ switch options.method
             self.result.('solver') = getName(self);
             self.result.runtime = runtime;
         end
+        if options.verbose
+            line_printf('\nJMT analysis (seed: %d) completed. Runtime: %f seconds.\n',options.seed,runtime);
+        end
     case {'jmva','jmva.amva','jmva.mva','jmva.recal','jmva.comom','jmva.chow','jmva.bs','jmva.aql','jmva.lin','jmva.dmlin','jmva.ls',...
             'jmt.jmva','jmt.jmva.mva','jmt.jmva.amva','jmt.jmva.recal','jmt.jmva.comom','jmt.jmva.chow','jmt.jmva.bs','jmt.jmva.aql','jmt.jmva.lin','jmt.jmva.dmlin','jmt.jmva.ls'}
-        fname = self.writeJMVA([getFilePath(self),'jmva',filesep,getFileName(self),'.jmva']);
+        fname = self.writeJMVA(sn, [getFilePath(self),'jmva',filesep,getFileName(self),'.jmva']);
         cmd = ['java -cp "',getJMTJarPath(self),filesep,'JMT.jar" jmt.commandline.Jmt mva "',fname,'" -seed ',num2str(options.seed),' --illegal-access=permit'];
         if options.verbose
             line_printf('\nJMT model: %s',[getFilePath(self),'jmva',filesep,getFileName(self),'.jmva']);
@@ -172,13 +175,12 @@ switch options.method
         if ~options.keep
             delete([getFilePath(self),'jmva',filesep,getFileName(self),'*']);
         end
+        if options.verbose
+            line_printf('\nJMT analysis (method: %d) completed. Runtime: %f seconds.\n',options.method,runtime);
+        end
     otherwise
         line_warning(mfilename,'This solver does not support the specified method. Setting to default.');
         self.options.method  = 'default';
         runtime = run(self);
-end
-
-if options.verbose > 0
-    line_printf('\nJMT analysis completed. Runtime: %f seconds.\n',runtime);
 end
 end

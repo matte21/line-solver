@@ -17,13 +17,20 @@ classdef ClosedClass < JobClass
             self@JobClass('closed', name);
             self.type = JobClassType.CLOSED;
             self.population = njobs;
+            if abs(njobs-round(njobs))>Distrib.Tol
+                line_error(mfilename,sprintf('The number of jobs in class %s must be an integer.\n', name));
+            end
             self.priority = 0;
             if nargin>=5 %exist('prio','var')
                 self.priority = prio;
             end
             model.addJobClass(self);
             if ~isa(refstat, 'Station')
-                line_error(mfilename,sprintf('The reference station for class %s needs to be a station, not a node.', name));
+                if isa(refstat, 'Node')
+                    line_error(mfilename,sprintf('The reference station of class %s needs to be a station, not a node.', name));
+                else
+                    line_error(mfilename,sprintf('The parameter for the reference station of class %s is not a valid object.', name));
+                end
             end
             setReferenceStation(self, refstat);
             
