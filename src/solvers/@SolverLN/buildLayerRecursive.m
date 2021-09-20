@@ -66,6 +66,7 @@ for tidx_caller = callers
             end
         end
         aidxClass{tidx_caller} = ClosedClass(model, lqn.hashnames{tidx_caller}, njobs, clientDelay);
+        aidxClass{tidx_caller}.setReferenceClass(true); % renormalize residence times using the visits to the task
         aidxClass{tidx_caller}.attribute = [LayeredNetworkElement.TASK, tidx_caller];
         model.attribute.tasks(end+1,:) = [aidxClass{tidx_caller}.index, tidx_caller];
         aidxClass{tidx_caller}.completes = false;
@@ -359,6 +360,8 @@ self.ensemble{idx} = model;
                                 
                                 jobPos = 3;
                                 curClass = aidxClass{nextaidx};
+                                self.routeupdmap{idx}(end+1,:) = [idx, nextaidx, lqn.hitaidx, 3, 3, aidxClass{nextaidx}.index, aidxClass{lqn.hitaidx}.index];
+                                self.routeupdmap{idx}(end+1,:) = [idx, nextaidx, lqn.missaidx, 3, 3, aidxClass{nextaidx}.index, aidxClass{lqn.missaidx}.index];
     
                             end
                         else
@@ -375,6 +378,7 @@ self.ensemble{idx} = model;
                                 for m=1:nreplicas
                                     P{curClass, aidxClass{nextaidx}}(cacheNode,serverStation{m}) = full(lqn.graph(aidx,nextaidx));
                                     serverStation{m}.setService(aidxClass{nextaidx}, lqn.hostdem{nextaidx});
+                                    %self.routeupdmap{idx}(end+1,:) = [idx, nextaidx, nextaidx, 3, 2, aidxClass{nextaidx}.index, aidxClass{nextaidx}.index];
                                 end                                
                             else                                
                             for m=1:nreplicas

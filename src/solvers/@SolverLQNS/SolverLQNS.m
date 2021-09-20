@@ -72,7 +72,7 @@ classdef SolverLQNS < LayeredNetworkSolver
             runtime = toc;
         end
         
-        function [QN,UN,RN,TN] = getAvg(self,~,~,~,~,useLQNSnaming)
+        function [QN,UN,RN,TN,AN,WN] = getAvg(self,~,~,~,~,useLQNSnaming)
             % [QN,UN,RN,TN] = GETAVG(SELF,~,~,~,~,USELQNSnaming)
             %
             % SN: average service time
@@ -88,6 +88,8 @@ classdef SolverLQNS < LayeredNetworkSolver
             TN = self.result.Avg.Tput;
             PN = self.result.Avg.ProcUtil;
             SN = self.result.Avg.SvcT;
+            AN = TN*0;
+            WN = RN*0;
             
             if ~useLQNSnaming
                 QN = UN;

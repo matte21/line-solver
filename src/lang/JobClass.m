@@ -6,7 +6,8 @@ classdef JobClass < NetworkElement
     
     properties
         priority;
-        reference; % reference station
+        refstat; % reference station
+        isrefclass; % is this a reference class within a chain?
         index;
         type;
         completes; % true if passage through reference station is a completion        
@@ -19,7 +20,8 @@ classdef JobClass < NetworkElement
             
             self@NetworkElement(name);
             self.priority = 0;
-            self.reference = Node('Unallocated');
+            self.refstat = Node('Unallocated');
+            self.isrefclass = false;
             self.index = 1;
             self.type=type;
             self.completes = true;            
@@ -28,15 +30,25 @@ classdef JobClass < NetworkElement
         function self = setReferenceStation(self, source)
             % SELF = SETREFERENCESTATION(SOURCE)
             
-            self.reference = source;
+            self.refstat = source;
+        end
+        
+        function self = setReferenceClass(self, bool)
+            % SELF = SETREFERENCECLASS(BOOL)            
+            self.isrefclass = bool;
         end
         
         function boolIsa = isReferenceStation(self, node)
             % BOOLISA = ISREFERENCESTATION(NODE)
             
-            boolIsa = strcmp(self.reference.name,node.name);
+            boolIsa = strcmp(self.refstat.name,node.name);
         end
         
+        function boolIsa = isReferenceClass(self)
+            % BOOLISA = ISREFERENCECLASS()
+            
+            boolIsa = self.isrefclass;
+        end
         
         %         function self = set.priority(self, priority)
         % SELF = SET.PRIORITY(PRIORITY)

@@ -14,7 +14,7 @@ ist = sn.nodeToStation(ind);
 
 % returns all states lb<= x<= ub, where ub/lb are either a scalar (total
 % number of jobs) or a vector (per-class number of jobs)
-space =[];
+space = [];
 if isempty(lb), lb=0*ub; end
 R = sn.nclasses;
 if length(lb) == 1, isVectorLB =0; else, isVectorLB = 1; end

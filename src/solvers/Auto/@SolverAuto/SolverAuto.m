@@ -82,7 +82,7 @@ classdef SolverAuto < NetworkSolver
             
         end
         
-        function [QN,UN,RN,TN] = getAvg(self,Q,U,R,T)
+        function [QN,UN,RN,TN,AN,WN] = getAvg(self,Q,U,R,T)
             %[QN,UN,RN,TN] = GETAVG(SELF,Q,U,R,T)
             if nargin ==1
                 [Q,U,R,T] = self.getAvgHandles;
@@ -99,7 +99,7 @@ classdef SolverAuto < NetworkSolver
             proposedSolvers = {chooseSolver(self), self.candidates};
             for s=1:length(proposedSolvers)
                 try
-                    [QN,UN,RN,TN] = proposedSolvers{s}.getAvg(Q,U,R,T);
+                    [QN,UN,RN,TN,AN,WN] = proposedSolvers{s}.getAvg(Q,U,R,T);
                     return
                 end
             end

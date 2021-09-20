@@ -67,6 +67,10 @@ switch solverName
         options.keep = false;
     case 'MAM'
         options.timespan = [Inf,Inf];
+    case 'MVA'
+        options.config.highvar = 'default';
+        options.config.multiserver = 'default';
+        options.config.np_priority = 'default';
     case 'NC'        
         options.samples = 1e5;
         options.timespan = [Inf,Inf];

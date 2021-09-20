@@ -18,12 +18,12 @@ if self.hasStruct && ~hardRefresh
     nodetypes = sn.nodetypes;
     classnames = sn.classnames;
     nodenames = sn.nodenames;
-    refstat = sn.refstat;
+    refstat = sn.refstat;    
 else
     nodetypes = getNodeTypes(self);
     classnames = getClassNames(self);
     nodenames = getNodeNames(self);
-    refstat = getReferenceStations(self);
+    refstat = getReferenceStations(self);    
 end
 njobs = getNumberOfJobs(self);
 numservers = getStationServers(self);
@@ -132,6 +132,8 @@ end
 for isf=1:sn.nstateful
     sn.statefulToNode(isf) = sf2nd(sn,isf);
 end
+refclass = getReferenceClasses(self);
+sn.refclass = refclass;
 
 self.sn = sn;
 refreshPriorities(self);

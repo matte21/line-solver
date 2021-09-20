@@ -57,6 +57,35 @@ for k=1:M
     end
 end
 
+%% high variance handling
+STchain0 = STchain;
+switch options.config.highvar
+    case {'default'}
+        % no-op        
+    case {'interp'}
+        for i=1:M
+            sd = isfinite(STchain(i,:)) & isfinite(SCVchain(i,:));
+            rho(i) = sum(Uchain(i,sd));
+            T(i,:) = Vchain(i,:).*Xchain;
+            switch sn.schedid(i)
+                case SchedStrategy.ID_FCFS
+                    if range(STchain(i,sd))>0 && (max(SCVchain(i,sd))>1 - Distrib.Zero || min(SCVchain(i,sd))<1 + Distrib.Zero) % check if non-product-form
+                        ca(i) = 1;
+                        cs(i) = (SCVchain(i,sd)*T(i,sd)')/sum(T(i,sd));
+                        gamma(i) = (rho(i)^nservers(i)+rho(i))/2; % multi-server
+                        % asymptotic decay rate (diffusion approximation, Kobayashi JACM)
+                        eta(i) = exp(-2*(1-rho(i))/(cs(i)+ca(i)*rho(i)));
+                        for k=find(sd)
+                            if STchain(i,k)>0
+                                STchain(i,k) = (1-rho(i)^8)*STchain0(i,k) + rho(i)^8*(gamma(i) + rho(i)^8* (eta(i)-gamma(i)))*(nservers(i)/sum(T(i,sd)));                                
+                            end
+                        end
+                        nservers(i) = 1;
+                    end
+            end
+        end
+end
+
 %% all methods use LLD and CD corrections from QD-AMVA
 if isempty(lldscaling)
     lldscaling = ones(M,Nt);
@@ -112,7 +141,7 @@ end
 
 Wchain = zeros(M,K);
 
-STeff = STchain; % effective service time
+STeff = zeros(size(STchain)); % effective service time
 for r=nnzclasses
     for k=1:M
         STeff(k,r) = STchain(k,r) * lldterm(k) * msterm(k) * cdterm(k,r);
@@ -279,6 +308,8 @@ for r=nnzclasses
                 
             case {SchedStrategy.ID_FCFS, SchedStrategy.ID_SIRO, SchedStrategy.ID_LCFSPR}
                 if STeff(k,r) > 0
+                    Uchain_r = Uchain ./ repmat(Xchain,M,1) .* (repmat(Xchain,M,1) + repmat(tau(r,:),M,1));
+                    
                     if nservers(k)>1
                         if sum(deltaclass .* Xchain .* Vchain(k,:) .* STeff(k,:)) < 0.75 % light-load case
                             switch options.config.multiserver
@@ -300,7 +331,15 @@ for r=nnzclasses
                     end
                     
                     if nservers(k)==1 && (~isempty(lldscaling) || ~isempty(cdscaling))
-                        Wchain(k,r) = STeff(k,r) * lldterm(k) * cdterm(k,r) * (1 + SCVchain(k,r))/2; % high SCV
+                        switch options.config.highvar % high SCV
+                            case 'hvmva'
+                                Wchain(k,r) = STeff(k,r) * (1-sum(Uchain_r(k,ccl)));
+                                for s=ccl
+                                    Wchain(k,r) = Wchain(k,r) + STeff(k,s) * Uchain_r(k,s) * (1 + SCVchain(k,s))/2; % high SCV
+                                end
+                            otherwise % default
+                                Wchain(k,r) = STeff(k,r);
+                        end
                         if any(ismember(ocl,r))
                             Wchain(k,r) = Wchain(k,r) + (STeff(k,r) * stationaryQlen(k,r) + STeff(k,sd)*stationaryQlen(k,sd)');
                         else
@@ -314,7 +353,7 @@ for r=nnzclasses
                     else
                         switch options.config.multiserver
                             case 'softmin'
-                                Wchain(k,r) = STchain(k,r) * lldterm(k) * cdterm(k,r) * (1 + SCVchain(k,r))/2; % high SCV
+                                Wchain(k,r) = STeff(k,r); % high SCV
                                 if any(ismember(ocl,r))
                                     Wchain(k,r) = Wchain(k,r) + STeff(k,r) * stationaryQlen(k,r) * Bk(r) + STeff(k,sd) * (stationaryQlen(k,sd) .* Bk(sd))';
                                 else
@@ -329,7 +368,7 @@ for r=nnzclasses
                                 end
                             case {'default','seidmann'}
                                 Wchain(k,r) = STeff(k,r) * (nservers(k)-1); % multi-server correction with serial think time, (1/nservers(k)) term already in STeff
-                                Wchain(k,r) = Wchain(k,r) + STeff(k,r) * (1 + SCVchain(k,r))/2; % high SCV
+                                Wchain(k,r) = Wchain(k,r) + STeff(k,r); % high SCV
                                 if any(ismember(ocl,r))
                                     Wchain(k,r) = Wchain(k,r) + (STeff(k,r) * deltaclass(r) * stationaryQlen(k,r)*Bk(r) + STeff(k,sd).*Bk(sd)*stationaryQlen(k,sd)');
                                 else
@@ -361,7 +400,7 @@ for r=nnzclasses
                             for h=nnzclasses_hprio{r}
                                 UHigherPrio = UHigherPrio + Vchain(k,h)*STeff(k,h)*Xchain(h);
                             end
-                            prioScaling = min([max([options.tol,1-UHigherPrio]),1-options.tol]);                            
+                            prioScaling = min([max([options.tol,1-UHigherPrio]),1-options.tol]);
                     end
                     
                     if nservers(k)>1
@@ -385,7 +424,21 @@ for r=nnzclasses
                     end
                     
                     if nservers(k)==1 && (~isempty(lldscaling) || ~isempty(cdscaling))
-                        Wchain(k,r) = STeff(k,r) * lldterm(k) * cdterm(k,r) * (1 + SCVchain(k,r))/2 / prioScaling; % high SCV
+                        switch options.config.highvar % high SCV
+                            case 'hvmva'
+                                Wchain(k,r) = (STeff(k,r) / prioScaling) * (1-sum(Uchain_r(k,ccl)));
+                                for s=ccl
+                                    UHigherPrio_s=0;
+                                    for h=nnzclasses_hprio{s}
+                                        UHigherPrio_s = UHigherPrio_s + Vchain(k,h)*STeff(k,h)*(Xchain(h)-Qchain(k,h)*tau(h));
+                                    end
+                                    prioScaling_s = min([max([options.tol,1-UHigherPrio_s]),1-options.tol]);                                    
+                                    Wchain(k,r) = Wchain(k,r) + (STeff(k,s) / prioScaling_s) * Uchain_r(k,s) * (1 + SCVchain(k,s))/2; % high SCV
+                                end
+                            otherwise % default
+                                Wchain(k,r) = STeff(k,r) / prioScaling;
+                        end
+                        
                         if any(ismember(ocl,r))
                             Wchain(k,r) = Wchain(k,r) + (STeff(k,r) * stationaryQlen(k,r)) / prioScaling;
                         else
@@ -401,7 +454,7 @@ for r=nnzclasses
                     else
                         switch options.config.multiserver
                             case 'softmin'
-                                Wchain(k,r) = STchain(k,r) * lldterm(k) * cdterm(k,r) * (1 + SCVchain(k,r))/2 / prioScaling; % high SCV
+                                Wchain(k,r) = STeff(k,r) / prioScaling; % high SCV
                                 if any(ismember(ocl,r))
                                     Wchain(k,r) = Wchain(k,r) + STeff(k,r) * stationaryQlen(k,r) * Bk(r) / prioScaling;
                                 else
@@ -418,7 +471,7 @@ for r=nnzclasses
                                 end
                             case {'default','seidmann'}
                                 Wchain(k,r) = STeff(k,r) * (nservers(k)-1)/prioScaling; % multi-server correction with serial think time, (1/nservers(k)) term already in STeff
-                                Wchain(k,r) = Wchain(k,r) + STeff(k,r) * (1 + SCVchain(k,r))/2/prioScaling; % high SCV
+                                Wchain(k,r) = Wchain(k,r) + STeff(k,r)/prioScaling; % high SCV
                                 if any(ismember(ocl,r))
                                     %Wchain(k,r) = Wchain(k,r) + (STeff(k,r) * stationaryQlen(k,r)*Bk(r) + STeff(k,sdprio).*Bk(sdprio)*stationaryQlen(k,sdprio)');
                                     Wchain(k,r) = Wchain(k,r) + (STeff(k,r) * stationaryQlen(k,r)*Bk(r))/prioScaling;

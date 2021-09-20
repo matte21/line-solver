@@ -136,6 +136,17 @@ classdef NetworkSolver < Solver
             self.model = model;
         end
         
+        function dh = diff(self, handle, parameter)
+            % dH = DIFF(H,P)
+            %
+            % Compute derivative of metric with handle H with respect to 
+            % a parameter P.
+            % H and P can also be cell arrays, in which case a cell array
+            % is returned.
+            
+            line_error(mfilename,'diff is not supported by this solver.');
+        end
+        
         function ag = getAG(self)
             % AG = GETAG()
             
@@ -223,8 +234,8 @@ classdef NetworkSolver < Solver
         end
         
         % also accepts a cell array with the handlers in it
-        [QN,UN,RN,TN,AN]       = getAvg(self,Q,U,R,T,A);
-        [QN,UN,RN,TN,AN]       = getAvgNode(self,Q,U,R,T,A);
+        [QN,UN,RN,TN,AN,WN]       = getAvg(self,Q,U,R,T,A);
+        [QN,UN,RN,TN,AN,WN]       = getAvgNode(self,Q,U,R,T,A);
         
         [AvgTable,QT,UT,RT,TT,AT] = getAvgTable(self,Q,U,R,T,A,keepDisabled);
         [AvgTable,QT] = getAvgQLenTable(self,Q,keepDisabled);

@@ -16,17 +16,17 @@ jobclass{4} = ClosedClass(model, 'Class4', 1, node{1}, 0);
 
 node{1}.setService(jobclass{1}, Exp(1));
 node{1}.setService(jobclass{2}, Exp(1));
-node{1}.setService(jobclass{3}, Exp(1));
+node{1}.setService(jobclass{3}, Exp(10));
 node{1}.setService(jobclass{4}, Exp(1));
 
 node{2}.setService(jobclass{1}, Exp(1));
 node{2}.setService(jobclass{2}, Exp(1));
-node{2}.setService(jobclass{3}, Exp(1));
+node{2}.setService(jobclass{3}, Exp(10));
 node{2}.setService(jobclass{4}, Exp(1));
 
 node{3}.setService(jobclass{1}, Exp(1));
-node{3}.setService(jobclass{2}, Erlang(1,2));
-node{3}.setService(jobclass{3}, Exp(1));
+node{3}.setService(jobclass{2}, Exp(1));
+node{3}.setService(jobclass{3}, Erlang(1,2));
 node{3}.setService(jobclass{4}, Exp(1));
 
 M = model.getNumberOfStations();

@@ -1,4 +1,4 @@
-function [QNclass,UNclass,RNclass,TNclass] = getAvg(self,Q,U,R,T)
+function [QNclass,UNclass,RNclass,TNclass,ANclass,WNclass] = getAvg(self,Q,U,R,T)
 % [QNCLASS,UNCLASS,RNCLASS,TNCLASS] = GETAVG(SELF,Q,U,R,T)
 
 % Return average station metrics at steady-state
@@ -41,6 +41,7 @@ if ~self.hasAvgResults || ~self.options.cache
                 RNclass=[];
                 TNclass=[];
                 ANclass=[];
+                WNclass=[];
                 return
             otherwise
                 rethrow(ME)
@@ -54,11 +55,14 @@ end % else return cached value
 sn = self.getStruct();
 M = sn.nstations;
 K = sn.nclasses;
+V = cellsum(sn.visits);
 
 QNclass = [];
 UNclass = [];
 RNclass = [];
 TNclass = [];
+ANclass=[];
+WNclass=[];
 
 if ~isempty(Q)
     QNclass = zeros(M,K);
@@ -93,7 +97,7 @@ if ~isempty(R)
             if ~R{i,k}.disabled && ~isempty(self.result.Avg.R)
                 RNclass(i,k) =self.result.Avg.R(i,k);
             else
-                RNclass(i,k) = NaN;                
+                RNclass(i,k) = NaN;
             end
         end
     end
@@ -106,7 +110,7 @@ if ~isempty(T)
             if ~T{i,k}.disabled && ~isempty(self.result.Avg.T)
                 TNclass(i,k) = self.result.Avg.T(i,k);
             else
-                TNclass(i,k) = NaN;                
+                TNclass(i,k) = NaN;
             end
         end
     end
@@ -118,6 +122,7 @@ QNclass(isnan(QNclass))=0;
 UNclass(isnan(UNclass))=0;
 RNclass(isnan(RNclass))=0;
 TNclass(isnan(TNclass))=0;
+ANclass(isnan(ANclass))=0;
 
 %% set to zero entries associated to immediate transitions
 QNclass(RNclass < 10/Distrib.InfRate)=0;
@@ -128,6 +133,30 @@ RNclass(RNclass < 10/Distrib.InfRate)=0;
 QNclass(QNclass < Distrib.Zero)=0;
 UNclass(UNclass < Distrib.Zero)=0;
 RNclass(RNclass < Distrib.Zero)=0;
+ANclass(ANclass < Distrib.Zero)=0;
 TNclass(TNclass < Distrib.Zero)=0;
+
+
+WNclass = 0*RNclass;
+for i=1:M
+    for k=1:K
+        if ~isempty(RNclass) && RNclass(i,k)>0
+            c = find(sn.chains(:,k));
+            if RNclass(i,k)<Distrib.Zero
+                WNclass(i,k) = RNclass(i,k);
+            else
+                if any(sn.refclass(sn.chains(c,:)))
+                    % if there is a reference class, use this
+                    WNclass(i,k) = RNclass(i,k)*V(i,k)/sum(V(sn.refstat(k),sn.refclass(sn.chains(c,:))));
+                else                    
+                    WNclass(i,k) = RNclass(i,k)*V(i,k)/sum(V(sn.refstat(k),sn.chains(c,:)));
+                end
+            end
+        end
+    end
+end
+WNclass(isnan(WNclass))=0;
+WNclass(WNclass < 10/Distrib.InfRate)=0;
+WNclass(WNclass < Distrib.Zero)=0;
 
 end

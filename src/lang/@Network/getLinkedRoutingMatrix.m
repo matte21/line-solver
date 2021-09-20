@@ -1,7 +1,7 @@
 function P = getLinkedRoutingMatrix(self)
 % P = GETLINKEDROUTINGMATRIX()
 
-sn = self.getStruct();
+sn = self.getStruct(false);
 P = sn.rtorig;
 
 if isempty(sn.rtorig)

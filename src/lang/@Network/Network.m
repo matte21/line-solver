@@ -418,6 +418,7 @@ classdef Network < Model
         
         N = getNumberOfJobs(self);
         refstat = getReferenceStations(self);
+        refclass = getReferenceClasses(self);
         sched = getStationScheduling(self);
         S = getStationServers(self);
         

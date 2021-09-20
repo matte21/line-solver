@@ -39,12 +39,12 @@ classdef LayeredNetworkSolver < Solver
     end
     
     methods
-        function [AvgTable,QT,UT,RT,TT,PT,ST] = getAvgTable(self, useLQNSnaming)
-            % [AVGTABLE,QT,UT,RT,TT,PT,ST] = GETAVGTABLE(USELQNSNAMING)
+        function [AvgTable,QT,UT,RT,TT,WT] = getAvgTable(self, useLQNSnaming)
+            % [AVGTABLE,QT,UT,RT,TT,WT] = GETAVGTABLE(USELQNSNAMING)
             if nargin<2 %~exist('wantLQNSnaming','var')
                 useLQNSnaming = false;
             end
-            [QN,UN,RN,TN] = getAvg(self);
+            [QN,UN,RN,TN,AN,WN] = getAvg(self);
             lqn = self.model.getStruct;
             Node = label(lqn.names);
             O = length(Node);
@@ -86,7 +86,9 @@ classdef LayeredNetworkSolver < Solver
                 %ST = Table(Node,SvcT);
                 %ProcUtil = PN;
                 %PT = Table(Node,ProcUtil);
-                AvgTable = Table(Node, NodeType, QLen, Util, RespT, Tput);%, ProcUtil, SvcT);
+                ResidT = WN;
+                WT = Table(Node,ResidT);
+                AvgTable = Table(Node, NodeType, QLen, Util, RespT, ResidT, Tput);%, ProcUtil, SvcT);
             end
         end
     end

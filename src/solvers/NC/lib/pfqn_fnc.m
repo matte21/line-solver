@@ -35,7 +35,6 @@ for i=1:M
     end
 end
 mu(isnan(mu)) = Inf;
-mu(mu==0) = Inf;
 mu(abs(mu)>1e15) = Inf;
 for i=1:M
     if any(isinf(mu(i,:)))
@@ -43,4 +42,5 @@ for i=1:M
         mu(i,s:end)=Inf;
     end
 end
+%mu(mu==0) = Inf;
 end

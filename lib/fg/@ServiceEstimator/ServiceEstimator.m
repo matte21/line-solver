@@ -1,5 +1,5 @@
 classdef ServiceEstimator < handle
-    % Abstract class for distribution
+    % Abstract class for service demand estimators
     %
     % Copyright (c) 2012-2021, Imperial College London
     % All rights reserved.

@@ -234,7 +234,7 @@ classdef Solver < handle
                 'nc','nc.exact','nc.imci','nc.ls','nc.le','nc.panacea','panacea','nc.mmint2','mmint2','mam','dec.source','dec.mmap',...
                 'mmk','gigk', 'gigk.kingman_approx', ...
                 'mm1','mg1','gm1','gig1','gim1','gig1.kingman','gig1.gelenbe','gig1.heyman','gig1.kimura','gig1.allen','gig1.kobayashi','gig1.klb','gig1.marchal','gig1.myskja','gig1.myskja.b',...
-                'aba.upper','aba.lower','gb.upper','gb.lower','bjb.upper','bjb.lower','pb.upper','pb.lower'};
+                'aba.upper','aba.lower','gb.upper','gb.lower','sb.upper','sb.lower','bjb.upper','bjb.lower','pb.upper','pb.lower'};
         end
         
         function bool = isValidOption(optName)
@@ -247,7 +247,7 @@ classdef Solver < handle
         function options = defaultOptions()
             % OPTIONS = DEFAULTOPTIONS()
             % Return default options
-            options = lineDefaults('Solver');
+            options = lineDefaults('MVA');
         end
         
         function options = parseOptions(varargin, defaultOptions)
@@ -258,7 +258,12 @@ classdef Solver < handle
             elseif isstruct(varargin{1})
                 options = varargin{1};
             elseif ischar(varargin{1})
-                options = defaultOptions;
+                if length(varargin)>1 && isstruct(varargin{2}) % options struct after method field
+                    options = varargin{2};
+                    varargin(2) = [];
+                else
+                    options = defaultOptions;
+                end
                 [optList, allOpt] = Solver.listValidOptions();
                 allMethodsList = setdiff(allOpt, optList);
                 while ~isempty(varargin)
@@ -273,7 +278,7 @@ classdef Solver < handle
                                 varargin(1) = [];
                         end
                     else
-                        line_warning(mfilename,'Option "%s" does not exist. Ignoring.',varargin{1});
+                        line_warning(mfilename,sprintf('Option "%s" does not exist. Ignoring.',varargin{1}));
                         varargin(1) = [];
                     end
                 end
@@ -306,7 +311,7 @@ classdef Solver < handle
                         'mm1','mmk','mg1','gm1','gig1','gim1','gig1.kingman', ...
                         'gigk', 'gigk.kingman_approx', ...
                         'gig1.gelenbe','gig1.heyman','gig1.kimura','gig1.allen','gig1.kobayashi','gig1.klb','gig1.marchal','gig1.myskja','gig1.myskja.b', ...
-                        'aba.upper', 'aba.lower', 'bjb.upper', 'bjb.lower', 'gb.upper', 'gb.lower','pb.upper','pb.lower'}
+                        'aba.upper', 'aba.lower', 'bjb.upper', 'bjb.lower', 'gb.upper', 'gb.lower', 'pb.upper', 'pb.lower', 'sb.upper', 'sb.lower'}
                     if strcmp(options.method,'mva'), options.method='default'; end
                     options.method = erase(options.method,'mva.');
                     solver = SolverMVA(model, options);

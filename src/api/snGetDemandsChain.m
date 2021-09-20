@@ -45,7 +45,10 @@ for c=1:sn.nchains
             STchain(i,c) = ST(i,inchain) * alpha(i,inchain)';
         end
         Lchain(i,c) = Vchain(i,c) * STchain(i,c);
-        SCVchain(i,c) = SCV(i,inchain) * alpha(i,inchain)' / sum(alpha(i,inchain(isfinite(SCV(i,inchain))))');
+        alphachain = sum(alpha(i,inchain(isfinite(SCV(i,inchain))))');
+        if alphachain>0
+            SCVchain(i,c) = SCV(i,inchain) * alpha(i,inchain)' / alphachain;
+        end
     end
     refstatchain(c) = sn.refstat(inchain(1));
     if any((sn.refstat(inchain(1))-refstatchain(c))~=0)

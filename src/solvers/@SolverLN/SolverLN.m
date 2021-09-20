@@ -130,11 +130,15 @@ classdef SolverLN < LayeredNetworkSolver & EnsembleSolver
                     self.results{end,e}.UN = w*self.results{end,e}.UN;
                     self.results{end,e}.RN = w*self.results{end,e}.RN;
                     self.results{end,e}.TN = w*self.results{end,e}.TN;
+                    self.results{end,e}.AN = w*self.results{end,e}.AN;
+                    self.results{end,e}.WN = w*self.results{end,e}.WN;
                     for k=1:kmax
                         self.results{end,e}.QN = self.results{end,e}.QN + self.results{end-k,e}.QN * w;
                         self.results{end,e}.UN = self.results{end,e}.UN + self.results{end-k,e}.UN * w;
                         self.results{end,e}.RN = self.results{end,e}.RN + self.results{end-k,e}.RN * w;
                         self.results{end,e}.TN = self.results{end,e}.TN + self.results{end-k,e}.TN * w;
+                        self.results{end,e}.AN = self.results{end,e}.AN + self.results{end-k,e}.AN * w;
+                        self.results{end,e}.WN = self.results{end,e}.WN + self.results{end-k,e}.WN * w;
                     end
                 end
             end
@@ -147,7 +151,7 @@ classdef SolverLN < LayeredNetworkSolver & EnsembleSolver
                     metric_1 = self.results{end-1,e}.QN;
                     N = sum(self.ensemble{e}.getNumberOfJobs);
                     if N>0
-%                         IterErr = nanmax(abs(metric(:) - metric_1(:)))/N;
+                        %                         IterErr = nanmax(abs(metric(:) - metric_1(:)))/N;
                         try
                             IterErr = nanmax(abs(metric(:) - metric_1(:)))/N;
                         catch
@@ -208,7 +212,7 @@ classdef SolverLN < LayeredNetworkSolver & EnsembleSolver
             % [RESULT, RUNTIME] = ANALYZE(IT, E)
             T0 = tic;
             result = struct();
-            [result.QN, result.UN, result.RN, result.TN] = self.solvers{e}.getAvg();
+            [result.QN, result.UN, result.RN, result.TN, result.AN, result.WN] = self.solvers{e}.getAvg();
             runtime = toc(T0);
         end
         
@@ -234,7 +238,7 @@ classdef SolverLN < LayeredNetworkSolver & EnsembleSolver
             end
             
             for e= self.svcreset
-                %if it==1   
+                %if it==1
                 %    self.svcreset_classes{e}=unique(union(self.svcupdmap(self.idxhash(self.svcupdmap(:,1))==e,3),self.callupdmap(self.idxhash(self.callupdmap(:,1))==e,4)));
                 %    self.ensemble{e}.refreshService(1:self.ensemble{e}.getNumberOfStations, self.svcreset_classes{e}(:)');
                 %end
@@ -268,8 +272,8 @@ classdef SolverLN < LayeredNetworkSolver & EnsembleSolver
         end
         
         
-        function [QN,UN,RN,TN] = getAvg(self,~,~,~,~, useLQNSnaming)
-            % [QN,UN,RN,TN] = GETAVG(SELF,~,~,~,~,USELQNSNAMING)
+        function [QN,UN,RN,TN,AN,WN] = getAvg(self,~,~,~,~, useLQNSnaming)
+            % [QN,UN,RN,TN,AN,WN] = GETAVG(SELF,~,~,~,~,USELQNSNAMING)
             
             if nargin < 5
                 useLQNSnaming = false;
@@ -282,6 +286,8 @@ classdef SolverLN < LayeredNetworkSolver & EnsembleSolver
             TN  = nan(self.lqn.nidx,1);
             PN  = nan(self.lqn.nidx,1);
             SN  = nan(self.lqn.nidx,1);
+            WN  = nan(self.lqn.nidx,1); % residence time
+            AN  = nan(self.lqn.nidx,1); % not available yet
             E = length(self.ensemble);
             for e=1:E
                 clientIdx = self.ensemble{e}.attribute.clientIdx;
@@ -365,7 +371,10 @@ classdef SolverLN < LayeredNetworkSolver & EnsembleSolver
                                     TN(aidx) = TN(aidx) + self.results{end,e}.TN(sourceIdx,c);
                             end
                             SN(aidx) = self.svct(aidx);
+                            if isnan(RN(aidx)), RN(aidx)=0; end
                             RN(aidx) = RN(aidx) + self.results{end,e}.RN(serverIdx,c);
+                            if isnan(WN(aidx)), WN(aidx)=0; end
+                            WN(aidx) = WN(aidx) + self.results{end,e}.WN(serverIdx,c);
                             if isnan(QN(aidx)), QN(aidx)=0; end
                             QN(aidx) = QN(aidx) + self.results{end,e}.QN(serverIdx,c);
                     end

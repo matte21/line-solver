@@ -40,7 +40,7 @@ y = L;
 
 for i=1:M
     if isinf(mu(i,s(i)))
-        lastfinite=max(find(isfinite(mu(i,:))))
+        lastfinite=max(find(isfinite(mu(i,:))));
         s(i) = lastfinite;
     end
     y(i,:) = y(i,:) / mu(i,s(i));

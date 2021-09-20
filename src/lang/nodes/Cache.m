@@ -43,6 +43,9 @@ classdef Cache < StatefulNode
             else
                 self.replacementPolicy = ReplacementStrategy.toId(replPolicy);
             end
+            %probHit = min(sum(itemLevelCap)/nitems,1.0); % initial estimate of hit probability
+            %self.setResultHitProb(probHit);
+            %self.setResultMissProb(1-probHit);
             self.server =  CacheClassSwitcher(classes, self.nLevels, itemLevelCap); % replace Server created by Queue
             self.popularity = {};
             self.setModel(model);
@@ -137,6 +140,7 @@ classdef Cache < StatefulNode
             
             if popularity.isDiscrete
                 
+                self.server.inputJobClasses{jobclass.index} = {jobclass, self.schedPolicy, DropStrategy.WaitingQueue};
                 self.popularity{jobclass.index} = popularity.copy;
                 switch class(popularity)
                     case 'Zipf'

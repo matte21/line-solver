@@ -54,6 +54,9 @@ end
 if ~isfield(options.config,'multiserver')
     options.config.multiserver = 'default';
 end
+if ~isfield(options.config,'highvar')
+    options.config.highvar = 'default';
+end
 
 switch options.method
     case 'default'
@@ -67,10 +70,10 @@ end
 switch options.method
     case {'default','amva.lin','lin','amva.qdlin','qdlin'}
         gamma = zeros(K,M,K); % class-based customer fraction corrections
-        tau = zeros(1,K); % throughput difference
+        tau = zeros(K,K); % throughput difference
     otherwise
         gamma = zeros(K,M); % total customer fraction corrections
-        tau = zeros(1,K); % throughput difference
+        tau = zeros(K,K); % throughput difference
 end
 
 %% main loop
@@ -143,7 +146,9 @@ while (outer_iter < 2 || max(max(abs(Qchain-QchainOuter_1))) > tol) && outer_ite
                             end
                     end
 
-                    tau(s) = XchainOuter_1(s)-Xchain_s_1(s); % save throughput for priority AMVA
+                    for r=nnzclasses
+                        tau(s,r) = Xchain_s_1(r) - XchainOuter_1(r); % save throughput for priority AMVA
+                    end
                 end
         end
     end

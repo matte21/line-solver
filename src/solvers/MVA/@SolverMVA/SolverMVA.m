@@ -24,6 +24,7 @@ classdef SolverMVA < NetworkSolver
         [Pnir,logPnir] = getProbAggr(self, ist);        
         [Pnir,logPn] = getProbSysAggr(self);
         RD = getCdfRespT(self, R);        
+        dh = diff(self, handle, parameter);
     end
     
     methods(Static)
@@ -69,5 +70,6 @@ classdef SolverMVA < NetworkSolver
             options.iter_max = 10^3;
             options.iter_tol = 10^-6;
         end
+                
     end
 end

@@ -72,23 +72,105 @@ elseif sn.nclosedjobs == 0 && length(sn.nodetype)==3 && all(sort(sn.nodetype)' =
     end
     self.model.refreshChains;
 else % queueing network
-    % random initialization
-    for ind = 1:sn.nnodes
-        if sn.nodetype(ind) == NodeType.Cache
-            line_error(mfilename, 'Integrated caching - queueing network models not supported yet.');
+    if any(sn.nodetype == NodeType.Cache)
+        options = Solver.defaultOptions;
+        lambda = zeros(1,self.model.getNumberOfClasses);
+        lambda_1 = zeros(1,self.model.getNumberOfClasses);
+        for it=1:options.iter_max
+            
+            %Porig = model.getLinkedRoutingMatrix;
+            [~,Pnodes] = self.model.getRoutingMatrix;
+            %model.resetNetwork; % Remove artificial class switch nodes
+            staticmodel = Network('staticmodel');
+            for ind=1:self.model.getNumberOfNodes
+                switch class(self.model.nodes{ind})
+                    case 'Cache'
+                        Pcs = zeros(self.model.getNumberOfClasses);
+                        hitClass = full(self.model.nodes{ind}.getHitClass);
+                        missClass = full(self.model.nodes{ind}.getMissClass);
+                        if it == 1
+                            % initial random value of arrival rates lambda to the
+                            % cache
+                            for r=1:length(self.model.nodes{ind}.server.inputJobClasses)
+                                if ~isempty(self.model.nodes{ind}.server.inputJobClasses{r})
+                                    lambda(r) = rand;
+                                end
+                            end
+                        else
+                            lambda_1  = lambda;
+                            lambda = tget(AvgNodeTable,staticcache).ArvR';
+                            %                         if norm(lambda-lambda_1,1) < options.iter_tol
+                            %                             break
+                            %                         end
+                        end
+                        % solution of isolated cache
+                        [actualHitProb, actualMissProb] = getCacheDecompositionResults(lambda, self.model.nodes{ind}, options);
+                        self.model.nodes{ind}.setResultHitProb(actualHitProb);
+                        self.model.nodes{ind}.setResultMissProb(actualMissProb);
+                        
+                        for r=1:length(hitClass)
+                            if hitClass(r)>0
+                                Pcs(r,hitClass(r)) = actualHitProb(r);
+                            end
+                        end
+                        for r=1:length(missClass)
+                            if missClass(r)>0
+                                Pcs(r,missClass(r)) = actualMissProb(r);
+                            end
+                        end
+                        for r=1:size(Pcs,1)
+                            if sum(Pcs(r,:)) == 0
+                                Pcs(r,r) = 1;
+                            end
+                        end
+                        staticcache = ClassSwitch(staticmodel, 'StaticCache', Pcs);
+                    otherwise
+                        staticmodel.addNode(self.model.nodes{ind});
+                end
+            end
+            
+            for r=1:self.model.getNumberOfClasses
+                staticmodel.addJobClass(self.model.classes{r});
+            end
+            
+            staticmodel.linkFromNodeRoutingMatrix(Pnodes);
+            
+            % sanitize disabled classes
+            for ind=1:self.model.getNumberOfNodes
+                switch class(self.model.nodes{ind})
+                    case 'Cache'
+                        for r=1:length(staticcache.output.outputStrategy)
+                            if isempty(staticcache.output.outputStrategy{r})
+                                staticcache.output.outputStrategy{r} = {[],'Disabled'};
+                            end
+                        end
+                        for r=(length(staticcache.output.outputStrategy)+1) : staticmodel.getNumberOfClasses
+                            staticcache.output.outputStrategy{r} = {[],'Disabled'};
+                        end
+                end
+            end
+            %it
+            
+            solver = SolverMVA(staticmodel);
+            AvgNodeTable = solver.getAvgNodeTable([],[],[],[],[],true);
+            
+            if norm(lambda-lambda_1,1) < options.iter_tol
+                sn = getStruct(staticmodel);
+                break
+            end
         end
     end
     self.model.refreshChains();
     switch method
-        case {'aba.upper', 'aba.lower', 'bjb.upper', 'bjb.lower', 'pb.upper', 'pb.lower', 'gb.upper', 'gb.lower'}
+        case {'aba.upper', 'aba.lower', 'bjb.upper', 'bjb.lower', 'pb.upper', 'pb.lower', 'gb.upper', 'gb.lower', 'sb.upper', 'sb.lower'}
             [QN,UN,RN,TN,CN,XN,lG,runtime] = solver_mva_bound_analyzer(sn, options);
             if nargout > 1
                 analyzer = @(sn) solver_mva_bound_analyzer(sn, options);
             end
-        otherwise           
+        otherwise
             if ~isempty(sn.lldscaling) || ~isempty(sn.cdscaling)
                 [QN,UN,RN,TN,CN,XN,lG,runtime] = solver_mvald_analyzer(sn, options);
-            else                
+            else
                 [QN,UN,RN,TN,CN,XN,lG,runtime] = solver_mva_analyzer(sn, options);
             end
             if nargout > 1
@@ -98,4 +180,43 @@ else % queueing network
 end
 self.setAvgResults(QN,UN,RN,TN,CN,XN,runtime,method);
 self.result.Prob.logNormConstAggr = lG;
+end
+
+
+function [hitProb,missProb] = getCacheDecompositionResults(lambda, cache, options)
+isolationmodel = Network('isolatedCache');
+
+n = cache.items.nitems; % number of items
+m = cache.itemLevelCap; % cache capacity
+
+isource = Source(isolationmodel, 'Source');
+icache = Cache(isolationmodel, 'Cache', n, m, cache.replacementPolicy);
+isink = Sink(isolationmodel, 'Sink');
+
+R = length(lambda);
+jobClass = cell(1,R);
+hitClass = full(cache.getHitClass);
+missClass = full(cache.getMissClass);
+for r=1:length(lambda)
+    jobClass{r} = OpenClass(isolationmodel, ['Class',num2str(r)], 0);
+end
+P = isolationmodel.initRoutingMatrix;
+for r=1:length(lambda)
+    if ~(lambda(r)>0.0001)
+        isource.setArrival(jobClass{r}, Disabled());
+        P{jobClass{r}, jobClass{r}}(isource, isink) =  1.0;
+    else
+        isource.setArrival(jobClass{r}, Exp(lambda(r)));
+        icache.setRead(jobClass{r}, cache.popularity{r});
+        icache.setHitClass(jobClass{r}, jobClass{hitClass(r)});
+        icache.setMissClass(jobClass{r}, jobClass{missClass(r)});
+        P{jobClass{r}, jobClass{r}}(isource, icache) =  1.0;
+        P{jobClass{hitClass(r)}, jobClass{hitClass(r)}}(icache, isink) =  1.0;
+        P{jobClass{missClass(r)}, jobClass{missClass(r)}}(icache, isink) =  1.0;
+    end
+end
+isolationmodel.link(P);
+SolverMVA(isolationmodel, options).getAvgNodeTable;
+hitProb = full(icache.getResultHitProb);
+missProb = full(icache.getResultMissProb);
 end
