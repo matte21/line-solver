@@ -8,7 +8,7 @@ Tstart = tic;
 
 sn.space = sn.state; % SSA progressively grows this cell array into the simulated state space
 switch options.method
-    case {'default','serial'}
+    case {'default','serial','ssa'}
         [XN,UN,QN,RN,TN,CN,tranSysState,tranSync,sn] = solver_ssa_analyzer_serial(sn, options, false);
     case {'serial.hash','serial.hashed','hashed'}
         [XN,UN,QN,RN,TN,CN,tranSysState,tranSync,sn] = solver_ssa_analyzer_serial(sn, options, true);
