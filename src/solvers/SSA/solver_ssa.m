@@ -9,6 +9,9 @@ function [pi,SSq,arvRates,depRates,tranSysState,tranSync,sn]=solver_ssa(sn,optio
 if ~isfield(options,'seed')
     options.seed = 23000;
 end
+if ~exist('labindex','builtin') || ~exist('labindex','var')
+    labindex = 1;
+end
 Solver.resetRandomGeneratorSeed(options.seed+labindex-1);
 
 %% generate local state spaces

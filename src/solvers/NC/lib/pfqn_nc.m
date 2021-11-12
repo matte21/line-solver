@@ -119,7 +119,7 @@ switch options.method
         end
     case {'adaptive','default'}
         if M>1
-            if R <= 3 && sum(N)<50
+            if R==1 || (R <= 3 && sum(N)<50)
                 [~,~,~,~,lG] = pfqn_mva(L,N,sum(Z,1));
             else
                 if M>R

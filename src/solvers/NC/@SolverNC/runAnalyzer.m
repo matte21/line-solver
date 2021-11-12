@@ -22,8 +22,8 @@ if sn.nclosedjobs == 0 && length(sn.nodetype)==3 && all(sort(sn.nodetype)' == so
         if sn.nodetype(ind) == NodeType.Cache
             prob = self.model.nodes{ind}.server.hitClass;
             prob(prob>0) = 0.5;
-            self.model.nodes{sn.statefulToNode(isf)}.setResultHitProb(prob);
-            self.model.nodes{sn.statefulToNode(isf)}.setResultMissProb(1-prob);
+            self.model.nodes{ind}.setResultHitProb(prob);
+            self.model.nodes{ind}.setResultMissProb(1-prob);
         end
     end
     self.model.refreshChains();
@@ -47,8 +47,8 @@ if sn.nclosedjobs == 0 && length(sn.nodetype)==3 && all(sort(sn.nodetype)' == so
                     hitprob(k) = XN(h) / nansum(XN(inchain));
                 end
             end
-            self.model.nodes{sn.statefulToNode(isf)}.setResultHitProb(hitprob);
-            self.model.nodes{sn.statefulToNode(isf)}.setResultMissProb(1-hitprob);
+            self.model.nodes{ind}.setResultHitProb(hitprob);
+            self.model.nodes{ind}.setResultMissProb(1-hitprob);
         end
     end
     self.model.refreshChains;
