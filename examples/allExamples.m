@@ -65,8 +65,12 @@ clear; example_openModel_5; fprintf(1,'Pausing...'); pause(3.0);
 fprintf(1,'\n\nExample: <strong>example_openModel_5</strong>\n');
 fprintf(1,' This model examplifies a large multiclass open model.\n');
 clear; example_openModel_6; fprintf(1,'Pausing...'); pause(3.0);
+
+%%
 fprintf(1,' This model examplifies how to specify priorities.\n');
-clear; example_openModel_7; fprintf(1,'Pausing...'); pause(3.0);
+clear; example_prio_1; fprintf(1,'Pausing...'); pause(3.0);
+fprintf(1,' Another model that examplifies how to specify priorities.\n');
+clear; example_prio_2; fprintf(1,'Pausing...'); pause(3.0);
 
 %%
 fprintf(1,'\n<strong>RUNNING: example_mixedModel_*</strong>');
