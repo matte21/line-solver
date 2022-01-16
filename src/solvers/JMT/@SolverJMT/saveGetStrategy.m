@@ -1,7 +1,7 @@
 function [simDoc, section] = saveGetStrategy(self, simDoc, section)
 % [SIMDOC, SECTION] = SAVEGETSTRATEGY(SIMDOC, SECTION)
 
-% Copyright (c) 2012-2021, Imperial College London
+% Copyright (c) 2012-2022, Imperial College London
 % All rights reserved.
 
 % the get strategy is always fcfs

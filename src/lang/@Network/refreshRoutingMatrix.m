@@ -1,7 +1,7 @@
 function [rt, rtfun, rtnodes] = refreshRoutingMatrix(self, rates)
 % [RT, RTFUN, CSMASK, RTNODES] = REFRESHROUTINGMATRIX(RATES)
 %
-% Copyright (c) 2012-2021, Imperial College London
+% Copyright (c) 2012-2022, Imperial College London
 % All rights reserved.
 
 if nargin == 1

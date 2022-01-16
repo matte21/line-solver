@@ -1,7 +1,7 @@
 function QN2SCRIPT(model, modelName, fid)
 % QN2SCRIPT(MODEL, MODELNAME, FID)
 
-% Copyright (c) 2012-2021, Imperial College London
+% Copyright (c) 2012-2022, Imperial College London
 % All rights reserved.
 if nargin<2%~exist('modelName','var')
     modelName='myModel';
@@ -112,13 +112,23 @@ for i=1:sn.nstations
                     switch sn.schedid(i)
                         case SchedStrategy.ID_EXT
                             if SCVik == 1
-                                fprintf(fid,'node{%d}.setArrival(jobclass{%d}, Exp.fitMean(%f)); %% (%s,%s)\n',sn.stationToNode(i),k,map_mean(PH{i}{k}),sn.nodenames{sn.stationToNode(i)},sn.classnames{k});
+                                meanik = map_mean(PH{i}{k});
+                                if meanik < Distrib.Tol
+                                    fprintf(fid,'node{%d}.setArrival(jobclass{%d}, Immediate()); %% (%s,%s)\n',sn.stationToNode(i),k,sn.nodenames{sn.stationToNode(i)},sn.classnames{k}); 
+                                else
+                                    fprintf(fid,'node{%d}.setArrival(jobclass{%d}, Exp.fitMean(%f)); %% (%s,%s)\n',sn.stationToNode(i),k,map_mean(PH{i}{k}),sn.nodenames{sn.stationToNode(i)},sn.classnames{k});
+                                end
                             else
                                 fprintf(fid,'node{%d}.setArrival(jobclass{%d}, Cox2.fitMeanAndSCV(%f,%f)); %% (%s,%s)\n',sn.stationToNode(i),k,map_mean(PH{i}{k}),SCVik,sn.nodenames{sn.stationToNode(i)},sn.classnames{k});
                             end
                         otherwise
                             if SCVik == 1
-                                fprintf(fid,'node{%d}.setService(jobclass{%d}, Exp.fitMean(%f)); %% (%s,%s)\n',sn.stationToNode(i),k,map_mean(PH{i}{k}),sn.nodenames{sn.stationToNode(i)},sn.classnames{k});
+                                meanik = map_mean(PH{i}{k});
+                                if meanik < Distrib.Tol
+                                    fprintf(fid,'node{%d}.setService(jobclass{%d}, Immediate()); %% (%s,%s)\n',sn.stationToNode(i),k,sn.nodenames{sn.stationToNode(i)},sn.classnames{k}); 
+                                else
+                                    fprintf(fid,'node{%d}.setService(jobclass{%d}, Exp.fitMean(%f)); %% (%s,%s)\n',sn.stationToNode(i),k,map_mean(PH{i}{k}),sn.nodenames{sn.stationToNode(i)},sn.classnames{k});
+                                end
                             else
                                 fprintf(fid,'node{%d}.setService(jobclass{%d}, Cox2.fitMeanAndSCV(%f,%f)); %% (%s,%s)\n',sn.stationToNode(i),k,map_mean(PH{i}{k}),SCVik,sn.nodenames{sn.stationToNode(i)},sn.classnames{k});
                             end

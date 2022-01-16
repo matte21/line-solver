@@ -1,7 +1,7 @@
 classdef SolverAuto < NetworkSolver
     %A solver that selects the solution method based on the model characteristics.
     
-    %Copyright (c) 2012-2021, Imperial College London
+    %Copyright (c) 2012-2022, Imperial College London
     %All rights reserved.
     
     properties

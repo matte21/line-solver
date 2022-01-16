@@ -1,14 +1,14 @@
 function [capacity, classcap, dropid] = refreshCapacity(self)
 % [CAPACITY, CLASSCAP, DROPRULE] = REFRESHCAPACITY()
 
-% Copyright (c) 2012-2021, Imperial College London
+% Copyright (c) 2012-2022, Imperial College London
 % All rights reserved.
 M = getNumberOfStations(self);
 K = getNumberOfClasses(self);
 C = self.sn.nchains;
 % set zero buffers for classes that are disabled
 classcap = Inf*ones(M,K);
-chaincap = Inf*ones(M,C);
+chaincap = Inf*ones(M,K);
 capacity = zeros(M,1);
 dropid = -ones(M,C); %DropStrategy.WaitingBuffer
 sn = self.sn;
@@ -19,15 +19,15 @@ for c = 1:C
         chainCap = sum(sn.njobs(classInChain));
         for i=1:M
             station = self.getStationByIndex(i);
-            if isnan(sn.rates(i,r))
+            if isa(station, 'Place')
+                classcap(i,r) = min(station.classCap(r), station.cap);                
+                dropid(i,r) = station.dropid; %DropStrategy.toId(station.input.inputJobClasses{r}{3});
+            elseif isnan(sn.rates(i,r))
                 classcap(i,r) = 0;
                 chaincap(i,r) = 0;
-            elseif isa(station, 'Place')
-                classcap(i,r) = min(station.classCap(r), station.cap);
-                dropid(i,r) = DropStrategy.toId(station.input.inputJobClasses{r}{3});
             else
-                classcap(i,r) = chaincap(i,c);
                 chaincap(i,c) = chainCap;
+                classcap(i,r) = chainCap;
                 if station.classCap(r) >= 0
                     classcap(i,r) = min(classcap(i,r), station.classCap(r));
                 end

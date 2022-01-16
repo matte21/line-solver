@@ -4,7 +4,7 @@ classdef activity < BPMN.flowNode
 % Properties:
 % property      list of modeler-defined properties (cell of string)
 %
-% Copyright (c) 2012-2021, Imperial College London 
+% Copyright (c) 2012-2022, Imperial College London 
 % All rights reserved.
 
 properties

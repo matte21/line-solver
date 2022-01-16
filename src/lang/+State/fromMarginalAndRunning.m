@@ -1,7 +1,7 @@
 function space = fromMarginalAndRunning(sn, ind, n, s, options)
 % SPACE = FROMMARGINALANDRUNNING(QN, IND, N, S, OPTIONS)
 
-% Copyright (c) 2012-2021, Imperial College London
+% Copyright (c) 2012-2022, Imperial College London
 % All rights reserved.
 
 if nargin<5 %~exist('options','var')
@@ -33,9 +33,9 @@ if any(n>sn.classcap(ist,:))
     exceeded = n>sn.classcap(ist,:);
     for r=find(exceeded)
         if ~isempty(sn.proc) && ~isempty(sn.proc{ist}{r}) && any(any(isnan(sn.proc{ist}{r}{1})))
-            line_warning(mfilename,'State vector at station %d (n=%s) exceeds the class capacity (classcap=%s). Some service classes are disabled.\n',ist,mat2str(n(ist,:)),mat2str(sn.classcap(ist,:)));
+            line_warning(mfilename,sprintf('State vector at station %d (n=%s) exceeds the class capacity (classcap=%s). Some service classes are disabled.',ist,mat2str(n),mat2str(sn.classcap(ist,:))));
         else
-            line_warning(mfilename,'State vector at station %d (n=%s) exceeds the class capacity (classcap=%s).\n',ist,mat2str(n(ist,:)),mat2str(sn.classcap(ist,:)));
+            line_warning(mfilename,sprintf('State vector at station %d (n=%s) exceeds the class capacity (classcap=%s).',ist,mat2str(n),mat2str(sn.classcap(ist,:))));
         end
     end
     return

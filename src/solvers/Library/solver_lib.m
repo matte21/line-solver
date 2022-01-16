@@ -1,7 +1,7 @@
 function [QN,UN,RN,TN,CN,XN] = solver_lib(sn, options)
 % [Q,U,R,T,C,X] = SOLVER_LIB(QN, OPTIONS)
 
-% Copyright (c) 2012-2021, Imperial College London
+% Copyright (c) 2012-2022, Imperial College London
 % All rights reserved.
 
 %% generate local state spaces

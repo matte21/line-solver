@@ -1,7 +1,7 @@
 function space = fromMarginalBounds(sn, ind, lb, ub, cap, options)
 % SPACE = FROMMARGINALBOUNDS(QN, IND, LB, UB, CAP, OPTIONS)
 
-% Copyright (c) 2012-2021, Imperial College London
+% Copyright (c) 2012-2022, Imperial College London
 % All rights reserved.
 
 if nargin<6 %~exist('options','var')
@@ -23,6 +23,9 @@ if isVectorLB~=isVectorUB, line_error(mfilename,'Bounds must either be both vect
 
 if isVectorUB && isVectorLB
     nmax = State.fromMarginal(sn, ind, ub, options);
+    if isempty(nmax)        
+         nmax = State.fromMarginal(sn, ind, ub, options);
+    end
     n = pprodcon(lb,ub);
     while n ~= -1
         state = State.fromMarginal(sn, ind, n, options);

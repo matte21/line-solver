@@ -1,7 +1,7 @@
 classdef PMIF
     % Class abstracting a PMIF input file
     %
-    % Copyright (c) 2012-2021, Imperial College London
+    % Copyright (c) 2012-2022, Imperial College London
     % All rights reserved.
     
     properties

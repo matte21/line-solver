@@ -1,10 +1,9 @@
 function bool = snHasMultiClassFCFS(sn)
 % BOOL = SNHASMULTICLASSFCFS()
 
-i = find(sn.schedid == SchedStrategy.ID_FCFS);
-if i > 0
-    bool = range([sn.rates(i,:)])>0;
-else
-    bool = false;
+iset = find(sn.schedid == SchedStrategy.ID_FCFS);
+bool = false;
+for i=iset(:)'
+    bool = bool | sum(sn.rates(i,:)>0)>1;
 end
 end

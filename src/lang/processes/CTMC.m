@@ -1,7 +1,7 @@
 classdef CTMC < Process
     % A class for a continuous time Markov chain
     %
-    % Copyright (c) 2012-2021, Imperial College London
+    % Copyright (c) 2012-2022, Imperial College London
     % All rights reserved.
     
     properties
@@ -64,19 +64,19 @@ classdef CTMC < Process
                 for t=1:length(I)
                     edgeLbl{end+1,1} = nodeLbl{I(t)};
                     edgeLbl{end,2} = nodeLbl{J(t)};
-                    edgeLbl{end,3} = sprintf('%.4f',(q(t)));
+                    edgeLbl{end,3} = strrep(strrep(sprintf('%.4f',q(t)),'000',''),'00','');
                 end
             else
                 for t=1:length(I)
                     edgeLbl{end+1,1} = num2str(I(t));
                     edgeLbl{end,2} = num2str(J(t));
-                    edgeLbl{end,3} = sprintf('%.4f',(q(t)));
+                    edgeLbl{end,3} = strrep(strrep(sprintf('%.4f',q(t)),'000',''),'00','');
                 end
             end
             h = plot(G,'Layout','force3','NodeLabel',nodeLbl,'EdgeLabel',edgeLbl(:,3));
         end
         
-        function plot(self)
+        function plot(self)            
             G = digraph(self.infGen-diag(diag(self.infGen)));
             nodeLbl = {};
             if ~isempty(self.stateSpace)
@@ -89,19 +89,23 @@ classdef CTMC < Process
                 end
             end
             Q0 = self.infGen - diag(diag(self.infGen));
-            [I,J,q]=find(Q0);
+            [I,J,q]=find(Q0);            
+            [~,sortIdx] = sortrows([I,J]);
+            I=I(sortIdx);
+            J=J(sortIdx);
+            q=q(sortIdx);
             edgeLbl = {};
             if ~isempty(self.stateSpace)
                 for t=1:length(I)
                     edgeLbl{end+1,1} = nodeLbl{I(t)};
                     edgeLbl{end,2} = nodeLbl{J(t)};
-                    edgeLbl{end,3} = sprintf('%.4f',(q(t)));
+                    edgeLbl{end,3} = strrep(strrep(sprintf('%.4f',q(t)),'000',''),'00','');
                 end
             else
                 for t=1:length(I)
                     edgeLbl{end+1,1} = num2str(I(t));
                     edgeLbl{end,2} = num2str(J(t));
-                    edgeLbl{end,3} = sprintf('%.4f',(q(t)));
+                    edgeLbl{end,3} = strrep(strrep(sprintf('%.4f',q(t)),'000',''),'00','');
                 end
             end
 %             if length(nodeLbl) <= 6

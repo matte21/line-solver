@@ -3,7 +3,7 @@ function [QNclass,UNclass,RNclass,TNclass,ANclass,WNclass] = getAvg(self,Q,U,R,T
 
 % Return average station metrics at steady-state
 %
-% Copyright (c) 2012-2021, Imperial College London
+% Copyright (c) 2012-2022, Imperial College London
 % All rights reserved.
 
 if nargin == 1 % no parameter
@@ -61,8 +61,8 @@ QNclass = [];
 UNclass = [];
 RNclass = [];
 TNclass = [];
-ANclass=[];
-WNclass=[];
+ANclass = [];
+WNclass = [];
 
 if ~isempty(Q)
     QNclass = zeros(M,K);
@@ -136,18 +136,18 @@ RNclass(RNclass < Distrib.Zero)=0;
 ANclass(ANclass < Distrib.Zero)=0;
 TNclass(TNclass < Distrib.Zero)=0;
 
-
 WNclass = 0*RNclass;
 for i=1:M
     for k=1:K
         if ~isempty(RNclass) && RNclass(i,k)>0
             c = find(sn.chains(:,k));
+            inchain = find(sn.chains(c,:));
             if RNclass(i,k)<Distrib.Zero
                 WNclass(i,k) = RNclass(i,k);
             else
-                if any(sn.refclass(sn.chains(c,:)))
+                if any(intersect(inchain,find(sn.refclass)))
                     % if there is a reference class, use this
-                    WNclass(i,k) = RNclass(i,k)*V(i,k)/sum(V(sn.refstat(k),sn.refclass(sn.chains(c,:))));
+                    WNclass(i,k) = RNclass(i,k)*V(i,k)/sum(V(sn.refstat(k),sn.refclass(intersect(inchain,find(sn.refclass)))));
                 else                    
                     WNclass(i,k) = RNclass(i,k)*V(i,k)/sum(V(sn.refstat(k),sn.chains(c,:)));
                 end

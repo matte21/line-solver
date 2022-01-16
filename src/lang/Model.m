@@ -1,7 +1,7 @@
 classdef Model < Copyable
     % Abstract parent class for all models
     %
-    % Copyright (c) 2012-2021, Imperial College London
+    % Copyright (c) 2012-2022, Imperial College London
     % All rights reserved.
     
     properties (Hidden)
@@ -18,7 +18,7 @@ classdef Model < Copyable
         function self = Model(name)
             % SELF = MODEL(NAME)
             %[~,lineVersion] = system('git describe'); 
-            lineVersion = '2.0.16';
+            lineVersion = '2.0.17';
             %persistent lineSplashScreenShown
             %if isempty(lineSplashScreenShown) || lineSplashScreenShown
             %    lineSplashScreenShown = true;

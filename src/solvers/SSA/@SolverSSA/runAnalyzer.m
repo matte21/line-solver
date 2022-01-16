@@ -23,10 +23,11 @@ switch options.method
         runtime = toc(T0);
         self.setAvgResults(Q,U,R,T,C,X,runtime);
     otherwise
-        sn = getStruct(self);        
+        sn = getStruct(self);
+
         % TODO: add priors on initial state
         sn.state = sn.state; % not used internally by SSA
-        
+
         [Q,U,R,T,C,X,~, tranSysState, tranSync, sn] = solver_ssa_analyzer(sn, options);
         for isf=1:sn.nstateful
             ind = sn.statefulToNode(isf);
@@ -41,5 +42,4 @@ switch options.method
         self.setAvgResults(Q,U,R,T,C,X,runtime);
         self.result.space = sn.space;
 end
-
 end

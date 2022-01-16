@@ -1,7 +1,7 @@
 classdef Network < Model
     % An extended queueing network model.
     %
-    % Copyright (c) 2012-2021, Imperial College London
+    % Copyright (c) 2012-2022, Imperial College London
     % All rights reserved.
     
     properties (Access=private)
@@ -180,6 +180,7 @@ classdef Network < Model
         ind = getNodeIndex(self, name)
         lldScaling = getLimitedLoadDependence(self)
 		lcdScaling = getLimitedClassDependence(self)
+        simodel = getStateIndependentModel(self);
         
         function stationIndex = getStationIndex(self, name)
             % STATIONINDEX = GETSTATIONINDEX(NAME)
@@ -596,6 +597,12 @@ classdef Network < Model
             bool = snHasMultiClassFCFS(self.getStruct);
         end
         
+        function bool = hasMultiClassHeterFCFS(self)
+            % BOOL = HASMULTICLASSFCFS()
+            
+            bool = snHasMultiClassFCFS(self.getStruct);
+        end
+        
         function bool = hasMultiServer(self)
             % BOOL = HASMULTISERVER()
             
@@ -658,7 +665,7 @@ classdef Network < Model
             if featUsed.SchedStrategy_LEPT, bool = false; end
             if featUsed.SchedStrategy_HOL, bool = false; end
             % modelling features
-            if self.hasMultiClassFCFS, bool = false; end
+            if self.hasMultiClassHeterFCFS, bool = false; end
         end
         
         function plot(self)     

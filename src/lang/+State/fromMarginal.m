@@ -1,7 +1,7 @@
 function space = fromMarginal(sn, ind, n, options)
 % SPACE = FROMMARGINAL(QN, IND, N, OPTIONS)
 
-% Copyright (c) 2012-2021, Imperial College London
+% Copyright (c) 2012-2022, Imperial College London
 % All rights reserved.
 
 if nargin<4 %~exist('options','var')
@@ -23,19 +23,19 @@ isf = sn.nodeToStateful(ind);
 
 if sn.isstateful(ind) && ~sn.isstation(ind)
     for r=1:R
-        init = State.spaceClosedSingle(1,n(r));
-        state = State.decorate(state,init);
+        init_r = State.spaceClosedSingle(1,n(r));
+        state = State.decorate(state,init_r);
     end
     space = State.decorate(space,state);
     return
 end
 
-K = zeros(1,R);
+phases = zeros(1,R);
 for r=1:R
-    if isempty(sn.proc{ist}{r})
-        K(r) = 0;
+    if isempty(sn.proc{ist}{r}) 
+        phases(r) = 0;
     else
-        K(r) = length(sn.proc{ist}{r}{1});
+        phases(r) = length(sn.proc{ist}{r}{1});
     end
 end
 if (sn.schedid(ist) ~= SchedStrategy.ID_EXT) && any(n>sn.classcap(ist,:))
@@ -49,19 +49,19 @@ switch sn.nodetype(ind)
             case SchedStrategy.ID_EXT
                 for r=1:R
                     if ~isempty(sn.proc) && ~isempty(sn.proc{ist}{r}) && any(any(isnan(sn.proc{ist}{r}{1}))) % disabled
-                        init = 0*ones(1,K(r));
+                        init_r = 0*ones(1,phases(r));
                     else
-                        init = State.spaceClosedSingle(K(r),1);
+                        init_r = State.spaceClosedSingle(phases(r),1);
                     end
-                    state = State.decorate(state,init);
+                    state = State.decorate(state,init_r);
                 end
-                space = State.decorate(space,state);
-                space = [Inf*ones(size(space,1),1),space];
+                space = State.decorate(space,state); %server part
+                space = [Inf*ones(size(space,1),1),space]; % attach infinite buffer before servers
             case {SchedStrategy.ID_INF, SchedStrategy.ID_PS, SchedStrategy.ID_DPS, SchedStrategy.ID_GPS}
                 % in these policies we only track the jobs in the servers
                 for r=1:R
-                    init = State.spaceClosedSingle(K(r),n(r));
-                    state = State.decorate(state,init);
+                    init_r = State.spaceClosedSingle(phases(r),n(r));
+                    state = State.decorate(state,init_r);
                 end
                 space = State.decorate(space,state);
             case {SchedStrategy.ID_SIRO, SchedStrategy.ID_LEPT, SchedStrategy.ID_SEPT}
@@ -70,8 +70,8 @@ switch sn.nodetype(ind)
                 % build list of job classes in the node, with repetition
                 if sum(n) <= S(ist)
                     for r=1:R
-                        init = State.spaceClosedSingle(K(r),n(r));
-                        state = State.decorate(state,init);
+                        init_r = State.spaceClosedSingle(phases(r),n(r));
+                        state = State.decorate(state,init_r);
                     end
                     space = State.decorate(space,[zeros(size(state,1),R),state]);
                 else
@@ -81,8 +81,8 @@ switch sn.nodetype(ind)
                         % determine number of classes r jobs running in phase j
                         kstate=[];
                         for r=1:R
-                            init = State.spaceClosedSingle(K(r),si(k,r));
-                            kstate = State.decorate(kstate,init);
+                            init_r = State.spaceClosedSingle(phases(r),si(k,r));
+                            kstate = State.decorate(kstate,init_r);
                         end
                         state = [repmat(mi_buf(k,:),size(kstate,1),1), kstate];
                         space = [space; state];
@@ -98,7 +98,7 @@ switch sn.nodetype(ind)
                 end
                 
                 if sum(n) == 0
-                    space = zeros(1,1+sum(K)); % unclear if this should 1+sum(K), was sum(K) but State.fromMarginalAndStarted uses 1+sum(K) so was changed here as well
+                    space = zeros(1,1+sum(phases)); % unclear if this should 1+sum(K), was sum(K) but State.fromMarginalAndStarted uses 1+sum(K) so was changed here as well
                     return
                 end
                 % in these policies we track an ordered buffer and
@@ -148,13 +148,13 @@ switch sn.nodetype(ind)
                         % state
                         kstate=[];
                         for r=1:R
-                            kstate = State.decorate(kstate,State.spaceClosedSingle(K(r),si(k,r)));
+                            kstate = State.decorate(kstate,State.spaceClosedSingle(phases(r),si(k,r)));
                         end
                         % generate job phases for all buffer states
                         bkstate = [];
                         for j=mi_buf(k,:) % for each job in the buffer
                             if j>0
-                                bkstate = State.decorate(bkstate,[1:K(j)]');
+                                bkstate = State.decorate(bkstate,[1:phases(j)]');
                             else 
                                 bkstate = 0;
                             end
@@ -179,7 +179,7 @@ switch sn.nodetype(ind)
                 end
                 
                 if sum(n) == 0
-                    space = zeros(1,1+sum(K)); % unclear if this should 1+sum(K), was sum(K) but State.fromMarginalAndStarted uses 1+sum(K) so was changed here as well
+                    space = zeros(1,1+sum(phases)); % unclear if this should 1+sum(K), was sum(K) but State.fromMarginalAndStarted uses 1+sum(K) so was changed here as well
                     return
                 end
                 % in these policies we track an ordered buffer and
@@ -222,7 +222,7 @@ switch sn.nodetype(ind)
                         % state
                         kstate=[];
                         for r=1:R
-                            kstate = State.decorate(kstate,State.spaceClosedSingle(K(r),si(k,r)));
+                            kstate = State.decorate(kstate,State.spaceClosedSingle(phases(r),si(k,r)));
                         end
                         state = [state; repmat(mi_buf(k,:),size(kstate,1),1), kstate];
                     end
@@ -242,8 +242,8 @@ switch sn.nodetype(ind)
             case SchedStrategy.ID_INF
                 % in this policies we only track the jobs in the servers
                 for r=1:R
-                    init = State.spaceClosedSingle(K(r),n(r));
-                    state = State.decorate(state,init);
+                    init_r = State.spaceClosedSingle(phases(r),n(r));
+                    state = State.decorate(state,init_r);
                 end
                 space = State.decorate(space,state);
         end

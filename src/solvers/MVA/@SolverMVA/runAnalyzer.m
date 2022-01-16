@@ -93,18 +93,14 @@ else % queueing network
                             % cache
                             for r=1:length(self.model.nodes{ind}.server.inputJobClasses)
                                 if ~isempty(self.model.nodes{ind}.server.inputJobClasses{r})
-                                    lambda(r) = rand;
+                                    lambda_1(r) = rand;
                                 end
                             end
-                        else
-                            lambda_1  = lambda;
-                            lambda = tget(AvgNodeTable,staticcache).ArvR';
-                            %                         if norm(lambda-lambda_1,1) < options.iter_tol
-                            %                             break
-                            %                         end
-                        end
+                            lambda(r)=lambda_1(r);
+                       end
+
                         % solution of isolated cache
-                        [actualHitProb, actualMissProb] = getCacheDecompositionResults(lambda, self.model.nodes{ind}, options);
+                        [actualHitProb, actualMissProb] = getCacheDecompositionResults(lambda_1, self.model.nodes{ind}, options);
                         self.model.nodes{ind}.setResultHitProb(actualHitProb);
                         self.model.nodes{ind}.setResultMissProb(actualMissProb);
                         
@@ -151,9 +147,11 @@ else % queueing network
             end
             %it
             
-            solver = SolverMVA(staticmodel);
+            solver = SolverMVA(staticmodel,options);
             AvgNodeTable = solver.getAvgNodeTable([],[],[],[],[],true);
-            
+            lambda_1  = lambda;
+            lambda = tget(AvgNodeTable,staticcache).ArvR';
+            %staticmodel_1 = staticmodel;
             if norm(lambda-lambda_1,1) < options.iter_tol
                 sn = getStruct(staticmodel);
                 break

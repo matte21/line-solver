@@ -41,8 +41,8 @@ for r=1:size(svcupdmap,1)
 end
 
 % reassign arvrates
-% for r=1:size(arvupdmap,1)
-for r=1:0
+ for r=1:size(arvupdmap,1)
+%for r=1:0
     if mod(it, 0)
         ri = size(arvupdmap,1) - r + 1;
     else

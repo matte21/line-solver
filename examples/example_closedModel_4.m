@@ -3,7 +3,7 @@ model = Network('model');
 
 node{1} = Delay(model, 'Delay');
 %node{1} = Queue(model, 'Queue0', SchedStrategy.PS);
-node{2} = Queue(model, 'Queue1', SchedStrategy.PS);
+node{2} = Queue(model, 'Queue1', SchedStrategy.FCFS);
 node{3} = Queue(model, 'Queue2', SchedStrategy.FCFS);
 node{2}.setNumServers(3);
 node{3}.setNumServers(3);
@@ -20,12 +20,12 @@ node{1}.setService(jobclass{3}, Exp(10));
 node{1}.setService(jobclass{4}, Exp(1));
 
 node{2}.setService(jobclass{1}, Exp(1));
-node{2}.setService(jobclass{2}, Exp(1));
+node{2}.setService(jobclass{2}, Erlang(1,2));
 node{2}.setService(jobclass{3}, Exp(10));
 node{2}.setService(jobclass{4}, Exp(1));
 
-node{3}.setService(jobclass{1}, Exp(1));
-node{3}.setService(jobclass{2}, Exp(1));
+node{3}.setService(jobclass{1}, Disabled());
+node{3}.setService(jobclass{2}, Disabled());
 node{3}.setService(jobclass{3}, Erlang(1,2));
 node{3}.setService(jobclass{4}, Exp(1));
 
@@ -69,6 +69,6 @@ myP{4,2} = zeros(3);
 
 model.link(myP);
 %
-spaceRunning = State.fromMarginalAndRunning(model,node{3},[2,1,1,1],[2,1,0,0])
-spaceStarted = State.fromMarginalAndStarted(model,node{3},[2,1,1,1],[2,1,0,0])
-space = State.fromMarginal(model,node{3},[2,1,1,1],[2,1,0,0])
+spaceRunning = State.fromMarginalAndRunning(model,node{2},[2,1,1,1],[2,1,0,0])
+spaceStarted = State.fromMarginalAndStarted(model,node{2},[2,1,1,1],[2,1,0,0])
+space = State.fromMarginal(model,node{2},[2,1,1,1],[2,1,0,0])

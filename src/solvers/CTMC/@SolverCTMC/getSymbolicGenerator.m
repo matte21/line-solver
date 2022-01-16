@@ -5,6 +5,9 @@ end
 if nargin<3
     primeNumbers = false;
 end
+if ~exist('sym')
+    line_error(mfilename,'This method requires MATLAB''s Symbolic Toolbox.');
+end
 if ~isdeployed
     [~, F] = getGenerator(self);
     [ stateSpace, nodeStateSpace] = getStateSpace(self);

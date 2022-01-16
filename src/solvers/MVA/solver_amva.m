@@ -1,7 +1,7 @@
 function [Q,U,R,T,C,X,lG] = solver_amva(sn,options)
 % [Q,U,R,T,C,X,lG] = SOLVER_AMVA(SN, OPTIONS)
 %
-% Copyright (c) 2012-2021, Imperial College London
+% Copyright (c) 2012-2022, Imperial College London
 % All rights reserved.
 if nargin < 2
     options = SolverMVA.defaultOptions;
@@ -63,7 +63,8 @@ switch options.method
         if Nt<=2
             options.method = 'bs';
         else
-            options.method = 'lin';
+            %options.method = 'aql';
+            options.method = 'lin'; % seems way worse than aql in test_LQN_8.xml
         end
 end
 
@@ -129,25 +130,25 @@ while (outer_iter < 2 || max(max(abs(Qchain-QchainOuter_1))) > tol) && outer_ite
                                 end
                             end
                         end
-                    end
-                    
-                    switch options.method
-                        case {'default', 'lin'}
-                            for k=1:M
-                                for r=nnzclasses
-                                    if ~isinf(Nchain(r)) && Nchain_s(r)>0
-                                        gamma(s,k,r) = Qchain_s_1(k,r)./Nchain_s(r) - QchainOuter_1(k,r)./Nchain(r);
+                        
+                        switch options.method
+                            case {'default', 'lin'}
+                                for k=1:M
+                                    for r=nnzclasses
+                                        if ~isinf(Nchain(r)) && Nchain_s(r)>0
+                                            gamma(s,k,r) = Qchain_s_1(k,r)./Nchain_s(r) - QchainOuter_1(k,r)./Nchain(r);
+                                        end
                                     end
                                 end
-                            end
-                        otherwise
-                            for k=1:M
-                                gamma(s,k) = sum(Qchain_s_1(k,:),2)/(Nt-1) - sum(QchainOuter_1(k,:),2)/Nt;
-                            end
-                    end
-
-                    for r=nnzclasses
-                        tau(s,r) = Xchain_s_1(r) - XchainOuter_1(r); % save throughput for priority AMVA
+                            otherwise
+                                for k=1:M
+                                    gamma(s,k) = sum(Qchain_s_1(k,:),2)/(Nt-1) - sum(QchainOuter_1(k,:),2)/Nt;
+                                end
+                        end
+                        
+                        for r=nnzclasses
+                            tau(s,r) = Xchain_s_1(r) - XchainOuter_1(r); % save throughput for priority AMVA
+                        end
                     end
                 end
         end

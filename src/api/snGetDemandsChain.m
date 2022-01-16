@@ -9,21 +9,35 @@ PH = sn.proc;
 SCV = sn.scv;
 SCV(isnan(SCV))=1;
 % determine service times
-ST = 1./sn.rates; 
+ST = 1./sn.rates;
 ST(isnan(ST))=0;
 
 alpha = zeros(sn.nstations,sn.nclasses);
 Vchain = zeros(sn.nstations,sn.nchains);
 for c=1:sn.nchains
     inchain = find(sn.chains(c,:));
-    for i=1:sn.nstations
-        Vchain(i,c) = sum(sn.visits{c}(i,inchain)) / sum(sn.visits{c}(sn.refstat(inchain(1)),inchain));
-        for k=inchain
-            alpha(i,k) = alpha(i,k) + sn.visits{c}(i,k) / sum(sn.visits{c}(i,inchain));
+    if any(intersect(inchain,find(sn.refclass))) % if the model has a ref class
+        for i=1:sn.nstations
+            Vchain(i,c) = sum(sn.visits{c}(i,inchain)) / sum(sn.visits{c}(sn.refstat(inchain(1)),intersect(inchain,find(sn.refclass))));
+            for k=inchain
+                alpha(i,k) = alpha(i,k) + sn.visits{c}(i,k) / sum(sn.visits{c}(i,inchain));
+            end
+        end
+    else
+        for i=1:sn.nstations
+            Vchain(i,c) = sum(sn.visits{c}(i,inchain)) / sum(sn.visits{c}(sn.refstat(inchain(1)),inchain));
+            for k=inchain
+                alpha(i,k) = alpha(i,k) + sn.visits{c}(i,k) / sum(sn.visits{c}(i,inchain));
+            end
         end
     end
 end
+
 Vchain(~isfinite(Vchain))=0;
+for c=1:sn.nchains
+    inchain = find(sn.chains(c,:));
+    Vchain(:,c) = Vchain(:,c) / Vchain(sn.refstat(inchain(1)),c);
+end
 alpha(~isfinite(alpha))=0;
 alpha(alpha<1e-12)=0;
 

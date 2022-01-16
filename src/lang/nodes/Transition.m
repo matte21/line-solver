@@ -1,7 +1,7 @@
 classdef Transition < Node
     % A service station with queueing
     %
-    % Copyright (c) 2012-2021, Imperial College London
+    % Copyright (c) 2012-2022, Imperial College London
     % All rights reserved.
     
     properties
@@ -125,8 +125,11 @@ classdef Transition < Node
 
         function self = setTimingStrategy(self, mode, timingStrategy)
             % SELF = SETTIMINGSTRATEGY(MODE, TIMINGSTRATEGY)
-
-            self.timingStrategies(mode) = timingStrategy;
+            if ischar(timingStrategy) || isstring(timingStrategy)
+                self.timingStrategies(mode) = TimingStrategy.toId(timingStrategy);
+            else
+                self.timingStrategies(mode) = timingStrategy;
+            end
         end
         
         function self = setFiringPriorities(self, mode, firingPriority)

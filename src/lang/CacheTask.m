@@ -1,7 +1,7 @@
 classdef CacheTask < Task 
     % A software server in a LayeredNetwork.
     %
-    % Copyright (c) 2012-2021, Imperial College London
+    % Copyright (c) 2012-2022, Imperial College London
     % All rights reserved.
     
     properties
@@ -11,8 +11,7 @@ classdef CacheTask < Task
         replacementPolicy           
         
     end
-    
-    
+
     methods
         %public methods, including constructor
         
@@ -35,22 +34,6 @@ classdef CacheTask < Task
             self.items = nitems;
             self.itemLevelCap = itemLevelCap; % item capacity            
             self.replacementPolicy = ReplacementStrategy.toId(replPolicy);
-            
-            
-                       
-            
-
         end
-        
-        
-
-        
-      
-
-                
-        
-
-        
     end
-    
 end

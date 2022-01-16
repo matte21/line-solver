@@ -63,7 +63,7 @@ node{11}.addMode('Mode1');
 node{11}.init();
 node{11}.setEnablingConditions(1,jobclass{1},node{4},1);
 node{11}.setFiringOutcome(1,jobclass{1},node{5},1);
-node{11}.setTimingStrategy(1,TimingStrategy.Immediate);
+node{11}.setTimingStrategy(1,TimingStrategy.IMMEDIATE);
 node{11}.setFiringPriorities(1,1);
 node{11}.setFiringWeights(1,1);
 
@@ -72,7 +72,7 @@ node{12}.addMode('Mode1');
 node{12}.init();
 node{12}.setEnablingConditions(1,jobclass{1},node{4},1);
 node{12}.setFiringOutcome(1,jobclass{1},node{6},1);
-node{12}.setTimingStrategy(1,TimingStrategy.Immediate);
+node{12}.setTimingStrategy(1,TimingStrategy.IMMEDIATE);
 node{12}.setFiringPriorities(1,1);
 % node{12}.setFiringWeights(1,0.6);
 node{12}.setFiringPriorities(1,1);
@@ -84,7 +84,7 @@ node{13}.setEnablingConditions(1,jobclass{1},node{5},1);
 node{13}.setEnablingConditions(1,jobclass{1},node{7},1);
 node{13}.setFiringOutcome(1,jobclass{1},node{7},1);
 node{13}.setFiringOutcome(1,jobclass{1},node{8},1);
-node{13}.setTimingStrategy(1,TimingStrategy.Immediate);
+node{13}.setTimingStrategy(1,TimingStrategy.IMMEDIATE);
 node{13}.setFiringPriorities(1,1);
 
 % T5
@@ -94,7 +94,7 @@ node{14}.setEnablingConditions(1,jobclass{1},node{6},1);
 node{14}.setEnablingConditions(1,jobclass{1},node{7},1);
 node{14}.setFiringOutcome(1,jobclass{1},node{9},1);
 node{14}.setInhibitingConditions(1,jobclass{1},node{8},1);
-node{14}.setTimingStrategy(1,TimingStrategy.Immediate);
+node{14}.setTimingStrategy(1,TimingStrategy.IMMEDIATE);
 node{14}.setFiringPriorities(1,1);
 
 % T6

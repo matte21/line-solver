@@ -1,7 +1,7 @@
-function [QN,UN,RN,TN,CN,XN,InfGen,StateSpace,StateSpaceAggr,EventFiltration,runtime,fname,qnc] = solver_ctmc_analyzer(sn, options)
+function [QN,UN,RN,TN,CN,XN,InfGen,StateSpace,StateSpaceAggr,EventFiltration,runtime,fname,sncopy] = solver_ctmc_analyzer(sn, options)
 % [QN,UN,RN,TN,CN,XN,INFGEN,STATESPACE,STATESPACEAGGR,EVENTFILTRATION,RUNTIME,FNAME,sn] = SOLVER_CTMC_ANALYZER(sn, OPTIONS)
 %
-% Copyright (c) 2012-2021, Imperial College London
+% Copyright (c) 2012-2022, Imperial College London
 % All rights reserved.
 
 %if options.remote
@@ -37,7 +37,7 @@ for isf=1:sn.nstateful
         end
     end
 end
-qnc = sn;
+sncopy = sn;
 
 if options.keep
     fname = lineTempName;
@@ -162,9 +162,10 @@ TN(isnan(TN))=0;
 runtime = toc(Tstart);
 
 % now update the routing probabilities in nodes with state-dependent routing
+TNcache = [];
 for k=1:K
     for isf=1:sn.nstateful
-        if sn.nodetype(isf) == NodeType.Cache
+        if sncopy.nodetype(isf) == NodeType.Cache
             TNcache(isf,k) = probSysState*depRates(wset,isf,k);
         end
     end
@@ -172,14 +173,16 @@ end
 
 % updates cache actual hit and miss data
 for k=1:K
-    for isf=1:qnc.nstateful
-        if qnc.nodetype(isf) == NodeType.Cache
-            ind = qnc.statefulToNode(isf);
-            if length(qnc.varsparam{ind}.hitclass)>=k
-                h = qnc.varsparam{ind}.hitclass(k);
-                m = qnc.varsparam{ind}.missclass(k);
-                qnc.varsparam{ind}.actualhitprob(k) = TNcache(isf,h)/sum(TNcache(isf,[h,m]));
-                qnc.varsparam{ind}.actualmissprob(k) = TNcache(isf,m)/sum(TNcache(isf,[h,m]));
+    for isf=1:sncopy.nstateful
+        if sncopy.nodetype(isf) == NodeType.Cache
+            ind = sncopy.statefulToNode(isf);
+            if length(sncopy.varsparam{ind}.hitclass)>=k
+                h = sncopy.varsparam{ind}.hitclass(k);
+                m = sncopy.varsparam{ind}.missclass(k);
+                if h> 0 && m > 0
+                    sncopy.varsparam{ind}.actualhitprob(k) = TNcache(isf,h)/sum(TNcache(isf,[h,m]));
+                    sncopy.varsparam{ind}.actualmissprob(k) = TNcache(isf,m)/sum(TNcache(isf,[h,m]));
+                end
             end
         end
     end

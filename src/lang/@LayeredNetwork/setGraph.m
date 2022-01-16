@@ -1,7 +1,7 @@
 function [self]=setGraph(self,lqnGraph,taskGraph)
 % [SELF]=SETGRAPH(SELF,LQNGRAPH,TASKGRAPH)
 
-% Copyright (c) 2012-2021, Imperial College London
+% Copyright (c) 2012-2022, Imperial College London
 % All rights reserved.
 self.lqnGraph = lqnGraph;
 if nargin>2

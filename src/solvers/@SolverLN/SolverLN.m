@@ -1,7 +1,7 @@
 classdef SolverLN < LayeredNetworkSolver & EnsembleSolver
     % LINE native solver for layered networks.
     %
-    % Copyright (c) 2012-2021, Imperial College London
+    % Copyright (c) 2012-2022, Imperial College London
     % All rights reserved.
     
     properties
@@ -24,17 +24,17 @@ classdef SolverLN < LayeredNetworkSolver & EnsembleSolver
         svcreset_classes;
         util;
         tput;
-        svct;
+        svct; % this is the response time (not the residence time)
+        svctproc;
+        svctcdf;
         idlet;
         idletproc;
         callrespt;
-        svctproc;
         tputproc;
         thinkproc;
         callresptproc;
         entryproc
         getEntryCdfRespT;
-        svctcdf;
         callresptcdf;
         cdf
         whetherConverge
@@ -285,7 +285,7 @@ classdef SolverLN < LayeredNetworkSolver & EnsembleSolver
             RN  = nan(self.lqn.nidx,1);
             TN  = nan(self.lqn.nidx,1);
             PN  = nan(self.lqn.nidx,1);
-            SN  = nan(self.lqn.nidx,1);
+            SN  = nan(self.lqn.nidx,1); % response time will be first stored here
             WN  = nan(self.lqn.nidx,1); % residence time
             AN  = nan(self.lqn.nidx,1); % not available yet
             E = length(self.ensemble);
@@ -358,7 +358,7 @@ classdef SolverLN < LayeredNetworkSolver & EnsembleSolver
                             SN(aidx) = SN(aidx) + self.results{end,e}.RN(serverIdx,c) * self.lqn.callproc{cidx}.getMean();
                             if isnan(QN(aidx)), QN(aidx)=0; end
                             QN(aidx) = QN(aidx) + self.results{end,e}.QN(serverIdx,c);
-                        case LayeredNetworkElement.ACTIVITY
+                        case LayeredNetworkElement.ACTIVITY                            
                             aidx = self.ensemble{e}.classes{c}.attribute(2);
                             tidx = self.lqn.parent(aidx);
                             QN(tidx) = QN(tidx) + self.results{end,e}.QN(serverIdx,c);
@@ -370,13 +370,17 @@ classdef SolverLN < LayeredNetworkSolver & EnsembleSolver
                                 case JobClassType.OPEN
                                     TN(aidx) = TN(aidx) + self.results{end,e}.TN(sourceIdx,c);
                             end
-                            SN(aidx) = self.svct(aidx);
+%                            SN(aidx) = self.svct(aidx);                            
+                            if isnan(SN(aidx)), SN(aidx)=0; end
+                            SN(aidx) = SN(aidx) + self.results{end,e}.RN(serverIdx,c);
                             if isnan(RN(aidx)), RN(aidx)=0; end
                             RN(aidx) = RN(aidx) + self.results{end,e}.RN(serverIdx,c);
                             if isnan(WN(aidx)), WN(aidx)=0; end
+                            if isnan(WN(tidx)), WN(tidx)=0; end
                             WN(aidx) = WN(aidx) + self.results{end,e}.WN(serverIdx,c);
+                            WN(tidx) = WN(tidx) + self.results{end,e}.WN(serverIdx,c);
                             if isnan(QN(aidx)), QN(aidx)=0; end
-                            QN(aidx) = QN(aidx) + self.results{end,e}.QN(serverIdx,c);
+                            QN(aidx) = QN(aidx) + self.results{end,e}.QN(serverIdx,c);                            
                     end
                 end
             end
@@ -392,7 +396,7 @@ classdef SolverLN < LayeredNetworkSolver & EnsembleSolver
                 UN(tidx) = UN(tidx) + UN(eidx);
             end
             
-            if ~useLQNSnaming
+            if ~useLQNSnaming % if LN
                 QN = UN;
                 UN = PN;
                 RN = SN;

@@ -2,7 +2,7 @@ function [AvgTable,QT,UT,RT,WT,TT] = getAvgTable(self,Q,U,R,T,keepDisabled)
 % [AVGTABLE,QT,UT,RT,WT,TT] = GETAVGTABLE(SELF,Q,U,R,T,KEEPDISABLED)
 % Return table of average station metrics
 %
-% Copyright (c) 2012-2021, Imperial College London
+% Copyright (c) 2012-2022, Imperial College London
 % All rights reserved.
 
 sn = getStruct(self);

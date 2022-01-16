@@ -1,7 +1,7 @@
 function refreshStruct(self, hardRefresh)
 % REFRESHSTRUCT()
 %
-% Copyright (c) 2012-2021, Imperial College London
+% Copyright (c) 2012-2022, Imperial College London
 % All rights reserved.
 
 sanitize(self);
@@ -139,9 +139,9 @@ self.sn = sn;
 refreshPriorities(self);
 refreshService(self);
 if any(nodetypes == NodeType.Cache)
-    self.refreshChains(false); % wantVisits
+    refreshChains(self, false); % wantVisits
 else
-    self.refreshChains(true); % wantVisits
+    refreshChains(self, true); % wantVisits
 end
 refreshLocalVars(self); % depends on chains (rtnodes)
 refreshSync(self); % this assumes that refreshChain is called before

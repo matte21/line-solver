@@ -4,7 +4,7 @@ function self = updateParam(self, AvgTableLayer, netSortAscending)
 % Update the LQN parameterization based on the solutions of each layer in
 % isolation.
 %
-% Copyright (c) 2012-2021, Imperial College London
+% Copyright (c) 2012-2022, Imperial College London
 % All rights reserved.
 
 network = getEnsemble(self);

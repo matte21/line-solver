@@ -3,7 +3,7 @@ function [chains, visits, rt] = refreshChains(self, propagate)
 %
 % PROPAGATE : true if the change needs to trigger recomputation of visits and station capacities (default: true)
 
-% Copyright (c) 2012-2021, Imperial College London
+% Copyright (c) 2012-2022, Imperial College London
 % All rights reserved.
 
 if nargin<2
@@ -83,6 +83,11 @@ end
 %if ~isempty(self.sn)
 self.sn.chains = logical(chains);
 self.sn.nchains = size(chains,1);
+for c=1:C
+    if range(self.sn.refstat(self.sn.chains(c,:)))
+        line_error(mfilename,sprintf('Classes within chain %d (classes: %s) have different reference stations.',c,mat2str(find(self.sn.chains(c,:)))));
+    end
+end
 
 if propagate
     [visits, nodevisits] = self.refreshVisits(chains, rt, rtnodes);

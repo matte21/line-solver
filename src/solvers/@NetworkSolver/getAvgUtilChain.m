@@ -2,7 +2,7 @@ function [UN] = getAvgUtilChain(self,U)
 % [UN] = GETAVGUTILCHAIN(SELF,U)
 % Return average utilization aggregated by chain
 %
-% Copyright (c) 2012-2021, Imperial College London
+% Copyright (c) 2012-2022, Imperial College London
 % All rights reserved.
 
 sn = self.model.getStruct();

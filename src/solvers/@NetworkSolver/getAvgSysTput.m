@@ -3,7 +3,7 @@ function [TNchain] = getAvgSysTput(self,T)
 
 % Return average system throughputs at steady state
 %
-% Copyright (c) 2012-2021, Imperial College London
+% Copyright (c) 2012-2022, Imperial College London
 % All rights reserved.
 [~,TNchain] = getAvgSys(self);
 end

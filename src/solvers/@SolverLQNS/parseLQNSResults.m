@@ -1,7 +1,7 @@
 function [Gres, iterations] =parseLQNSResults(G, filename, filename_sim, verbose)
 % [GRES, ITERATIONS] =PARSELQNSRESULTS(G, FILENAME, FILENAME_SIM, VERBOSE)
 
-% Copyright (c) 2012-2021, Imperial College London
+% Copyright (c) 2012-2022, Imperial College London
 % All rights reserved.
 
 [Gres, iterations] = aux_results(G, filename, verbose);

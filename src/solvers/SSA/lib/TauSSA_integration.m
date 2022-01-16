@@ -14,7 +14,7 @@ methods(Static)
             java_dist = SimUtil.DisabledDistribution();
             return;
         else
-            throw(MException('Distribution not supported by LINE/TauSSA integration script.'));
+            line_error(mfilename,'Distribution not supported by LINE/TauSSA integration script.');
         end
     end
     
@@ -30,7 +30,7 @@ methods(Static)
         elseif isa(java_dist, 'SimUtil.DisabledDistribution')
             return;
         else
-            throw(MException('Distribution not supported by LINE/TauSSA integration script.'));
+            line_error(mfilename,'Distribution not supported by LINE/TauSSA integration script.');
         end
     end
     
@@ -45,7 +45,7 @@ methods(Static)
             elseif (isa(line_node, 'Source'))
                 matlab_dist = line_node.getArrivalProcess(n);
             else
-                throw(MException('Node not supported by LINE/TauSSA integration script.'));
+                line_error(mfilename,'Node not supported by LINE/TauSSA integration script.');
             end
             service_dist = TauSSA_integration.compile_distribution(matlab_dist);
             
@@ -70,7 +70,7 @@ methods(Static)
             elseif (isa(jline_node, 'StochLib.Source'))
                 line_node.setArrival(line_classes{n}, matlab_dist);
             else
-                throw(MException('Node not supported by LINE/TauSSA integration script.'));
+                line_error(mfilename,'Node not supported by LINE/TauSSA integration script.');
             end
         end
     end
@@ -105,7 +105,7 @@ methods(Static)
         elseif isa(line_node, 'Join')
             node_object = StochLib.Join(java_network);
         else
-            throw(MException('Node not supported by LINE/TauSSA integration script.'));
+            line_error(mfilename,'Node not supported by LINE/TauSSA integration script.');
         end
     end
     
@@ -122,9 +122,9 @@ methods(Static)
         elseif isa(jline_node, 'StochLib.Router')
             node_object = Router(line_network, jline_node.getName.toCharArray');
         elseif isa(jline_node, 'StochLib.ClassSwitch')
-            throw(MException('Node not supported by LINE/TauSSA integration script.'));
+            line_error(mfilename,'Node not supported by LINE/TauSSA integration script.');
         else
-            throw(MException('Node not supported by LINE/TauSSA integration script.'));
+            line_error(mfilename,'Node not supported by LINE/TauSSA integration script.');
         end
    end
 
@@ -134,7 +134,7 @@ methods(Static)
         elseif isa(line_class, 'ClosedClass')
             node_class = StochLib.ClosedClass(java_network, line_class.getName, line_class.population, java_network.getNodeByName(line_class.refstat.getName));
         else
-            throw(MException('Class type not supported by LINE/TauSSA integration script.'));
+            line_error(mfilename,'Class type not supported by LINE/TauSSA integration script.');
         end
     end
 
@@ -144,7 +144,7 @@ methods(Static)
         elseif isa(java_class, 'StochLib.ClosedClass')
             node_class = ClosedClass(line_network, java_class.getName.toCharArray', line_class.getNumberOfJobs, java_network.getNodeByName(line_class.refstat.getName));
         else
-            throw(MException('Class type not supported by LINE/TauSSA integration script.'));
+            line_error(mfilename,'Class type not supported by LINE/TauSSA integration script.');
         end
     end
     
@@ -201,7 +201,7 @@ methods(Static)
            routing_probs = line_network.getRoutingStrategies;
            for n = 1 : length(routing_probs)
             if (routing_probs(n) ~= RoutingStrategy.ID_RAND) && (routing_probs(n) ~= RoutingStrategy.ID_PROB)
-                throw(MException('Routing Strategy not supported by LINE/TauSSA integration script.'));
+                line_error(mfilename,'Routing Strategy not supported by LINE/TauSSA integration script.');
             end
            end
            network_object = StochLib.Network(line_network.getName);

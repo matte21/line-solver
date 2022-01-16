@@ -1,7 +1,7 @@
 function [pi,SSq,arvRates,depRates,tranSysState,tranSync,sn]=solver_ssa(sn,options)
 % [PI,SSQ,ARVRATES,DEPRATES,TRANSYSSTATE,QN]=SOLVER_SSA(QN,OPTIONS)
 
-% Copyright (c) 2012-2021, Imperial College London
+% Copyright (c) 2012-2022, Imperial College London
 % All rights reserved.
 
 % by default the jobs are all initialized in the first valid state
@@ -12,6 +12,7 @@ end
 if ~exist('labindex','builtin') || ~exist('labindex','var')
     labindex = 1;
 end
+
 Solver.resetRandomGeneratorSeed(options.seed+labindex-1);
 
 %% generate local state spaces

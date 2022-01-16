@@ -1,7 +1,7 @@
 function [Qfull, Ufull, Rfull, Tfull, ymean, Qfull_t, Ufull_t, Tfull_t, ymean_t, t,iters,runtime] = solver_fluid_analyzer_inner(sn, options)
 % [QFULL, UFULL, RFULL, TFULL, YMEAN, QFULL_T, UFULL_T, TFULL_T, YMEAN_T, T,ITERS,RUNTIME] = SOLVER_FLUID_ANALYZER_INNER(QN, OPTIONS)
 
-% Copyright (c) 2012-2021, Imperial College London
+% Copyright (c) 2012-2022, Imperial College London
 % All rights reserved.
 chains = sn.chains;
 

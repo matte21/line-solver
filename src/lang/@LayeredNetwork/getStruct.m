@@ -2,7 +2,7 @@ function lqn = getStruct(self)
 % LQN = GETSTRUCT(SELF)
 %
 %
-% Copyright 2012-2021, Imperial College London
+% Copyright 2012-2022, Imperial College London
 
 lqn = struct();
 lqn.nidx = 0;  % total number of hosts, tasks, entries, and activities, except the reference tasks

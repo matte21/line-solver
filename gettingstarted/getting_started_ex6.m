@@ -32,4 +32,6 @@ model.link(P);
 
 % Block 4: solution
 ssaAvgTable = SolverSSA(model,'samples',2e4,'seed',1,'verbose',true).getAvgTable
+if license('test','parallel_computing_toolbox')
 ssaAvgTablePara = SolverSSA(model,'samples',2e4,'seed',1,'verbose',true,'parallel').getAvgTable
+end

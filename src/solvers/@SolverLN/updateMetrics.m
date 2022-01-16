@@ -11,8 +11,10 @@ switch self.getOptions.method
         nodeidx = self.svctmap(r,3);
         classidx = self.svctmap(r,4);
         self.svct(aidx) = self.results{end,self.idxhash(idx)}.RN(nodeidx,classidx);
+        %self.svct(aidx) = self.results{end,self.idxhash(idx)}.WN(nodeidx,classidx);
         self.tput(aidx) = self.results{end,self.idxhash(idx)}.TN(nodeidx,classidx);  
         self.svctproc{aidx} = Exp.fitMean(self.svct(aidx));
+        self.tputproc{aidx} = Exp.fitRate(self.tput(aidx)); 
     end
 
     % estimate call response times at hostlayers
@@ -22,11 +24,11 @@ switch self.getOptions.method
         cidx = self.callresptmap(r,2);
         nodeidx = self.callresptmap(r,3);
         classidx = self.callresptmap(r,4);
-%         self.callrespt(cidx) = self.results{end, self.idxhash(idx)}.RN(nodeidx,classidx);
         if nodeidx == 1
             self.callrespt(cidx) = 0;
-        else
-            self.callrespt(cidx) = self.results{end, self.idxhash(idx)}.RN(nodeidx,classidx);
+        else            
+         self.callrespt(cidx) = self.results{end, self.idxhash(idx)}.RN(nodeidx,classidx);
+         %self.callrespt(cidx) = self.results{end, self.idxhash(idx)}.WN(nodeidx,classidx);
         end
     end
 
@@ -65,6 +67,7 @@ switch self.getOptions.method
             nodeidx = self.svctmap(r,3);
             classidx = self.svctmap(r,4);
             self.svct(aidx) = self.results{end,self.idxhash(idx)}.RN(nodeidx,classidx);
+            %self.svct(aidx) = self.results{end,self.idxhash(idx)}.WN(nodeidx,classidx);
             self.tput(aidx) = self.results{end,self.idxhash(idx)}.TN(nodeidx,classidx);  
             self.svctproc{aidx} = Exp.fitMean(self.svct(aidx));
         end
@@ -81,6 +84,7 @@ switch self.getOptions.method
                 self.callrespt(cidx) = 0;
             else
                 self.callrespt(cidx) = self.results{end, self.idxhash(idx)}.RN(nodeidx,classidx);
+                %self.callrespt(cidx) = self.results{end, self.idxhash(idx)}.WN(nodeidx,classidx);
             end
         end
 

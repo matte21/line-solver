@@ -1,12 +1,12 @@
 classdef (Sealed) TimingStrategy
     % Enumeration of timing polcies in petri nets transitions.
     %
-    % Copyright (c) 2012-2021, Imperial College London
+    % Copyright (c) 2012-2022, Imperial College London
     % All rights reserved.
     
     properties (Constant)
-        Timed = {'timed'};
-        Immediate = {'immediate'};
+        TIMED = 'timed';
+        IMMEDIATE = 'immediate';
         
         ID_TIMED = 0;
         ID_IMMEDIATE = 1;
@@ -18,10 +18,10 @@ classdef (Sealed) TimingStrategy
             % ID = TOOD(TYPE)
             
             switch type
-                case TimingStrategy.Timed
-                    id = ID_TIMED;
-                case TimingStrategy.Immediate
-                    id = ID_IMMEDIATE;
+                case TimingStrategy.TIMED
+                    id = TimingStrategy.ID_TIMED;
+                case TimingStrategy.IMMEDIATE
+                    id = TimingStrategy.ID_IMMEDIATE;
             end
             
         end

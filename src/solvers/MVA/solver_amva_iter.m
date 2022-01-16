@@ -19,6 +19,7 @@ if all(isinf(Nchain))
 else
     delta = (Nt - 1) / Nt;
 end
+
 deltaclass = (Nchain - 1) ./ Nchain;
 deltaclass(isinf(Nchain)) = 1;
 
@@ -311,25 +312,17 @@ for r=nnzclasses
                     Uchain_r = Uchain ./ repmat(Xchain,M,1) .* (repmat(Xchain,M,1) + repmat(tau(r,:),M,1));
                     
                     if nservers(k)>1
-                        if sum(deltaclass .* Xchain .* Vchain(k,:) .* STeff(k,:)) < 0.75 % light-load case
-                            switch options.config.multiserver
-                                case 'softmin'
-                                    Bk = ((deltaclass .* Xchain .* Vchain(k,:) .* STeff(k,:))); % note: this is in 0-1 as a utilization
-                                case {'default','seidmann'}
-                                    Bk = ((deltaclass .* Xchain .* Vchain(k,:) .* STeff(k,:)) / nservers(k)); % note: this is in 0-1 as a utilization
-                            end
+                        deltaclass_r = ones(size(Xchain)); 
+                        deltaclass_r(r) = deltaclass(r);
+                        if sum(deltaclass_r .* Xchain .* Vchain(k,:) .* STeff(k,:)) < 0.75 % light-load case
+                            Bk = ((deltaclass_r .* Xchain .* Vchain(k,:) .* STeff(k,:))); % note: this is in 0-1 as a utilization
                         else % high-load case
-                            switch options.config.multiserver
-                                case 'softmin'
-                                    Bk = (deltaclass .* Xchain .* Vchain(k,:) .* STeff(k,:)).^nservers(k); % Rolia
-                                case {'default','seidmann'}
-                                    Bk = (deltaclass .* Xchain .* Vchain(k,:) .* STeff(k,:) / nservers(k)).^nservers(k); % Rolia
-                            end
+                            Bk = (deltaclass_r .* Xchain .* Vchain(k,:) .* STeff(k,:)).^(nservers(k)-1);
                         end
                     else
                         Bk = ones(1,K);
                     end
-                    
+    
                     if nservers(k)==1 && (~isempty(lldscaling) || ~isempty(cdscaling))
                         switch options.config.highvar % high SCV
                             case 'hvmva'
@@ -344,8 +337,8 @@ for r=nnzclasses
                             Wchain(k,r) = Wchain(k,r) + (STeff(k,r) * stationaryQlen(k,r) + STeff(k,sd)*stationaryQlen(k,sd)');
                         else
                             switch options.method
-                                case {'default', 'amva.lin', 'lin', 'amva.qdlin','qdlin'} % Linearizer
-                                    Wchain(k,r) = Wchain(k,r) + (STeff(k,r) * selfArvlQlenSeenByClosed(k,r) + STeff(k,sd)*stationaryQlen(k,sd)') + (STeff(k,ccl).*Nchain(ccl)*permute(gamma(r,k,ccl),3:-1:1) - STeff(k,r)*gamma(r,k,r));
+                                %case {'default', 'amva.lin', 'lin', 'amva.qdlin','qdlin'} % Linearizer
+                                %    Wchain(k,r) = Wchain(k,r) + (STeff(k,r) * selfArvlQlenSeenByClosed(k,r) + STeff(k,sd)*stationaryQlen(k,sd)') + (STeff(k,ccl).*Nchain(ccl)*permute(gamma(r,k,ccl),3:-1:1) - STeff(k,r)*gamma(r,k,r));
                                 otherwise
                                     Wchain(k,r) = Wchain(k,r) + (STeff(k,r) * selfArvlQlenSeenByClosed(k,r) + STeff(k,sd)*stationaryQlen(k,sd)');
                             end
@@ -360,8 +353,8 @@ for r=nnzclasses
                                     % FCFS approximation + reducing backlog proportionally to server utilizations; somewhat similar to
                                     % Rolia-Sevcik -  method of layers - Sec IV.
                                     switch options.method
-                                        case {'default', 'amva.lin', 'lin', 'amva.qdlin','qdlin'} % Linearizer
-                                            Wchain(k,r) = Wchain(k,r) + STeff(k,r) * selfArvlQlenSeenByClosed(k,r) * Bk(r) + STeff(k,sd) * (stationaryQlen(k,sd) .* Bk(sd))' + (STeff(k,ccl).*Nchain(ccl)*permute(gamma(r,k,ccl),3:-1:1) - STeff(k,r)*gamma(r,k,r));
+                                        %case {'default', 'amva.lin', 'lin', 'amva.qdlin','qdlin'} % Linearizer
+                                        %    Wchain(k,r) = Wchain(k,r) + STeff(k,r) * selfArvlQlenSeenByClosed(k,r) * Bk(r) + STeff(k,sd) * (stationaryQlen(k,sd) .* Bk(sd))' + (STeff(k,ccl).*Nchain(ccl)*permute(gamma(r,k,ccl),3:-1:1) - STeff(k,r)*gamma(r,k,r));
                                         otherwise
                                             Wchain(k,r) = Wchain(k,r) + STeff(k,r) * selfArvlQlenSeenByClosed(k,r) * Bk(r) + STeff(k,sd) * (stationaryQlen(k,sd) .* Bk(sd))';
                                     end
@@ -375,8 +368,8 @@ for r=nnzclasses
                                     % FCFS approximation + reducing backlog proportionally to server utilizations; somewhat similar to
                                     % Rolia-Sevcik -  method of layers - Sec IV. (1/nservers(k)) term already in STeff
                                     switch options.method
-                                        case {'default', 'amva.lin', 'lin', 'amva.qdlin','qdlin'} % Linearizer
-                                            Wchain(k,r) = Wchain(k,r) + (STeff(k,r) * selfArvlQlenSeenByClosed(k,r)*Bk(r) + STeff(k,sd).*Bk(sd)*stationaryQlen(k,sd)') + (STeff(k,ccl).*Nchain(ccl)*permute(gamma(r,k,ccl),3:-1:1) - STeff(k,r)*gamma(r,k,r));
+                                        %case {'default', 'amva.lin', 'lin', 'amva.qdlin','qdlin'} % Linearizer
+                                        %    Wchain(k,r) = Wchain(k,r) + (STeff(k,r) * selfArvlQlenSeenByClosed(k,r)*Bk(r) + STeff(k,sd).*Bk(sd)*stationaryQlen(k,sd)') + (STeff(k,ccl).*Nchain(ccl)*permute(gamma(r,k,ccl),3:-1:1) - STeff(k,r)*gamma(r,k,r));
                                         otherwise
                                             Wchain(k,r) = Wchain(k,r) + (STeff(k,r) * selfArvlQlenSeenByClosed(k,r)*Bk(r) + STeff(k,sd).*Bk(sd)*stationaryQlen(k,sd)');
                                     end
@@ -443,9 +436,9 @@ for r=nnzclasses
                             Wchain(k,r) = Wchain(k,r) + (STeff(k,r) * stationaryQlen(k,r)) / prioScaling;
                         else
                             switch options.method
-                                case {'default', 'amva.lin', 'lin', 'amva.qdlin','qdlin'} % Linearizer
-                                    %Wchain(k,r) = Wchain(k,r) + (STeff(k,r) * selfArvlQlenSeenByClosed(k,r) + STeff(k,sdprio)*stationaryQlen(k,sdprio)') + (STeff(k,[r,sdprio]).*Nchain([r,sdprio])*permute(gamma(r,k,[r,sdprio]),3:-1:1) - STeff(k,r)*gamma(r,k,r));
-                                    Wchain(k,r) = Wchain(k,r) + (STeff(k,r) * selfArvlQlenSeenByClosed(k,r) - STeff(k,r)*gamma(r,k,r)) / prioScaling;
+                                %case {'default', 'amva.lin', 'lin', 'amva.qdlin','qdlin'} % Linearizer
+                                %    %Wchain(k,r) = Wchain(k,r) + (STeff(k,r) * selfArvlQlenSeenByClosed(k,r) + STeff(k,sdprio)*stationaryQlen(k,sdprio)') + (STeff(k,[r,sdprio]).*Nchain([r,sdprio])*permute(gamma(r,k,[r,sdprio]),3:-1:1) - STeff(k,r)*gamma(r,k,r));
+                                %    Wchain(k,r) = Wchain(k,r) + (STeff(k,r) * selfArvlQlenSeenByClosed(k,r) - STeff(k,r)*gamma(r,k,r)) / prioScaling;
                                 otherwise
                                     %Wchain(k,r) = Wchain(k,r) + (STeff(k,r) * selfArvlQlenSeenByClosed(k,r) + STeff(k,sdprio)*stationaryQlen(k,sdprio)');
                                     Wchain(k,r) = Wchain(k,r) + (STeff(k,r) * selfArvlQlenSeenByClosed(k,r)) / prioScaling;
@@ -461,9 +454,9 @@ for r=nnzclasses
                                     % FCFS approximation + reducing backlog proportionally to server utilizations; somewhat similar to
                                     % Rolia-Sevcik -  method of layers - Sec IV.
                                     switch options.method
-                                        case {'default', 'amva.lin', 'lin', 'amva.qdlin','qdlin'} % Linearizer
-                                            %Wchain(k,r) = Wchain(k,r) + STeff(k,r) * selfArvlQlenSeenByClosed(k,r) * Bk(r) + STeff(k,sdprio) * (stationaryQlen(k,sdprio) .* Bk(sdprio))' + (STeff(k,[r,sdprio]).*Nchain([r,sdprio])*permute(gamma(r,k,[r,sdprio]),3:-1:1) - STeff(k,r)*gamma(r,k,r));
-                                            Wchain(k,r) = Wchain(k,r) + STeff(k,r) * selfArvlQlenSeenByClosed(k,r) * Bk(r) / prioScaling + (STeff(k,[r]).*Nchain([r])*permute(gamma(r,k,[r]),3:-1:1) - STeff(k,r)*gamma(r,k,r)) / prioScaling;
+                                        %case {'default', 'amva.lin', 'lin', 'amva.qdlin','qdlin'} % Linearizer
+                                        %    %Wchain(k,r) = Wchain(k,r) + STeff(k,r) * selfArvlQlenSeenByClosed(k,r) * Bk(r) + STeff(k,sdprio) * (stationaryQlen(k,sdprio) .* Bk(sdprio))' + (STeff(k,[r,sdprio]).*Nchain([r,sdprio])*permute(gamma(r,k,[r,sdprio]),3:-1:1) - STeff(k,r)*gamma(r,k,r));
+                                        %    Wchain(k,r) = Wchain(k,r) + STeff(k,r) * selfArvlQlenSeenByClosed(k,r) * Bk(r) / prioScaling + (STeff(k,[r]).*Nchain([r])*permute(gamma(r,k,[r]),3:-1:1) - STeff(k,r)*gamma(r,k,r)) / prioScaling;
                                         otherwise
                                             %Wchain(k,r) = Wchain(k,r) + STeff(k,r) * selfArvlQlenSeenByClosed(k,r) * Bk(r) + STeff(k,sdprio) * (stationaryQlen(k,sdprio) .* Bk(sdprio))';
                                             Wchain(k,r) = Wchain(k,r) + STeff(k,r) * selfArvlQlenSeenByClosed(k,r) * Bk(r) / prioScaling;
@@ -479,9 +472,9 @@ for r=nnzclasses
                                     % FCFS approximation + reducing backlog proportionally to server utilizations; somewhat similar to
                                     % Rolia-Sevcik -  method of layers - Sec IV. (1/nservers(k)) term already in STeff
                                     switch options.method
-                                        case {'default', 'amva.lin', 'lin', 'amva.qdlin','qdlin'} % Linearizer
-                                            %Wchain(k,r) = Wchain(k,r) + (STeff(k,r) * selfArvlQlenSeenByClosed(k,r)*Bk(r) + STeff(k,sdprio).*Bk(sdprio)*stationaryQlen(k,sdprio)') + (STeff(k,[r,sdprio]).*Nchain([r,sdprio])*permute(gamma(r,k,[r,sdprio]),3:-1:1) - STeff(k,r)*gamma(r,k,r));
-                                            Wchain(k,r) = Wchain(k,r) + STeff(k,r) * selfArvlQlenSeenByClosed(k,r)*Bk(r)/prioScaling + (STeff(k,r).*Nchain(r)*permute(gamma(r,k,r),3:-1:1) - STeff(k,r)*gamma(r,k,r))/prioScaling;
+                                        %case {'default', 'amva.lin', 'lin', 'amva.qdlin','qdlin'} % Linearizer
+                                        %    %Wchain(k,r) = Wchain(k,r) + (STeff(k,r) * selfArvlQlenSeenByClosed(k,r)*Bk(r) + STeff(k,sdprio).*Bk(sdprio)*stationaryQlen(k,sdprio)') + (STeff(k,[r,sdprio]).*Nchain([r,sdprio])*permute(gamma(r,k,[r,sdprio]),3:-1:1) - STeff(k,r)*gamma(r,k,r));
+                                        %    Wchain(k,r) = Wchain(k,r) + STeff(k,r) * selfArvlQlenSeenByClosed(k,r)*Bk(r)/prioScaling + (STeff(k,r).*Nchain(r)*permute(gamma(r,k,r),3:-1:1) - STeff(k,r)*gamma(r,k,r))/prioScaling;
                                         otherwise
                                             %Wchain(k,r) = Wchain(k,r) + (STeff(k,r) * selfArvlQlenSeenByClosed(k,r)*Bk(r) + STeff(k,sdprio).*Bk(sdprio)*stationaryQlen(k,sdprio)');
                                             Wchain(k,r) = Wchain(k,r) + STeff(k,r) * selfArvlQlenSeenByClosed(k,r)*Bk(r)/prioScaling;

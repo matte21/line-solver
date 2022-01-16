@@ -1,7 +1,7 @@
 classdef InputSection < Section
     % An abstract class for the input section of a node.
     %
-    % Copyright (c) 2012-2021, Imperial College London
+    % Copyright (c) 2012-2022, Imperial College London
     % All rights reserved.
     
     properties
