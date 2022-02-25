@@ -38,7 +38,7 @@ docker pull linemcr/cli
 ```
 Let us first run the line container in client-server model 
 ```
-docker run -i -p 127.0.0.1:5463:5463/tcp  --rm linemcr/cli -p 5463
+docker run -i -p 127.0.0.1:5463:5463/tcp  --rm linemcr/cli -p 5463 -i xml
 ```
 bootstraps the server. To solve a layered queueing network (LQN), after downloading a LQN example model [ofbizExample.xml](https://raw.githubusercontent.com/imperial-qore/line/master/examples/ofbizExample.xml), we issue a request to the engine using LINE's [websocket client](https://github.com/imperial-qore/line-solver/raw/master/src/cli/websocket/lineclient.jar). 
 ```
