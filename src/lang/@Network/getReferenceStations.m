@@ -6,7 +6,7 @@ function refstat = getReferenceStations(self)
 
 K = getNumberOfClasses(self);
 refstat = zeros(K,1);
-for k=1:K
+for k=1:K    
     refstat(k,1) =  findstring(getStationNames(self),self.classes{k}.refstat.name);
 end
 end

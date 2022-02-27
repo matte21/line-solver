@@ -41,8 +41,8 @@ for r=1:size(svcupdmap,1)
 end
 
 % reassign arvrates
- for r=1:size(arvupdmap,1)
-%for r=1:0
+for r=1:size(arvupdmap,1)
+    %for r=1:0
     if mod(it, 0)
         ri = size(arvupdmap,1) - r + 1;
     else
@@ -69,9 +69,16 @@ for c=1:size(callupdmap,1)
     class = ensemble{idxhash(callupdmap(ci,1))}.classes{callupdmap(ci,4)};
     switch nodeidx
         case ensemble{idxhash(idx)}.attribute.clientIdx % client
-             ensemble{idxhash(idx)}.nodes{nodeidx}.setService(class, callresptproc{cidx});
+            ensemble{idxhash(idx)}.nodes{nodeidx}.setService(class, callresptproc{cidx});
         case ensemble{idxhash(idx)}.attribute.serverIdx % the call is processed by the server, then replace with the svc time
             eidx = lqn.callpair(cidx,2);
+            %tidx = lqn.parent(eidx);            
+            %eidxclass = self.ensemble{self.idxhash(tidx)}.attribute.calls(find(self.ensemble{self.idxhash(tidx)}.attribute.calls(:,4) == eidx),1);
+            %eidxchain = find(self.ensemble{self.idxhash(tidx)}.getStruct.chains(:,eidxclass)>0);
+            %qn = self.ensemble{self.idxhash(tidx)}.getStruct;            
+            %svctproc{eidx}.updateMean(svctproc{eidx}.getMean * qn.visits{eidxchain}(1,find(qn.refclass)) / qn.visits{eidxchain}(2,eidxclass))
+            %%task_tput = sum(self.results{end,self.idxhash(tidx)}.TN(self.ensemble{self.idxhash(tidx)}.attribute.serverIdx,eidxclass))
+            %%entry_tput = sum(self.results{end,self.idxhash(tidx)}.TN(self.ensemble{self.idxhash(tidx)}.attribute.serverIdx,eidxclass))
             ensemble{idxhash(idx)}.nodes{nodeidx}.setService(class, svctproc{eidx});
     end
 end

@@ -153,7 +153,7 @@ classdef LayeredNetwork < Model & Ensemble
         type = getNodeType(self,nodeNameOrIdx)
         
         writeSRVN(self,filename);
-        writeXML(self,filename);
+        writeXML(self,filename,true);
     end
     
     methods
@@ -165,6 +165,7 @@ classdef LayeredNetwork < Model & Ensemble
             
             E = getNumberOfModels(self);
         end
+        
         function E = getNumberOfModels(self)
             % E = GETNUMBEROFMODELS()
             

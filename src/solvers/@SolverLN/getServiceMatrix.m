@@ -4,7 +4,8 @@ eshift = self.lqn.eshift;
 U = sparse(self.lqn.nidx + self.lqn.ncalls, self.lqn.nidx + self.lqn.ncalls);
 for e = 1:self.lqn.nentries
     eidx = eshift + e;
-    U = self.getServiceMatrixRecursion(self.lqn, eidx, U);
+    U = self.getServiceMatrixRecursion(self.lqn, eidx, eidx, U);
 end
+U = double(U > 0);
 end
 

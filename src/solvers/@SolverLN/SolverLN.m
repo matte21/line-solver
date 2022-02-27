@@ -96,7 +96,7 @@ classdef SolverLN < LayeredNetworkSolver & EnsembleSolver
             end
             
             % build layering
-            buildLoose(self);
+            buildLayers(self);
             
             self.routereset = unique(self.idxhash(self.routeupdmap(:,1)))';
             self.svcreset = unique(self.idxhash(self.svcupdmap(:,1)))';
@@ -284,7 +284,7 @@ classdef SolverLN < LayeredNetworkSolver & EnsembleSolver
             UN  = nan(self.lqn.nidx,1);
             RN  = nan(self.lqn.nidx,1);
             TN  = nan(self.lqn.nidx,1);
-            PN  = nan(self.lqn.nidx,1);
+            PN  = nan(self.lqn.nidx,1); % utilization will be first stored here
             SN  = nan(self.lqn.nidx,1); % response time will be first stored here
             WN  = nan(self.lqn.nidx,1); % residence time
             AN  = nan(self.lqn.nidx,1); % not available yet
@@ -506,10 +506,10 @@ classdef SolverLN < LayeredNetworkSolver & EnsembleSolver
     end
     
     methods (Hidden)
-        buildLoose(self, lqn, resptproc, callresptproc);
-        buildLayerRecursive(self, idx, callers, ishostlayer);
+        buildLayers(self, lqn, resptproc, callresptproc);
+        buildLayersRecursive(self, idx, callers, ishostlayer);
         updateLayers(self, it);
-        U = getServiceMatrixRecursion(self, lqn, aidx, U);
+        U = getServiceMatrixRecursion(self, lqn, aidx, eidx, U);
         U = getServiceMatrix(self)
     end
     

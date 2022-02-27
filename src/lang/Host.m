@@ -55,7 +55,8 @@ classdef Host  < LayeredNetworkElement
         %addTask
         function self = addTask(self, newTask)
             % self = ADDTASK(self, NEWTASK)
-            self.tasks = [self.tasks; newTask];            
+            self.tasks = [self.tasks; newTask];
+            newTask.parent = self;
         end
         
     end

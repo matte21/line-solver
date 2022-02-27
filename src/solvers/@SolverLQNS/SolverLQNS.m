@@ -64,10 +64,12 @@ classdef SolverLQNS < LayeredNetworkSolver
                         system(['lqns ',ignoreWarn,' -i ',num2str(options.iter_max),' -Pstop-on-message-loss=false -x ',filename]);
                 end
             end
+            
             self.parseXMLResults(filename);
+            
             if ~options.keep
                 [filepath,name] = fileparts(filename);
-                delete([filepath,filesep,name,'*'])
+                delete([filepath,filesep,name,'.*'])
             end
             runtime = toc;
         end

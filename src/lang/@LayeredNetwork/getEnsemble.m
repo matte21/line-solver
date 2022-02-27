@@ -1,9 +1,5 @@
 function ensemble = getEnsemble(self)
 % ENSEMBLE = GETENSEMBLE()
-
-if isempty(self.ensemble)
-    self.updateEnsemble(true);
-end
+SolverLN(self).buildLayers;
 ensemble = self.ensemble;
-
 end

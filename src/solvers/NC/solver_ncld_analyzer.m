@@ -8,7 +8,7 @@ K = sn.nclasses;
 nservers = sn.nservers;
 
 if nservers(isfinite(nservers))>1
-    error('The load-dependent solver does not support multi-server stations yet. Specify multi-server stations via limited load-dependence.');
+    line_error(mfilename,'The load-dependent solver does not support multi-server stations yet. Specify multi-server stations via limited load-dependence.');
 end
 
 if ~isempty(sn.cdscaling) && strcmpi(options.method, 'exact')
@@ -16,6 +16,11 @@ if ~isempty(sn.cdscaling) && strcmpi(options.method, 'exact')
 end
 
 NK = sn.njobs';  % initial population per class
+
+if isinf(max(NK))
+    line_error(mfilename,'The load-dependent solver does not support open classes yet.');
+end
+
 schedid = sn.schedid;
 %chains = sn.chains;
 C = sn.nchains;

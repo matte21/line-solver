@@ -40,3 +40,6 @@ AvgNodeTable = SolverMVA(model).getAvgNodeTable
 
 AvgTableMAM = SolverMAM(model).getAvgTable
 AvgNodeTableMAM = SolverMAM(model).getAvgNodeTable
+
+AvgTableNC = SolverNC(model).getAvgTable
+AvgNodeTableNC = SolverNC(model).getAvgNodeTable

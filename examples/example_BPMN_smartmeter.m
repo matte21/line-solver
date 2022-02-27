@@ -5,11 +5,11 @@
 
 clear; 
 clc;
-diary on;
-diary smartMeterOutLog2.txt;
+%diary on;
+%diary smartMeterOutLog2.txt;
 %% input files: bpmn + extensions
-filename = fullfile(pwd,'data','BPMN','bpmn_smartmeter.bpmn');
-extFilename = fullfile(pwd,'data', 'BPMN','bpmn_ext_smartmeter.xml');
+filename = fullfile(lineRootFolder,'examples','data','BPMN','bpmn_smartmeter.bpmn');
+extFilename = fullfile(lineRootFolder,'examples','data', 'BPMN','bpmn_ext_smartmeter.xml');
 
 verbose = 1;
 %% input files parsing
@@ -45,4 +45,4 @@ useLQNSnaming = true;
 AvgTable{3}
 CallAvgTable{3}
 
-diary off;
+%diary off;

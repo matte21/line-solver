@@ -18,9 +18,9 @@ end
 %title('Task graph');
 figure;
 if useNodes
-    h = plot(lqnGraph,'Layout','layered','EdgeLabel',lqnGraph.Edges.Weight,'NodeLabel',lqnGraph.Nodes.Node);
+    h = plot(lqnGraph,'Layout','layered','EdgeLabel',lqnGraph.Edges.Weight,'NodeLabel',strrep(lqnGraph.Nodes.Node, '_', '\_'),'MarkerSize',6);
 else
-    h = plot(lqnGraph,'Layout','layered','EdgeLabel',lqnGraph.Edges.Weight,'NodeLabel',lqnGraph.Nodes.Name);
+    h = plot(lqnGraph,'Layout','layered','EdgeLabel',lqnGraph.Edges.Weight,'NodeLabel',strrep(lqnGraph.Nodes.Name, '_', ''),'MarkerSize',6);
 end
 row = dataTipTextRow('multiplicity',lqnGraph.Nodes.Mult);
 h.DataTipTemplate.DataTipRows(2) = row;
@@ -31,39 +31,40 @@ h.DataTipTemplate.DataTipRows(end+1) = row;
 title(['Model: ',self.name]);
 
 if showProcs
-    for r=findstring(lqnGraph.Nodes.Type,'PS')
+    lqnGraph.Nodes.Type
+    for r=findstring(lqnGraph.Nodes.Type,'P')
         if r>0
-            highlight(h,r,'NodeColor','white')
+            highlight(h,r,'NodeColor','white','Marker','h');
         end
     end
-    for r=findstring(lqnGraph.Nodes.Type,'AH')
+    for r=findstring(lqnGraph.Nodes.Type,'A')
         if r>0
-            highlight(h,r,'NodeColor','cyan')
+            %highlight(h,r,'NodeColor','blue','Marker','o');
         end
     end
 end
 
 for r=findstring(lqnGraph.Nodes.Type,'T')
     if r>0
-        highlight(h,r,'NodeColor','magenta')
+        highlight(h,r,'NodeColor','magenta','Marker','v');
     end
 end
 
 for r=findstring(lqnGraph.Nodes.Type,'R')
     if r>0
-        highlight(h,r,'NodeColor','red')
+        highlight(h,r,'NodeColor','#EDB120','Marker','^');
     end
 end
 
 for r=findstring(lqnGraph.Nodes.Type,'H')
     if r>0
-        highlight(h,r,'NodeColor','black')
+        highlight(h,r,'NodeColor','black','Marker','h');
     end
 end
 
 for r=findstring(lqnGraph.Nodes.Type,'E')
     if r>0
-        highlight(h,r,'NodeColor','green')
+        highlight(h,r,'NodeColor','red','Marker','s');
     end
 end
 

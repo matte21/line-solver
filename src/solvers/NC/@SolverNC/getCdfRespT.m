@@ -5,7 +5,7 @@ if nargin<2 || isempty(R) %~exist('R','var')
     R = self.getAvgRespTHandles;
 end
 
-config = self.getOptions.praqma;
+config = self.getOptions.config;
 if ~isfield(config,'algorithm')
 	config.algorithm = 'exact';
 end

@@ -1,5 +1,6 @@
 function [lGN,Cgamma] = pfqn_rd(L,N,Z,mu,options)
 [M,R]=size(L);
+lambda=zeros(1,R);
 if sum(N)<0
     lGN=-Inf;
     return
@@ -70,7 +71,7 @@ beta(isnan(beta))=Inf;
 
 if (all(beta==Inf))
     options.method='adaptive';
-    lGN = pfqn_nc(L,N,Z,options);
+    lGN = pfqn_nc(lambda,L,N,Z,options);
     return
 else
     Cgamma=0;
@@ -88,7 +89,7 @@ else
         Cgamma = Cgamma + ((sum(N)-max(0,max(vtot-1)))/sum(N)) * EN;
     end
     options.method='adaptive';
-    lGN = pfqn_nc(y,N,Z,options);
+    lGN = pfqn_nc(lambda,y,N,Z,options);
     lGN = lGN + log(Cgamma);
 end
 end

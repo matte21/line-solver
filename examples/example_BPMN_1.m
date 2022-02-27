@@ -7,8 +7,8 @@ clear;
 clc;
 
 %% input files: bpmn + extensions
-filename = fullfile(pwd,'data','BPMN','bpmn_gateways.bpmn');
-extFilename = fullfile(pwd,'data', 'BPMN','bpmn_ext_gateways.xml');
+filename = fullfile(lineRootFolder,'examples','data','BPMN','bpmn_gateways.bpmn');
+extFilename = fullfile(lineRootFolder,'examples','data', 'BPMN','bpmn_ext_gateways.xml');
 
 verbose = 1;
 %% input files parsing

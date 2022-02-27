@@ -97,6 +97,8 @@ fprintf(1,'\n\nExample: <strong>example_stateProbabilities_4</strong>\n');
 clear; example_stateProbabilities_4; fprintf(1,'Pausing...'); pause(3.0);
 fprintf(1,'\n\nExample: <strong>example_stateProbabilities_5</strong>\n');
 clear; example_stateProbabilities_5; fprintf(1,'Pausing...'); pause(3.0);
+fprintf(1,'\n\nExample: <strong>example_stateProbabilities_6</strong>\n');
+clear; example_stateProbabilities_6; fprintf(1,'Pausing...'); pause(3.0);
 
 %%
 fprintf(1,'\n<strong>RUNNING: example_cdfRespT_*</strong>');
@@ -154,6 +156,9 @@ clear; example_cacheModel_1; fprintf(1,'Pausing...'); pause(3.0);
 fprintf(1,'\n\nExample: <strong>example_cacheModel_2</strong>\n');
 fprintf('This example shows a small cache model with a closed arrival process.\n')
 clear; example_cacheModel_2; fprintf(1,'Pausing...'); pause(3.0);
+fprintf(1,'\n\nExample: <strong>example_cacheModel_3</strong>\n');
+fprintf('This example shows a small cache model within a layered queueing network.\n')
+clear; example_cacheModel_3; fprintf(1,'Pausing...'); pause(3.0);
 
 %%
 fprintf(1,'\n<strong>RUNNING: example_svcEstimation_*</strong>');

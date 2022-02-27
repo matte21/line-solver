@@ -1,4 +1,4 @@
-function [lG,X,Q] = pfqn_nc(L,N,Z,varargin)
+function [lG,X,Q] = pfqn_nc(lambda,L,N,Z,varargin)
 % [LGN] = PFQN_NC(L,N,Z,VARARGIN)
 
 options = Solver.parseOptions(varargin, SolverNC.defaultOptions);
@@ -7,8 +7,26 @@ Rin = length(N);
 
 X=[]; Q=[];
 
+% compute open class contributions
+ocl = find(isinf(N));
+Qopen = [];
+lGopen = 0;
+for i=1:size(L,1)
+    Ut(i) = (1-lambda*L(i,:)');
+    if isnan(Ut(i))
+        Ut(i) = 0;
+    end
+    L(i,:) = L(i,:)/Ut(i);
+    Qopen(i,:) = lambda.*L(i,:)/Ut(i);
+    %lGopen = lGopen + log(Ut(i));
+end
+Qopen(isnan(Qopen))=0;
+% then erase open classes
+N(isinf(N)) = 0;
+
 % first remove empty classes
 nnzClasses = find(N);
+lambda = lambda(:,nnzClasses);
 L = L(:,nnzClasses);
 N = N(:,nnzClasses);
 Z = Z(:,nnzClasses);
@@ -47,9 +65,9 @@ end
 % return immediately if degenerate case
 if isempty(L) || sum(L(:))<options.tol % all demands are zero
     if isempty(Z) || sum(Z(:))<options.tol
-        lG = 0;
+        lG = lGopen;
     else
-        lG = - sum(factln(N)) + sum(N.*log(sum(Z,1))) + N*log(scalevec)';
+        lG = lGopen - sum(factln(N)) + sum(N.*log(sum(Z,1))) + N*log(scalevec)';
     end
     return
 elseif M==1 && (isempty(Z) || sum(Z(:))<options.tol) % single node and no think time
@@ -91,15 +109,17 @@ else
     Xnnz(zeroDemandClasses) = Nz./ sum(Zz,1)./ scalevec(zeroDemandClasses);
     Xnnz(nonzeroDemandClasses) = Xnnzdem./ scalevec(nonzeroDemandClasses);
     X(1,[zClasses, nnzClasses]) = [Xz, Xnnz];
+    X(ocl) = lambda(ocl);
     Qz = zeros(size(Qnnzdem,1),length(zClasses));
     Qnnz = zeros(size(Qnnzdem,1),length(nnzClasses));
     Qnnz(:,zeroDemandClasses) = 0; % they are all in the delay
     Qnnz(:,nonzeroDemandClasses) = Qnnzdem; % Q does not require scaling
     Q(noDemStations,:) = 0;
     Q(demStations,[zClasses, nnzClasses]) = [Qz, Qnnz];
+    Q(:,ocl) = Qopen(:,ocl);
 end
 % scale back to original demands
-lG = lGnzdem + lGzdem + N*log(scalevecz)';
+lG = lGopen + lGnzdem + lGzdem + N*log(scalevecz)';
 end
 
 

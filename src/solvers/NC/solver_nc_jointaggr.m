@@ -8,6 +8,9 @@ method = options.method;
 M = sn.nstations;    %number of stations
 nservers = sn.nservers;
 NK = sn.njobs';  % initial population per class
+if any(isinf(NK))
+line_error(mfilename,'Open classes not yet supported in solver_nc_jointaggr.');
+end
 schedid = sn.schedid;
 %chains = sn.chains;
 SCV = sn.scv;
@@ -41,7 +44,7 @@ while max(abs(1-eta./eta_1)) > options.iter_tol && it <= options.iter_max
     C = sn.nchains;
     Lchain = zeros(M,C);
     STchain = zeros(M,C);
-    
+    lambda = zeros(1,C);
     SCVchain = zeros(M,C);
     Nchain = zeros(1,C);
     refstatchain = zeros(C,1);
@@ -98,17 +101,17 @@ while max(abs(1-eta./eta_1)) > options.iter_tol && it <= options.iter_max
     Qchain = zeros(M,C);
     
     % step 1
-    lG = pfqn_nc(Lcorr,Nchain,sum(Z,1)+sum(Zcorr,1), options);
+    lG = pfqn_nc(lambda,Lcorr,Nchain,sum(Z,1)+sum(Zcorr,1), options);
     
     for r=1:C
-        lGr(r) = pfqn_nc(Lcorr,oner(Nchain,r),sum(Z,1)+sum(Zcorr,1), options);
+        lGr(r) = pfqn_nc(lambda,Lcorr,oner(Nchain,r),sum(Z,1)+sum(Zcorr,1), options);
         Xchain(r) = exp(lGr(r) - lG);
         for i=1:M
             if Lchain(i,r)>0
                 if isinf(nservers(i)) % infinite server
                     Qchain(i,r) = Lchain(i,r) * Xchain(r);
                 else
-                    lGar(i,r) = pfqn_nc([Lcorr(setdiff(1:size(Lcorr,1),i),:),zeros(size(Lcorr,1)-1,1); Lcorr(i,:),1], [oner(Nchain,r),1], [sum(Z,1)+sum(Zcorr,1),0], options);
+                    lGar(i,r) = pfqn_nc([lambda,0],[Lcorr(setdiff(1:size(Lcorr,1),i),:),zeros(size(Lcorr,1)-1,1); Lcorr(i,:),1], [oner(Nchain,r),1], [sum(Z,1)+sum(Zcorr,1),0], options);
                     Qchain(i,r) = Zcorr(i,r) * Xchain(r) + Lcorr(i,r) * exp(lGar(i,r) - lG);
                 end
             end

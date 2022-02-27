@@ -17,8 +17,7 @@ for u = 1:length(self.unique_routeupdmap)
         classidxto = self.routeupdmap(r,7);
         if ~isempty(self.ensemble{self.idxhash(idx)}.items)
             Xtot = sum(self.results{end,self.idxhash(host)}.TN(self.ensemble{self.idxhash(host)}.attribute.serverIdx,:));
-            if Xtot > 0
-                
+            if Xtot > 0                
                 hm_tput = sum(self.results{end,self.idxhash(host)}.TN(self.ensemble{self.idxhash(host)}.attribute.serverIdx,classidxto));
                 P{classidxfrom,classidxto}(nodefrom, nodeto) = hm_tput / Xtot;
                 idx_updated = true;

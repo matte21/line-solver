@@ -8,11 +8,11 @@
          <entry name="Select data_entry" type="NONE"/>
          <entry name="Send data to Cloudwatch_entry" type="NONE"/>
          <task-activities>
-            <activity bound-to-entry="Read current meter_entry" call-order="STOCHASTIC" host-demand-cvsq="1" host-demand-mean="30" name="Read current meter_activity"/>
-            <activity bound-to-entry="Clean raw data_entry" call-order="STOCHASTIC" host-demand-cvsq="1" host-demand-mean="50" name="Clean raw data_activity"/>
-            <activity bound-to-entry="Standardize data_entry" call-order="STOCHASTIC" host-demand-cvsq="1" host-demand-mean="20" name="Standardize data_activity"/>
-            <activity bound-to-entry="Select data_entry" call-order="STOCHASTIC" host-demand-cvsq="1" host-demand-mean="10" name="Select data_activity"/>
-            <activity bound-to-entry="Send data to Cloudwatch_entry" call-order="STOCHASTIC" host-demand-cvsq="1" host-demand-mean="40" name="Send data to Cloudwatch_activity"/>
+            <activity bound-to-entry="Read current meter_entry" call-order="STOCHASTIC" host-demand-cvsq="1" host-demand-mean="300" name="Read current meter_activity"/>
+            <activity bound-to-entry="Clean raw data_entry" call-order="STOCHASTIC" host-demand-cvsq="1" host-demand-mean="480" name="Clean raw data_activity"/>
+            <activity bound-to-entry="Standardize data_entry" call-order="STOCHASTIC" host-demand-cvsq="1" host-demand-mean="180" name="Standardize data_activity"/>
+            <activity bound-to-entry="Select data_entry" call-order="STOCHASTIC" host-demand-cvsq="1" host-demand-mean="120" name="Select data_activity"/>
+            <activity bound-to-entry="Send data to Cloudwatch_entry" call-order="STOCHASTIC" host-demand-cvsq="1" host-demand-mean="120" name="Send data to Cloudwatch_activity"/>
             <reply-entry name="Read current meter_entry">
                <reply-activity name="Read current meter_activity"/>
             </reply-entry>
@@ -36,8 +36,8 @@
          <entry name="Share on SNS_entry" type="NONE"/>
          <entry name="Tigger ML pipeline state machine_entry" type="NONE"/>
          <task-activities>
-            <activity bound-to-entry="Share on SNS_entry" call-order="STOCHASTIC" host-demand-cvsq="1" host-demand-mean="22" name="Share on SNS_activity"/>
-            <activity bound-to-entry="Tigger ML pipeline state machine_entry" call-order="STOCHASTIC" host-demand-cvsq="1" host-demand-mean="5" name="Tigger ML pipeline state machine_activity"/>
+            <activity bound-to-entry="Share on SNS_entry" call-order="STOCHASTIC" host-demand-cvsq="1" host-demand-mean="60" name="Share on SNS_activity"/>
+            <activity bound-to-entry="Tigger ML pipeline state machine_entry" call-order="STOCHASTIC" host-demand-cvsq="1" host-demand-mean="120" name="Tigger ML pipeline state machine_activity"/>
             <reply-entry name="Share on SNS_entry">
                <reply-activity name="Share on SNS_activity"/>
             </reply-entry>
@@ -54,16 +54,12 @@
          <entry name="Load the initial configuration_entry" type="NONE"/>
          <entry name="Prepare training data set_entry" type="NONE"/>
          <entry name="Activate forecast_entry" type="NONE"/>
-         <entry name="Create endpoint_entry" type="NONE"/>
-         <entry name="Provide online interface_entry" type="NONE"/>
          <task-activities>
             <activity bound-to-entry="Activate model training_entry" call-order="STOCHASTIC" host-demand-cvsq="1" host-demand-mean="10" name="Activate model training_activity"/>
-            <activity bound-to-entry="Initial model training pipeline_entry" call-order="STOCHASTIC" host-demand-cvsq="1" host-demand-mean="15" name="Initial model training pipeline_activity"/>
-            <activity bound-to-entry="Load the initial configuration_entry" call-order="STOCHASTIC" host-demand-cvsq="1" host-demand-mean="8" name="Load the initial configuration_activity"/>
-            <activity bound-to-entry="Prepare training data set_entry" call-order="STOCHASTIC" host-demand-cvsq="1" host-demand-mean="33" name="Prepare training data set_activity"/>
-            <activity bound-to-entry="Activate forecast_entry" call-order="STOCHASTIC" host-demand-cvsq="1" host-demand-mean="3" name="Activate forecast_activity"/>
-            <activity bound-to-entry="Create endpoint_entry" call-order="STOCHASTIC" host-demand-cvsq="1" host-demand-mean="6" name="Create endpoint_activity"/>
-            <activity bound-to-entry="Provide online interface_entry" call-order="STOCHASTIC" host-demand-cvsq="1" host-demand-mean="1" name="Provide online interface_activity"/>
+            <activity bound-to-entry="Initial model training pipeline_entry" call-order="STOCHASTIC" host-demand-cvsq="1" host-demand-mean="60" name="Initial model training pipeline_activity"/>
+            <activity bound-to-entry="Load the initial configuration_entry" call-order="STOCHASTIC" host-demand-cvsq="1" host-demand-mean="60" name="Load the initial configuration_activity"/>
+            <activity bound-to-entry="Prepare training data set_entry" call-order="STOCHASTIC" host-demand-cvsq="1" host-demand-mean="600" name="Prepare training data set_activity"/>
+            <activity bound-to-entry="Activate forecast_entry" call-order="STOCHASTIC" host-demand-cvsq="1" host-demand-mean="20" name="Activate forecast_activity"/>
             <reply-entry name="Activate model training_entry">
                <reply-activity name="Activate model training_activity"/>
             </reply-entry>
@@ -79,12 +75,6 @@
             <reply-entry name="Activate forecast_entry">
                <reply-activity name="Activate forecast_activity"/>
             </reply-entry>
-            <reply-entry name="Create endpoint_entry">
-               <reply-activity name="Create endpoint_activity"/>
-            </reply-entry>
-            <reply-entry name="Provide online interface_entry">
-               <reply-activity name="Provide online interface_activity"/>
-            </reply-entry>
          </task-activities>
       </task>
    </processor>
@@ -92,14 +82,24 @@
       <task name="SageMaker_task" scheduling="inf">
          <entry name="Train the model_entry" type="NONE"/>
          <entry name="Save model_entry" type="NONE"/>
+         <entry name="Create endpoint_entry" type="NONE"/>
+         <entry name="Provide online interface_entry" type="NONE"/>
          <task-activities>
-            <activity bound-to-entry="Train the model_entry" call-order="STOCHASTIC" host-demand-cvsq="1" host-demand-mean="600" name="Train the model_activity"/>
-            <activity bound-to-entry="Save model_entry" call-order="STOCHASTIC" host-demand-cvsq="1" host-demand-mean="11" name="Save model_activity"/>
+            <activity bound-to-entry="Train the model_entry" call-order="STOCHASTIC" host-demand-cvsq="1" host-demand-mean="1200" name="Train the model_activity"/>
+            <activity bound-to-entry="Save model_entry" call-order="STOCHASTIC" host-demand-cvsq="1" host-demand-mean="300" name="Save model_activity"/>
+            <activity bound-to-entry="Create endpoint_entry" call-order="STOCHASTIC" host-demand-cvsq="1" host-demand-mean="30" name="Create endpoint_activity"/>
+            <activity bound-to-entry="Provide online interface_entry" call-order="STOCHASTIC" host-demand-cvsq="1" host-demand-mean="120" name="Provide online interface_activity"/>
             <reply-entry name="Train the model_entry">
                <reply-activity name="Train the model_activity"/>
             </reply-entry>
             <reply-entry name="Save model_entry">
                <reply-activity name="Save model_activity"/>
+            </reply-entry>
+            <reply-entry name="Create endpoint_entry">
+               <reply-activity name="Create endpoint_activity"/>
+            </reply-entry>
+            <reply-entry name="Provide online interface_entry">
+               <reply-activity name="Provide online interface_activity"/>
             </reply-entry>
          </task-activities>
       </task>

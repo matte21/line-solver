@@ -1,7 +1,55 @@
-function writeXML(self,filename)
+function writeXML(self,filename,abstractNames)
 % WRITEXML(SELF,FILENAME)
 % Copyright (c) 2012-2022, Imperial College London
 % All rights reserved.
+
+if nargin<3
+    abstractNames=false;
+end
+nodeHashMap = containers.Map;
+
+tctr = 0;
+ectr = 0;
+actr = 0;
+if abstractNames
+    for p = 1:length(self.hosts)
+        curProc = self.hosts{p};
+        nodeHashMap(curProc.name)=sprintf('P%d',p);
+        for t=1:length(curProc.tasks)
+            curTask = curProc.tasks(t);
+            tctr = tctr + 1;
+            nodeHashMap(curTask.name)=sprintf('T%d',tctr);
+            for e=1:length(curTask.entries)
+                curEntry = curTask.entries(e);
+                ectr = ectr + 1;
+                nodeHashMap(curEntry.name)=sprintf('E%d',ectr);
+            end
+            for a=1:length(curTask.activities)
+                curAct = curTask.activities(a);
+                actr = actr + 1;
+                nodeHashMap(curAct.name) = sprintf('A%d',actr);
+            end
+        end
+    end
+else
+    for p = 1:length(self.hosts)
+        curProc = self.hosts{p};
+        nodeHashMap(curProc.name)=curProc.name;
+        for t=1:length(curProc.tasks)
+            curTask = curProc.tasks(t);
+            nodeHashMap(curTask.name)=curTask.name;
+            for e=1:length(curTask.entries)
+                curEntry = curTask.entries(e);
+                nodeHashMap(curEntry.name)=curEntry.name;
+            end
+            for a=1:length(curTask.activities)
+                curAct = curTask.activities(a);
+                nodeHashMap(curAct.name)=curAct.name;
+            end
+        end
+    end
+end
+
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.DocumentBuilder;
 import org.w3c.dom.Document;
@@ -32,8 +80,8 @@ for p = 1:length(self.hosts)
     curProc = self.hosts{p};
     procElement = doc.createElement('processor');
     rootElement.appendChild(procElement);
-    procElement.setAttribute('name', curProc.name);        
-    procElement.setAttribute('scheduling', SchedStrategy.toText(curProc.scheduling));    
+    procElement.setAttribute('name', nodeHashMap(curProc.name));
+    procElement.setAttribute('scheduling', SchedStrategy.toText(curProc.scheduling));
     if curProc.replication>1
         procElement.setAttribute('replication', num2str(curProc.replication));
     end
@@ -50,10 +98,10 @@ for p = 1:length(self.hosts)
         curTask = curProc.tasks(t);
         taskElement = doc.createElement('task');
         procElement.appendChild(taskElement);
-        taskElement.setAttribute('name', curTask.name);
+        taskElement.setAttribute('name', nodeHashMap(curTask.name));
         taskElement.setAttribute('scheduling', SchedStrategy.toText(curTask.scheduling));
         if curTask.replication>1
-        taskElement.setAttribute('replication',  num2str(curTask.replication));
+            taskElement.setAttribute('replication',  num2str(curTask.replication));
         end
         if ~strcmp(curTask.scheduling,SchedStrategy.INF)
             taskElement.setAttribute('multiplicity', num2str(curTask.multiplicity));
@@ -65,7 +113,7 @@ for p = 1:length(self.hosts)
             curEntry = curTask.entries(e);
             entryElement = doc.createElement('entry');
             taskElement.appendChild(entryElement);
-            entryElement.setAttribute('name', curEntry.name);
+            entryElement.setAttribute('name', nodeHashMap(curEntry.name));
             entryElement.setAttribute('type', 'NONE');
         end
         taskActsElement = doc.createElement('task-activities');
@@ -77,21 +125,22 @@ for p = 1:length(self.hosts)
             actElement.setAttribute('host-demand-mean', num2str(curAct.hostDemandMean));
             actElement.setAttribute('host-demand-cvsq', num2str(curAct.hostDemandSCV));
             if ~isempty(curAct.boundToEntry)
-                actElement.setAttribute('bound-to-entry', curAct.boundToEntry);
+                actElement.setAttribute('bound-to-entry', nodeHashMap(curAct.boundToEntry));
             end
             actElement.setAttribute('call-order', curAct.callOrder);
-            actElement.setAttribute('name', curAct.name);
-            for sd=1:length(curAct.syncCallDests)
+            actElement.setAttribute('name', nodeHashMap(curAct.name));
+            
+            for sc=1:length(curAct.syncCallDests)
                 syncCallElement = doc.createElement('synch-call');
                 actElement.appendChild(syncCallElement);
-                syncCallElement.setAttribute('dest', curAct.syncCallDests(sd));
-                syncCallElement.setAttribute('calls-mean', num2str(curAct.syncCallMeans(sd)));
+                syncCallElement.setAttribute('dest', nodeHashMap(curAct.syncCallDests{sc}));
+                syncCallElement.setAttribute('calls-mean', num2str(curAct.syncCallMeans(sc)));
             end
-            for asd=1:length(curAct.asyncCallDests)
+            for ac=1:length(curAct.asyncCallDests)
                 asyncCallElement = doc.createElement('asynch-call');
                 actElement.appendChild(asyncCallElement);
-                asyncCallElement.setAttribute('dest', curAct.asyncCallDests(asd));
-                asyncCallElement.setAttribute('calls-mean', num2str(curAct.asyncCallMeans(asd)));
+                asyncCallElement.setAttribute('dest', nodeHashMap(curAct.asyncCallDests{ac}));
+                asyncCallElement.setAttribute('calls-mean', num2str(curAct.asyncCallMeans(ac)));
             end
         end
         for ap=1:length(curTask.precedences)
@@ -107,7 +156,7 @@ for p = 1:length(self.hosts)
             for pra = 1:length(curActPrec.preActs)
                 preActElement = doc.createElement('activity');
                 preElement.appendChild(preActElement);
-                preActElement.setAttribute('name', curActPrec.preActs{pra});
+                preActElement.setAttribute('name', nodeHashMap(curActPrec.preActs{pra}));
             end
             
             postElement = doc.createElement(curActPrec.postType);
@@ -116,14 +165,14 @@ for p = 1:length(self.hosts)
                 for poa = 1:length(curActPrec.postActs)
                     postActElement = doc.createElement('activity');
                     postElement.appendChild(postActElement);
-                    postActElement.setAttribute('name', curActPrec.postActs{poa});
+                    postActElement.setAttribute('name', nodeHashMap(curActPrec.postActs{poa}));
                     postActElement.setAttribute('prob', num2str(curActPrec.postParams(poa)));
                 end
             elseif strcmp(curActPrec.postType, ActivityPrecedence.POST_LOOP)
                 for poa = 1:length(curActPrec.postActs)-1
                     postActElement = doc.createElement('activity');
                     postElement.appendChild(postActElement);
-                    postActElement.setAttribute('name', curActPrec.postActs{poa});
+                    postActElement.setAttribute('name', nodeHashMap(curActPrec.postActs{poa}));
                     postActElement.setAttribute('count', num2str(curActPrec.postParams(poa)));
                 end
                 postElement.setAttribute('end', curActPrec.postActs{end});
@@ -131,7 +180,7 @@ for p = 1:length(self.hosts)
                 for poa = 1:length(curActPrec.postActs)
                     postActElement = doc.createElement('activity');
                     postElement.appendChild(postActElement);
-                    postActElement.setAttribute('name', curActPrec.postActs{poa});
+                    postActElement.setAttribute('name', nodeHashMap(curActPrec.postActs{poa}));
                 end
             end
         end
@@ -140,11 +189,11 @@ for p = 1:length(self.hosts)
             if ~isempty(curEntry.replyActivity)
                 entryReplyElement = doc.createElement('reply-entry');
                 taskActsElement.appendChild(entryReplyElement);
-                entryReplyElement.setAttribute('name', curEntry.name);
+                entryReplyElement.setAttribute('name', nodeHashMap(curEntry.name));
                 for r=1:length(curEntry.replyActivity)
                     entryReplyActElement = doc.createElement('reply-activity');
                     entryReplyElement.appendChild(entryReplyActElement);
-                    entryReplyActElement.setAttribute('name', curEntry.replyActivity{r});
+                    entryReplyActElement.setAttribute('name', nodeHashMap(curEntry.replyActivity{r}));
                 end
             end
         end
@@ -156,6 +205,10 @@ transformerFactory = TransformerFactory.newInstance();
 transformer = transformerFactory.newTransformer();
 transformer.setOutputProperty(OutputKeys.INDENT, 'yes');
 source = DOMSource(doc);
+if isempty(fileparts(filename))
+    filename=[lineRootFolder,filesep,'workspace',filesep,filename];
+end
+fprintf(1,'LQN model: %s\n', filename);
 result = StreamResult(File(filename));
 transformer.transform(source, result);
 end

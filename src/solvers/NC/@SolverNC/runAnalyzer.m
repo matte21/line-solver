@@ -128,7 +128,7 @@ else % queueing network
             end
             %it
 
-            solver=SolverNC(staticmodel, options);
+            solver = SolverNC(staticmodel, options);
             solver.setChecks(false);
             solver.getAvgNodeTable;
 

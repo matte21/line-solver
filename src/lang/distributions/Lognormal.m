@@ -45,8 +45,8 @@ classdef Lognormal < ContinuousDistrib
             if nargin<2 %~exist('n','var'), 
                 n = 1; 
             end
-            alpha = self.getParam(1).paramValue;
-            r = self.getParam(2).paramValue;
+            mu = self.getParam(1).paramValue;
+            sigma = self.getParam(2).paramValue;
             X = lognrnd(mu,sigma,n,1);
         end
         

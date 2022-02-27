@@ -142,12 +142,12 @@ for i=1:M
         if ~isempty(RNclass) && RNclass(i,k)>0
             c = find(sn.chains(:,k));
             inchain = find(sn.chains(c,:));
-            if RNclass(i,k)<Distrib.Zero
+            if RNclass(i,k) < Distrib.Zero
                 WNclass(i,k) = RNclass(i,k);
             else
                 if any(intersect(inchain,find(sn.refclass)))
                     % if there is a reference class, use this
-                    WNclass(i,k) = RNclass(i,k)*V(i,k)/sum(V(sn.refstat(k),sn.refclass(intersect(inchain,find(sn.refclass)))));
+                    WNclass(i,k) = RNclass(i,k)*V(i,k)/sum(V(sn.refstat(k),intersect(inchain,find(sn.refclass))));
                 else                    
                     WNclass(i,k) = RNclass(i,k)*V(i,k)/sum(V(sn.refstat(k),sn.chains(c,:)));
                 end

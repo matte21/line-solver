@@ -6,16 +6,26 @@ function [Q,U,R,T,C,X,lG,runtime] = solver_nc_analyzer(sn, options)
 
 M = sn.nstations;    %number of stations
 nservers = sn.nservers;
+if max(nservers(nservers<Inf))>1 & strcmpi(options.method,'exact')
+    line_error(mfilename,'NC solver cannot provide exact solutions for open or mixed queueing networks. Remove the ''exact'' option.');
+end
+
 NK = sn.njobs';  % initial population per class
 schedid = sn.schedid;
-%chains = sn.chains;
 C = sn.nchains;
 SCV = sn.scv;
 ST = 1 ./ sn.rates;
 ST(isnan(ST))=0;
 ST0=ST;
 
-[~,~,Vchain,alpha] = snGetDemandsChain(sn);
+Nchain = zeros(1,C);
+for c=1:C
+    inchain = find(sn.chains(c,:));
+    Nchain(c) = sum(NK(inchain)); %#ok<FNDSB>
+end
+Nt = sum(Nchain(isfinite(Nchain)));
+openChains = find(isinf(Nchain));
+closedChains = find(~isinf(Nchain));
 
 eta_1 = zeros(1,M);
 eta = ones(1,M);
@@ -32,8 +42,9 @@ while max(abs(1-eta./eta_1)) > options.iter_tol && it < options.iter_max
     STchain = zeros(M,C);
     
     SCVchain = zeros(M,C);
-    Nchain = zeros(1,C);
     refstatchain = zeros(C,1);
+    lambda = zeros(1,C);
+    [~,~,Vchain,alpha,Nchain,SCVchain,refstatchain] = snGetDemandsChain(sn);
     for c=1:C
         inchain = find(sn.chains(c,:));
         isOpenChain = any(isinf(sn.njobs(inchain)));
@@ -42,22 +53,14 @@ while max(abs(1-eta./eta_1)) > options.iter_tol && it < options.iter_max
             Lchain(i,c) = Vchain(i,c) * ST(i,inchain) * alpha(i,inchain)';
             STchain(i,c) = ST(i,inchain) * alpha(i,inchain)';
             if isOpenChain && i == sn.refstat(inchain(1)) % if this is a source ST = 1 / arrival rates
-                STchain(i,c) = sumfinite(ST(i,inchain)); % ignore degenerate classes with zero arrival rates
-            else
-                STchain(i,c) = ST(i,inchain) * alpha(i,inchain)';
+                lambda(c) = 1 ./ STchain(i,c);
             end
-            SCVchain(i,c) = SCV(i,inchain) * alpha(i,inchain)';
-        end
-        Nchain(c) = sum(NK(inchain));
-        refstatchain(c) = sn.refstat(inchain(1));
-        if any((sn.refstat(inchain(1))-refstatchain(c))~=0)
-            line_error(mfilename,sprintf('Classes in chain %d have different reference station.',c));
         end
     end
+    
     STchain(~isfinite(STchain))=0;
     Lchain(~isfinite(Lchain))=0;
     Tstart = tic;
-    Nt = sum(Nchain(isfinite(Nchain)));
     
     Lms = zeros(M,C);
     Z = zeros(M,C);
@@ -65,7 +68,6 @@ while max(abs(1-eta./eta_1)) > options.iter_tol && it < options.iter_max
     infServers = [];
     for i=1:M
         if isinf(nservers(i)) % infinite server
-            %mu_chain(i,1:sum(Nchain)) = 1:sum(Nchain);
             infServers(end+1) = i;
             Lms(i,:) = 0;
             Z(i,:) = Lchain(i,:);
@@ -80,10 +82,8 @@ while max(abs(1-eta./eta_1)) > options.iter_tol && it < options.iter_max
             Zms(i,:) = Lchain(i,:) * (nservers(i)-1)/nservers(i);
         end
     end
-    Qchain = zeros(M,C);
     % step 1
-    
-    [lG,Xchain, Qchain] = pfqn_nc(Lms,Nchain,sum(Z,1)+sum(Zms,1), options);
+    [lG, Xchain, Qchain] = pfqn_nc(lambda,Lms,Nchain,sum(Z,1)+sum(Zms,1), options);
     
     if sum(Zms,1) > Distrib.Zero
         % in this case, we need to use the iterative approximation below
@@ -111,19 +111,28 @@ while max(abs(1-eta./eta_1)) > options.iter_tol && it < options.iter_max
     %     end
     
     if isempty(Xchain)
-        for r=1:C
-            lGr(r) = pfqn_nc(Lms,oner(Nchain,r),sum(Z,1)+sum(Zms,1), options);
+        Xchain=lambda;
+        Qchain = zeros(M,C);
+        for r=closedChains
+            lGr(r) = pfqn_nc(lambda,Lms,oner(Nchain,r),sum(Z,1)+sum(Zms,1), options);
             Xchain(r) = exp(lGr(r) - lG);
             for i=1:M
                 if Lchain(i,r)>0
                     if isinf(nservers(i)) % infinite server
                         Qchain(i,r) = Lchain(i,r) * Xchain(r);
                     else
-                        lGar(i,r) = pfqn_nc([Lms(setdiff(1:size(Lms,1),i),:),zeros(size(Lms,1)-1,1); Lms(i,:),1], [oner(Nchain,r),1], [sum(Z,1)+sum(Zms,1),0], options);
-                        dlG = lGar(i,r) - lG;
-                        Qchain(i,r) = Zms(i,r) * Xchain(r) + Lms(i,r) * exp(dlG);
+                        % add repliaca of station i and move job of class r
+                        % in separate class
+                        lGar(i,r) = pfqn_nc([lambda,0],[Lms(setdiff(1:size(Lms,1),i),:),zeros(size(Lms,1)-1,1); Lms(i,:),1], [oner(Nchain,r),1], [sum(Z,1)+sum(Zms,1),0], options);
+                        Qchain(i,r) = Zms(i,r) * Xchain(r) + Lms(i,r) * exp(lGar(i,r) - lG);
                     end
                 end
+            end
+            Qchain(isnan(Qchain))=0;
+        end
+        for r=openChains
+            for i=1:M
+                Qchain(i,r) = lambda(r)*Lchain(i,r)/(1-lambda(openChains)*Lchain(i,openChains)'/nservers(i))*(1+sum(Qchain(i,closedChains)));
             end
         end
     else
@@ -144,11 +153,12 @@ while max(abs(1-eta./eta_1)) > options.iter_tol && it < options.iter_max
     end
     
     Z = sum(Z(1:M,:),1);
+    
     Rchain = Qchain ./ repmat(Xchain,M,1) ./ Vchain;
     Rchain(infServers,:) = Lchain(infServers,:) ./ Vchain(infServers,:);
     Tchain = repmat(Xchain,M,1) .* Vchain;
-    Uchain = Tchain .* Lchain;
-    Cchain = Nchain ./ Xchain - Z;
+    %Uchain = Tchain .* Lchain;
+    %Cchain = Nchain ./ Xchain - Z;
     
     [Q,U,R,T,C,X] = snDeaggregateChainResults(sn, Lchain, ST, STchain, Vchain, alpha, [], [], Rchain, Tchain, [], Xchain);
     
@@ -174,22 +184,6 @@ while max(abs(1-eta./eta_1)) > options.iter_tol && it < options.iter_max
         switch schedid(i)
             case SchedStrategy.ID_FCFS
                 if range(ST0(i,sd))>0 && (max(SCV(i,sd))>1 - Distrib.Zero || min(SCV(i,sd))<1 + Distrib.Zero) % check if non-product-form
-                    %                    if rho(i) <= 1
-                    %                     else
-                    %                         ca(i) = 0;
-                    %                         for j=1:M
-                    %                             for r=1:K
-                    %                                 if ST0(j,r)>0
-                    %                                     for s=1:K
-                    %                                         if ST0(i,s)>0
-                    %                                             pji_rs = sn.rt((j-1)*sn.nclasses + r, (i-1)*sn.nclasses + s);
-                    %                                             ca(i) = ca(i) + (T(j,r)*pji_rs/sum(T(i,sd)))*(1 - pji_rs + pji_rs*((1-rho(j)^2)*ca_1(j) + rho(j)^2*cs_1(j)));
-                    %                                         end
-                    %                                     end
-                    %                                 end
-                    %                             end
-                    %                         end
-                    %                     end
                     ca(i) = 1;
                     cs(i) = (SCV(i,sd)*T(i,sd)')/sum(T(i,sd));
                     gamma(i) = (rho(i)^nservers(i)+rho(i))/2; % multi-server

@@ -64,7 +64,7 @@ switch solverName
     case 'LQNS'
         options = EnsembleSolver.defaultOptions();
         options.timespan = [Inf,Inf];
-        options.keep = false;
+        options.keep = true;
     case 'MAM'
         options.timespan = [Inf,Inf];
     case 'MVA'

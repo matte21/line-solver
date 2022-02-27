@@ -1,5 +1,7 @@
-function  buildLayerRecursive(self, idx, callers, ishostlayer)
+function  buildLayersRecursive(self, idx, callers, ishostlayer)
 lqn = self.lqn;
+jobPoskey = zeros(lqn.nidx,1);
+curClasskey = cell(lqn.nidx,1);
 nreplicas = lqn.repl(idx);
 callresptproc = self.callresptproc;
 model = Network(lqn.hashnames{idx});
@@ -28,7 +30,7 @@ for m=1:nreplicas
     serverStation{m}.attribute.idx = idx;
 end
 if iscachelayer
-    cacheNode = Cache(model, lqn.hashnames{callers}, lqn.nitems{callers}, lqn.itemlevelcap{callers}, lqn.replacementpolicy{callers}); 
+    cacheNode = Cache(model, lqn.hashnames{callers}, lqn.nitems{callers}, lqn.itemlevelcap{callers}, lqn.replacementpolicy{callers});
     model.attribute.cacheIdx = 3;
 end
 aidxClass = cell(1,lqn.nentries+lqn.nacts);
@@ -83,7 +85,7 @@ for tidx_caller = callers
             clientDelay.setService(aidxClass{eidx}, Immediate.getInstance());
         end
     end
-    
+
     % for each activity of the calling task
     for aidx = lqn.actsof{tidx_caller}
         if ishostlayer | any(any(lqn.issynccaller(tidx_caller, lqn.entriesof{idx}))) %#ok<OR2>
@@ -138,15 +140,15 @@ for tidx_caller = callers
                     model.attribute.calls(end+1,:) = [cidxClass{cidx}.index, cidx, lqn.callpair(cidx,1), lqn.callpair(cidx,2)];
                     aidxClass{cidx}.completes = false;
                     cidxClass{cidx}.attribute = [LayeredNetworkElement.CALL, cidx];
-                    minRespT = 0;                    
+                    minRespT = 0;
                     for tidx_act = lqn.actsof{idx}
                         minRespT = minRespT + lqn.hostdem{tidx_act}.getMean; % upper bound, uses all activities not just the ones reachable by this entry
-                    end 
+                    end
                     for m=1:nreplicas
                         serverStation{m}.setService(cidxClass{cidx}, Exp.fitMean(minRespT));
                     end
             end
-            
+
             if callmean(cidx) ~= nreplicas
                 switch lqn.calltype(cidx)
                     case CallType.ID_SYNC
@@ -199,6 +201,7 @@ for tidx_caller = callers
                 % at successive iterations make sure to replace this with throughput ratio
                 self.routeupdmap{idx}(end+1,:) = [idx, tidx_caller, eidx, 1, 1, aidxClass_tidx_caller.index, aidxClass_eidx.index];
             end
+
             P = recurActGraph(P, tidx_caller, eidx, aidxClass_eidx, atClient);
         end
     end
@@ -207,11 +210,11 @@ model.link(P);
 self.ensemble{idx} = model;
 
     function [P, curClass, jobPos] = recurActGraph(P, tidx_caller, aidx, curClass, jobPos)
+        jobPoskey(aidx) = jobPos;
+        curClasskey{aidx} = curClass;
         nextaidxs = find(lqn.graph(aidx,:)); % these include the called entries
-        %curClass0 = curClass;
         for nextaidx = nextaidxs
             if ~isempty(nextaidx)
-                %curClass = curClass0; % for each activity, restart from the input curClass
                 if ~(lqn.parent(aidx) == lqn.parent(nextaidx))
                     % if the successor activity is an entry of another task, this is a call
                     cidx = matchrow(lqn.callpair,[aidx,nextaidx]); % find the call index
@@ -223,7 +226,7 @@ self.ensemble{idx} = model;
                                 if lqn.parent(lqn.callpair(cidx,2)) == idx
                                     % if it is a call to an entry of the server
                                     %P{curClass, curClass}(clientDelay,clientDelay) = full(lqn.graph(lqn.callpair(cidx,1), lqn.callpair(cidx,2))) * (1-pcall);
-                                    if callmean(cidx) < nreplicas                                        
+                                    if callmean(cidx) < nreplicas
                                         P{curClass, cidxAuxClass{cidx}}(clientDelay,clientDelay) = 1 - callmean(cidx);
                                         for m=1:nreplicas
                                             P{curClass, cidxClass{cidx}}(clientDelay,serverStation{m}) = callmean(cidx) / nreplicas;
@@ -305,10 +308,13 @@ self.ensemble{idx} = model;
                                     end
                                 else
                                     % if it is not a call to an entry of the server
-                                    if callmean(cidx) < nreplicas
+                                    % callmean not needed since we switched
+                                    % to ResidT to model service time at
+                                    % client
+                                    if callmean(cidx) < nreplicas                                        
                                         for m=1:nreplicas
-                                            P{curClass, cidxClass{cidx}}(serverStation{m},clientDelay) = callmean(cidx);
-                                            P{curClass, cidxAuxClass{cidx}}(serverStation{m},clientDelay) = 1 - callmean(cidx);
+                                            %P{curClass, cidxClass{cidx}}(serverStation{m},clientDelay) = callmean(cidx);
+                                            P{curClass, cidxClass{cidx}}(serverStation{m},clientDelay) = 1;% - callmean(cidx);
                                         end
                                         P{cidxClass{cidx}, cidxAuxClass{cidx}}(clientDelay,clientDelay) = 1;
                                         curClass = cidxAuxClass{cidx};
@@ -321,8 +327,8 @@ self.ensemble{idx} = model;
                                         for m=1:nreplicas
                                             P{curClass, cidxClass{cidx}}(serverStation{m},clientDelay) = 1;
                                         end
-                                        P{cidxClass{cidx}, cidxClass{cidx}}(clientDelay,clientDelay) = 1 - 1 / (callmean(cidx));
-                                        P{cidxClass{cidx}, cidxAuxClass{cidx}}(clientDelay,clientDelay) = 1 / (callmean(cidx));
+                                        %P{cidxClass{cidx}, cidxClass{cidx}}(clientDelay,clientDelay) = 1 - 1 / (callmean(cidx));
+                                        P{cidxClass{cidx}, cidxAuxClass{cidx}}(clientDelay,clientDelay) = 1;% / (callmean(cidx));
                                         curClass = cidxAuxClass{cidx};
                                     end
                                     jobPos = 1;
@@ -337,32 +343,42 @@ self.ensemble{idx} = model;
                 % activities now
                 %% if the successor activity is not a call
                 if (lqn.parent(aidx) == lqn.parent(nextaidx))
+                    if isempty(intersect(lqn.entryidx,nextaidxs))
+                        jobPos = jobPoskey(aidx);
+                        curClass = curClasskey{aidx};
+                    else
+                        if ismember(nextaidxs(find(nextaidxs==nextaidx)-1),lqn.entryidx)
+                            curClassC = curClass;
+                        end
+                        jobPos = 1;
+                        curClass = curClassC;
+                    end
                     if jobPos == 1 % at node 1
                         if ishostlayer
                             if ~iscachelayer
-                            for m=1:nreplicas
-                                P{curClass, aidxClass{nextaidx}}(clientDelay,serverStation{m}) = full(lqn.graph(aidx,nextaidx));
-                                serverStation{m}.setService(aidxClass{nextaidx}, lqn.hostdem{nextaidx});
-                            end
-                            jobPos = 2;
-                            curClass = aidxClass{nextaidx};
-                            self.svctmap{idx}(end+1,:) = [idx, nextaidx, 2, aidxClass{nextaidx}.index];
-                        else
+                                for m=1:nreplicas
+                                    P{curClass, aidxClass{nextaidx}}(clientDelay,serverStation{m}) = full(lqn.graph(aidx,nextaidx));
+                                    serverStation{m}.setService(aidxClass{nextaidx}, lqn.hostdem{nextaidx});
+                                end
+                                jobPos = 2;
+                                curClass = aidxClass{nextaidx};
+                                self.svctmap{idx}(end+1,:) = [idx, nextaidx, 2, aidxClass{nextaidx}.index];
+                            else
                                 P{curClass, aidxClass{nextaidx}}(clientDelay,cacheNode) = full(lqn.graph(aidx,nextaidx));
 
-                                cacheNode.setReadItemEntry(aidxClass{nextaidx},lqn.itemsdistribution{aidx},lqn.nitemsof{aidx}); 
+                                cacheNode.setReadItemEntry(aidxClass{nextaidx},lqn.itemsdistribution{aidx},lqn.nitemsof{aidx});
                                 lqn.hitmissaidx = find(lqn.graph(nextaidx,:));
                                 lqn.hitaidx = lqn.hitmissaidx(1);
                                 lqn.missaidx = lqn.hitmissaidx(2);
-                                
-                                cacheNode.setHitClass(aidxClass{nextaidx},aidxClass{lqn.hitaidx}); 
-                                cacheNode.setMissClass(aidxClass{nextaidx},aidxClass{lqn.missaidx});     
-                                
+
+                                cacheNode.setHitClass(aidxClass{nextaidx},aidxClass{lqn.hitaidx});
+                                cacheNode.setMissClass(aidxClass{nextaidx},aidxClass{lqn.missaidx});
+
                                 jobPos = 3;
                                 curClass = aidxClass{nextaidx};
                                 %self.routeupdmap{idx}(end+1,:) = [idx, nextaidx, lqn.hitaidx, 3, 3, aidxClass{nextaidx}.index, aidxClass{lqn.hitaidx}.index];
                                 %self.routeupdmap{idx}(end+1,:) = [idx, nextaidx, lqn.missaidx, 3, 3, aidxClass{nextaidx}.index, aidxClass{lqn.missaidx}.index];
-    
+
                             end
                         else
                             P{curClass, aidxClass{nextaidx}}(clientDelay,clientDelay) = full(lqn.graph(aidx,nextaidx));
@@ -374,17 +390,17 @@ self.ensemble{idx} = model;
                     else % at node 2
                         if ishostlayer
                             if iscachelayer
-                                curClass = aidxClass{nextaidx};                                
+                                curClass = aidxClass{nextaidx};
                                 for m=1:nreplicas
                                     P{curClass, aidxClass{nextaidx}}(cacheNode,serverStation{m}) = full(lqn.graph(aidx,nextaidx));
                                     serverStation{m}.setService(aidxClass{nextaidx}, lqn.hostdem{nextaidx});
                                     %self.routeupdmap{idx}(end+1,:) = [idx, nextaidx, nextaidx, 3, 2, aidxClass{nextaidx}.index, aidxClass{nextaidx}.index];
-                                end                                
-                            else                                
-                            for m=1:nreplicas
-                                P{curClass, aidxClass{nextaidx}}(serverStation{m},serverStation{m}) = full(lqn.graph(aidx,nextaidx));
-                                serverStation{m}.setService(aidxClass{nextaidx}, lqn.hostdem{nextaidx});
-                            end
+                                end
+                            else
+                                for m=1:nreplicas
+                                    P{curClass, aidxClass{nextaidx}}(serverStation{m},serverStation{m}) = full(lqn.graph(aidx,nextaidx));
+                                    serverStation{m}.setService(aidxClass{nextaidx}, lqn.hostdem{nextaidx});
+                                end
                             end
                             jobPos = 2;
                             curClass = aidxClass{nextaidx};
@@ -399,19 +415,21 @@ self.ensemble{idx} = model;
                             self.svcupdmap{idx}(end+1,:) = [idx, nextaidx, 1, aidxClass{nextaidx}.index];
                         end
                     end
-                    %% now recursively build the rest of the routing matrix graph
-                    [P, curClass, jobPos] = recurActGraph(P, tidx_caller, nextaidx, curClass, jobPos);
-                    
-                    % At this point curClassRec is the last class in the
-                    % recursive branch, which we now close with a reply
-                    if jobPos == 1
-                        P{curClass, aidxClass{tidx_caller}}(clientDelay,clientDelay) = 1;
-                        curClass.completes = true;
-                    else
-                        for m=1:nreplicas
-                            P{curClass, aidxClass{tidx_caller}}(serverStation{m},clientDelay) = 1;
+                    if aidx ~= nextaidx
+                        %% now recursively build the rest of the routing matrix graph
+                        [P, curClass, jobPos] = recurActGraph(P, tidx_caller, nextaidx, curClass, jobPos);
+
+                        % At this point curClassRec is the last class in the
+                        % recursive branch, which we now close with a reply
+                        if jobPos == 1
+                            P{curClass, aidxClass{tidx_caller}}(clientDelay,clientDelay) = 1;
+                            curClass.completes = true;
+                        else
+                            for m=1:nreplicas
+                                P{curClass, aidxClass{tidx_caller}}(serverStation{m},clientDelay) = 1;
+                            end
+                            curClass.completes = true;
                         end
-                        curClass.completes = true;
                     end
                 end
             end

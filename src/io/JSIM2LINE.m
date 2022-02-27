@@ -62,6 +62,7 @@ for i=1:length(node_name)
             node{i} = Source(model, node_name{i});
             source_idx = i;
             xrouting{i} = {xsection_i{i}(3).parameter.subParameter.ATTRIBUTE};
+            nSources=1;
         case 'Join'
             node{i} = Join(model, node_name{i});
             xrouting{i} = {xsection_i{i}(3).parameter.subParameter.ATTRIBUTE};
@@ -103,10 +104,10 @@ for i=1:length(node_name)
                             switch xput_strategy{i}(3).ATTRIBUTE.name
                                 case 'retrialDistributions'
                                     % new XML format from 1.2.0
-                                        %xretrial_strategy{i}= {xput_strategy{i}(4)};                            
-                                        xput_strategy{i}= {xput_strategy{i}(5).subParameter.ATTRIBUTE};                            
+                                    %xretrial_strategy{i}= {xput_strategy{i}(4)};
+                                    xput_strategy{i}= {xput_strategy{i}(5).subParameter.ATTRIBUTE};
                                 otherwise
-                                        xput_strategy{i}= {xput_strategy{i}(4).subParameter.ATTRIBUTE};
+                                    xput_strategy{i}= {xput_strategy{i}(4).subParameter.ATTRIBUTE};
                             end
                             switch xput_strategy{i}{1}.name
                                 case 'TailStrategy'
@@ -277,9 +278,9 @@ for i=1:length(node_name)
                 end
                 timingSt = xsection_i{1, i}(2).parameter(3).subParameter(m).ATTRIBUTE.classPath;
                 if strcmp(timingSt,'jmt.engine.NetStrategies.ServiceStrategies.ZeroServiceTimeStrategy')
-                    node{i}.setTimingStrategy(m,TimingStrategy.ID_IMMEDIATE);
+                    node{i}.setTimingStrategy(m,TimingStrategy.IMMEDIATE);
                 else
-                    node{i}.setTimingStrategy(m,TimingStrategy.ID_TIMED);
+                    node{i}.setTimingStrategy(m,TimingStrategy.TIMED);
                     distribution = xsection_i{1, i}(2).parameter(3).subParameter(m).subParameter(1).ATTRIBUTE.name;
                     lambda = xsection_i{1, i}(2).parameter(3).subParameter(m).subParameter(2).subParameter(1).value;
                     switch distribution
@@ -574,6 +575,12 @@ for from=1:length(node_name)
 end
 %model.link(P);
 %line_printf(['JMT2LINE parsing time: ',num2str(Ttot),' s\n']);
+
+if length(model.getIndexSourceStation)>1
+    txt = sprintf('LINE supports JMT models with at most a single source node. You can refactor your JMT model in several ways:\n - If you are mapping in JMT each class to a different source, this is not required. You can instead assign the same reference station to each class and configure class routing in the routing panel of the source node.\n - In more general cases, you may follow these three steps:\n    (1) give a different name to each class of arrival, assigning these classes to a single source as reference station.\n    (2) put a class-switch node after the source to switch the new classes into the original classes they were in the model with multiple sources.\n    (3) configure the routing section of this class-switch node to set the same routing for the classes as they were in the original model.');
+    error(txt);    
+end
+
 
 % Preload
 state = zeros(length(node),length(classes));

@@ -1,4 +1,4 @@
-function buildLoose(self)
+function buildLayers(self)
 lqn = self.lqn;
 refnode = find(lqn.schedid == SchedStrategy.ID_REF);
 %if length(refnode)>1
@@ -16,7 +16,7 @@ self.callupdmap = cell(lqn.nhosts+lqn.ntasks,1);
 self.routeupdmap = cell(lqn.nhosts+lqn.ntasks,1);
 for hidx = 1:lqn.nhosts
     callers = lqn.tasksof{hidx};
-    self.buildLayerRecursive(hidx, callers, true);
+    self.buildLayersRecursive(hidx, callers, true);
 end
 
 %% build one subnetwork for every task
@@ -27,7 +27,7 @@ for t = 1:lqn.ntasks
             [calling_idx, called_entries] = find(lqn.iscaller(:, lqn.entriesof{tidx})); %#ok<ASGLU>
             callers = intersect(lqn.taskidx, unique(calling_idx)');
             if ~isempty(callers) % true if the server is a software task
-                self.buildLayerRecursive(tidx, callers, false);
+                self.buildLayersRecursive(tidx, callers, false);
             else
                 self.ensemble{tidx} = [];
             end    
@@ -56,4 +56,5 @@ self.idxhash(emptymodels) = NaN;
 %callresptmap(:,1) = idxmap(callresptmap(:,1));
 %routupdmap(:,1) = idxmap(routupdmap(:,1));
 
+self.model.ensemble = self.ensemble;
 end

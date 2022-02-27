@@ -19,7 +19,7 @@ warning off;
 %javaaddpath('/opt/matlabruntime/v99/java/jarext/matlab-websocket-1.6.jar');
 %system('ls /opt/matlabruntime/v99/java/jarext/')
 %system('cat /opt/matlabruntime/v99/toolbox/local/classpath.txt')
-%javaaddpath(which('matlab-websocket-1.6.jar'))
+javaaddpath(which('matlab-websocket-1.6.jar'))
 %javaclasspath
 
 ret = [];
@@ -57,7 +57,7 @@ for v=1:2:length(varargin)
         case {'-h','--help'}
             fprintf('--------------------------------------------------------------------\n');
             fprintf('LINE Solver - Command Line Interface\n');
-            fprintf('Copyright (c) 2012-2021, QORE group, Imperial College London\n');
+            fprintf('Copyright (c) 2012-2022, QORE group, Imperial College London\n');
             fprintf(sprintf('Version %s. All rights reserved.\n',Model('').getVersion()));
             fprintf('--------------------------------------------------------------------\n');
             fprintf('-p, --port     : run in server mode on the specified port \n');

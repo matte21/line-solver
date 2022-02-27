@@ -47,8 +47,14 @@ for c=1:sn.nchains
     inchain = find(sn.chains(c,:));
     completingclasses = sn.chains(c,:) & completes;
     for i=1:sn.nstations
-        for k=inchain % for all classes within the chain (a class belongs to a single chain, the reference station must be identical for all classes within a chain )
-            alpha(i,k) = alpha(i,k) + sn.visits{c}(i,k)/sum(sn.visits{c}(sn.refstat(k),completingclasses));
+        if any(intersect(find(sn.refclass), inchain))
+            for k=intersect(find(sn.refclass), inchain) % for all classes within the chain (a class belongs to a single chain, the reference station must be identical for all classes within a chain )
+                alpha(i,k) = alpha(i,k) + sn.visits{c}(i,k)/sum(sn.visits{c}(sn.refstat(k),completingclasses));
+            end
+        else
+            for k=inchain % for all classes within the chain (a class belongs to a single chain, the reference station must be identical for all classes within a chain )
+                alpha(i,k) = alpha(i,k) + sn.visits{c}(i,k)/sum(sn.visits{c}(sn.refstat(k),completingclasses));
+            end
         end
     end
 end
@@ -69,9 +75,17 @@ for c=1:sn.nchains
         % reference station from completing classes
         for i=1:sn.nstations
             for r=completingclasses(:)'
-                for s=inchain(:)'
-                    if ~isnan(TN(i,r))
-                        XNchain(c) = XNchain(c) + sn.rt((i-1)*sn.nclasses + r, (ref-1)*sn.nclasses + s )*TN(i,r);
+                if any(intersect(find(sn.refclass), inchain))
+                    for s=intersect(find(sn.refclass), inchain)
+                        if ~isnan(TN(i,r))
+                            XNchain(c) = XNchain(c) + sn.rt((i-1)*sn.nclasses + r, (ref-1)*sn.nclasses + s )*TN(i,r);
+                        end
+                    end
+                else
+                    for s=inchain(:)'
+                        if ~isnan(TN(i,r))
+                            XNchain(c) = XNchain(c) + sn.rt((i-1)*sn.nclasses + r, (ref-1)*sn.nclasses + s )*TN(i,r);
+                        end
                     end
                 end
             end

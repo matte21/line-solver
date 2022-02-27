@@ -201,7 +201,7 @@ methods(Static)
            routing_probs = line_network.getRoutingStrategies;
            for n = 1 : length(routing_probs)
             if (routing_probs(n) ~= RoutingStrategy.ID_RAND) && (routing_probs(n) ~= RoutingStrategy.ID_PROB)
-                line_error(mfilename,'Routing Strategy not supported by LINE/TauSSA integration script.');
+                line_error(mfilename,'Routing strategy not supported by LINE/TauSSA integration script.');
             end
            end
            network_object = StochLib.Network(line_network.getName);

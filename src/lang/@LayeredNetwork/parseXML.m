@@ -149,7 +149,7 @@ for i = 0:procList.getLength()-1
                         if hostDemandSCV <= 0.0
                             hostDemand = Det(hostDemandMean);
                         elseif hostDemandSCV < 1.0
-                            hostDemand = Gamma.fitMeanAndSCV(hostDemandMean, hostDemandSCV);
+                            hostDemand = APH.fitMeanAndSCV(hostDemandMean, hostDemandSCV);
                         elseif hostDemandSCV == 1.0
                             hostDemand = Exp.fitMean(hostDemandMean);
                         else
@@ -232,7 +232,7 @@ for i = 0:procList.getLength()-1
                         if hostDemandSCV <= 0.0
                             hostDemand = Det(hostDemandMean);
                         elseif hostDemandSCV < 1.0
-                            hostDemand = Gamma.fitMeanAndSCV(hostDemandMean, hostDemandSCV);
+                            hostDemand = APH.fitMeanAndSCV(hostDemandMean, hostDemandSCV);
                         elseif hostDemandSCV == 1.0
                             hostDemand = Exp.fitMeanAndSCV(hostDemandMean, hostDemandSCV);
                         else
@@ -339,7 +339,7 @@ for i = 0:procList.getLength()-1
                         postActs{m+1} = char(postActElement.getAttribute('name'));
                         postParams(m+1) = str2double(char(postActElement.getAttribute('count')));
                     end
-                    postActs{end} = char(postElement.getAttribute('end'));
+                    postActs{end} = char(postElement.getAttribute('end'));                    
                 else
                     postActs = cell(postActList.getLength(),1);
                     postParams = [];

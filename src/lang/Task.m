@@ -5,6 +5,7 @@ classdef Task < LayeredNetworkElement
     % All rights reserved.
     
     properties
+        parent;
         multiplicity;       %int
         replication;       %int
         scheduling;         %string
@@ -43,6 +44,7 @@ classdef Task < LayeredNetworkElement
             self.multiplicity = multiplicity;
             self.scheduling = scheduling;
             self.setThinkTime(thinkTime);
+            self.parent = [];
             model.tasks{end+1} = self;
             switch scheduling
                 case 'ref'
@@ -57,7 +59,7 @@ classdef Task < LayeredNetworkElement
                 
         function self = on(self, parent)
             % self = ON(self, PARENT)
-            
+            self.parent = parent;
             parent.addTask(self);
         end
         

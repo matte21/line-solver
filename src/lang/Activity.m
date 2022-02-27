@@ -62,11 +62,11 @@ classdef Activity < LayeredNetworkElement
             end
         end
         
-        function obj = on(obj, parent)
+        function self = on(self, parent)
             % OBJ = ON(OBJ, PARENT)
             
-            parent.addActivity(obj);
-            obj.parent = parent;
+            parent.addActivity(self);
+            self.parent = parent;
         end
         
         function obj = setHostDemand(obj, hostDemand)

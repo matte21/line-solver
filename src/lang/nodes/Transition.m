@@ -125,11 +125,8 @@ classdef Transition < Node
 
         function self = setTimingStrategy(self, mode, timingStrategy)
             % SELF = SETTIMINGSTRATEGY(MODE, TIMINGSTRATEGY)
-            if ischar(timingStrategy) || isstring(timingStrategy)
-                self.timingStrategies(mode) = TimingStrategy.toId(timingStrategy);
-            else
-                self.timingStrategies(mode) = timingStrategy;
-            end
+
+            self.timingStrategies(mode) = TimingStrategy.toId(timingStrategy);
         end
         
         function self = setFiringPriorities(self, mode, firingPriority)

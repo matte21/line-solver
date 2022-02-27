@@ -4,6 +4,7 @@ function [G,lG]=pfqn_gmvald(L,N,mu,options)
 % G=pfqn_gmvald(L,N,mu)
 % mu: MxN matrix of load-dependent rates
 [M,R]=size(L);
+lambda=zeros(1,R);
 if M==1       
     lG = factln(sum(N)) - sum(factln(N)) + N(L>0)*log(L(L>0))' - sum(log(mu(1,1:sum(N))));
     G = exp(lG);
@@ -54,7 +55,7 @@ if ~isLoadDep
         Zli = 0*N;
     end
     options.method='exact';
-    lG = pfqn_nc(Lli, N, sum(Zli,1), options);
+    lG = pfqn_nc(lambda,Lli, N, sum(Zli,1), options);
     G = exp(lG);
     return
 end

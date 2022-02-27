@@ -50,6 +50,7 @@ elseif ~keepDisabled
         for k=1:K
             if any(sum([QN(i,k),UN(i,k),RN(i,k),TN(i,k),AN(i,k)])>0)
                 c = find(sn.chains(:,k));
+                inchain = find(sn.chains(c,:));                
                 JobClass{end+1,1} = sn.classnames{k};
                 Node{end+1,1} = sn.nodenames{i};
                 Qval(end+1) = QN(i,k);
@@ -58,7 +59,11 @@ elseif ~keepDisabled
                 if RN(i,k)<Distrib.Zero
                     Residval(end+1) = RN(i,k);
                 else
-                    Residval(end+1) = RN(i,k)*V(i,k)/sum(V(sn.refstat(k),sn.chains(c,:)));
+                    if any(intersect(inchain,find(sn.refclass)))
+                        Residval(end+1) = RN(i,k)*V(i,k)/sum(V(sn.refstat(k),sn.refclass(intersect(inchain,find(sn.refclass)))));
+                    else
+                        Residval(end+1) = RN(i,k)*V(i,k)/sum(V(sn.refstat(k),sn.chains(c,:)));
+                    end
                 end
                 Tval(end+1) = TN(i,k);
                 Aval(end+1) = AN(i,k);
@@ -103,6 +108,7 @@ else
     for i=1:I
         for k=1:K
             c = find(sn.chains(:,k));
+            inchain = find(sn.chains(c,:));            
             JobClass{end+1,1} = sn.classnames{k};
             Node{end+1,1} = sn.nodenames{i};
             Qval((i-1)*K+k) = QN(i,k);
@@ -111,8 +117,13 @@ else
             if RN(i,k)<Distrib.Zero
                 Residval((i-1)*K+k) = RN(i,k);
             else
-                Residval((i-1)*K+k) = RN(i,k)*V(i,k)/sum(V(sn.refstat(k),sn.chains(c,:)));
+                if any(intersect(inchain,find(sn.refclass)))                    
+                    Residval((i-1)*K+k) = RN(i,k)*V(i,k)/sum(V(sn.refstat(k),sn.refclass(intersect(inchain,find(sn.refclass)))));
+                else
+                    Residval((i-1)*K+k) = RN(i,k)*V(i,k)/sum(V(sn.refstat(k),sn.chains(c,:)));
+                end
             end
+            
             Tval((i-1)*K+k) = TN(i,k);
             Aval((i-1)*K+k) = AN(i,k);
         end
