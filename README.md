@@ -42,7 +42,7 @@ docker run -i -p 127.0.0.1:5463:5463/tcp  --rm linemcr/cli -p 5463
 ```
 bootstraps the server. To solve a layered queueing network (LQN), after downloading a LQN example model [ofbizExample.xml](https://raw.githubusercontent.com/imperial-qore/line/master/examples/ofbizExample.xml), we issue a request to the engine using LINE's [websocket client](https://github.com/imperial-qore/line-solver/raw/master/src/cli/websocket/lineclient.jar). 
 ```
-cat ofbizExample.xml | java -jar lineclient.jar 127.0.0.1 5463 -i xml
+cat ofbizExample.xml | java -jar lineclient.jar 127.0.0.1 5463 -i lqn
 ```
 Note that the first invocation tends to be slightly slower than the following ones.
 
@@ -52,7 +52,7 @@ The command will print in JSON format the results of the mean performance metric
 
 It is also possible to run LINE in direct CLI mode, but incurring a longer bootstrap time due to the MATLAB compiler runtime startup, for example:
 ```
-cat ofbizExample.xml | docker run -i --rm linemcr/cli -i xml -s ln -a all -o json
+cat ofbizExample.xml | docker run -i --rm linemcr/cli -i lqn -s ln -a all -o json
 ```
 We can also solve [JMT](http://jmt.sf.net) example models. We first download [example_openModel_3.jsimg](https://raw.githubusercontent.com/line-solver/line/master/examples/example_openModel_3.jsimg) to a local directory and then run
 ```
