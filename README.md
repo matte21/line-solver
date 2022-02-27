@@ -1,4 +1,3 @@
-Hello
 ## LINE: Performance and Reliability Modeling Engine
 
 Website: http://line-solver.sourceforge.net/
