@@ -43,6 +43,8 @@ if isStateDep
                         switch sn.routing(ind,r)
                             case RoutingStrategy.ID_RROBIN
                                 rnodefuncell{(ind-1)*K+r, (jnd-1)*K+s} = @(state_before, state_after) sub_rr(ind, jnd, r, s, linksmat, state_before, state_after);
+                            case RoutingStrategy.ID_WRROBIN
+                                rnodefuncell{(ind-1)*K+r, (jnd-1)*K+s} = @(state_before, state_after) sub_wrr(ind, jnd, r, s, linksmat, state_before, state_after);
                             case RoutingStrategy.ID_JSQ
                                 rnodefuncell{(ind-1)*K+r, (jnd-1)*K+s} = @(state_before, state_after) sub_jsq(ind, jnd, r, s, linksmat, state_before, state_after);
                             otherwise
@@ -64,7 +66,7 @@ end
 
 % we now generate the node routing matrix for the given state and then
 % lump the states for non-stateful nodes so that run gives the routing
-% touble for stateful nodes only
+% table for stateful nodes only
 statefulNodesClasses = [];
 for ind=stateful
     statefulNodesClasses(end+1:end+K)= ((ind-1)*K+1):(ind*K);
@@ -88,12 +90,29 @@ end
     function p = sub_rr(ind, jnd, r, s, linksmat, state_before, state_after)
         % P = SUB_RR(IND, JND, R, S, LINKSMAT, STATE_BEFORE, STATE_AFTER)
         
+        R = sn.nclasses;
         isf = sn.nodeToStateful(ind);
         if isempty(state_before{isf})
             p = min(linksmat(ind,jnd),1);
         else
             if r==s
-                p = double(state_after{isf}(end-r+1)==jnd);
+                p = double(state_after{isf}(end-R+r)==jnd);
+            else
+                p = 0;
+            end
+        end
+    end
+
+    function p = sub_wrr(ind, jnd, r, s, linksmat, state_before, state_after)
+        % P = SUB_WRR(IND, JND, R, S, LINKSMAT, STATE_BEFORE, STATE_AFTER)
+
+        R = sn.nclasses;
+        isf = sn.nodeToStateful(ind);
+        if isempty(state_before{isf})
+            p = min(linksmat(ind,jnd),1);
+        else
+            if r==s
+                p = double(state_after{isf}(end-R+r)==jnd);
             else
                 p = 0;
             end

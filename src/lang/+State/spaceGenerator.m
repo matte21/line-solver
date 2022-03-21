@@ -60,7 +60,7 @@ while n>=0
     %      1     1     0     0
     %      2     0     0     0
     % that are then in the need for a call to unique
-    if all(isOpenClass) | (Np(isClosedClass) == n(isClosedClass))
+    if all(isOpenClass) | (Np(isClosedClass) == n(isClosedClass)) %#ok<OR2> 
         chainStationPos = [chainStationPos; State.spaceClosedMultiCS(nstatefulp,n,sn.chains)];
     end
     n = pprod(n,Np);

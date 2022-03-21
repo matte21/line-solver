@@ -211,19 +211,19 @@ classdef Station < StatefulNode
                     switch class(self.input.sourceClasses{r}{end})
                         case 'Replayer'
                             aph = self.input.sourceClasses{r}{end}.fitAPH;
-                            map{r} = aph.getRepresentation();
+                            map{r} = aph.getRepres();
                             mu{r} = aph.getMu;
                             phi{r} = aph.getPhi;
                         case {'Exp','Coxian','Erlang','HyperExp','MarkovianDistribution','APH','PH'}
-                            map{r} = self.input.sourceClasses{r}{end}.getRepresentation;
+                            map{r} = self.input.sourceClasses{r}{end}.getRepres;
                             mu{r} = self.input.sourceClasses{r}{end}.getMu;
                             phi{r} = self.input.sourceClasses{r}{end}.getPhi;
                         case 'MMPP2'
-                            map{r} = self.input.sourceClasses{r}{end}.getRepresentation();
+                            map{r} = self.input.sourceClasses{r}{end}.getRepres();
                             mu{r} = self.input.sourceClasses{r}{end}.getMu;
                             phi{r} = self.input.sourceClasses{r}{end}.getPhi;
                         case 'MAP'
-                            map{r} = self.input.sourceClasses{r}{end}.getRepresentation();
+                            map{r} = self.input.sourceClasses{r}{end}.getRepres();
                             mu{r} = self.input.sourceClasses{r}{end}.getMu;
                             phi{r} = self.input.sourceClasses{r}{end}.getPhi;
                     end
@@ -257,15 +257,15 @@ classdef Station < StatefulNode
                     switch class(serviceProcess_r{end})
                         case 'Replayer'
                             aph = serviceProcess_r{end}.fitAPH;
-                            map{r} = aph.getRepresentation();
+                            map{r} = aph.getRepres();
                             mu{r} = aph.getMu;
                             phi{r} = aph.getPhi;
-                        case {'Exp','Coxian','Erlang','HyperExp','MarkovianDistribution','APH','MAP'}
-                            map{r} = serviceProcess_r{end}.getRepresentation();
+                        case {'Exp','Coxian','Erlang','HyperExp','MarkovianDistribution','APH','MAP','PH'}
+                            map{r} = serviceProcess_r{end}.getRepres();
                             mu{r} = serviceProcess_r{end}.getMu;
                             phi{r} = serviceProcess_r{end}.getPhi;
                         case 'MMPP2'
-                            map{r} = serviceProcess_r{end}.getRepresentation();
+                            map{r} = serviceProcess_r{end}.getRepres();
                             mu{r} = serviceProcess_r{end}.getMu;
                             phi{r} = serviceProcess_r{end}.getPhi;
                     end

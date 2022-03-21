@@ -1,22 +1,15 @@
 function [estVal,fObjFun] = estimatorUBO(self, node)
-% UBO Utilization-based optimization statistical data analyzer (SDA)
-% This SDA is based on the method proposed in
+% UBO Utilization-based optimization
+% This demand estimator is based on the method proposed in:
 % Liu, Z., Wynter, L., Xia, C. H. and Zhang, F.
 % Parameter inference of queueing models for IT systems using end-to-end measurements
 % Performance Evaluation, Elsevier, 2006.
 %
-% [D,F] = UBO(data,maxTime) reads the data and configuration
-% parameters from the input parameters, estimates the resource
-% demand for each request class and returns it on D.
-%
-% Configuration file fields:
-% data:         the input data for the SDA
-% maxTime:      maximum running time (s) for optimization procedure
-%
-%
-% Copyright (c) 2012-2016, Imperial College London
+% Copyright (c) 2012-2022, Imperial College London
 % All rights reserved.
 % This code is released under the 3-Clause BSD License.
+
+% This estimator at present can handle estimation on a single resource.
 
 %%
 % if exist('data','var') == 0
@@ -139,7 +132,9 @@ w = avgArvR./(sum(avgArvR,2)*ones(1,R));
         for i=1:R
             f = f + w(i).*deltaj(i).^2;
         end
-        for i=1:M, f = f + epsi(i).^2; end
+        for i=1:M 
+            f = f + epsi(i).^2; 
+        end
     end
 
 end

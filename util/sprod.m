@@ -3,7 +3,7 @@ function [out1,out2,out3,out4]=sprod(par1,par2,par3)
 % [s,n]=SPROD(s,S,D) % next state
 % Sequence of non-negative matrices with constant row sums
 %
-% Copyright (c) 2012-2021, Imperial College London
+% Copyright (c) 2012-2022, Imperial College London
 % All rights reserved.
 if nargin==2 % this is init
     M=par1; N=par2;

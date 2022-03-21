@@ -16,22 +16,23 @@ classdef MarkovModulated < PointProcess
     methods
         function X = sample(self, n)
             % X = SAMPLE(N)
-            
-            if nargin<2 %~exist('n','var'), 
-                n = 1; 
-            end
-            MAP = self.getRepresentation;
-            if map_isfeasible(MAP)
-                X = map_sample(MAP,n);
-            else
-                line_error(mfilename,'This process is infeasible (negative rates).');
-            end
+            line_error(mfilename,'Line:AbstractMethodCall','An abstract method was called. The function needs to be overridden by a subclass.');
         end
         
-        function pie = getEmbeddedProb(self)
-            % PIE = GETEMBEDDEDPROB()
+        function P = getEmbDTMC(self)
+            % P = GETEMBDTMC()
+            %
+            % Get DTMC embedded at event arrival times
             
-            pie = map_pie(self.getRepresentation);
+            P = map_embedded(self.getRepres);
+        end
+
+        function pie = getEmbProb(self)
+            % PIE = GETEMBPROB()
+            %
+            % Solve DTMC embedded embedded at event arrival times
+            
+            pie = map_pie(self.getRepres);
         end
     end
     
@@ -41,7 +42,7 @@ classdef MarkovModulated < PointProcess
             
             line_error(mfilename,'Line:AbstractMethodCall','An abstract method was called. The function needs to be overridden by a subclass.');
         end
-        function MAP = getRepresentation(self)
+        function MAP = getRepres(self)
             % MAP = GETREPRESENTATION()
             
             line_error(mfilename,'Line:AbstractMethodCall','An abstract method was called. The function needs to be overridden by a subclass.');

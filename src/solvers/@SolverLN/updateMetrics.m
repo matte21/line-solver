@@ -78,7 +78,7 @@ switch self.getOptions.method
         end
         
     case 'moment3'
-        if self.whetherConverge == 0
+        if self.hasConverged == 0
             % first obtain svct of activities at hostlayers
             self.svct = zeros(self.lqn.nidx,1);
             for r=1:size(self.svctmap,1)
@@ -147,7 +147,15 @@ switch self.getOptions.method
                 
                 submodelidx = self.idxhash(idx);
                 if submodelidx>length(repo)
+                    try
                     repo{submodelidx} = self.solvers{submodelidx}.getCdfRespT;
+                    catch me
+                        switch me.identifier
+                            case 'MATLAB:class:undefinedMethod'
+                            line_warning(mfilename,'The solver for layer %d does not allow response time distribution calculation, switching to fluid solver.');
+                            repo{submodelidx} = SolverFluid(self.ensemble{submodelidx}).getCdfRespT;
+                        end
+                    end
                 end
                 self.svctcdf{aidx} =  repo{submodelidx}{nodeidx,classidx};
             end
@@ -168,7 +176,7 @@ switch self.getOptions.method
                     try
                         repo{submodelidx} = self.solvers{submodelidx}.getCdfRespT;
                     catch
-                        repo{submodelidx} = [0,0;0.5,0;1,0];
+                        repo{submodelidx} = [0,0;0.5,0;1,0]; % ??
                     end
                 end
                 %         self.callresptcdf{cidx} =  repo{submodelidx}{nodeidx,classidx};
@@ -190,8 +198,8 @@ switch self.getOptions.method
                 ParamCell = {};
                 while num<length(convolidx)
                     fitidx = convolidx(num+1);
-                    [m1,m2,m3,SCV,SKEW] = Trace(self.cdf{fitidx}).getRawMoments;
-                    if m1>0.000001
+                    [m1,m2,m3,SCV,SKEW] = EmpiricalCDF(self.cdf{fitidx}).getRawMoments; %% ??
+                    if m1>Distrib.Zero
                         fitdist = APH.fitRawMoments(m1,m2,m3);
                         rep_num = floor(matrix(eidx,fitidx));
                         fitparam{1} = fitdist.params{1}.paramValue;
@@ -201,13 +209,13 @@ switch self.getOptions.method
                             ParamCell = [ParamCell,repmat(fitparam,1,rep_num)];
                         elseif rep_num>0 && behindDecimal>0
                             ParamCell = [ParamCell,repmat(fitparam,1,rep_num)];
-                            zerodist = APH.fitMeanAndSCV(0.0000001,0.99);
+                            zerodist = APH.fitMeanAndSCV(Distrib.Zero,0.99);
                             zeroparam{1} = zerodist.params{1}.paramValue;
                             zeroparam{2} = zerodist.params{2}.paramValue;
                             [fitparam{1},fitparam{2}] = aph_simplify(fitparam{1},fitparam{2},zeroparam{1},zeroparam{2},behindDecimal,1-behindDecimal,3);
                             ParamCell = [ParamCell,fitparam];
                         else
-                            zerodist = APH.fitMeanAndSCV(0.0000001,0.99);
+                            zerodist = APH.fitMeanAndSCV(Distrib.Zero,0.99);
                             zeroparam{1} = zerodist.params{1}.paramValue;
                             zeroparam{2} = zerodist.params{2}.paramValue;
                             [fitparam{1},fitparam{2}] = aph_simplify(fitparam{1},fitparam{2},zeroparam{1},zeroparam{2},behindDecimal,1-behindDecimal,3);

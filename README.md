@@ -1,4 +1,4 @@
-## LINE: Performance and Reliability Modeling Engine
+## LINE: Queueing Theory Algorithms
 
 Website: http://line-solver.sourceforge.net/
 
@@ -14,7 +14,7 @@ LINE is a MATLAB toolbox offering computational algorithms for queueing theory. 
 
 The engine offers a language to specify queueing networks that decouples model description from the choice of solver used for its solution. Model-to-model transformations enable the use of either native or external solvers, such as [JMT](http://jmt.sourceforge.net/) and [LQNS](http://www.sce.carleton.ca/rads/lqns/). Native solvers are based on continuous-time Markov chains (CTMC), fluid ordinary differential equations, matrix analytic methods (MAM), normalizing constant analysis, and mean-value analysis (MVA).
 
-Advanced ifeatures are also supported, such as nodes to describe caching, randomly-evolving environments, computation of response time percentiles, and transient solutions.
+Advanced features include nodes to describe caching, randomly-evolving environments, computation of response time percentiles, and transient solutions.
 
 ### Getting started (MATLAB SOURCE)
 
@@ -37,11 +37,11 @@ To get started, retrieve the LINE container:
 ```
 docker pull linemcr/cli
 ```
-Let us first run the line container in client-server model 
+Let us first run the line container in client-server model by bootstrapping the server first
 ```
 docker run -i -p 127.0.0.1:5463:5463/tcp  --rm linemcr/cli -p 5463
 ```
-bootstraps the server. To solve a layered queueing network (LQN), after downloading a LQN example model [ofbizExample.xml](https://raw.githubusercontent.com/imperial-qore/line/master/examples/ofbizExample.xml), we issue a request to the engine using LINE's [websocket client](https://github.com/imperial-qore/line-solver/raw/master/src/cli/websocket/lineclient.jar). 
+To solve a layered queueing network (LQN), after downloading a LQN example model [ofbizExample.xml](https://raw.githubusercontent.com/imperial-qore/line/master/examples/ofbizExample.xml), we issue a request to the server from LINE's [websocket client](https://github.com/imperial-qore/line-solver/raw/master/src/cli/websocket/lineclient.jar). 
 ```
 cat ofbizExample.xml | java -jar lineclient.jar 127.0.0.1 5463 -i lqnx
 ```
@@ -55,7 +55,7 @@ It is also possible to run LINE in direct CLI mode, but incurring a longer boots
 ```
 cat ofbizExample.xml | docker run -i --rm linemcr/cli -i lqnx -s ln -a all -o json
 ```
-We can also solve [JMT](http://jmt.sf.net) example models. We first download [example_openModel_3.jsimg](https://raw.githubusercontent.com/line-solver/line/master/examples/example_openModel_3.jsimg) to a local directory and then run
+We can also solve [JMT](http://jmt.sf.net) example models. First download [example_openModel_3.jsimg](https://raw.githubusercontent.com/line-solver/line/master/examples/example_openModel_3.jsimg) to a local directory and then run
 ```
 cat example_openModel_3.jsimg | docker run -i --rm linemcr/cli -i jsimg -s mva -a all -o json
 ```

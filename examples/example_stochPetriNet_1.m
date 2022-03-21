@@ -141,5 +141,6 @@ options.seed = 23000;
 % solver = SolverCTMC(model, options);
 % solver.getAvgTable();
 
- solver = SolverJMT(model,options);
- solver.getAvgTable()
+solver = SolverJMT(model,options);
+AvgTable{1}=solver.getAvgTable();
+AvgTable{1}

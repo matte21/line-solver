@@ -191,6 +191,6 @@ isolationmodel.link(P);
 solver=SolverNC(isolationmodel, options);
 solver.setChecks(false);
 solver.getAvgNodeTable;
-hitProb = full(icache.getResultHitProb);
-missProb = full(icache.getResultMissProb);
+hitProb = full(icache.getHitRatio);
+missProb = full(icache.getMissRatio);
 end

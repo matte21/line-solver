@@ -126,7 +126,7 @@ classdef Coxian < MarkovianDistribution
             % CX = FITCENTRAL(MEAN, VAR, SKEW)
             cx = Cox2.fitCentral(MEAN, VAR, SKEW);
             SCV = VAR/MEAN^2;
-            if abs(1-map_scv(cx.getRepresentation)/SCV) > 0.01
+            if abs(1-map_scv(cx.getRepres)/SCV) > 0.01
                 cx = Coxian.fitMeanAndSCV(MEAN, SCV);
             end
         end

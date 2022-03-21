@@ -32,7 +32,7 @@ if max(phasesz)==1
 end
 
 if nargin < 8
-    space_var = state_i(:,(end-sum(sn.nvars(ind,:))+1):end); % server stat
+    space_var = state_i(:,(end-sum(sn.nvars(ind,:))+1):end); % server state
     space_srv = state_i(:,(end-sum(phasesz)-sum(sn.nvars(ind,:))+1):(end-sum(sn.nvars(ind,:))));
     space_buf = state_i(:,1:(end-sum(phasesz)-sum(sn.nvars(ind,:))));
 end
@@ -87,7 +87,7 @@ switch sn.schedid(ist)
     case SchedStrategy.ID_LCFSPR
         if length(space_buf)>1
             space_buf = space_buf(1:2:end);
-            space_bufphase = space_buf(2:2:end);            
+            %space_bufphase = space_buf(2:2:end);            
             for r=1:R
                 nir(:,r) = sir(:,r) + sum(space_buf==r,2); % class-r jobs in station
             end

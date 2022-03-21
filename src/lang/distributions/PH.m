@@ -38,7 +38,7 @@ classdef PH < MarkovianDistribution
             if nargin<2 %~exist('n','var'), 
                 n = 1; 
             end
-            X = map_sample(self.getRepresentation,n);
+            X = map_sample(self.getRepres,n);
         end
     end
     
@@ -74,7 +74,7 @@ classdef PH < MarkovianDistribution
             % UPDATEMEAN(SELF,MEAN)
             
             % Update parameters to match the given mean
-            ph = self.getRepresentation;
+            ph = self.getRepres;
             ph = map_scale(ph,MEAN);
             self.setParam(1, 'alpha', map_pie(ph), 'java.lang.Double');
             self.setParam(2, 'T', ph{1}, 'java.lang.Double');
@@ -95,7 +95,7 @@ classdef PH < MarkovianDistribution
             self.setParam(2, 'T', T, 'java.lang.Double');
         end
         
-        function ph = getRepresentation(self)
+        function ph = getRepres(self)
             % PH = GETREPRESENTATION()
             
             % Return the renewal process associated to the distribution

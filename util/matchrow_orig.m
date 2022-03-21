@@ -3,7 +3,7 @@ function pos = matchrow_old(matrix, row)
 % Finds position of row r in matrix M if unique
 % Returns -1 otherwise
 %
-% Copyright (c) 2015-2020, Imperial College London
+% Copyright (c) 2015-2022, Imperial College London
 % All rights reserved.
 I = size(matrix,1);
 %L = 1:ceil(I/8):I;

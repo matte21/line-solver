@@ -22,10 +22,10 @@ model.link(P);
 
 %% Generate random dataset for utilization and average arrival rate
 n = 1000;
-ts = 1:n;
-arvrate_samples = 2*ones(n,1)-rand(n,1)*0.15; 
-util_samples = ones(n,1)-rand(n,1)*0.05; 
-respt_samples = 0.7./(1-util_samples); 
+ts = 1:n; % timestamps at which the system is sampled
+arvrate_samples = 2*ones(n,1)-rand(n,1)*0.15; % sampled arrival rate values
+util_samples = ones(n,1)-rand(n,1)*0.05;  % sampled utilization values
+respt_samples = 0.7./(1-util_samples);  % sampled response time values
 
 %% Estimate demands
 estoptions = ServiceEstimator.defaultOptions;
@@ -39,8 +39,8 @@ util = SampledMetric(MetricType.Util, ts, util_samples, node{2});
 se.addSamples(lambda1);
 se.addSamples(respT1);
 se.addSamples(util);
-se.interpolate();
-estVal = se.estimateAt(node{2}) % the change is applied automatically
+se.interpolate(); % ensures that the metrics are interpolated at the same time instants all
+estVal = se.estimateAt(node{2}) % the change to the NaN value in Exp is applied automatically
 
 %% Solve model
 options = Solver.defaultOptions;

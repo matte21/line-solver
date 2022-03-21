@@ -13,7 +13,7 @@ jobClass = OpenClass(model, 'InitClass', 0);
 hitClass = OpenClass(model, 'HitClass', 0);
 missClass = OpenClass(model, 'MissClass', 0);
 
-source.setArrival(jobClass, Exp(1));
+source.setArrival(jobClass, Exp(2));
 
 pAccess = DiscreteSampler((1/n)*ones(1,n));  % uniform item references
 %pAccess = Zipf(1.4, n);  % Zipf-like item references
@@ -45,3 +45,5 @@ AvgTable{3} = solver{3}.getAvgNodeTable; AvgTable{3}
 % solver{3} = SolverNC(model,'seed',1);
 % AvgTable{3} = solver{3}.getAvgNodeTable; AvgTable{3}
 
+hitRatio=cacheNode.getHitRatio
+missRatio=cacheNode.getMissRatio

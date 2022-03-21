@@ -72,6 +72,7 @@ for tidx_caller = callers
         aidxClass{tidx_caller}.attribute = [LayeredNetworkElement.TASK, tidx_caller];
         model.attribute.tasks(end+1,:) = [aidxClass{tidx_caller}.index, tidx_caller];
         aidxClass{tidx_caller}.completes = false;
+        %self.thinkproc
         clientDelay.setService(aidxClass{tidx_caller}, self.thinkproc{tidx_caller});
         if lqn.schedid(tidx_caller) ~= SchedStrategy.ID_REF % in 'ref' case the think time is constant
             self.svcupdmap{idx}(end+1,:) = [idx, tidx_caller, 1, aidxClass{tidx_caller}.index];

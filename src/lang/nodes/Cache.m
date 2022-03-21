@@ -94,11 +94,11 @@ classdef Cache < StatefulNode
             self.server.actualMissProb = actualMissProb;
         end
         
-        function p = getResultHitProb(self)
+        function p = getHitRatio(self)
             p = self.server.actualHitProb;
         end
         
-        function p = getResultMissProb(self)
+        function p = getMissRatio(self)
             p = self.server.actualMissProb;
         end
         

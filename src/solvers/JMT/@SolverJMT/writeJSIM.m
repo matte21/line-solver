@@ -91,6 +91,7 @@ end
 
 [simXMLElem, simXMLDoc] = saveMetrics(self, simXMLElem, simXMLDoc);
 [simXMLElem, simXMLDoc] = saveLinks(self, simXMLElem, simXMLDoc);
+[simXMLElem, simXMLDoc] = saveRegions(self, simXMLElem, simXMLDoc);
 
 hasReferenceNodes = false;
 preloadNode = simXMLDoc.createElement('preload');

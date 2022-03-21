@@ -23,7 +23,16 @@ for ind=1:sn.nnodes
                 end
             end
         end
-        sn.space{isf} = State.fromMarginalBounds(sn, ind, [], capacityc(ind,:), sn.cap(ist), options);
+        if sn.isstation(ind)
+            % in this case, the local variables are produced within
+            % fromMarginalBounds, e.g., for RROBIN routing
+            sn.space{isf} = State.fromMarginalBounds(sn, ind, [], capacityc(ind,:), sn.cap(ist), options);
+        else
+            % this is the case for example of cache nodes
+            state_bufsrv = State.fromMarginalBounds(sn, ind, [], capacityc(ind,:), sn.cap(ist), options);
+            state_var = State.spaceLocalVars(sn, ind);
+            sn.space{isf} = State.decorate(state_bufsrv,state_var); % generate all possible states for local variables
+        end
         if isinf(sn.nservers(ist))
             sn.nservers(ist) = sum(capacityc(ind,:));
         end
@@ -42,8 +51,8 @@ for ind=1:sn.nnodes
             otherwise
                 capacityc(ind,:) =  1; %
         end
-        state_var = State.spaceLocalVars(sn, ind);
         state_bufsrv = State.fromMarginalBounds(sn, ind, [], capacityc(ind,:), 1, options);
+        state_var = State.spaceLocalVars(sn, ind);
         sn.space{isf} = State.decorate(state_bufsrv,state_var); % generate all possible states for local variables
     end
 end

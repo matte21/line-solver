@@ -26,8 +26,8 @@ classdef Distrib < Copyable
     
     methods %(Abstract)
         
-        function X = sample(self)
-            % X = SAMPLE()
+        function X = sample(self,n)
+            % X = SAMPLE(n)
             % Get n samples from the distribution
             line_error(mfilename,'Line:AbstractMethodCall','An abstract method was called. The function needs to be overridden by a subclass.');
         end

@@ -184,15 +184,15 @@ classdef Transition < Node
                 switch class(self.distributions{r})
                     case 'Replayer'
                         aph = self.distributions{r}.fitAPH;
-                        map{r} = aph.getRepresentation();
+                        map{r} = aph.getRepres();
                         mu{r} = aph.getMu;
                         phi{r} = aph.getPhi;
                     case {'Exp','Coxian','Erlang','HyperExp','MarkovianDistribution','APH','MAP'}
-                        map{r} = self.distributions{r}.getRepresentation();
+                        map{r} = self.distributions{r}.getRepres();
                         mu{r} = self.distributions{r}.getMu;
                         phi{r} = self.distributions{r}.getPhi;
                     case 'MMPP2'
-                        map{r} = self.distributions{r}.getRepresentation();
+                        map{r} = self.distributions{r}.getRepres();
                         mu{r} = self.distributions{r}.getMu;
                         phi{r} = self.distributions{r}.getPhi;
                     otherwise

@@ -121,7 +121,7 @@ if isempty(self.sn)
                 end
         end
     end
-    for i=1:M        
+    for i=1:M
         if isempty(self.getIndexSourceStation) || i ~= self.getIndexSourceStation
             for r=1:K
                 switch self.stations{i}.server.className

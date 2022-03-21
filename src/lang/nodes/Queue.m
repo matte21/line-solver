@@ -142,6 +142,7 @@ classdef Queue < Station
             self.serviceProcess{class.index} = distribution;
             self.input.inputJobClasses{class.index} = {class, self.schedPolicy, DropStrategy.WaitingQueue};
             self.server.serviceProcess{1, class.index}{2} = ServiceStrategy.LI;
+            
             if distribution.isImmediate()
                 self.server.serviceProcess{1, class.index}{3} = Immediate.getInstance();
             else

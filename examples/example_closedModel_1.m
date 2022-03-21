@@ -22,7 +22,7 @@ solver{end+1} = SolverSSA(model,'seed',23000,'verbose',true,'samples',5e3);
 solver{end+1} = SolverFluid(model);
 solver{end+1} = SolverMVA(model);
 solver{end+1} = SolverNC(model,'exact');
-solver{end+1} = SolverAuto(model);
+solver{end+1} = LINE(model);
 
 AvgTable = cell(1,length(solver));
 for s=1:length(solver)

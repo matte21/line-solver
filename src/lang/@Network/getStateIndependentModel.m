@@ -11,8 +11,8 @@ if any(sn.nodetype == NodeType.Cache)
                 hitClass = full(self.nodes{ind}.getHitClass);
                 missClass = full(self.nodes{ind}.getMissClass);
 
-                actualHitProb = self.nodes{ind}.getResultHitProb;
-                actualMissProb = self.nodes{ind}.getResultMissProb;
+                actualHitProb = self.nodes{ind}.getHitRatio;
+                actualMissProb = self.nodes{ind}.getMissRatio;
 
                 for r=1:length(hitClass)
                     if hitClass(r)>0

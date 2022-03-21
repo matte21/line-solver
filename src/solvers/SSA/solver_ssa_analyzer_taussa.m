@@ -1,31 +1,29 @@
 function [XN,UN,QN,RN,TN,CN,tranSysState,tranSync]=solver_ssa_analyzer_taussa(network, options, tl_option, tau)
 % [XN,UN,QN,RN,TN,CN]=SOLVER_SSA_ANALYZER_SERIAL(SN, OPTIONS)
 
-javaaddpath(which('TauSSA.jar'));
-import SimUtil.*; %#ok<SIMPT>
-import StochLib.*; %#ok<SIMPT>
+jmodel = LINE2JLINE(network);
+jsolver = JLINE.SolverSSA(jmodel);
+import jline.solvers.ssa.*;
 
-[java_network, ssa_solver] = TauSSA_integration.compile_network(network);
+M = jmodel.getNumberOfStatefulNodes; %number of stations
+K = jmodel.getNumberOfClasses;    %number of classes
 
-M = java_network.getNumberOfStatefulNodes; %number of stations
-K = java_network.getNumberOfClasses;    %number of classes
+jsolver.setOptions().samples = options.samples;
+jsolver.setOptions().seed = options.seed;
 
-ssa_solver.setOptions().samples = options.samples;
-ssa_solver.setOptions().seed = options.seed;
-
-if tl_option == 1
+if tl_option == 1    
     if tau <= 0
-        tau = 1.5/java_network.avgRate;
+        tau = 1.5/jmodel.avgRate;
     end
-    ssa_solver.setOptions().configureTauLeap(TauSSA.TauLeapingType(TauSSA.TauLeapingVarType.Poisson, TauSSA.TauLeapingOrderStrategy.DirectedCycle, TauSSA.TauLeapingStateStrategy.Cutoff, tau));
-elseif tl_option == 2
+    jsolver.setOptions().configureTauLeap(TauLeapingType(TauLeapingVarType.Poisson, TauLeapingOrderStrategy.DirectedCycle, TauLeapingStateStrategy.Cutoff, tau));
+elseif tl_option == 2    
     if tau <= 0
-        tau = 1.5/java_network.avgRate;
+        tau = 1.5/jmodel.avgRate;
     end
-    ssa_solver.setOptions().configureTauLeap(TauSSA.TauLeapingType(TauSSA.TauLeapingVarType.Poisson, TauSSA.TauLeapingOrderStrategy.RandomEvent, TauSSA.TauLeapingStateStrategy.Cutoff, tau));
+    jsolver.setOptions().configureTauLeap(TauLeapingType(TauLeapingVarType.Poisson, TauLeapingOrderStrategy.RandomEvent, TauLeapingStateStrategy.Cutoff, tau));
 end
 
-timeline = ssa_solver.solve();
+timeline = jsolver.solve();
 
 tranSysState = [];
 tranSync = [];

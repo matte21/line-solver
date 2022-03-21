@@ -563,8 +563,21 @@ for from=1:length(node_name)
                             node{from}.setProbRouting(jobclass{r}, node{target}, prob);
                             %                        P((from-1)*length(classes)+r, (target-1)*length(classes)+r) = prob;
                         end
+                    case 'Power of k'
+                        line_error(mfilename,'Power of k import not supported yet.')
                     case 'Round Robin'
                         node{from}.setRouting(jobclass{r},RoutingStrategy.RROBIN);
+                    case 'Weighted Round Robin'
+                        node{from}.setRouting(jobclass{r},RoutingStrategy.WRROBIN);
+                        xroutprobarray = {xsection_i{from}(3).parameter.subParameter.subParameter};
+                        xroutprob = {xroutprobarray{r}.subParameter}; xroutprob = xroutprob{1};
+                        xroutprobdest = {xroutprob.subParameter};
+                        for j=1:length(xroutprobdest)
+                            xprob={xroutprobdest{j}.value};
+                            target = findstring(node_name,xprob{1});
+                            weight = xprob{2};
+                            node{from}.setRouting(RoutingStrategy.WRROBIN, node{target}, jobclass{r}, weight);
+                        end
                     case 'Join the Shortest Queue (JSQ)'
                         node{from}.setRouting(jobclass{r},RoutingStrategy.JSQ);
                     case 'Disabled'

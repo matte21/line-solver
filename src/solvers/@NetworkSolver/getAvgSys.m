@@ -13,9 +13,18 @@ if nargin < 3
 end
 [~,~,RN,TN] = self.getAvg([],[],R,T);
 
+if self.model.hasFork
+    if self.model.hasOpenClasses
+        line_warning(mfilename,'System response time computation not yet supported with open classes in the presence of fork nodes.');
+        RN = RN*NaN;
+    end
+end
+
 if self.model.hasJoin
-    line_warning(mfilename,'System response time computation not yet supported with join nodes.');
-    RN = RN*NaN;
+    if self.model.hasOpenClasses
+        line_warning(mfilename,'System response time computation not yet supported with open classes in the presence of join nodes.');
+        RN = RN*NaN;
+    end
 end
 
 refstats = sn.refstat;
@@ -30,14 +39,16 @@ end
 
 % compute chain visits
 alpha = zeros(sn.nstations,sn.nclasses);
-CNclass = zeros(1,sn.nclasses);
-for c=1:sn.nchains
-    inchain = find(sn.chains(c,:));
-    for r=inchain
-        CNclass(r)=0;
-        for i=1:sn.nstations
-            if ~isempty(RN) && ~(isinf(sn.njobs(r)) && i==sn.refstat(r)) % not empty and not source
-                CNclass(r) = CNclass(r) + sn.visits{c}(i,r)*RN(i,r)/sn.visits{c}(sn.refstat(r),r);
+if ~(self.model.hasFork && self.model.hasJoin)
+    CNclass = zeros(1,sn.nclasses);
+    for c=1:sn.nchains
+        inchain = find(sn.chains(c,:));
+        for r=inchain
+            CNclass(r)=0;
+            for i=1:sn.nstations
+                if ~isempty(RN) && ~(isinf(sn.njobs(r)) && i==sn.refstat(r)) % not empty and not source
+                    CNclass(r) = CNclass(r) + sn.visits{c}(i,r)*RN(i,r)/sn.visits{c}(sn.refstat(r),r);
+                end
             end
         end
     end
@@ -91,21 +102,25 @@ for c=1:sn.nchains
             end
         end
     end
-    
+
     % If this is a closed chain we simply apply Little's law
     nJobsChain = sum(sn.njobs(find(sn.chains(c,:)))); %#ok<FNDSB>
-    %if ~isinf(nJobsChain)
-    %    CNchain(c) = nJobsChain / XNchain(c);
-    %else % if this is an open chain
-    if isinf(nJobsChain)
-        if length(inchain) ~= length(completingclasses)
-            line_error(mfilename,'Edge-based chain definition not yet supported for open queueing networks.');
-            %else
-            % we use nan sum to disregard response at stations where
-            % the class is not defined
-            %    CNchain(c) = sumfinite(alpha(refstats(inchain(1)),inchain).*CNclass(inchain));
+    if self.model.hasFork && self.model.hasJoin
+        % in this case, CNclass is unreliable as it sums the contribution
+        % across all stations, which would include also forked tasks,
+        % we use Little's law instead
+        CNchain(c) = nJobsChain / XNchain(c);
+    else % if this is an open chain
+        if isinf(nJobsChain)
+            if length(inchain) ~= length(completingclasses)
+                line_error(mfilename,'Edge-based chain definition not yet supported for open queueing networks.');
+                %else
+                % we use nan sum to disregard response at stations where
+                % the class is not defined
+                %    CNchain(c) = sumfinite(alpha(refstats(inchain(1)),inchain).*CNclass(inchain));
+            end
         end
+        CNchain(c) = sumfinite(alpha(refstats(inchain(1)),inchain).*CNclass(inchain));
     end
-    CNchain(c) = sumfinite(alpha(refstats(inchain(1)),inchain).*CNclass(inchain));
 end
 end

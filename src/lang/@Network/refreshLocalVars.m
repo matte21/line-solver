@@ -1,7 +1,8 @@
 function nvars = refreshLocalVars(self)
 % NVARS = REFRESHLOCALVARS()
 
-nvars = zeros(self.getNumberOfNodes, 1);
+R = self.getNumberOfClasses;
+nvars = zeros(self.getNumberOfNodes, 2*R+1);
 varsparam = cell(self.getNumberOfNodes, 1);
 rtnodes = self.sn.rtnodes;
 
@@ -9,7 +10,7 @@ for ind=1:self.getNumberOfNodes
     node = self.getNodeByIndex(ind);
     switch class(node)
         case 'Cache'
-            nvars(ind) = sum(node.itemLevelCap);
+            nvars(ind,2*R+1) = sum(node.itemLevelCap);
             varsparam{ind} = struct();
             varsparam{ind}.nitems = 0;
             varsparam{ind}.accost = node.accessProb;
@@ -31,12 +32,12 @@ for ind=1:self.getNumberOfNodes
             varsparam{ind}.hitclass = round(node.server.hitClass);
             varsparam{ind}.missclass = round(node.server.missClass);
         case 'Fork'
-            varsparam{ind}.tasksPerLink = node.output.tasksPerLink;
+            varsparam{ind}.fanOut = node.output.tasksPerLink;
         case 'Join'
             varsparam{ind}.joinStrategy = node.input.joinStrategy;
-            varsparam{ind}.joinRequired = cell(1,self.getNumberOfClasses);
+            varsparam{ind}.fanIn = cell(1,self.getNumberOfClasses);
             for r=1:self.getNumberOfClasses
-                varsparam{ind}.joinRequired{r} = node.input.joinRequired{r};
+                varsparam{ind}.fanIn{r} = node.input.joinRequired{r};
             end
         case 'Logger'
             varsparam{ind}.fileName = node.fileName;
@@ -49,10 +50,17 @@ for ind=1:self.getNumberOfNodes
             varsparam{ind}.timeSameClass = node.getTimeSameClass;
             varsparam{ind}.timeAnyClass = node.getTimeAnyClass;
     end
-    
+
     for r=1:self.getNumberOfClasses
         if isprop(node,'serviceProcess')
             switch class(node.server.serviceProcess{r}{3})
+                case 'MAP'
+                    nvars(ind,r) = nvars(ind,r) + 1;
+                    if isempty(varsparam{ind})
+                        varsparam{ind} = struct();
+                    end
+                    varsparam{ind}.mapshift = [0,cumsum(self.sn.procid(self.sn.nodeToStation(ind),:) == ProcessType.ID_MAP)];
+                    varsparam{ind}.mapshift(end) = [];
                 case 'Replayer'
                     if isempty(varsparam{ind})
                         varsparam{ind} = cell(1,self.getNumberOfClasses);
@@ -61,15 +69,31 @@ for ind=1:self.getNumberOfNodes
                     varsparam{ind}{r}.(node.server.serviceProcess{r}{3}.params{1}.paramName) = node.server.serviceProcess{r}{3}.params{1}.paramValue;
             end
         end
-    end
-    switch self.sn.routing(ind)
-        case RoutingStrategy.ID_RROBIN
-            nvars(ind) = nvars(ind) + 1;
-            % save indexes of outgoing links
-            if isempty(varsparam) % reinstantiate if not a cache
-                varsparam{ind} = struct();
-            end
-            varsparam{ind}.outlinks = find(sum(reshape(rtnodes(ind,:)>0,self.sn.nnodes,self.sn.nclasses),2)');
+        switch self.sn.routing(ind,r)
+            case RoutingStrategy.ID_KCHOICES
+                varsparam{ind}{r}.k = node.output.outputStrategy{r}{3}{1};
+                varsparam{ind}{r}.withMemory = node.output.outputStrategy{r}{3}{2};
+            case RoutingStrategy.ID_WRROBIN
+                nvars(ind,R+r) = nvars(ind,R+r) + 1;
+                % save indexes of outgoing links
+                if isempty(varsparam) || isempty(varsparam{ind}) % reinstantiate if not a cache
+                    varsparam{ind}{r} = struct();
+                end
+                varsparam{ind}{r}.weights = zeros(1,self.sn.nnodes);
+                varsparam{ind}{r}.outlinks = find(self.sn.connmatrix(ind,:));
+                for c=1:size(node.output.outputStrategy{1, r}{3},2)
+                    destination = node.output.outputStrategy{1, r}{3}{c}{1};
+                    weight = node.output.outputStrategy{1, r}{3}{c}{2};
+                    varsparam{ind}{r}.weights(destination.index) = weight;
+                end
+            case RoutingStrategy.ID_RROBIN
+                nvars(ind,R+r) = nvars(ind,R+r) + 1;
+                % save indexes of outgoing links
+                if isempty(varsparam) || isempty(varsparam{ind}) % reinstantiate if not a cache
+                    varsparam{ind}{r} = struct();
+                end
+                varsparam{ind}{r}.outlinks = find(self.sn.connmatrix(ind,:));
+        end
     end
 end
 

@@ -34,6 +34,59 @@ for r=1:K
             concStratNode = simDoc.createElement('subParameter');
             concStratNode.setAttribute('classPath', 'jmt.engine.NetStrategies.RoutingStrategies.ShortestQueueLengthRoutingStrategy');
             concStratNode.setAttribute('name', 'Join the Shortest Queue (JSQ)');
+        case RoutingStrategy.ID_KCHOICES
+            concStratNode = simDoc.createElement('subParameter');
+            concStratNode.setAttribute('classPath', 'jmt.engine.NetStrategies.RoutingStrategies.PowerOfKRoutingStrategy');
+            concStratNode.setAttribute('name', 'Power of k');         
+            concStratNode2 = simDoc.createElement('subParameter');
+            concStratNode2.setAttribute('classPath', 'java.lang.Integer');
+            concStratNode2.setAttribute('name', 'k');
+            concStratNode2ValueNode = simDoc.createElement('value');
+            concStratNode2ValueNode.appendChild(simDoc.createTextNode(sprintf('%d',sn.varsparam{ind}{r}.k)));
+            concStratNode2.appendChild(concStratNode2ValueNode);
+            concStratNode3 = simDoc.createElement('subParameter');
+            concStratNode3.setAttribute('classPath', 'java.lang.Boolean');
+            concStratNode3.setAttribute('name', 'withMemory');
+            concStratNode3ValueNode = simDoc.createElement('value');
+            if sn.varsparam{ind}{r}.withMemory
+                concStratNode3ValueNode.appendChild(simDoc.createTextNode('true'));
+            else
+                concStratNode3ValueNode.appendChild(simDoc.createTextNode('false'));
+            end
+            concStratNode3.appendChild(concStratNode3ValueNode);
+            concStratNode.appendChild(concStratNode2);
+            concStratNode.appendChild(concStratNode3);
+        case RoutingStrategy.ID_WRROBIN
+            concStratNode = simDoc.createElement('subParameter');
+            concStratNode.setAttribute('classPath', 'jmt.engine.NetStrategies.RoutingStrategies.WeightedRoundRobinStrategy');
+            concStratNode.setAttribute('name', 'Weighted Round Robin');
+            concStratNode2 = simDoc.createElement('subParameter');
+            concStratNode2.setAttribute('array', 'true');
+            concStratNode2.setAttribute('classPath', 'jmt.engine.NetStrategies.RoutingStrategies.WeightEntry');
+            concStratNode2.setAttribute('name', 'WeightEntryArray');
+            for j=find(sn.connmatrix(i,:)) % linked stations          
+                    weight = sn.varsparam{ind}{r}.weights(j);                    
+                    concStratNode3 = simDoc.createElement('subParameter');
+                    concStratNode3.setAttribute('classPath', 'jmt.engine.NetStrategies.RoutingStrategies.WeightEntry');
+                    concStratNode3.setAttribute('name', 'WeightEntry');
+                    concStratNode4Station = simDoc.createElement('subParameter');
+                    concStratNode4Station.setAttribute('classPath', 'java.lang.String');
+                    concStratNode4Station.setAttribute('name', 'stationName');
+                    concStratNode4StationValueNode = simDoc.createElement('value');
+                    concStratNode4StationValueNode.appendChild(simDoc.createTextNode(sprintf('%s',sn.nodenames{j})));
+                    concStratNode4Station.appendChild(concStratNode4StationValueNode);
+                    concStratNode3.appendChild(concStratNode4Station);
+                    concStratNode4Weight = simDoc.createElement('subParameter');
+                    concStratNode4Weight.setAttribute('classPath', 'java.lang.Integer');
+                    concStratNode4Weight.setAttribute('name', 'weight');
+                    concStratNode4WeightValueNode = simDoc.createElement('value');
+                    concStratNode4WeightValueNode.appendChild(simDoc.createTextNode(sprintf('%d',weight)));
+                    concStratNode4Weight.appendChild(concStratNode4WeightValueNode);                    
+                    concStratNode3.appendChild(concStratNode4Station);
+                    concStratNode3.appendChild(concStratNode4Weight);
+                    concStratNode2.appendChild(concStratNode3);
+            end
+            concStratNode.appendChild(concStratNode2);            
         case RoutingStrategy.ID_PROB
             concStratNode = simDoc.createElement('subParameter');
             concStratNode.setAttribute('classPath', 'jmt.engine.NetStrategies.RoutingStrategies.EmpiricalStrategy');

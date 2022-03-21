@@ -10,7 +10,7 @@ jplNode = simDoc.createElement('parameter');
 jplNode.setAttribute('classPath', 'java.lang.Integer');
 jplNode.setAttribute('name', 'jobsPerLink');
 valueNode = simDoc.createElement('value');
-valueNode.appendChild(simDoc.createTextNode(int2str(sn.varsparam{ind}.tasksPerLink)));
+valueNode.appendChild(simDoc.createTextNode(int2str(sn.varsparam{ind}.fanOut)));
 jplNode.appendChild(valueNode);
 section.appendChild(jplNode);
 
@@ -84,7 +84,7 @@ for r=1:numOfClasses
             classStratNode5bStation.setAttribute('classPath', 'java.lang.String');
             classStratNode5bStation.setAttribute('name', 'numbers');
             classStratNode5bStationValueNode = simDoc.createElement('value');
-            classStratNode5bStationValueNode.appendChild((simDoc.createTextNode(int2str(sn.varsparam{ind}.tasksPerLink))));
+            classStratNode5bStationValueNode.appendChild((simDoc.createTextNode(int2str(sn.varsparam{ind}.fanOut))));
             classStratNode5bStation.appendChild(classStratNode5bStationValueNode);
             classStratNode4b.appendChild(classStratNode5bStation);
             classStratNode5bProbability = simDoc.createElement('subParameter');

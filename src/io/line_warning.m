@@ -16,12 +16,11 @@ switch w(1).state
         %warning('[%s] %s',caller,MSG);
         finalmsg = sprintf('Warning [%s]: %s',caller,errmsg);
         try
-            if ~strcmp(finalmsg, lastWarning) || (toc(lastWarningTime)-suppressedWarningsTic)>10
+            if ~strcmp(finalmsg, lastWarning) || (toc(suppressedWarningsTic)-toc(lastWarningTime))>10
                 line_printf(finalmsg);
                 lastWarning = finalmsg;
                 suppressedWarnings = false;
-                suppressedWarningsTic = -1;
-                lastWarningTime=tic;
+                suppressedWarningsTic = tic;                
             else
                 if ~suppressedWarnings
                     line_printf(sprintf('Warning [%s]: %s',caller,'Warning message casted more than once, repetitions will not be printed on screen for 10 seconds.'));
@@ -29,6 +28,7 @@ switch w(1).state
                     suppressedWarningsTic = tic;
                 end
             end
+            lastWarningTime=tic;
         catch ME
             switch ME.identifier
                 case 'MATLAB:toc:callTicFirstNoInputs'

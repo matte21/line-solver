@@ -33,6 +33,18 @@ classdef SolverCTMC < NetworkSolver
         tstate = sampleSys(self, numevents)
         sampleAggr = sampleAggr(self, node, numSamples)
         
+        function MCTMC = getMarkedCTMC(self, options)        
+            % MCTMC = GETMARKEDCTMC(options)
+
+            if nargin < 2
+                [infGen, eventFilt, synchInfo] = self.getInfGen();    
+            else
+                [infGen, eventFilt, synchInfo] = getInfGen(self, options);    
+            end
+            
+            MCTMC = MarkedCTMC(infGen, eventFilt, synchInfo);
+        end
+
         function sn = getStruct(self)
             % QN = GETSTRUCT()
             
@@ -49,7 +61,7 @@ classdef SolverCTMC < NetworkSolver
             featSupported = SolverFeatureSet;
             featSupported.setTrue({'Source','Sink',...
                 'ClassSwitch','DelayStation','Queue',...
-                'APH','Coxian','Erlang','Exponential','HyperExp',...
+                'MAP','APH','MMPP2','PH','Coxian','Erlang','Exponential','HyperExp',...
                 'StatelessClassSwitcher','InfiniteServer','SharedServer','Buffer','Dispatcher',...
                 'Cache','CacheClassSwitcher', ...
                 'Server','JobSink','RandomSource','ServiceTunnel',...

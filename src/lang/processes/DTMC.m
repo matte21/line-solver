@@ -3,18 +3,18 @@ classdef DTMC < Process
     %
     % Copyright (c) 2012-2022, Imperial College London
     % All rights reserved.
-    
+
     properties
         transMat;
         stateSpace;
         isfinite;
     end
-    
+
     methods
         function self = DTMC(transMat, isFinite)
             % SELF = DTMC(transMat, isInfinite)
             self@Process('DTMC', 1);
-            
+
             self.transMat = dtmc_makestochastic(transMat);
             self.stateSpace = [];
             if nargin < 2
@@ -23,25 +23,25 @@ classdef DTMC < Process
                 self.isfinite = isFinite;
             end
         end
-        
+
         function A = toCTMC(self)
             Q= self.transMat - eye(size(self.transMat));
             A=CTMC(Q);
             A.setStateSpace(self.stateSpace);
-        end        
-        
-        function Ap = toTimeReverse(self)
+        end
+
+        function Ap = toTimeReversed(self)
             Ap = DTMC(dtmc_timereverse(self.transMat));
         end
-        
+
         function transMat = getTransMat(self)
             transMat = self.transMat;
         end
-        
+
         function setStateSpace(self,stateSpace)
             self.stateSpace  = stateSpace;
         end
-        
+
         function plot(self)
             nodeLbl = {};
             if ~isempty(self.stateSpace)
@@ -76,12 +76,33 @@ classdef DTMC < Process
                 graphViz4Matlab('-adjMat',P0,'-nodeLabels',nodeLbl,'-edgeLabels',edgeLbl,'-layout',Springlayout);
             end
         end
-                
+
     end
-    
+
     methods (Static)
         function dtmcObj=rand(nStates) % creates a random DTMC
             dtmcObj = DTMC(dtmc_rand(nStates));
-        end        
+        end
+
+        function dtmcObj=fromSampleSysAggr(sa)
+            isFinite = true;
+            sampleState = sa.state{1};
+            for r=2:length(sa.state)
+                sampleState = State.decorate(sampleState, sa.state{r});
+            end
+            [stateSpace,~,stateHash] = unique(sampleState,'rows');
+            dtmc = spalloc(length(stateSpace),length(stateSpace),length(stateSpace)); % assume O(n) elements with n states
+            holdTime = zeros(length(stateSpace),1);
+            for i=2:length(stateHash)
+                if isempty(dtmc(stateHash(i-1),stateHash(i)))
+                    dtmc(stateHash(i-1),stateHash(i)) = 0;
+                end
+                dtmc(stateHash(i-1),stateHash(i)) = dtmc(stateHash(i-1),stateHash(i)) + 1;
+                holdTime(stateHash(i-1)) = holdTime(stateHash(i-1)) + sa.t(i) - sa.t(i-1);
+            end
+            % at this point, dtmc has absolute counts so not yet normalized
+            dtmc = dtmc_makestochastic(dtmc);
+            dtmcObj = DTMC(dtmc, isFinite);
+        end
     end
 end

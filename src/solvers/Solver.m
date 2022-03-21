@@ -295,7 +295,7 @@ classdef Solver < handle
             switch options.method
                 case {'default','auto'}
                     if strcmp(options.method,'auto'), options.method='default'; end
-                    solver = SolverAuto(model, options);
+                    solver = LINE(model, options);
                 case {'ctmc','ctmc.gpu','gpu'}
                     if strcmp(options.method,'ctmc'), options.method='default'; end
                     options.method = erase(options.method,'ctmc.');
@@ -337,7 +337,9 @@ classdef Solver < handle
                     options.method = erase(options.method,'mam.');
                     solver = SolverMAM(model, options);
                 otherwise
-                    solver = Library(model, options);
+                    if strcmp(options.method,'auto'), options.method='default'; end
+                    solver = LINE(model, options);
+%                    solver = Library(model, options);
             end
         end
         

@@ -22,7 +22,7 @@ for r=1:numOfClasses
     elseif sn.procid(i,r) == ProcessType.ID_IMMEDIATE
         serviceTimeStrategyNode.setAttribute('classPath', 'jmt.engine.NetStrategies.ServiceStrategies.ZeroServiceTimeStrategy');
         serviceTimeStrategyNode.setAttribute('name', 'ZeroServiceTimeStrategy');
-    elseif sn.procid(i,r) == ProcessType.ID_APH|| sn.procid(i,r) == ProcessType.ID_COXIAN || (sn.phases(i,r)>2 && sn.procid(i,r) == ProcessType.ID_HYPEREXP) %|| (sn.phases(i,r)>2 && sn.procid(i,r) == ProcessType.ID_COXIAN) || (sn.phases(i,r)>2 && sn.procid(i,r) == ProcessType.ID_HYPEREXP)
+    elseif sn.procid(i,r) == ProcessType.ID_PH || sn.procid(i,r) == ProcessType.ID_APH || sn.procid(i,r) == ProcessType.ID_COXIAN || (sn.phases(i,r)>2 && sn.procid(i,r) == ProcessType.ID_HYPEREXP) %|| (sn.phases(i,r)>2 && sn.procid(i,r) == ProcessType.ID_COXIAN) || (sn.phases(i,r)>2 && sn.procid(i,r) == ProcessType.ID_HYPEREXP)
         serviceTimeStrategyNode.setAttribute('classPath', 'jmt.engine.NetStrategies.ServiceStrategies.ServiceTimeStrategy');
         serviceTimeStrategyNode.setAttribute('name', 'ServiceTimeStrategy');
         distributionNode = simDoc.createElement('subParameter');

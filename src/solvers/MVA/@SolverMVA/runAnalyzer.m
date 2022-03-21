@@ -215,6 +215,6 @@ for r=1:length(lambda)
 end
 isolationmodel.link(P);
 SolverMVA(isolationmodel, options).getAvgNodeTable;
-hitProb = full(icache.getResultHitProb);
-missProb = full(icache.getResultMissProb);
+hitProb = full(icache.getHitRatio);
+missProb = full(icache.getMissRatio);
 end

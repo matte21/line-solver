@@ -19,9 +19,13 @@ classdef Event
     methods
         function self = Event(event, node, class, prob, state, t, job)
             % SELF = EVENT(EVENT, NODE, CLASS, PROB, STATE, TIMESTAMP ,job)
-            
+                                    
             self.node = node;            
-            self.event = event;
+            if ischar(event)
+                self.event = EventType.toId(event);
+            else
+                self.event = event;
+            end            
             self.class = class;
             if nargin <4
                 prob = NaN;
@@ -39,6 +43,10 @@ classdef Event
                 job = NaN; % timestamp
             end
             self.job = job;
+        end
+
+        function vec=getRepres(self)
+            vec = [self.node,self.event,self.class];
         end
         
         function print(self)

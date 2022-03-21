@@ -24,14 +24,14 @@ for i=1:M
                     mu_i{r} = NaN;
                     phi_i{r} = NaN;
                 end
-                ph_i = Coxian(mu_i,phi_i).getRepresentation;
+                ph_i = Coxian(mu_i,phi_i).getRepres;
             case 'Join'
                 mu_i = cell(1,K);
                 phi_i = cell(1,K);
                 for r=1:K
                     mu_i{r} = NaN;
                     phi_i{r} = NaN;
-                    ph_i{r} = Coxian(mu_i{r},phi_i{r}).getRepresentation;
+                    ph_i{r} = Coxian(mu_i{r},phi_i{r}).getRepres;
                 end
             otherwise
                 ph_i = stations{i}.getMarkovianServiceRates();

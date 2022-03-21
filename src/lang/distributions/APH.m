@@ -3,49 +3,49 @@ classdef APH < MarkovianDistribution
     %
     % Copyright (c) 2012-2022, Imperial College London
     % All rights reserved.
-    
+
     methods
         function self = APH(alpha, T)
             % SELF = APH(ALPHA, T)
-            
+
             % Abstract class constructor
             self@MarkovianDistribution('APH', 2);
             self.setParam(1, 'alpha', alpha, 'java.lang.Double');
             self.setParam(2, 'T', T, 'java.lang.Double');
         end
     end
-    
+
     methods
         function alpha = getInitProb(self)
             % ALPHA = GETINITPROB()
-            
+
             % Get vector of initial probabilities
             alpha = self.getParam(1).paramValue(:);
             alpha = reshape(alpha,1,length(alpha));
         end
-        
+
         function T = getSubgenerator(self)
             % T = GETSUBGENERATOR()
-            
+
             % Get subgenerator
             T = self.getParam(2).paramValue;
         end
-        
+
         function X = sample(self, n)
             % X = SAMPLE(N)
-            
+
             % Get n samples from the distribution
-            if nargin<2 %~exist('n','var'), 
-                n = 1; 
+            if nargin<2 %~exist('n','var'),
+                n = 1;
             end
-            X = map_sample(self.getRepresentation,n);
+            X = map_sample(self.getRepres,n);
         end
     end
-    
+
     methods
         function update(self,varargin)
             % UPDATE(SELF,VARARGIN)
-            
+
             % Update parameters to match the first n central moments
             % (n<=4)
             MEAN = varargin{1};
@@ -64,7 +64,7 @@ classdef APH < MarkovianDistribution
 
         function updateFromRawMoments(self,varargin)
             % UPDATE(SELF,VARARGIN)
-            
+
             % Update parameters to match the first n moments
             % (n<=4)
             e1 = varargin{1};
@@ -89,7 +89,7 @@ classdef APH < MarkovianDistribution
 
                 if scv == 0.5
                     satisfy = 2;
-                elseif 0.5<scv && scv<1 
+                elseif 0.5<scv && scv<1
                     if 6*(m1^3)*scv<m3 && m3<3*(m1^3)*(3*scv-1+sqrt(2)*(1-scv)^(3/2))
                         satisfy = 1;
                         m2 = 3*(m1^3)*(3*scv-1+sqrt(2)*(1-scv)^(3/2));
@@ -105,11 +105,11 @@ classdef APH < MarkovianDistribution
                 elseif scv == 1
                     satisfy = 3;
                     % one dimensional exponential distribution with lambda = 1/m1
-                elseif scv>1 
+                elseif scv>1
                     satisfy = 1;
                     if m3<=(3/2)*m1^3*(1+scv)^2
                         m3 = (3/2)*m1^3*(1+scv)^2;
-                    else 
+                    else
                         m3 = m3;
                     end
                 else
@@ -151,25 +151,25 @@ classdef APH < MarkovianDistribution
                     lambda2 = 2/m1;
                 end
                 alpha = [mu,1-mu];
-                T = [-lambda1,lambda1;0,-lambda2];                
+                T = [-lambda1,lambda1;0,-lambda2];
             end
             self.setParam(1, 'alpha', alpha, 'java.lang.Double');
             self.setParam(2, 'T', T, 'java.lang.Double');
         end
-        
+
         function updateMean(self,MEAN)
             % UPDATEMEAN(SELF,MEAN)
-            
+
             % Update parameters to match the given mean
-            APH = self.getRepresentation;
+            APH = self.getRepres;
             APH = map_scale(APH,MEAN);
             self.setParam(1, 'alpha', map_pie(APH), 'java.lang.Double');
             self.setParam(2, 'T', APH{1}, 'java.lang.Double');
         end
-        
+
         function updateMeanAndSCV(self, MEAN, SCV)
             % UPDATEMEANANDSCV(MEAN, SCV)
-            
+
             % Fit phase-type distribution with given mean and squared coefficient of
             % variation (SCV=variance/mean^2)
             e1 = MEAN;
@@ -178,18 +178,18 @@ classdef APH < MarkovianDistribution
             self.setParam(1, 'alpha', alpha, 'java.lang.Double');
             self.setParam(2, 'T', T, 'java.lang.Double');
         end
-        
-        function APH = getRepresentation(self)
+
+        function APH = getRepres(self)
             % APH = GETREPRESENTATION()
-            
+
             % Return the renewal process associated to the distribution
             T = self.getSubgenerator;
             APH = {T,-T*ones(length(T),1)*self.getInitProb};
-        end
-        
+        end 
+
         function Ft = evalCDF(self,varargin)
-            alpha = self.getParam(1).paramValue; 
-            T = self.getParam(2).paramValue; 
+            alpha = self.getParam(1).paramValue;
+            T = self.getParam(2).paramValue;
             e = ones(length(alpha),1);
             if isempty(varargin)
                 mean = self.getMean;
@@ -198,8 +198,8 @@ classdef APH < MarkovianDistribution
                 F = [];
                 i = 1;
                 for t = linspace(0,mean+10*sigma,500)
-                  F(i) = 1-alpha*expm(T.*t)*e;
-                  i = i+1;
+                    F(i) = 1-alpha*expm(T.*t)*e;
+                    i = i+1;
                 end
                 t = linspace(0,mean+10*sigma,500);
                 Ft = [F',t'];
@@ -211,37 +211,43 @@ classdef APH < MarkovianDistribution
                 end
             end
         end
-        
+
     end
-    
+
     methods (Static)
+
+        function aph = rand(order)
+            map = aph_rand(order);
+            aph = APH(map_pie(map),map{1});
+        end
+
         function ex = fit(MEAN, SCV, SKEW)
             % EX = FIT(MEAN, SCV, SKEW)
-            
+
             % Fit the distribution from first three standard moments (mean,
             % SCV, skewness)
             if MEAN <= Distrib.Zero
                 ex = Exp(Inf);
-            else                
+            else
                 ex = APH(1.0, [1]);
                 ex.update(MEAN, SCV, SKEW);
             end
         end
 
         function ex = fitRawMoments(m1, m2, m3)
-            
+
             % Fit the distribution from first three moments
             if m1 <= Distrib.Zero
                 ex = Exp(Inf);
-            else                
+            else
                 ex = APH(1.0, [1]);
                 ex.updateFromRawMoments(m1, m2, m3);
             end
         end
-        
+
         function ex = fitCentral(MEAN, VAR, SKEW)
             % EX = FITCENTRAL(MEAN, VAR, SKEW)
-            
+
             % Fit the distribution from first three central moments (mean,
             % variance, skewness)
             if MEAN <= Distrib.Zero
@@ -251,10 +257,10 @@ classdef APH < MarkovianDistribution
                 ex.update(MEAN, VAR/MEAN^2, SKEW);
             end
         end
-        
+
         function ex = fitMeanAndSCV(MEAN, SCV)
             % EX = FITMEANANDSCV(MEAN, SCV)
-            
+
             % Fit the distribution from first three central moments (mean,
             % variance, skewness)
             if MEAN <= Distrib.Zero
@@ -263,9 +269,9 @@ classdef APH < MarkovianDistribution
                 ex = APH(1.0, [1]);
                 ex.updateMeanAndSCV(MEAN, SCV);
             end
-        end   
+        end
     end
-    
+
 end
 
 

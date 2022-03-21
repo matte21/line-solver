@@ -1,4 +1,4 @@
-model = LayeredNetwork('smallcachetest');
+model = LayeredNetwork('cacheInLayeredNetwork');
 
 %% definition of layered network
 %% client
@@ -26,6 +26,7 @@ lnoptions = SolverLN.defaultOptions;
 %lnoptions.iter_max = 1;
 lnoptions.verbose = 1;
 options = SolverMVA.defaultOptions;
-solver = SolverLN(model, @(model) SolverMVA(model, options), lnoptions);
-AvgTable{1} = solver.getAvgTable;
+solver{1} = SolverLN(model, @(model) SolverMVA(model, options), lnoptions);
+AvgTable = {};
+AvgTable{1} = solver{1}.getAvgTable;
 AvgTable{1}

@@ -176,5 +176,5 @@ end
 %sn.rates(1,jobclass{class_synchcall}) = destEntryObj.getRate;
 %sn.mu{1,jobclass{class_synchcall}} = destEntryObj.getMu;
 %sn.phi{1,jobclass{class_synchcall}} = destEntryObj.getPhi;
-%sn.proc{1,jobclass{class_synchcall}} = destEntryObj.getRepresentation;
+%sn.proc{1,jobclass{class_synchcall}} = destEntryObj.getRepres;
 %sn.phases(1,jobclass{class_synchcall}) = length(%sn.phases(1,jobclass{class_synchcall}));

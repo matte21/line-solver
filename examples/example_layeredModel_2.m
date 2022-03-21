@@ -48,6 +48,6 @@ AvgTable{2} = solver{1}.getAvgTable
 AvgTable{2}
 
 % this method adapts with the features of each layer
-%solver{2} = SolverLN(model, @(model) SolverAuto(model, SolverAuto.defaultOptions), lnoptions);
+%solver{2} = SolverLN(model, @(model) LINE(model, LINE.defaultOptions), lnoptions);
 %AvgTable{2} = solver{2}.getAvgTable
 %AvgTable{2}

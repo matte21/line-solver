@@ -24,7 +24,7 @@ for r=1:numOfClasses
             reqNode.setAttribute('classPath', 'java.lang.Integer');
             reqNode.setAttribute('name', 'numRequired');
             valueNode = simDoc.createElement('value');
-            valueNode.appendChild(simDoc.createTextNode(int2str(sn.varsparam{ind}.joinRequired{r})));
+            valueNode.appendChild(simDoc.createTextNode(int2str(sn.varsparam{ind}.fanIn{r})));
             reqNode.appendChild(valueNode);
             joinStrategyNode.appendChild(reqNode);
             strategyNode.appendChild(joinStrategyNode);

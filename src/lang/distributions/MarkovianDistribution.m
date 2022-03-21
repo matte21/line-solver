@@ -23,6 +23,42 @@ classdef MarkovianDistribution < ContinuousDistrib
     end
     
     methods
+        
+        % alpha,T representation of a PH distribution
+        function alpha_vec = alpha(self)
+            alpha_vec = self.getInitProb;
+        end
+        
+        function T_mat = T(self)
+            T_mat = self.D(0);
+        end
+        
+        % D matrices representation as in MAPs
+        function Di = D(self, i, wantSparse)
+            % Di = D(i)
+            if nargin<3
+                wantSparse = false;
+            end
+            
+            % Return representation matrix, e.g., D0=MAP.D(0)
+            if wantSparse
+                if nargin<2
+                    Di=self.getRepres;
+                else
+                    Di=self.getRepres{i+1};
+                end
+            else
+                if nargin<2
+                    Di=self.getRepres;
+                    for i=1:length(Di)
+                        Di(i)=full(Di(i));
+                    end
+                else
+                    Di=full(self.getRepres{i+1});
+                end
+            end
+        end        
+        
         function X = sample(self, n)
             % X = SAMPLE(N)
             
@@ -30,7 +66,7 @@ classdef MarkovianDistribution < ContinuousDistrib
             if nargin<2 %~exist('n','var'), 
                 n = 1; 
             end
-            X = map_sample(self.getRepresentation,n);
+            X = map_sample(self.getRepres,n);
         end
         
         function EXn = getRawMoments(self, n)
@@ -39,7 +75,7 @@ classdef MarkovianDistribution < ContinuousDistrib
             if nargin<2 %~exist('n','var'), 
                 n = 3; 
             end
-            PH = self.getRepresentation;
+            PH = self.getRepres;
             EXn = map_moment(PH,1:n);
         end
         
@@ -48,10 +84,10 @@ classdef MarkovianDistribution < ContinuousDistrib
             if ~isempty(self.mean)
                 MEAN = self.mean;
             else
-                if isnan(self.getRepresentation{1})
+                if isnan(self.getRepres{1})
                     MEAN = NaN;
                 else
-                    MEAN = map_mean(self.getRepresentation);
+                    MEAN = map_mean(self.getRepres);
                 end
                 self.mean = MEAN;
             end
@@ -60,19 +96,19 @@ classdef MarkovianDistribution < ContinuousDistrib
         function SCV = getSCV(self)
             % SCV = GETSCV()
             % Get the squared coefficient of variation of the distribution (SCV = variance / mean^2)
-            if any(isnan(self.getRepresentation{1}))
+            if any(isnan(self.getRepres{1}))
                 SCV = NaN;
             else
-                SCV = map_scv(self.getRepresentation);
+                SCV = map_scv(self.getRepres);
             end
         end
         
         function SKEW = getSkewness(self)
             % SKEW = GETSKEWNESS()
-            if any(isnan(self.getRepresentation{1}))
+            if any(isnan(self.getRepres{1}))
                 SKEW = NaN;
             else
-                SKEW = map_skew(self.getRepresentation);
+                SKEW = map_skew(self.getRepres);
             end
         end
         
@@ -82,12 +118,12 @@ classdef MarkovianDistribution < ContinuousDistrib
             % Evaluate the cumulative distribution function at t
             % AT T
             
-            Ft = map_cdf(self.getRepresentation,t);
+            Ft = map_cdf(self.getRepres,t);
         end
         
         function alpha = getInitProb(self)
             % ALPHA = GETINITPROB()
-            aph = self.getRepresentation;
+            aph = self.getRepres;
             alpha = map_pie(aph);
             self.initProb = alpha;
         end
@@ -96,7 +132,7 @@ classdef MarkovianDistribution < ContinuousDistrib
             % T = GETSUBGENERATOR()
             
             % Get generator
-            aph = self.getRepresentation;
+            aph = self.getRepres;
             T = aph{1};
         end
         
@@ -117,7 +153,7 @@ classdef MarkovianDistribution < ContinuousDistrib
             % MU = GETMU()
             
             % Return total outgoing rate from each state
-            aph = self.getRepresentation;
+            aph = self.getRepres;
             mu = - diag(aph{1});
         end
         
@@ -126,7 +162,7 @@ classdef MarkovianDistribution < ContinuousDistrib
             
             % Return the probability that a transition out of a state is
             % absorbing
-            aph = self.getRepresentation;
+            aph = self.getRepres;
             phi = - aph{2}*ones(size(aph{1},1),1) ./ diag(aph{1});
         end
         
@@ -182,12 +218,19 @@ classdef MarkovianDistribution < ContinuousDistrib
             % PHASES = GETNUMBEROFPHASES()
             
             % Return number of phases in the distribution
-            PH = self.getRepresentation;
+            PH = self.getRepres;
             phases = length(PH{1});
         end
         
         function PH = getRepresentation(self)
             % PH = GETREPRESENTATION()
+            
+            % Retrocompatibility mapping
+            PH = self.getRepres();
+        end
+        
+        function PH = getRepres(self)
+            % PH = GETREPRES()
             
             if ~isempty(self.representation)
                 PH = self.representation;
@@ -209,7 +252,7 @@ classdef MarkovianDistribution < ContinuousDistrib
             % Evaluate the Laplace transform of the distribution function at t
             % AT T
             
-            PH = self.getRepresentation;
+            PH = self.getRepres;
             pie = map_pie(PH);
             A = PH{1};
             e = ones(length(pie),1);
@@ -219,7 +262,7 @@ classdef MarkovianDistribution < ContinuousDistrib
         function plot(self)
             % PLOT()
             
-            PH = self.getRepresentation;
+            PH = self.getRepres;
             s = []; % source node
             t = []; % dest node
             w = []; % edge weight

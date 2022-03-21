@@ -15,6 +15,14 @@ elseif nargin == 2
     T=handlers{4};
 end
 [QN,UN,RN,TN] = self.getAvg(Q,U,R,T);
+if isempty(QN)
+    QNn=[];
+    UNn=[];
+    RNn=[];
+    TNn=[];
+    ANn=[];
+    return
+end
 
 sn = self.model.getStruct; % must be called after getAvg
 
@@ -55,7 +63,18 @@ for ind=1:I
                 %    ist = sn.nodeToStation(ind);
                 %    ANn(ind, r) =  TN(ist,r);
                 %else
-                ANn(ind, r) =  (sn.nodevisits{c}(ind,r) / sum(sn.visits{c}(refstat,inchain))) * sum(TN(refstat,inchain));
+                switch sn.nodetype(ind)
+                    case NodeType.Cache
+                        if any(find(r==sn.varsparam{ind}.hitclass))
+                        TNn(ind, r) =  (sn.nodevisits{c}(ind,r) / sum(sn.visits{c}(refstat,inchain))) * sum(TN(refstat,inchain));
+                        elseif any(find(r==sn.varsparam{ind}.missclass))
+                        TNn(ind, r) =  (sn.nodevisits{c}(ind,r) / sum(sn.visits{c}(refstat,inchain))) * sum(TN(refstat,inchain));
+                        else
+                        ANn(ind, r) =  (sn.nodevisits{c}(ind,r) / sum(sn.visits{c}(refstat,inchain))) * sum(TN(refstat,inchain));
+                        end
+                    otherwise
+                        ANn(ind, r) =  (sn.nodevisits{c}(ind,r) / sum(sn.visits{c}(refstat,inchain))) * sum(TN(refstat,inchain));
+                end
                 %end
             end
             %end
@@ -70,6 +89,22 @@ for ind=1:I
             anystat = find(sn.visits{c}(:,r));
             if ~isempty(anystat)
                 if sn.nodetype(ind) ~= NodeType.Sink && sn.nodetype(ind) ~= NodeType.Join
+                    for s = inchain
+                        for jnd=1:I
+                            switch sn.nodetype(ind)
+                                case NodeType.Source
+                                    ist = sn.nodeToStation(ind);
+                                    TNn(ind, s) = TN(ist,s);
+                                case NodeType.Cache
+                                     if ind~=jnd
+                                         TNn(ind, s) = TNn(ind, s) + ANn(ind, r) * sn.rtnodes((ind-1)*R+r, (jnd-1)*R+s);
+                                     end
+                                otherwise
+                                    TNn(ind, s) = TNn(ind, s) + ANn(ind, r) * sn.rtnodes((ind-1)*R+r, (jnd-1)*R+s);
+                            end
+                        end
+                    end
+                elseif sn.nodetype(ind) == NodeType.Join
                     for s = inchain
                         for jnd=1:I
                             if sn.nodetype(ind) ~= NodeType.Source

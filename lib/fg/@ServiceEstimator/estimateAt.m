@@ -13,6 +13,7 @@ switch self.options.method
         error('Unknown inference method: %s.', self.options.method);
 end
 estVal = estVal(:)';
+
 % update the model parameters
 svcProc = node.getService;
 for r=1:sn.nclasses

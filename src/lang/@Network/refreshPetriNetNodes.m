@@ -1,7 +1,5 @@
-function nvars = refreshPetriNetNodes(self)
-% NVARS = REFRESHPETRINETNODES()
-
-nvars = zeros(self.getNumberOfNodes, 1);
+function refreshPetriNetNodes(self)
+% REFRESHPETRINETNODES()
 
 for ind=1:self.getNumberOfNodes
     node = self.getNodeByIndex(ind);
@@ -24,7 +22,7 @@ for ind=1:self.getNumberOfNodes
             self.sn.fireweight{ind,1} = node.firingWeights;
             self.sn.firingid{ind,1} = node.timingStrategies;
             for m = 1:self.sn.nmodes(ind)
-                self.sn.firingproc{ind,1}{m} = node.distributions{m}.getRepresentation;
+                self.sn.firingproc{ind,1}{m} = node.distributions{m}.getRepres;
                 self.sn.firingprocid{ind,1}(m) = ProcessType.toId(ProcessType.fromText(class(node.distributions{m})));
                 self.sn.firingphases{ind,1}(m) = node.distributions{m}.getNumberOfPhases;
             end

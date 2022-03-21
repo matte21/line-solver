@@ -41,4 +41,6 @@ solver = {};
 solver{end+1} = SolverJMT(model,'seed',23000);
 
 AvgTable = {};
-AvgTable{end+1} = solver{end}.getAvgTable
+AvgTable{end+1} = solver{end}.getAvgTable;
+AvgTable{end}
+

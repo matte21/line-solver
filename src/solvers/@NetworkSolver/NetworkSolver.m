@@ -221,17 +221,7 @@ classdef NetworkSolver < Solver
                     end
                 end
             end
-        end
-        
-        function [AvgTable,QT,UT,RT,TT,AT] = getNodeAvgTable(self,Q,U,R,T,A,keepDisabled)
-            line_warning(mfilename,'getNodeAvgTable will be removed in a future release. Use getAvgNodeTable instead.');
-            [AvgTable,QT,UT,RT,TT,AT] = getAvgNodeTable(self,Q,U,R,T,A,keepDisabled);
-        end
-        
-        function [QNn,UNn,RNn,TNn,ANn] = getNodeAvg(self, Q, U, R, T, A)
-            line_warning(mfilename,'getNodeAvg will be removed in a future release. Use getAvgNode instead.');
-            [QNn,UNn,RNn,TNn,ANn] = getAvgNode(self, Q, U, R, T, A);
-        end
+        end       
         
         % also accepts a cell array with the handlers in it
         [QN,UN,RN,TN,AN,WN]       = getAvg(self,Q,U,R,T,A);

@@ -10,12 +10,24 @@ end
 if isa(sn,'Network')
     sn=sn.getStruct();
 end
+
+
 % generate states such that the marginal queue-lengths are as in vector n
 %  n(r): number of jobs at the station in class r
 R = sn.nclasses;
 S = sn.nservers;
 state = [];
 space = [];
+
+
+if sn.isstation(ind) && any(sn.procid(sn.nodeToStation(ind),:)==ProcessType.ID_MAP | sn.procid(sn.nodeToStation(ind),:)==ProcessType.ID_MMPP2);
+    if sn.nservers(ind)>1
+        line_error(mfilename,'Multiserver MAP stations are not supported.')
+    end
+    if sn.schedid(ind) ~= SchedStrategy.ID_FCFS
+        line_error(mfilename,'Non-FCFS MAP stations are not supported.')
+    end
+end
 
 % ind: node index
 ist = sn.nodeToStation(ind);
@@ -32,7 +44,7 @@ end
 
 phases = zeros(1,R);
 for r=1:R
-    if isempty(sn.proc{ist}{r}) 
+    if isempty(sn.proc{ist}{r})
         phases(r) = 0;
     else
         phases(r) = length(sn.proc{ist}{r}{1});
@@ -96,14 +108,14 @@ switch sn.nodetype(ind)
                         %line_warning(mfilename,sprintf('Marginal state space size is in the order of thousands of states. Computation may be slow.',sizeEstimator));
                     end
                 end
-                
+
                 if sum(n) == 0
                     space = zeros(1,1+sum(phases)); % unclear if this should 1+sum(K), was sum(K) but State.fromMarginalAndStarted uses 1+sum(K) so was changed here as well
                     return
                 end
                 % in these policies we track an ordered buffer and
                 % the jobs in the servers
-                
+
                 % build list of job classes in the node, with repetition
                 vi = [];
                 for r=1:R
@@ -111,7 +123,7 @@ switch sn.nodetype(ind)
                         vi=[vi, r*ones(1,n(r))];
                     end
                 end
-                
+
                 % gen permutation of their positions in the waiting buffer
                 mi = uniqueperms(vi);
                 % now generate server states
@@ -129,10 +141,10 @@ switch sn.nodetype(ind)
                     end
                     mi_buf_kstate = [];
                     %if mi_buf(1)>0
-                    % generate job phases for all buffer states                    
+                    % generate job phases for all buffer states
                     %for k=1:size(mi_buf,1)
                     %    mi_buf_kstate(end+1:end+size(bkstate,1),1:size(bkstate,2)) = bkstate;
-                    %end         
+                    %end
                     %end
                     % mi_srv: class of job running in server i
                     mi_srv = mi(:,max(size(mi,2)-S(ist)+1,1):end);
@@ -155,21 +167,21 @@ switch sn.nodetype(ind)
                         for j=mi_buf(k,:) % for each job in the buffer
                             if j>0
                                 bkstate = State.decorate(bkstate,[1:phases(j)]');
-                            else 
+                            else
                                 bkstate = 0;
                             end
-                        end                        
+                        end
                         bufstate_tmp = State.decorate(mi_buf(k,:), bkstate);
                         % here interleave positions of class and phases in
                         % buf
                         bufstate = zeros(size(bufstate_tmp));
                         bufstate(:,1:2:end)=bufstate_tmp(:,1:size(mi_buf,2));
-                        bufstate(:,2:2:end)=bufstate_tmp(:,(size(mi_buf,2)+1):end);                        
+                        bufstate(:,2:2:end)=bufstate_tmp(:,(size(mi_buf,2)+1):end);
                         state = [state; State.decorate(bufstate, kstate)];
                     end
                 end
                 space = state;
-          case {SchedStrategy.ID_FCFS, SchedStrategy.ID_HOL, SchedStrategy.ID_LCFS}  
+            case {SchedStrategy.ID_FCFS, SchedStrategy.ID_HOL, SchedStrategy.ID_LCFS}
                 sizeEstimator = multinomialln(n) - gammaln(sum(n)) + gammaln(1+sn.cap(ist));
                 sizeEstimator = round(sizeEstimator/log(10));
                 if sizeEstimator > 3
@@ -177,14 +189,22 @@ switch sn.nodetype(ind)
                         %line_warning(mfilename,sprintf('Marginal state space size is in the order of thousands of states. Computation may be slow.',sizeEstimator));
                     end
                 end
-                
+
                 if sum(n) == 0
-                    space = zeros(1,1+sum(phases)); % unclear if this should 1+sum(K), was sum(K) but State.fromMarginalAndStarted uses 1+sum(K) so was changed here as well
+                    space = zeros(1,1+sum(phases));
+                    if sn.nodetype(ind) ~= NodeType.Source
+                        for r=1:R
+                            switch sn.procid(sn.nodeToStation(ind),r)
+                                case {ProcessType.ID_MAP, ProcessType.ID_MMPP2}
+                                    space = State.decorate(space, [1:sn.phases(ind,r)]');
+                            end
+                        end
+                    end
                     return
                 end
                 % in these policies we track an ordered buffer and
                 % the jobs in the servers
-                
+
                 % build list of job classes in the node, with repetition
                 vi = [];
                 for r=1:R
@@ -192,7 +212,7 @@ switch sn.nodetype(ind)
                         vi=[vi, r*ones(1,n(r))];
                     end
                 end
-                
+
                 % gen permutation of their positions in the waiting buffer
                 mi = uniqueperms(vi);
                 % now generate server states
@@ -218,24 +238,45 @@ switch sn.nodetype(ind)
                     %si = unique(si,'rows');
                     for k=1:size(si,1)
                         % determine number of class r jobs running in phase
-                        % j in server state mi_srv(kjs,:) and build
+                        % j in server state mi_srv(k,:) and build
                         % state
                         kstate=[];
+                        map_cols = [];
+
                         for r=1:R
-                            kstate = State.decorate(kstate,State.spaceClosedSingle(phases(r),si(k,r)));
+                            init_r = State.spaceClosedSingle(phases(r),si(k,r));
+                            if sn.procid(sn.nodeToStation(ind),r) == ProcessType.ID_MAP || sn.procid(sn.nodeToStation(ind),r) == ProcessType.ID_MMPP2
+                                if si(k,r) == 0
+                                    init_r = State.decorate(init_r, [1:phases(r)]');
+                                else
+                                    init_r = State.decorate(init_r, 0);
+                                end
+                                for i=1:size(init_r,1)
+                                    if init_r(i,end) == 0
+                                        init_r(i,end) = find(init_r(i,:));
+                                    end
+                                end
+                            end
+                            kstate = State.decorate(kstate,init_r);
+                            if sn.procid(sn.nodeToStation(ind),r) == ProcessType.ID_MAP || sn.procid(sn.nodeToStation(ind),r) == ProcessType.ID_MMPP2
+                                map_cols(end+1) = size(kstate,2);
+                            end
                         end
+                        kstate = kstate(:,[setdiff(1:size(kstate,2),map_cols),map_cols]);
                         state = [state; repmat(mi_buf(k,:),size(kstate,1),1), kstate];
                     end
                 end
-                space = state;                
+                space = state;
             case {SchedStrategy.ID_SJF, SchedStrategy.ID_LJF}
                 % in these policies the state space includes continuous
                 % random variables for the service times
                 line_error(mfilename,'The scheduling policy does not admit a discrete state space.\n');
         end
-        switch sn.routing(ind)
-            case RoutingStrategy.ID_RROBIN
-                space = State.decorate(space, sn.varsparam{ind}.outlinks(:));
+        for r=1:R
+            switch sn.routing(ind,r)
+                case {RoutingStrategy.ID_RROBIN, RoutingStrategy.ID_WRROBIN}
+                    space = State.decorate(space, sn.varsparam{ind}{r}.outlinks(:));
+            end
         end
     case NodeType.Cache
         switch sn.schedid(ist)
@@ -247,9 +288,11 @@ switch sn.nodetype(ind)
                 end
                 space = State.decorate(space,state);
         end
-        switch sn.routing(ind)
-            case RoutingStrategy.ID_RROBIN
-                space = State.decorate(space, sn.varsparam{ind}.outlinks(:));
+        for r=1:R
+            switch sn.routing(ind,r)
+                case RoutingStrategy.ID_RROBIN
+                    space = State.decorate(space, sn.varsparam{ind}{r}.outlinks(:));
+            end
         end
 end
 space = unique(space,'rows'); % do not comment, required to sort empty state as first

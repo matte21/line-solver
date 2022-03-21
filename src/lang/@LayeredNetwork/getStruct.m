@@ -96,7 +96,7 @@ for t=1:lqn.ntasks
             lqn.hashnames{idx,1} = ['C:',lqn.names{idx,1}];
             %lqn.shortnames{idx,1} = ['C',num2str(idx-tshift)];
     end
-    pidx = find(cellfun(@(x) strcmpi(x.name, self.tasks{t}.parent.name), self.hosts));
+    pidx = find(cellfun(@(x) strcmp(x.name, self.tasks{t}.parent.name), self.hosts));
     lqn.parent(idx) = pidx;
     lqn.graph(idx, pidx) = 1;
     lqn.nentriesof(idx) = length(self.tasks{t}.entries);
@@ -124,7 +124,7 @@ for e=1:lqn.nentries
             lqn.itemsdistribution{idx,1} = self.entries{e}.popularity;
     end
     lqn.hostdem{idx,1} = Immediate.getInstance();
-    tidx = lqn.nhosts + find(cellfun(@(x) strcmpi(x.name, self.entries{e}.parent.name), self.tasks));
+    tidx = lqn.nhosts + find(cellfun(@(x) strcmp(x.name, self.entries{e}.parent.name), self.tasks));
     lqn.parent(idx) = tidx;
     lqn.graph(tidx,idx) = 1;
     lqn.entriesof{tidx}(end+1) = idx;
@@ -138,7 +138,7 @@ for a=1:lqn.nacts
     lqn.hashnames{idx,1} = ['A:',lqn.names{idx,1}];
     %lqn.shortnames{idx,1} = ['A',num2str(idx - ashift)];
     lqn.hostdem{idx,1} = self.activities{a}.hostDemand;
-    tidx = lqn.nhosts + find(cellfun(@(x) strcmpi(x.name, self.activities{a}.parent.name), self.tasks));
+    tidx = lqn.nhosts + find(cellfun(@(x) strcmp(x.name, self.activities{a}.parent.name), self.tasks));
     lqn.parent(idx) = tidx;
     lqn.actsof{tidx}(end+1) = idx;
     lqn.type(idx) = LayeredNetworkElement.ACTIVITY; % activities

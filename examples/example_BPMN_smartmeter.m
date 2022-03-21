@@ -1,6 +1,6 @@
 % EXAMPLE_BPMN_SMARTMETER exemplifies a smartmeter models
 %
-% Copyright (c) 2012-2021, Imperial College London 
+% Copyright (c) 2012-2022, Imperial College London 
 % All rights reserved.
 
 clear; 

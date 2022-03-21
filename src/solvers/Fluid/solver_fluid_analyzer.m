@@ -124,7 +124,7 @@ switch options.method
                                         %if any(muik > 0.01+ sn.mu{i,k} * rates(i,k) / rates0(i,k))
                                         %    keyboard
                                         %end
-                                        sn.proc{i}{k} = cx.getRepresentation;
+                                        sn.proc{i}{k} = cx.getRepres;
                                         sn.mu{i,k} = muik;
                                         sn.phi{i}{k} = phiik;
                                         sn.phases = phases;

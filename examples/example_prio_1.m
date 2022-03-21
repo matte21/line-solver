@@ -3,41 +3,33 @@ if ~isoctave(), clearvars -except exampleName; end
 model = Network('MyNetwork');
 
 %% Block 1: nodes
-node{1} = Delay(model, 'SlowDelay');
-node{2} = Queue(model, 'FCFSQueue', SchedStrategy.FCFS);
-node{3} = Queue(model, 'SIROQueue', SchedStrategy.SIRO);
-node{4} = Queue(model, 'PSQueue', SchedStrategy.PS);
-node{5} = Queue(model, 'HOLQueue', SchedStrategy.HOL);
-node{6} = Delay(model, 'FastDelay');
+node{1} = Source(model, 'Source');
+node{2} = Queue(model, 'Queue1', SchedStrategy.FCFS);
+node{3} = Queue(model, 'Queue2', SchedStrategy.SIRO);
+node{4} = Queue(model, 'Queue3', SchedStrategy.PS);
+node{5} = Queue(model, 'Queue4', SchedStrategy.HOL);
+node{6} = Sink(model, 'Sink');
 
 %% Block 2: classes
-jobclass{1} = ClosedClass(model, 'Class1', 18, node{1}, 0);
-jobclass{2} = ClosedClass(model, 'Class2', 18, node{1}, 1);
-jobclass{3} = ClosedClass(model, 'Class3', 18, node{1}, 0);
+jobclass{1} = OpenClass(model, 'Class1', 0);
+jobclass{2} = OpenClass(model, 'Class2', 1);
+jobclass{3} = OpenClass(model, 'Class3', 0);
 
-node{1}.setService(jobclass{1}, Exp.fitMean(10.000000)); 
-node{1}.setService(jobclass{2}, Exp.fitMean(10.000000)); 
-node{1}.setService(jobclass{3}, Exp.fitMean(10.000000)); 
-
-node{2}.setService(jobclass{1}, Exp.fitMean(0.300000)); 
-node{2}.setService(jobclass{2}, Exp.fitMean(0.500000)); 
-node{2}.setService(jobclass{3}, Exp.fitMean(0.600000)); 
-
-node{3}.setService(jobclass{1}, Exp.fitMean(1.100000)); 
-node{3}.setService(jobclass{2}, Exp.fitMean(1.300000)); 
-node{3}.setService(jobclass{3}, Exp.fitMean(1.500000)); 
-
-node{4}.setService(jobclass{1}, Exp.fitMean(1.000000)); 
-node{4}.setService(jobclass{2}, Exp.fitMean(1.100000)); 
-node{4}.setService(jobclass{3}, Exp.fitMean(1.900000)); 
-
-node{5}.setService(jobclass{1}, Exp.fitMean(2.500000)); 
-node{5}.setService(jobclass{2}, Exp.fitMean(1.900000)); 
-node{5}.setService(jobclass{3}, Exp.fitMean(4.300000)); 
-
-node{6}.setService(jobclass{1}, Exp.fitMean(1.000000)); 
-node{6}.setService(jobclass{2}, Exp.fitMean(1.000000)); 
-node{6}.setService(jobclass{3}, Exp.fitMean(1.000000)); 
+node{1}.setArrival(jobclass{1}, Exp.fitMean(10.000000)); % (Source of Customers,Class0)
+node{1}.setArrival(jobclass{2}, Exp.fitMean(10.000000)); % (Source of Customers,Class1)
+node{1}.setArrival(jobclass{3}, Exp.fitMean(10.000000)); % (Source of Customers,Class2)
+node{2}.setService(jobclass{1}, Exp.fitMean(0.300000)); % (WebServer,Class0)
+node{2}.setService(jobclass{2}, Exp.fitMean(0.500000)); % (WebServer,Class1)
+node{2}.setService(jobclass{3}, Exp.fitMean(0.600000)); % (WebServer,Class2)
+node{3}.setService(jobclass{1}, Exp.fitMean(1.100000)); % (Storage1,Class0)
+node{3}.setService(jobclass{2}, Exp.fitMean(1.300000)); % (Storage1,Class1)
+node{3}.setService(jobclass{3}, Exp.fitMean(1.500000)); % (Storage1,Class2)
+node{4}.setService(jobclass{1}, Exp.fitMean(2.000000)); % (Storage2,Class0)
+node{4}.setService(jobclass{2}, Exp.fitMean(2.100000)); % (Storage2,Class1)
+node{4}.setService(jobclass{3}, Exp.fitMean(1.900000)); % (Storage2,Class2)
+node{5}.setService(jobclass{1}, Exp.fitMean(2.500000)); % (Storage3,Class0)
+node{5}.setService(jobclass{2}, Exp.fitMean(1.900000)); % (Storage3,Class1)
+node{5}.setService(jobclass{3}, Exp.fitMean(4.300000)); % (Storage3,Class2)
 
 %% Block 3: topology
 P = model.initRoutingMatrix(); % initialize routing matrix 
@@ -65,23 +57,20 @@ P{3,3}(2,6) = 2.500000e-01; % (WebServer,Class2) -> (Out,Class2)
 P{3,3}(3,2) = 1; % (Storage1,Class2) -> (WebServer,Class2)
 P{3,3}(4,2) = 1; % (Storage2,Class2) -> (WebServer,Class2)
 P{3,3}(5,2) = 1; % (Storage3,Class2) -> (WebServer,Class2)
-P{1,1}(6,1) = 1;
-P{2,2}(6,1) = 1;
-P{3,3}(6,1) = 1;
 model.link(P);
 
 %%
 options = lineDefaults;
 options.seed = 23000;
 options.cutoff=1;
-options.samples=1e5;
+options.samples=1e4;
 solver={};
 solver{end+1} = SolverCTMC(model,options); % CTMC is infinite on this model
 %solver{end+1} = SolverFluid(model,options);
 solver{end+1} = SolverMVA(model,options);
 %solver{end+1} = SolverMAM(model,options);
 solver{end+1} = SolverJMT(model,options);
-%solver{end+1} = SolverSSA(model,options);
+solver{end+1} = SolverSSA(model,options);
 %solver{end+1} = SolverNC(model,options);
 for s=1:length(solver)
     fprintf(1,'SOLVER: %s\n',solver{s}.getName());

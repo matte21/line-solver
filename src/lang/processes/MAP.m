@@ -17,51 +17,125 @@ classdef MAP < MarkovModulated
             end
             setParam(self, 1, 'D0', D0, 'java.lang.Double');
             setParam(self, 2, 'D1', D1, 'java.lang.Double');
+
+            if ~map_isfeasible(self.D)
+                line_warning(mfilename,'MAP is infeasible.');
+            end
         end
 
-        function meant = getMeanT(self,t)
-            % MEANT = GETMEANT(SELF,T)
-            D0 =  self.getParam(1).paramValue;
-            D1 =  self.getParam(2).paramValue;
-            lambda = map_lambda({D0,D1});
-            meant = lambda * t;
+        function Di = D(self, i, wantSparse)
+            % Di = D(i)
+            if nargin<3
+                wantSparse = false;
+            end
+
+            % Return representation matrix, e.g., D0=MAP.D(0)
+            if wantSparse
+                if nargin<2
+                    Di=self.getRepres;
+                else
+                    Di=self.getRepres{i+1};
+                end
+            else
+                if nargin<2
+                    Di=self.getRepres;
+                    for i=1:length(Di)
+                        Di(i)=full(Di(i));
+                    end
+                else
+                    Di=full(self.getRepres{i+1});
+                end
+            end
         end
 
-        function vart = evalVarT(self,t)
+        function meant = evalMeanT(self, t)
+            % MEANT = EVALMEANT(SELF,T)
+
+            meant = map_count_mean(self.D, t);
+        end
+
+        function vart = evalVarT(self, t)
             % VART = EVALVART(SELF,T)
 
-            % Evaluate the variance-time curve at t
-            D0 =  self.getParam(1).paramValue;
-            D1 =  self.getParam(2).paramValue;
-            vart =  map_count_var({D0,D1},t);
+            % Evaluate the variance-time curve at timescale t
+            vart =  map_count_var(self.D, t);
+        end
+
+        function acf = evalACFT(self, lags, timescale)
+            % ACF = EVALACFT(self, lags)
+            %
+            % Evaluate the autocorrelation in counts at timescale t
+
+            acf = map_acfc(self.D, lags, timescale);
+        end
+
+        function n = getNumberOfPhases(self)
+            % N = GETNUMBEROFPHASES()
+            n = 2;
         end
 
         % inter-arrival time properties
         function mean = getMean(self)
             % MEAN = GETMEAN()
 
-            D0 =  self.getParam(1).paramValue;
-            D1 =  self.getParam(2).paramValue;
-            mean = map_mean({D0,D1});
+            mean = map_mean(self.D);
         end
 
         function scv = getSCV(self)
             % SCV = GETSCV()
 
-            D0 =  self.getParam(1).paramValue;
-            D1 =  self.getParam(2).paramValue;
-            scv = map_scv({D0,D1});
+            scv = map_scv(self.D);
         end
 
-        function id = getID(self) % asymptotic index of dispersion
-            % ID = GETID() % ASYMPTOTIC INDEX OF DISPERSION
+        function mu = getMu(self)
+            % MU = GETMU()
+            D = getProcess(self);
+            mu = sum(D{2},2); % sum D1 rows / diag -D0
+        end
 
-            D0 =  self.getParam(1).paramValue;
-            D1 =  self.getParam(2).paramValue;
-            id = map_idc({D0,D1});
+        function phi = getPhi(self)
+            % PHI = GETPHI()
+            % Return the exit vector of the underlying PH
+            D = getProcess(self);
+            phi = sum(D{2},2) ./ diag(-D{1}); % sum D1 rows / diag -D0
+        end        
+
+        function acf = getACF(self, lags)
+            % ACF = GETACF(self, lags)
+
+            acf = map_acf(self.D,lags);
+        end
+
+        function [gamma2, gamma] = getACFDecay(self)
+            % [gamma2, gamma] = GETACFDECAY(self)
+            %
+            % gamma2: asymptotic decay rate of acf
+            % gamma: interpolated decay rate of acf
+
+            gamma2 = map_gamma2(self.D);
+            if nargout>1
+                gamma = map_gamma(self.D);
+            end
+        end
+
+        function id = getIDC(self, t) % index of dispersion for counts
+            % IDC = GETIDC() % ASYMPTOTIC INDEX OF DISPERSION
+
+            if nargin < 2
+                id = map_idc(self.D);
+            else
+                id = map_count_var(self.D,t) / map_count_mean(self.D,t);
+            end
         end
 
         function MAP = getRepresentation(self)
+            % MAP = GETREPRESENTATION()
+
+            % Retrocompatibility mapping
+            MAP = self.getRepres();
+        end
+
+        function MAP = getRepres(self)
             % MAP = GETREPRESENTATION()
             MAP = getProcess(self);
         end
@@ -69,9 +143,7 @@ classdef MAP < MarkovModulated
         function lam = getRate(self)
             % MAP = GETRATE()
 
-            D0 =  self.getParam(1).paramValue;
-            D1 =  self.getParam(2).paramValue;
-            lam = map_lambda({D0,D1});
+            lam = map_lambda(self.D);
         end
 
         function MAP = getProcess(self)
@@ -82,35 +154,125 @@ classdef MAP < MarkovModulated
             MAP = {D0,D1};
         end
 
-        function n = getNumberOfPhases(self)
-            % N = GETNUMBEROFMAPASES()
-            D0 =  self.getParam(1).paramValue;
-            n = length(D0);
-        end
-
-        function mu = getMu(self)
-            % MU = GETMU()
-            % Aggregate departure rate from each state
-            MAP = getProcess(self);
-            mu = sum(MAP{2},2); % sum D1 rows / diag -D0
-        end
-
-        function phi = getPhi(self)
-            % MAPI = GETMAPI()
-            % Return the exit vector of the underlying MAP
-            MAP = getProcess(self);
-            phi = sum(MAP{2},2) ./ diag(-MAP{1}); % sum D1 rows / diag -D0
-        end
-
-        function bool = isImmmediate(self)
+     function bool = isImmmediate(self)
             % BOOL = ISIMMMEDIATE()
 
             bool = getMean(self) == 0;
         end
+
+        function mapr = toTimeReversed(self)
+            mapr = MAP(map_timereverse(self.D));
+        end
+
+        function ph = toPH(self)
+            ph = PH(self.getEmbProb,self.D(0));
+        end
+
+        function X = sample(self, n)
+            % X = SAMPLE(N)
+            if nargin<2 %~exist('n','var'),
+                n = 1;
+            end
+            MAP = self.getRepres;
+            if map_isfeasible(MAP)
+                X = map_sample(MAP,n);
+            else
+                line_error(mfilename,'This process is infeasible (negative rates).');
+            end
+        end
+
+        function self = updateMean(self,MEAN)
+            % UPDATEMEAN(SELF,MEAN)
+            % Update parameters to match the given mean
+            newMAP = map_scale(self.D,MEAN);
+            self.params{1}.paramValue = newMAP{1};
+            self.params{2}.paramValue = newMAP{2};
+        end
+
     end
 
     methods (Static)
-        function [MAP, logL] = emfit(trace, order, iter_max, iter_tol, verbose)
+
+        function map = rand(order)
+            % MAP = RAND(ORDER)
+            %
+            % Generate random MAP using uniform random numbers
+            if nargin < 1
+                order = 2;
+            end
+            map = MAP(map_rand(order));
+        end
+
+        function map = randn(order, mu, sigma)
+            % MAP = RANDN(ORDER, MU, SIGMA)
+            %
+            % Generate random MAP using specified Gaussian parameter and
+            % taking the absolute value of the resulting values
+            map = MAP(map_randn(order, mu, sigma));
+        end
+
+        function [map] = fit(trace, order)
+            % MAP = FIT(TRACE, ORDER)
+            if nargin<2
+                order = 16;
+            end
+            map = MAP.kpcfit(trace, order);
+        end
+
+        function [map, fac, fbc, kpcMAPs] = kpcfit(trace, order, ac_runs_max, bc_runs_max)
+            % MAP = KPCFIT(TRACE, ORDER, AC_RUNS_MAX, BC_RUNS_MAX)
+
+            % ORDER must be a power of 2.
+            % MAP.kpcfit(S,8,5,2) % fit a MAP(8) with 5 autocorrelation
+            % trial runs and 2 bicorrelation trial runs
+
+            if nargin<3
+                ac_runs_max = 10;
+            end
+            if nargin<4
+                bc_runs_max = 1;
+            end
+
+            T = kpcfit_init(trace);
+            [D, fac, fbc, kpcMAPs] = kpcfit_auto(T, 'NumMAPs',ceil(log2(order)), 'MaxRunsAC', ac_runs_max, 'MaxRunsBC',bc_runs_max);
+            map = MAP(D);
+        end
+
+
+        function [map] = anfit(trace, order, iter_max, iter_tol)
+            if order<4
+                error('error: requested %d states, but anfit can return only maps with a minimum of4 states', order);
+            end
+            if mod(order, 2) > 0
+                error('error: requested %d states, but anfit can return only a number of states that is a power of 2', order);
+            end
+            if nargin<3
+                iter_max=100;
+            end
+            if nargin<4
+                iter_tol=1e-9;
+            end
+            T = kpcfit_init(trace);
+            % ls - mean arrival rate
+            ls = 1/ T.E(1);
+            % rho - lag-1 autocorrelation of the counting process
+            rho = T.AC(1);
+            % H - Hurst coefficient (counting process)
+            H = hurst_estimate(trace,'aggvar');
+            % n - number of time scales to be modeled
+            n = log2(order);
+            % ds - number of IPP to be used
+            ds = log2(order);
+            % SA - set of autocorrelation coefficients of interarrival times
+            SA = T.ACFull;
+            % SAlags - lags used in SA
+            SAlags = T.ACLags;
+            fprintf(1,'running Andersen-Nielsen fitting method\n');
+            D = map_anfit(ls,rho,H,n,ds,SA,SAlags,iter_max,iter_tol);
+            map = MAP(D);
+        end
+
+        function [map, logL] = emfit(trace, order, iter_max, iter_tol, verbose)
             % MAP = EMFIT(TRACE, ORDERS)
 
             % MAP = EMFIT(TRACE, ORDERS, ITER_MAX, ITER_TOL, VERBOSE)
@@ -123,14 +285,15 @@ classdef MAP < MarkovModulated
             end
 
             if nargin< 4
-                iter_tol = 1e-7; % stop condition on the iterations
+                iter_tol = Distrib.Tol; % stop condition on the iterations
             end
 
             if nargin< 5
                 verbose = true;
             end
 
-            [MAP, logL] = erchmm_emfit(trace, order, iter_max, iter_tol, verbose);
+            [D, logL] = erchmm_emfit(trace, order, iter_max, iter_tol, verbose);
+            map = MAP(D);
         end
     end
 end

@@ -17,8 +17,10 @@ switch sn.nodetype(ind)
         space = State.spaceCache(sn.varsparam{ind}.nitems,sn.varsparam{ind}.cap);
 end
 
-switch sn.routing(ind)
-    case RoutingStrategy.ID_RROBIN
-        space = State.decorate(space, sn.varsparam{ind}.outlinks(:));
+for r=1:sn.nclasses
+    switch sn.routing(ind,r)
+        case {RoutingStrategy.ID_RROBIN, RoutingStrategy.ID_WRROBIN}
+            space = State.decorate(space, sn.varsparam{ind}{r}.outlinks(:));
+    end
 end
 end

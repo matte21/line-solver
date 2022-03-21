@@ -18,12 +18,12 @@ if self.hasStruct && ~hardRefresh
     nodetypes = sn.nodetypes;
     classnames = sn.classnames;
     nodenames = sn.nodenames;
-    refstat = sn.refstat;    
+    refstat = sn.refstat;
 else
     nodetypes = getNodeTypes(self);
     classnames = getClassNames(self);
     nodenames = getNodeNames(self);
-    refstat = getReferenceStations(self);    
+    refstat = getReferenceStations(self);
 end
 njobs = getNumberOfJobs(self);
 numservers = getStationServers(self);
@@ -44,18 +44,7 @@ sn.nclasses = length(classnames);
 routing = zeros(sn.nnodes, sn.nclasses);
 for ind=1:sn.nnodes
     for r=1:sn.nclasses
-        switch self.nodes{ind}.output.outputStrategy{r}{2}
-            case RoutingStrategy.RAND
-                routing(ind,r) = RoutingStrategy.ID_RAND;
-            case RoutingStrategy.PROB
-                routing(ind,r) = RoutingStrategy.ID_PROB;
-            case RoutingStrategy.RROBIN
-                routing(ind,r) = RoutingStrategy.ID_RROBIN;
-            case RoutingStrategy.JSQ
-                routing(ind,r) = RoutingStrategy.ID_JSQ;
-            case RoutingStrategy.DISABLED
-                routing(ind,r) = RoutingStrategy.ID_DISABLED;
-        end
+        routing(ind,r) = RoutingStrategy.toId(self.nodes{ind}.output.outputStrategy{r}{2});
     end
 end
 
@@ -88,9 +77,10 @@ for ind=1:sn.nnodes
             %         case NodeType.Transition
             %             self.nodes{ind}.init(); % this erases enablingConditions
     end
+
     for r=1:sn.nclasses
         switch sn.routing(ind,r)
-            case {RoutingStrategy.ID_RROBIN, RoutingStrategy.ID_JSQ}
+            case {RoutingStrategy.ID_RROBIN, RoutingStrategy.ID_WRROBIN, RoutingStrategy.ID_JSQ}
                 sn.isstatedep(ind,3) = true; % state dependent routing
         end
     end

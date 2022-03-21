@@ -194,8 +194,8 @@ while max(abs(1-eta./eta_1)) > options.iter_tol && it <= options.iter_max
                 % asymptotic decay rate (diffusion approximation, Kobayashi JACM)
                 eta(i) = exp(-2*(1-rho(i))/(cs(i)+ca(i)*rho(i)));
                 
-                %MAPa = APH.fitMeanAndSCV(sum(T(i,sd)),ca(i)).getRepresentation;
-                %MAPs = APH.fitMeanAndSCV(((ST(i,sd)*T(i,sd)')/sum(T(i,sd))),cs(i)).getRepresentation;
+                %MAPa = APH.fitMeanAndSCV(sum(T(i,sd)),ca(i)).getRepres;
+                %MAPs = APH.fitMeanAndSCV(((ST(i,sd)*T(i,sd)')/sum(T(i,sd))),cs(i)).getRepres;
                 %[~,~,~,~,~,eta(i)] = qbd_mapmap1(MAPa, MAPs, rho(i))
         end
     end

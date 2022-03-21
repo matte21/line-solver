@@ -148,7 +148,7 @@ for i=1:M
                 if any(intersect(inchain,find(sn.refclass)))
                     % if there is a reference class, use this
                     WNclass(i,k) = RNclass(i,k)*V(i,k)/sum(V(sn.refstat(k),intersect(inchain,find(sn.refclass))));
-                else                    
+                else
                     WNclass(i,k) = RNclass(i,k)*V(i,k)/sum(V(sn.refstat(k),sn.chains(c,:)));
                 end
             end
@@ -159,4 +159,10 @@ WNclass(isnan(WNclass))=0;
 WNclass(WNclass < 10/Distrib.InfRate)=0;
 WNclass(WNclass < Distrib.Zero)=0;
 
+if ~isempty(UNclass)
+    unstableQueues = find(sum(UNclass,2)>0.99 * sn.nservers);
+    if any(unstableQueues) && any(isinf(sn.njobs))
+        line_printf('The model has unstable queues, performance metrics may grow unbounded.')
+    end
+end
 end

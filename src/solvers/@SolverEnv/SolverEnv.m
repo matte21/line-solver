@@ -349,7 +349,8 @@ classdef SolverEnv < EnsembleSolver
                 Station = categorical(Station);
                 JobClass = categorical(JobClass);                
                 TT = Table(Station,JobClass,Tput);
-                AvgTable = Table(Station,JobClass,QLen,Util,Tput);
+                RespT = QLen ./ Tput;
+                AvgTable = Table(Station,JobClass,QLen,Util,RespT,Tput);
             else
                 Qval = zeros(M,K); Uval = zeros(M,K);
                 JobClass = cell(K*M,1);
@@ -371,7 +372,8 @@ classdef SolverEnv < EnsembleSolver
                 UT = Table(Station,JobClass,Util);
                 Tput = Tval(:); % we need to save first in a variable named like the column
                 TT = Table(Station,JobClass,Tput);
-                AvgTable = Table(Station,JobClass,QLen,Util,Tput);
+                RespT = QLen ./ Tput;
+                AvgTable = Table(Station,JobClass,QLen,Util,RespT,Tput);
             end
         end
     end

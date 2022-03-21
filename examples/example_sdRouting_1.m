@@ -1,4 +1,5 @@
-clear;
+if ~isoctave(), clearvars -except exampleName; end 
+
 model = Network('model');
 
 node{1} = Delay(model, 'Delay');
@@ -23,10 +24,12 @@ node{3}.setProbRouting(jobclass{1}, node{1}, 1.0)
 
 solver={};
 solver{end+1} = SolverCTMC(model,'keep',true);
-solver{end+1} = SolverJMT(model,'samples',1e5);
+solver{end+1} = SolverJMT(model,'samples',1e5,'seed',23000);
 solver{end+1} = SolverSSA(model,'verbose',true,'samples',1e4,'seed',23000);
 
+AvgTable = {};
 for s=1:length(solver)
     fprintf(1,'SOLVER: %s\n',solver{s}.getName());
-    AvgTable = solver{s}.getAvgTable()
+    AvgTable{s} = solver{s}.getAvgTable();
+    AvgTable{s}
 end

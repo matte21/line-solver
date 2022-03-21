@@ -19,8 +19,8 @@ classdef RenewalProcess < SinkProcess
     end
     
     methods
-        function mt = getMeanT(self, t, steps)
-            % MT = GETMEANT(T, STEPS)
+        function mt = evalMeanT(self, t, steps)
+            % MT = EVALMEANT(T, STEPS)
             
             distrib =  self.getParam(1).paramValue;
             if nargin<3 %~exist('steps','var')

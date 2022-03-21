@@ -1,6 +1,6 @@
 % EXAMPLE_BPMN_3 exemplifies the use of LINE to analize BPMN models. 
 %
-% Copyright (c) 2012-2021, Imperial College London 
+% Copyright (c) 2012-2022, Imperial College London 
 % All rights reserved.
 
 clear; 

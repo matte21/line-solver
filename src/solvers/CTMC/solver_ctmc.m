@@ -74,11 +74,11 @@ for a=1:A
                     %prob_sync_p = sync{a}.passive{1}.prob(state_a, state_p)
                     %if prob_sync_p > 0
                     %% debugging block
-                    if options.verbose == 2
-                        line_printf('---\n');
-                        sync{a}.active{1}.print,
-                        sync{a}.passive{1}.print
-                    end
+                    %if options.verbose == 2
+                    %    line_printf('---\n');
+                    %    sync{a}.active{1}.print,
+                    %    sync{a}.passive{1}.print
+                    %end
                     %%
                     if node_p == node_a %self-loop
                         [new_state_p, ~, outprob_p] = State.afterEventHashed( sn, node_p, new_state_a(ia), event_p, class_p);

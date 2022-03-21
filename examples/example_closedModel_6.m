@@ -31,7 +31,8 @@ node{4}.setRouting(jobclass{1},RoutingStrategy.RROBIN);
 node{1}.setRouting(jobclass{2},RoutingStrategy.RAND);
 node{2}.setRouting(jobclass{2},RoutingStrategy.RAND);
 node{3}.setRouting(jobclass{2},RoutingStrategy.RAND);
-node{4}.setRouting(jobclass{2},RoutingStrategy.RROBIN);
+node{4}.setRouting(jobclass{2},RoutingStrategy.WRROBIN,node{2},1);
+node{4}.setRouting(jobclass{2},RoutingStrategy.WRROBIN,node{3},2);
 
 simoptions = Solver.defaultOptions; 
 simoptions.verbose = true;
@@ -40,5 +41,6 @@ solver = {};
 solver{end+1} = SolverJMT(model, simoptions);
 for s=1:length(solver)
     fprintf(1,'SOLVER: %s\n',solver{s}.getName());    
-    AvgTable{s} = solver{s}.getAvgTable()
+    AvgTable{s} = solver{s}.getAvgTable();
+    AvgTable{s}
 end

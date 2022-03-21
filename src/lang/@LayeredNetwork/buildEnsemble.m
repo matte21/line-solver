@@ -180,7 +180,7 @@ for net=1:length(graphLayer)
             else % convolution of thinkTime and interArrivalFromUpperLayer processes
                 % The code will never enter this section since thinkTime is available only
                 % in the reference task that has no arrivals from an upper layer
-                %                 thinkTimeMAP = taskobj.thinkTime.getRepresentation();
+                %                 thinkTimeMAP = taskobj.thinkTime.getRepres();
                 %                 D0 = [thinkTimeMAP{1},sum(thinkTimeMAP{2},2);zeros(1,size(thinkTimeMAP{1},2)),-interArrivalFromUpperLayer];
                 %                 D1 = zeros(size(D0)); D1(end,1:end-1) = interArrivalFromUpperLayer*map_pie(thinkTimeMAP);
                 %                 destEntryMAP = {D0,D1};

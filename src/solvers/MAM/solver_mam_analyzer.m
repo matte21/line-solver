@@ -4,9 +4,6 @@ function [QN,UN,RN,TN,CN,XN,runtime] = solver_mam_analyzer(sn, options)
 % Copyright (c) 2012-2022, Imperial College London
 % All rights reserved.
 
-M = sn.nstations;    %number of stations
-K = sn.nclasses;    %number of classes
-
 Tstart = tic;
 
 if nargin<2 || isempty(options.config) || ~isfield(options.config,'merge')
@@ -27,7 +24,7 @@ switch options.method
         [QN,UN,RN,TN,CN,XN] = solver_mam_basic(sn, options);
     case 'dec.poisson'
         % analyze the network with Poisson streams
-        config.space_max = 1;
+        options.config.space_max = 1;
         [QN,UN,RN,TN,CN,XN] = solver_mam_basic(sn, options);
     otherwise
         line_error(mfilename,'Unknown method.');

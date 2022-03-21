@@ -27,7 +27,7 @@ if isempty(QN)
     TT = Table();
     AT = Table();
 elseif ~keepDisabled
-    V = cellsum(sn.visits);
+    V = cellsum(sn.nodevisits);
     if isempty(V) % SSA
         for i=1:I
             for c=1:sn.nchains

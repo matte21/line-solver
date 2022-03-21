@@ -14,7 +14,7 @@ source.setArrival(jobclass1, Exp(0.5));
 queue1.setService(jobclass1, Exp(1.0));
 queue2.setService(jobclass1, Exp(1.0));
 
-P = zeros(5);
+P = zeros(6);
 P(source,fork) = 1;
 P(fork,queue1) = 1.0;
 P(fork,queue2) = 1.0;
@@ -27,4 +27,5 @@ solver = {};
 solver{end+1} = SolverJMT(model,'seed',23000);
 
 AvgTable = {};
-AvgTable{end+1} = solver{end}.getAvgTable
+AvgTable{end+1} = solver{end}.getAvgTable;
+AvgTable{end}

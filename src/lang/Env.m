@@ -82,7 +82,7 @@ classdef Env < Ensemble
                     if isa(self.env{e,h},'Disabled')
                         emmap{e}{h} = {0,0}; % multiclass MMAP representation
                     else
-                        emmap{e}{h} = self.env{e,h}.getRepresentation; % multiclass MMAP representation
+                        emmap{e}{h} = self.env{e,h}.getRepres; % multiclass MMAP representation
                     end
                     for j = 1:E
                         if j == h
