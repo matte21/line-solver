@@ -25,6 +25,7 @@ else
     nodenames = getNodeNames(self);
     refstat = getReferenceStations(self);
 end
+conn = self.getConnectionMatrix;
 njobs = getNumberOfJobs(self);
 numservers = getStationServers(self);
 lldscaling = getLimitedLoadDependence(self);
@@ -92,7 +93,7 @@ for i=1:sn.nstateful
 end
 sn.nodenames = nodenames;
 sn.classnames = classnames;
-
+sn.connmatrix = conn;
 sn.modenames = cell(sn.nnodes,1);
 sn.nmodes = zeros(sn.nnodes,1);
 sn.nmodeservers = cell(sn.nnodes,1);
@@ -122,8 +123,6 @@ end
 for isf=1:sn.nstateful
     sn.statefulToNode(isf) = sf2nd(sn,isf);
 end
-refclass = getReferenceClasses(self);
-sn.refclass = refclass;
 
 self.sn = sn;
 refreshPriorities(self);
@@ -133,6 +132,18 @@ if any(nodetypes == NodeType.Cache)
 else
     refreshChains(self, true); % wantVisits
 end
+sn = self.sn;
+refclasses = getReferenceClasses(self);
+refclass = zeros(1,sn.nchains);
+for c=1:sn.nchains
+    isect = intersect(sn.inchain{c},find(refclasses));
+    if any(isect)
+        refclass(c) = isect;
+    end
+end
+sn.refclass = refclass;
+self.sn = sn;
+
 refreshLocalVars(self); % depends on chains (rtnodes)
 refreshSync(self); % this assumes that refreshChain is called before
 refreshPetriNetNodes(self);

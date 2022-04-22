@@ -21,7 +21,7 @@ classdef Replayer < TimeSeries
                 else
                     line_error(mfilename,'The file cannot be located, use the full file path.');
                 end                
-                setParam(self, 1, 'fileName', fileName, 'java.lang.String');
+                setParam(self, 1, 'fileName', fileName);
                 self.data = [];
             else
                 self.data = data;

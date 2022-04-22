@@ -10,9 +10,11 @@ node{2}.setService(jobclass{1}, Exp.fitMean(1.5)); % mean = 1.5
 
 P = model.initRoutingMatrix;
 P{1} = [0.7,0.3;1.0,0];
+
 % This may be alternatively specified as:
 %P{1}(node{1},[node{1},node{2}]) = [0.7,0.3]; 
 %P{1}(node{2},[node{1},node{2}]) = [1.0,0]; 
+
 model.link(P);
 
 solver = {};
@@ -22,6 +24,7 @@ solver{end+1} = SolverSSA(model,'seed',23000,'verbose',true,'samples',5e3);
 solver{end+1} = SolverFluid(model);
 solver{end+1} = SolverMVA(model);
 solver{end+1} = SolverNC(model,'exact');
+solver{end+1} = SolverMAM(model);
 solver{end+1} = LINE(model);
 
 AvgTable = cell(1,length(solver));

@@ -27,7 +27,7 @@ XN = zeros(1,K);
 
 lambda = zeros(1,K);
 for c=1:C
-    inchain = find(sn.chains(c,:));
+    inchain = sn.inchain{c};
     lambdas_inchain = sn.rates(sn.refstat(inchain(1)),inchain);
     lambdas_inchain = lambdas_inchain(isfinite(lambdas_inchain));
     lambda(inchain) = sum(lambdas_inchain);

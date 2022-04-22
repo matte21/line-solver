@@ -14,8 +14,8 @@ classdef Lognormal < ContinuousDistrib
             if sigma < 0
                 line_error(mfilename,'sigma parameter must be >= 0.0');
             end
-            setParam(self, 1, 'mu', mu, 'java.lang.Double');
-            setParam(self, 2, 'sigma', sigma, 'java.lang.Double');
+            setParam(self, 1, 'mu', mu);
+            setParam(self, 2, 'sigma', sigma);
         end
         
         function ex = getMean(self)

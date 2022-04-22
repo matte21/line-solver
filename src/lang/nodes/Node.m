@@ -15,22 +15,27 @@ classdef Node < NetworkElement
     methods(Hidden)
         %Constructor
         function self = Node(name)
-            % SELF = NODE(NAME)
-            self@NetworkElement(name);
-            index = NaN;
+            % SELF = NODE(NAME)              
+
+            self@NetworkElement(char(name));
+            self.index = NaN;
         end
 
         function self = setModel(self, model)
             % SELF = SETMODEL(MODEL)
+            %
+            % Add a pointer to the model object
 
             self.model = model;
         end
 
-        function self = link(self, nodeTo)
-            % SELF = LINK(NODETO)
-
-            self.model.addLink(self,nodeTo);
-        end
+         function self = link(self, nodeTo)
+             % SELF = LINK(NODETO)
+             %
+             %
+ 
+             self.model.addLink(self,nodeTo);
+         end
 
         function self = reset(self)
             % SELF = RESET()
@@ -52,7 +57,7 @@ classdef Node < NetworkElement
         function setProbRouting(self, class, destination, probability)
             % SETPROBROUTING(CLASS, DESTINATION, PROBABILITY)
 
-            self.setRouting(class, RoutingStrategy.PROB, destination, probability);
+            setRouting(self, class, RoutingStrategy.PROB, destination, probability);
         end
 
         function self = setScheduling(self, class, strategy)
@@ -172,7 +177,7 @@ classdef Node < NetworkElement
             % SUMMARY()
 
             line_printf('\nNode: <strong>%s</strong>',self.getName);
-            %            self.input.summary;
+            %self.input.summary;
             %            self.server.summary;
             %            self.output.summary;
         end

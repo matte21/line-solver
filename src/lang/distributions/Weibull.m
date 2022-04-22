@@ -14,8 +14,8 @@ classdef Weibull < ContinuousDistrib
             if shape < 0
                 line_error(mfilename,'shape parameter must be >= 0.0');
             end
-            setParam(self, 1, 'alpha', scale, 'java.lang.Double');
-            setParam(self, 2, 'r', shape, 'java.lang.Double');
+            setParam(self, 1, 'alpha', scale);
+            setParam(self, 2, 'r', shape);
         end
         
         function ex = getMean(self)

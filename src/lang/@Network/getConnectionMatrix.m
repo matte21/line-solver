@@ -4,7 +4,7 @@ function connections = getConnectionMatrix(self)
 % Copyright (c) 2012-2022, Imperial College London
 % All rights reserved.
 
-% connection matrix
+% connection matrix entries are setup by the addLink method
 connections = self.connections;
 if size(connections,1)< self.getNumberOfNodes
     connections(self.getNumberOfNodes,1)=0;

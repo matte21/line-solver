@@ -8,7 +8,9 @@ persistent lastWarning;
 persistent suppressedWarnings;
 persistent suppressedWarningsTic;
 persistent lastWarningTime;
+persistent suppressedAnnouncement;
 
+suppressedAnnouncement = false;
 errmsg=sprintf(MSG, varargin{:});
 w = warning('QUERY','ALL');
 switch w(1).state
@@ -16,14 +18,15 @@ switch w(1).state
         %warning('[%s] %s',caller,MSG);
         finalmsg = sprintf('Warning [%s]: %s',caller,errmsg);
         try
-            if ~strcmp(finalmsg, lastWarning) || (toc(suppressedWarningsTic)-toc(lastWarningTime))>10
+            if ~strcmp(finalmsg, lastWarning) || (toc(suppressedWarningsTic)-toc(lastWarningTime))>60
                 line_printf(finalmsg);
                 lastWarning = finalmsg;
-                suppressedWarnings = false;
+                suppressedWarnings = false;                
                 suppressedWarningsTic = tic;                
             else
-                if ~suppressedWarnings
-                    line_printf(sprintf('Warning [%s]: %s',caller,'Warning message casted more than once, repetitions will not be printed on screen for 10 seconds.'));
+                if ~suppressedWarnings && ~suppressedAnnouncement
+                    line_printf(sprintf('Warning [%s]: %s',caller,'Warning message casted more than once, repetitions will not be printed on screen for 60 seconds.'));
+                    suppressedAnnouncement = true;
                     suppressedWarnings = true;
                     suppressedWarningsTic = tic;
                 end

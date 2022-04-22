@@ -1,6 +1,8 @@
 function updateMetrics(self, it)
 lqn = self.lqn;
 
+ensemble = self.ensemble;
+
 switch self.getOptions.method
     case 'default'
         % first obtain svct of activities at hostlayers
@@ -12,11 +14,11 @@ switch self.getOptions.method
             classidx = self.svctmap(r,4);
             
             hidx = lqn.parent(lqn.parent(aidx)); % host idx
-            sn = self.ensemble{self.idxhash(hidx)}.getStruct;
+            sn = ensemble{self.idxhash(hidx)}.getStruct(false);
             
             % rescale the entries so they have unit visit relatively to the refclass
-            aidxchain = find(sn.chains(:,classidx)>0);
-            refclass = intersect(find(sn.refclass),find(sn.chains(aidxchain,:)));
+            %aidxchain = find(sn.chains(:,classidx)>0);
+            %refclass = sn.refclass(aidxchain);
             %Vtask = sn.visits{aidxchain}(1,refclass);
             %Ventry = sn.visits{aidxchain}(2,classidx);
             self.svct(aidx) = self.results{end,self.idxhash(idx)}.WN(nodeidx,classidx);% * Vtask / Ventry; % residT
@@ -49,10 +51,10 @@ switch self.getOptions.method
             hidx = lqn.parent(tidx); %host of entry
             % eidxname = lqn.names{eidx};
             % get class in host layer of task and entry
-            tidxclass = self.ensemble{self.idxhash(hidx)}.attribute.tasks(find(self.ensemble{self.idxhash(hidx)}.attribute.tasks(:,2) == tidx),1);
-            eidxclass = self.ensemble{self.idxhash(hidx)}.attribute.entries(find(self.ensemble{self.idxhash(hidx)}.attribute.entries(:,2) == eidx),1);
-            task_tput  = sum(self.results{end,self.idxhash(hidx)}.TN(self.ensemble{self.idxhash(hidx)}.attribute.clientIdx,tidxclass));
-            entry_tput = sum(self.results{end,self.idxhash(hidx)}.TN(self.ensemble{self.idxhash(hidx)}.attribute.clientIdx,eidxclass));
+            tidxclass = ensemble{self.idxhash(hidx)}.attribute.tasks(find(ensemble{self.idxhash(hidx)}.attribute.tasks(:,2) == tidx),1);
+            eidxclass = ensemble{self.idxhash(hidx)}.attribute.entries(find(ensemble{self.idxhash(hidx)}.attribute.entries(:,2) == eidx),1);
+            task_tput  = sum(self.results{end,self.idxhash(hidx)}.TN(ensemble{self.idxhash(hidx)}.attribute.clientIdx,tidxclass));
+            entry_tput = sum(self.results{end,self.idxhash(hidx)}.TN(ensemble{self.idxhash(hidx)}.attribute.clientIdx,eidxclass));
             self.svct(eidx) = entry_svct(eidx) * task_tput / entry_tput;
         end
         %self.svct(lqn.eshift+1:lqn.eshift+lqn.nentries) = entry_svct(lqn.eshift+1:lqn.eshift+lqn.nentries);
@@ -153,7 +155,7 @@ switch self.getOptions.method
                         switch me.identifier
                             case 'MATLAB:class:undefinedMethod'
                             line_warning(mfilename,'The solver for layer %d does not allow response time distribution calculation, switching to fluid solver.');
-                            repo{submodelidx} = SolverFluid(self.ensemble{submodelidx}).getCdfRespT;
+                            repo{submodelidx} = SolverFluid(ensemble{submodelidx}).getCdfRespT;
                         end
                     end
                 end
@@ -254,4 +256,5 @@ switch self.getOptions.method
             end
         end
 end
+self.ensemble = ensemble;
 end

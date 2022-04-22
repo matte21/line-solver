@@ -18,11 +18,9 @@ classdef DiscreteSampler < DiscreteDistrib
                 x=1:n;
             end
             self@DiscreteDistrib('DiscreteSampler',3,[min(x),max(x)]);
-            setParam(self, 1, 'p', p(:)', 'java.lang.Double');
-            setParam(self, 2, 'x', x(:)', 'java.lang.Double');
-            setParam(self, 3, 'f', cumsum(p(:)')/sum(p), 'java.lang.Double');
-            self.javaClass = '';
-            self.javaParClass = '';
+            setParam(self, 1, 'p', p(:)');
+            setParam(self, 2, 'x', x(:)');
+            setParam(self, 3, 'f', cumsum(p(:)')/sum(p));
         end
         
         function ex = getMean(self)

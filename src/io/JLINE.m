@@ -157,12 +157,27 @@ classdef JLINE
             connections = line_network.getConnectionMatrix();
             [m, n] = size(connections);
             nodes = network_object.getNodes();
-            routing_matrix = jline.lang.RoutingMatrix(network_object.getClasses(), nodes);
+            line_nodes = line_network.getNodes;
+            classes = network_object.getClasses();
+            n_classes = classes.size();
+            routing_matrix = jline.lang.RoutingMatrix(classes, nodes);
+            line_nodes = line_network.getNodes;
             % [ ] Update to consider different weights/routing for classes
             for i = 1:m
-                for j = 1:n
-                    if (connections(i, j) ~= 0)
-                        routing_matrix.addConnection(nodes.get(i-1), nodes.get(j-1));
+                line_node = line_nodes{i};
+                for k = 1:n_classes
+                    output_strat = line_node.output.outputStrategy{k};
+                    probabilities = output_strat{3};
+                    if ~strcmp(output_strat{2}, 'Probabilities') && ~strcmp(output_strat{2}, 'Random');
+                        line_error(mfilename, 'Routing Strategy not supported by JLINE');
+                    end
+
+
+                    for j = 1:length(probabilities)
+                        dest_idx = line_network.getNodeIndex(probabilities{j}{1}.name);
+                        if (connections(i, j) ~= 0)
+                                routing_matrix.addConnection(nodes.get(i-1), nodes.get(dest_idx-1), classes.get(k-1), probabilities{j}{2});
+                        end
                     end
                 end
             end

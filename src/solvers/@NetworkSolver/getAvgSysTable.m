@@ -10,6 +10,17 @@ if nargin==1
     R = self.getAvgRespTHandles;
     T = self.getAvgTputHandles;
 end
+if nargin == 2
+    if iscell(R) && ~isempty(R)
+        param = R;
+        R = param{1};
+        T = param{2};    
+        % case where varargin is passed as input
+    elseif iscell(R) && isempty(R)
+        R = self.getAvgRespTHandles;
+        T = self.getAvgTputHandles;
+    end
+end
 [SysRespT, SysTput] = getAvgSys(self,R,T);
 SysRespT = SysRespT';
 SysTput = SysTput';

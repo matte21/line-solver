@@ -11,17 +11,17 @@ if ~isempty(self.sn)
     isReset = true;
     self.resetNetwork; % remove artificial class switch nodes
 end
-R = self.getNumberOfClasses;
-Mnodes = self.getNumberOfNodes;
+K = self.getNumberOfClasses;
+I = self.getNumberOfNodes;
 
-if ~iscell(P) && R>1
+if ~iscell(P) && K>1
     line_error(mfilename,'Multiclass model: the linked routing matrix P must be a cell array, e.g., P = model.initRoutingMatrix; P{1} = Pclass1; P{2} = Pclass2.');
 end
 
 isLinearP = true;
 if size(P,1) == size(P,2)
-    for s=2:R
-        for r=1:R
+    for s=2:K
+        for r=1:K
             if nnz(P{r,s})>0
                 isLinearP = false;
                 break;
@@ -32,7 +32,7 @@ if size(P,1) == size(P,2)
     % routing is state-dependent and therefore some zero entries are
     % actually unspecified
     %cacheNodes = find(cellfun(@(c) isa(c,'Cache'), self.getStatefulNodes));
-    for ind=1:Mnodes
+    for ind=1:I
         switch class(self.nodes{ind})
             case 'Cache'
                 % note that since a cache needs to distinguish hits and
@@ -47,7 +47,7 @@ if size(P,1) == size(P,2)
 end
 
 for i=self.getDummys
-    for r=1:R
+    for r=1:K
         if iscell(P)
             if isLinearP
                 P{r}(i,self.getSink) = 1.0;
@@ -64,14 +64,14 @@ end
 % into P{2,2} rather than being interpreted as P{2,1}.
 if isLinearP
     Ptmp = P;
-    P = cell(R,R);
-    for r=1:R
+    P = cell(K,K);
+    for r=1:K
         if iscell(Ptmp)
             P{r,r} = Ptmp{r};
         else
             P{r,r} = Ptmp;
         end
-        for s=1:R
+        for s=1:K
             if s~=r
                 P{r,s} = 0*Ptmp{r};
             end
@@ -80,9 +80,9 @@ if isLinearP
 end
 
 % assign routing for self-looping jobs
-for r=1:R
+for r=1:K
     if isa(self.classes{r},'SelfLoopingClass')
-        for s=1:R
+        for s=1:K
             P{r,s} = 0 * P{r,s};
         end
         P{r,r}(self.classes{r}.reference, self.classes{r}.reference) = 1.0;
@@ -102,25 +102,25 @@ ispool_nnz = find(ispool)';
 
 
 if ~iscell(P)
-    if R>1
-        newP = cell(1,R);
-        for r=1:R
+    if K>1
+        newP = cell(1,K);
+        for r=1:K
             newP{r} = P;
         end
         P = newP;
     else %R==1
         % single class
         for i=ispool_nnz
-            P((i-1)*R+1:i*R,:)=0;
+            P((i-1)*K+1:i*K,:)=0;
         end
         Pmat = P;
-        P = cell(R,R);
-        for r=1:R
-            for s=1:R
-                P{r,s} = zeros(Mnodes);
-                for i=1:Mnodes
-                    for j=1:Mnodes
-                        P{r,s}(i,j) = Pmat((i-1)*R+r,(j-1)*R+s);
+        P = cell(K,K);
+        for r=1:K
+            for s=1:K
+                P{r,s} = zeros(I);
+                for i=1:I
+                    for j=1:I
+                        P{r,s}(i,j) = Pmat((i-1)*K+r,(j-1)*K+s);
                     end
                 end
             end
@@ -128,30 +128,30 @@ if ~iscell(P)
     end
 end
 
-if numel(P) == R
+if numel(P) == K
     % 1 matrix per class
-    for r=1:R
+    for r=1:K
         for i=ispool_nnz
-            P{r}((i-1)*R+1:i*R,:)=0;
+            P{r}((i-1)*K+1:i*K,:)=0;
         end
     end
     Pmat = P;
-    P = cell(R,R);
-    for r=1:R
+    P = cell(K,K);
+    for r=1:K
         P{r,r} = Pmat{r};
-        for s=setdiff(1:R,r)
-            P{r,s} = zeros(Mnodes);
+        for s=setdiff(1:K,r)
+            P{r,s} = zeros(I);
         end
     end
 end
 
 
-isemptyP = false(R,R);
-for r=1:R
-    for s=1:R
+isemptyP = false(K,K);
+for r=1:K
+    for s=1:K
         if isempty(P{r,s})
             isemptyP(r,s)= true;
-            P{r,s} = zeros(Mnodes);
+            P{r,s} = zeros(I);
         else
             for i=ispool_nnz
                 P{r,s}(i,:)=0;
@@ -160,19 +160,19 @@ for r=1:R
     end
 end
 
-csMatrix = cell(Mnodes,Mnodes);
-for i=1:Mnodes
-    for j=1:Mnodes
-        csMatrix{i,j} = zeros(R);
+csnodematrix = cell(I,I);
+for i=1:I
+    for j=1:I
+        csnodematrix{i,j} = zeros(K,K);
     end
 end
 
-for r=1:R
-    for s=1:R
+for r=1:K
+    for s=1:K
         if ~isemptyP(r,s)
-            [I,J] = find(P{r,s});
-            for k=1:size(I,1)
-                csMatrix{I(k),J(k)}(r,s) = P{r,s}(I(k),J(k));
+            [If,Jf] = find(P{r,s});
+            for k=1:size(If,1)
+                csnodematrix{If(k),Jf(k)}(r,s) = P{r,s}(If(k),Jf(k));
             end
         end
     end
@@ -193,45 +193,61 @@ self.sn.rtorig = P;
 
 % As we will now create a CS for each link i->j,
 % we now condition on the job going from node i to j
-for i=1:Mnodes
-    for j=1:Mnodes
-        for r=1:R
-            S = sum(csMatrix{i,j}(r,:));
+for i=1:I
+    for j=1:I
+        for r=1:K
+            S = sum(csnodematrix{i,j}(r,:));
             if S>0
-                csMatrix{i,j}(r,:)=csMatrix{i,j}(r,:)/S;
+                csnodematrix{i,j}(r,:)=csnodematrix{i,j}(r,:)/S;
             else
-                csMatrix{i,j}(r,r)=1.0;
+                csnodematrix{i,j}(r,r)=1.0;
             end
         end
     end
 end
 
-csid = zeros(Mnodes);
+csid = zeros(I);
+csmatrix = zeros(K);
 nodeNames = self.getNodeNames;
-for i=1:Mnodes
-    for j=1:Mnodes
-        if ~isdiag(csMatrix{i,j})
-            self.nodes{end+1} = ClassSwitch(self, sprintf('CS_%s_to_%s',nodeNames{i},nodeNames{j}),csMatrix{i,j});
+for i=1:I
+    for j=1:I
+        csmatrix = csmatrix + csnodematrix{i,j};
+        if ~isdiag(csnodematrix{i,j})
+            self.nodes{end+1} = ClassSwitch(self, sprintf('CS_%s_to_%s',nodeNames{i},nodeNames{j}),csnodematrix{i,j});
             csid(i,j) = length(self.nodes);
         end
     end
 end
 
-Mplus = length(self.nodes); % number of nodes after addition of cs nodes
+for i=1:I
+    % this is to ensure that also stateful cs like caches
+    % are accounted
+    if isa(self.nodes{i},'Cache') || isa(self.nodes{i},'ClassSwitch')
+        for r=find(self.nodes{i}.server.hitClass)
+            csmatrix(r,self.nodes{i}.server.hitClass(r)) = 1.0;
+        end
+        for r=find(self.nodes{i}.server.missClass)
+            csmatrix(r,self.nodes{i}.server.missClass(r)) = 1.0;
+        end
+    end
+end
+self.csmatrix = csmatrix~=0;
+
+Ip = length(self.nodes); % number of nodes after addition of cs nodes
 
 % resize matrices
-for r=1:R
-    for s=1:R
-        P{r,s}((Mnodes+1):Mplus,(Mnodes+1):Mplus)=0;
+for r=1:K
+    for s=1:K
+        P{r,s}((I+1):Ip,(I+1):Ip)=0;
     end
 end
 
-for i=1:Mnodes
-    for j=1:Mnodes
+for i=1:I
+    for j=1:I
         if csid(i,j)>0
             % re-route
-            for r=1:R
-                for s=1:R
+            for r=1:K
+                for s=1:K
                     if P{r,s}(i,j)>0
                         P{r,r}(i,csid(i,j)) = P{r,r}(i,csid(i,j)) + P{r,s}(i,j);
                         P{r,s}(i,j) = 0;
@@ -243,16 +259,16 @@ for i=1:Mnodes
     end
 end
 
-connected = zeros(Mplus);
+connected = zeros(Ip);
 nodes = self.nodes;
-for r=1:R
-    [I,J,S] = find(P{r,r});
-    for k=1:length(I)        
-        if connected(I(k),J(k)) == 0
-            self.addLink(nodes{I(k)}, nodes{J(k)});
-            connected(I(k),J(k)) = 1;
+for r=1:K
+    [If,Jf,S] = find(P{r,r});
+    for k=1:length(If)
+        if connected(If(k),Jf(k)) == 0
+            self.addLink(nodes{If(k)}, nodes{Jf(k)});
+            connected(If(k),Jf(k)) = 1;
         end
-        nodes{I(k)}.setProbRouting(self.classes{r}, nodes{J(k)}, S(k));
+        nodes{If(k)}.setProbRouting(self.classes{r}, nodes{Jf(k)}, S(k));
     end
 end
 self.nodes = nodes;
@@ -272,11 +288,13 @@ if any(isAboveOne)
     end
 end
 
-for i=1:Mnodes
+for i=1:I
     if isa(self.nodes{i},'Place')
         self.nodes{i}.init;
     end
 end
+
+self.csmatrix;
 
 if isReset
     self.refreshChains; % without this exception with linkAndLog

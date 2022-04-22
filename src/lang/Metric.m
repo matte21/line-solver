@@ -4,9 +4,27 @@ function met = Metric(type, class, station)
 % Copyright (c) 2012-2022, Imperial College London
 % All rights reserved.
 
+persistent emptyMetric;
+
 if nargin > 2
-    met = struct('type',type,'class',class,'station',station,'disabled',false,'transient',false);
+    if isempty(emptyMetric)
+        met = struct('type',type,'class',class,'station',station,'disabled',false,'transient',false);
+        emptyMetric = met;
+    else
+        met = emptyMetric; % copying faster than creating a new struct
+        met.class = class;
+        met.type = type;
+        met.station = station;
+    end
 else
-    met = struct('type',type,'class',class,'station',NaN,'disabled',false,'transient',false);
+    if isempty(emptyMetric)
+        met = struct('type',type,'class',class,'station',NaN,'disabled',false,'transient',false);
+        emptyMetric = met;
+    else
+        met = emptyMetric;
+        met.class = class;
+        met.type = type;
+        met.station = NaN;
+    end
 end % nargin
 end

@@ -10,8 +10,8 @@ classdef APH < MarkovianDistribution
 
             % Abstract class constructor
             self@MarkovianDistribution('APH', 2);
-            self.setParam(1, 'alpha', alpha, 'java.lang.Double');
-            self.setParam(2, 'T', T, 'java.lang.Double');
+            self.setParam(1, 'alpha', alpha);
+            self.setParam(2, 'T', T);
         end
     end
 
@@ -58,8 +58,8 @@ classdef APH < MarkovianDistribution
             e2 = (1+SCV)*e1^2;
             e3 = -(2*e1^3-3*e1*e2-SKEW*(e2-e1^2)^(3/2));
             [alpha,T] = APHFrom3Moments([e1,e2,e3]);
-            self.setParam(1, 'alpha', alpha, 'java.lang.Double');
-            self.setParam(2, 'T', T, 'java.lang.Double');
+            self.setParam(1, 'alpha', alpha);
+            self.setParam(2, 'T', T);
         end
 
         function updateFromRawMoments(self,varargin)
@@ -153,8 +153,8 @@ classdef APH < MarkovianDistribution
                 alpha = [mu,1-mu];
                 T = [-lambda1,lambda1;0,-lambda2];
             end
-            self.setParam(1, 'alpha', alpha, 'java.lang.Double');
-            self.setParam(2, 'T', T, 'java.lang.Double');
+            self.setParam(1, 'alpha', alpha);
+            self.setParam(2, 'T', T);
         end
 
         function updateMean(self,MEAN)
@@ -163,8 +163,8 @@ classdef APH < MarkovianDistribution
             % Update parameters to match the given mean
             APH = self.getRepres;
             APH = map_scale(APH,MEAN);
-            self.setParam(1, 'alpha', map_pie(APH), 'java.lang.Double');
-            self.setParam(2, 'T', APH{1}, 'java.lang.Double');
+            self.setParam(1, 'alpha', map_pie(APH));
+            self.setParam(2, 'T', APH{1});
         end
 
         function updateMeanAndSCV(self, MEAN, SCV)
@@ -175,8 +175,8 @@ classdef APH < MarkovianDistribution
             e1 = MEAN;
             e2 = (1+SCV)*e1^2;
             [alpha,T] = APHFrom2Moments([e1,e2]);
-            self.setParam(1, 'alpha', alpha, 'java.lang.Double');
-            self.setParam(2, 'T', T, 'java.lang.Double');
+            self.setParam(1, 'alpha', alpha);
+            self.setParam(2, 'T', T);
         end
 
         function APH = getRepres(self)
@@ -231,6 +231,7 @@ classdef APH < MarkovianDistribution
             else
                 ex = APH(1.0, [1]);
                 ex.update(MEAN, SCV, SKEW);
+                ex.immediate = false;
             end
         end
 
@@ -242,6 +243,7 @@ classdef APH < MarkovianDistribution
             else
                 ex = APH(1.0, [1]);
                 ex.updateFromRawMoments(m1, m2, m3);
+                ex.immediate = false;
             end
         end
 
@@ -255,6 +257,7 @@ classdef APH < MarkovianDistribution
             else
                 ex = APH(1.0, [1]);
                 ex.update(MEAN, VAR/MEAN^2, SKEW);
+                ex.immediate = false;
             end
         end
 
@@ -264,10 +267,11 @@ classdef APH < MarkovianDistribution
             % Fit the distribution from first three central moments (mean,
             % variance, skewness)
             if MEAN <= Distrib.Zero
-                ex = Exp(Inf);
+                ex = Exp(Inf);                
             else
                 ex = APH(1.0, [1]);
                 ex.updateMeanAndSCV(MEAN, SCV);
+                ex.immediate = false;
             end
         end
     end

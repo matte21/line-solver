@@ -28,23 +28,23 @@ classdef SolverLQNS < LayeredNetworkSolver
             else
                 ignoreWarn = '-w ';
             end
-            
+                        
             if isunix
                 switch options.method
                     case {'default','lqns'}
-                        system(['lqns ',ignoreWarn,' --iteration-limit ',num2str(options.iter_max),' -Pstop-on-message-loss=false -x ',filename]);
+                        system(['lqns ',ignoreWarn,' --iteration-limit=',num2str(options.iter_max),' -Pstop-on-message-loss=false -x ',filename]);
                     case {'srvn'}
-                        system(['lqns ',ignoreWarn,' --iteration-limit ',num2str(options.iter_max),' -Playering=srvn -Pstop-on-message-loss=false -x ',filename]);
+                        system(['lqns ',ignoreWarn,' --iteration-limit=',num2str(options.iter_max),' -Playering=srvn -Pstop-on-message-loss=false -x ',filename]);
                     case {'exact'}
-                        system(['lqns ',ignoreWarn,' --iteration-limit ',num2str(options.iter_max),' -Pmva=exact -Pstop-on-message-loss=false -x ',filename]);
+                        system(['lqns ',ignoreWarn,' --iteration-limit=',num2str(options.iter_max),' -Pmva=exact -Pstop-on-message-loss=false -x ',filename]);
                     case {'srvnexact'}
-                        system(['lqns ',ignoreWarn,' --iteration-limit ',num2str(options.iter_max),' -Playering=srvn -Pmva=exact -Pstop-on-message-loss=false -x ',filename]);
+                        system(['lqns ',ignoreWarn,' --iteration-limit=',num2str(options.iter_max),' -Playering=srvn -Pmva=exact -Pstop-on-message-loss=false -x ',filename]);
                     case {'sim','lqsim'}
                         system(['lqsim ',ignoreWarn,' -A ',num2str(options.samples),',3  -Pstop-on-message-loss=off -x ',filename]);
                     case {'lqnsdefault'}
                         system(['lqns ',ignoreWarn,' -x ',filename]);
                     otherwise
-                        system(['lqns ',ignoreWarn,' --iteration-limit ',num2str(options.iter_max),' -Pstop-on-message-loss=false -x ',filename]);
+                        system(['lqns ',ignoreWarn,' --iteration-limit=',num2str(options.iter_max),' -Pstop-on-message-loss=false -x ',filename]);
                 end
             else
                 switch options.method
@@ -73,9 +73,15 @@ classdef SolverLQNS < LayeredNetworkSolver
             end
             runtime = toc;
         end
-        
-        function [QN,UN,RN,TN,AN,WN] = getAvg(self,~,~,~,~,useLQNSnaming)
+
+        function varargout = getAvg(varargin)
             % [QN,UN,RN,TN] = GETAVG(SELF,~,~,~,~,USELQNSnaming)
+            [varargout{1:nargout}] = getEnsembleAvg( varargin{:} );
+        end
+
+        
+        function [QN,UN,RN,TN,AN,WN] = getEnsembleAvg(self,~,~,~,~, useLQNSnaming)        
+            % [QN,UN,RN,TN] = GETENSEMBLEAVG(SELF,~,~,~,~,USELQNSnaming)
             %
             % SN: average service time
             

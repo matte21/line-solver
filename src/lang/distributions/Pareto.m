@@ -14,10 +14,8 @@ classdef Pareto < ContinuousDistrib
             if shape < 2
                 line_error(mfilename,'shape parameter must be >= 2.0');
             end
-            setParam(self, 1, 'alpha', shape, 'java.lang.Double');
-            setParam(self, 2, 'k', scale, 'java.lang.Double');
-            %            self.javaClass = 'jmt.engine.random.Pareto';
-            %            self.javaParClass = 'jmt.engine.random.ParetoPar';
+            setParam(self, 1, 'alpha', shape);
+            setParam(self, 2, 'k', scale);
         end
         
         function ex = getMean(self)

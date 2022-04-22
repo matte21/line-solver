@@ -13,18 +13,20 @@ capacity = zeros(M,1);
 dropid = -ones(M,C); %DropStrategy.WaitingBuffer
 sn = self.sn;
 C = sn.nchains;
+njobs = sn.njobs;
+rates = sn.rates;
 for c = 1:C
-    classInChain = find(sn.chains(c,:));
-    for r = classInChain
-        chainCap = sum(sn.njobs(classInChain));
+    inchain = sn.inchain{c};
+    for r = inchain
+        chainCap = sum(njobs(inchain));
         for i=1:M
             station = self.getStationByIndex(i);
-            if isa(station, 'Place')
-                classcap(i,r) = min(station.classCap(r), station.cap);                
-                dropid(i,r) = station.dropid; %DropStrategy.toId(station.input.inputJobClasses{r}{3});
-            elseif isnan(sn.rates(i,r))
+            if sn.nodetype(sn.stationToNode(i)) ~= NodeType.ID_SOURCE                
+                dropid(i,r) = station.dropRule(r);
+            end 
+            if isnan(rates(i,r))
                 classcap(i,r) = 0;
-                chaincap(i,r) = 0;
+                chaincap(i,c) = 0;
             else
                 chaincap(i,c) = chainCap;
                 classcap(i,r) = chainCap;
@@ -32,10 +34,7 @@ for c = 1:C
                     classcap(i,r) = min(classcap(i,r), station.classCap(r));
                 end
                 if station.cap >= 0
-                    classcap(i,r) = min(classcap(i,r),station.cap);
-                end
-                if isa(station,'Queue')
-                    dropid(i,r) = DropStrategy.toId(station.input.inputJobClasses{r}{3});
+                    classcap(i,r) = min(classcap(i,r), station.cap);
                 end
             end
         end
@@ -44,9 +43,7 @@ end
 for i=1:M
     capacity(i,1) = min([sum(chaincap(i,:)),sum(classcap(i,:))]);
 end
-if ~isempty(self.sn) %&& isprop(self.sn,'cap')
-    self.sn.cap = capacity;
-    self.sn.classcap = classcap;
-    self.sn.dropid = dropid;
-end
+self.sn.cap = capacity;
+self.sn.classcap = classcap;
+self.sn.dropid = dropid;
 end

@@ -15,8 +15,8 @@ node{5}.setNumberOfServers(5);
 source = Source(model,'Source');
 sink = Sink(model,'Sink');
 
-jobclass{1} = ClosedClass(model, 'Class1', 3, node{1}, 0);
-jobclass{2} = OpenClass(model, 'Class2', 0);
+jobclass{1} = ClosedClass(model, 'ClosedClass', 3, node{1}, 0);
+jobclass{2} = OpenClass(model, 'OpenClass', 0);
 
 for i=1:5
     node{i}.setService(jobclass{1}, Exp(i));
@@ -45,15 +45,21 @@ options.seed = 23000;
 %options.samples=2e4;
 optionssa = options; optionssa.cutoff = Inf;
 
+mam_options = SolverMAM.defaultOptions;
+mam_options.seed = 23000;
+mam_options.keep=false;
+mam_options.verbose=1;
+
 disp('This example shows the execution of the solver on a 2-class mixed model with 5 multi-server nodes.')
 % This part illustrates the execution of different solvers
 solver={};
 solver{end+1} = SolverCTMC(model,options); % CTMC is infinite on this model
 solver{end+1} = SolverJMT(model,'samples',1e5);
-solver{end+1} = SolverSSA(model,options);
+%solver{end+1} = SolverSSA(model,options);
 %solver{end+1} = SolverFluid(model,options);
 solver{end+1} = SolverMVA(model,'exact');
 %solver{end+1} = SolverNC(model,options);
+solver{end+1} = SolverMAM(model,mam_options);
 for s=1:length(solver)
     fprintf(1,'SOLVER: %s\n',solver{s}.getName());
     AvgTable{s} = solver{s}.getAvgTable();

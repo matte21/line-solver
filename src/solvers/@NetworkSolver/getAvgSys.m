@@ -42,7 +42,7 @@ alpha = zeros(sn.nstations,sn.nclasses);
 if ~(self.model.hasFork && self.model.hasJoin)
     CNclass = zeros(1,sn.nclasses);
     for c=1:sn.nchains
-        inchain = find(sn.chains(c,:));
+        inchain = sn.inchain{c};
         for r=inchain
             CNclass(r)=0;
             for i=1:sn.nstations
@@ -55,10 +55,10 @@ if ~(self.model.hasFork && self.model.hasJoin)
 end
 
 for c=1:sn.nchains
-    inchain = find(sn.chains(c,:));
+    inchain = sn.inchain{c};
     completingclasses = sn.chains(c,:) & completes;
     for i=1:sn.nstations
-        if any(intersect(find(sn.refclass), inchain))
+        if sn.refclass(c)>0
             for k=intersect(find(sn.refclass), inchain) % for all classes within the chain (a class belongs to a single chain, the reference station must be identical for all classes within a chain )
                 alpha(i,k) = alpha(i,k) + sn.visits{c}(i,k)/sum(sn.visits{c}(sn.refstat(k),completingclasses));
             end
@@ -76,7 +76,7 @@ alpha(~isfinite(alpha))=0;
 CNchain = zeros(1,sn.nchains);
 XNchain = zeros(1,sn.nchains);
 for c=1:sn.nchains
-    inchain = find(sn.chains(c,:));
+    inchain = sn.inchain{c};
     completingclasses = find(sn.chains(c,:) & completes);
     if ~isempty(TN)
         XNchain(c) = 0;

@@ -119,8 +119,7 @@ classdef NetworkSolver < Solver
         end
     end
     
-    methods
-        
+    methods (Sealed)       
         function setOptions(self, options)
             % SETOPTIONS(OPTIONS)
             % Assign the solver options
@@ -134,17 +133,6 @@ classdef NetworkSolver < Solver
             
             % Assign the model to be solved.
             self.model = model;
-        end
-        
-        function dh = diff(self, handle, parameter)
-            % dH = DIFF(H,P)
-            %
-            % Compute derivative of metric with handle H with respect to 
-            % a parameter P.
-            % H and P can also be cell arrays, in which case a cell array
-            % is returned.
-            
-            line_error(mfilename,'diff is not supported by this solver.');
         end
         
         function ag = getAG(self)
@@ -228,6 +216,7 @@ classdef NetworkSolver < Solver
         [QN,UN,RN,TN,AN,WN]       = getAvgNode(self,Q,U,R,T,A);
         
         [AvgTable,QT,UT,RT,TT,AT] = getAvgTable(self,Q,U,R,T,A,keepDisabled);
+        
         [AvgTable,QT] = getAvgQLenTable(self,Q,keepDisabled);
         [AvgTable,UT] = getAvgUtilTable(self,U,keepDisabled);
         [AvgTable,RT] = getAvgRespTTable(self,R,keepDisabled);
@@ -320,6 +309,21 @@ classdef NetworkSolver < Solver
             self.result.Tran.Avg.C = Ct;
             self.result.Tran.Avg.runtime = runtimet;
         end
+
+    end
+
+    methods 
+        function dh = diff(self, handle, parameter)
+            % dH = DIFF(H,P)
+            %
+            % Compute derivative of metric with handle H with respect to 
+            % a parameter P.
+            % H and P can also be cell arrays, in which case a cell array
+            % is returned.
+            
+            line_error(mfilename,'diff is not supported by this solver.');
+        end
+
         
         function [lNormConst] = getProbNormConstAggr(self)
             % [LNORMCONST] = GETPROBNORMCONST()

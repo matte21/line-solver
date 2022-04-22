@@ -5,7 +5,7 @@ classdef Network < Model
     % All rights reserved.
 
     properties (Access=private)
-        doChecks;
+        enableChecks;
         hasState;
         logPath;
         usedFeatures; % structure of booleans listing the used classes
@@ -15,6 +15,7 @@ classdef Network < Model
 
     properties (Hidden)
         sn;
+        csmatrix;
         hasStruct;
     end
 
@@ -39,7 +40,7 @@ classdef Network < Model
         used = getUsedLangFeatures(self) % get used features
         ft = getForks(self, rt) % get fork table
         [chainsObj,chainsMatrix] = getChains(self, rt) % get chain table
-        [rt,rtNodes,connections,rtNodesByClass,rtNodesByStation] = getRoutingMatrix(self, arvRates) % get routing matrix
+        [rt,rtNodes,connections,chains,rtNodesByClass,rtNodesByStation] = getRoutingMatrix(self, arvRates) % get routing matrix
         [Q,U,R,T,A] = getAvgHandles(self)
         A = getAvgArvRHandles(self);
         T = getAvgTputHandles(self);
@@ -75,8 +76,7 @@ classdef Network < Model
         [sched, schedid, schedparam] = refreshScheduling(self);
         [rates, mu, phi, phases] = refreshArrival(self);
         [rates, scv, mu, phi, phases] = refreshService(self, statSet, classSet);
-        [chains, visits, rt] = refreshChains(self, propagate)
-        [visits, nodevisits] = refreshVisits(self, chains, rt, rtNodes)
+        [chains, visits, rt] = refreshChains(self, propagate)        
         [cap, classcap] = refreshCapacity(self);
         nvars = refreshLocalVars(self);
     end
@@ -97,17 +97,17 @@ classdef Network < Model
             self.hasState = false;
             self.logPath = '';
             self.items = {};
-            self.regions = {};            
+            self.regions = {};
             self.sourceidx = [];
             self.sinkidx = [];
             self.setChecks(true);
-            self.hasStruct = false;
+            self.hasStruct = false;            
         end
 
         setInitialized(self, bool);
 
         function self = setChecks(self, bool)
-            self.doChecks = bool;
+            self.enableChecks = bool;
         end
 
         P = getLinkedRoutingMatrix(self)
@@ -175,7 +175,8 @@ classdef Network < Model
             index = find(isfinite(getNumberOfJobs(self)))';
         end
 
-        c = getClassChain(self, className)
+        chain = getClassChain(self, className)
+        c = getClassChainIndex(self, className)
         classNames = getClassNames(self)
 
         nodeNames = getNodeNames(self)
@@ -221,9 +222,11 @@ classdef Network < Model
 
         function stationnames = getStationNames(self)
             % STATIONNAMES = GETSTATIONNAMES()
-
+            
             if self.hasStruct
-                stationnames = {self.sn.nodenames{self.sn.isstation}}';
+                nodenames = self.sn.nodenames;
+                isstation = self.sn.isstation;
+                stationnames = {nodenames{isstation}}';
             else
                 stationnames = {};
                 for i=self.getIndexStations
@@ -300,11 +303,14 @@ classdef Network < Model
         end
 
         function summary(self)
-            % SUMMARY()
-
+            % SUMMARY()            
             for i=1:self.getNumberOfNodes
                 self.nodes{i}.summary();
             end
+            line_printf('\n<strong>Routing matrix</strong>:');
+            self.printRoutingMatrix
+            line_printf('\n<strong>Product-form parameters</strong>:');
+            [arvRates,svcDemands,nJobs,thinkTimes,ldScalings,nServers]= getProductFormParameters(self)            
         end
 
         function [D,Z] = getDemands(self)
@@ -479,6 +485,90 @@ classdef Network < Model
 
             snPrintRoutingMatrix(self.getStruct);
         end
+        
+        function [taggedModel, taggedJob] = tagChain(self, chain, jobclass, suffix)
+            % the tagged job will be removed from the initial
+            % population of JOBCLASS
+            if nargin<4 || isempty(suffix)
+                suffix = '.tagged';
+            end
+            if nargin<3
+                jobclass = chain.classes{1};
+            end
+            I = self.getNumberOfNodes;
+            R = self.getNumberOfClasses;
+            taggedModel = self.copy;
+
+            % we don't use rtNodesByClass because it contains the
+            % fictitious class switching nodes
+            Plinked = taggedModel.getLinkedRoutingMatrix;
+            if ~iscell(Plinked) || isempty(Plinked)
+                line_error(mfilename, 'getCdfRespT requires the original model to be linked with a routing matrix defined as a cell array P{r,s} for every class pair (r,s).');
+            end
+
+            taggedModel.resetNetwork; % resets cs Nodes as well
+            taggedModel.reset(true);
+            
+            chainIndexes = cell2mat(chain.index);
+            for r=chainIndexes
+                % create a tagged class
+                taggedModel.classes{end+1,1} = taggedModel.classes{r}.copy;
+                taggedModel.classes{end,1}.index=length(taggedModel.classes);
+                taggedModel.classes{end,1}.name=[taggedModel.classes{r,1}.name,suffix];
+                if r==jobclass.index
+                    taggedModel.classes{end}.population = 1;                
+                else
+                    taggedModel.classes{end}.population = 0;                
+                end
+
+                % clone station sections for tagged class
+                for m=1:length(taggedModel.nodes)
+                    taggedModel.stations{m}.output.outputStrategy{end+1} = taggedModel.stations{m}.output.outputStrategy{r};
+                end
+
+                for m=1:length(taggedModel.stations)
+                    if self.stations{m}.server.serviceProcess{end}{end}.isDisabled
+                        taggedModel.stations{m}.input.inputJobClasses(1,end+1) = {[]};
+                        taggedModel.stations{m}.server.serviceProcess{end+1} = taggedModel.stations{m}.server.serviceProcess{r};
+                        taggedModel.stations{m}.server.serviceProcess{end}{end}=taggedModel.stations{m}.server.serviceProcess{end}{end}.copy;
+                        taggedModel.stations{m}.schedStrategyPar(end+1) = 0;
+                        taggedModel.stations{m}.classCap(1,r) = 0;
+                        taggedModel.stations{m}.classCap(1,end+1) = 0;
+                    else
+                        taggedModel.stations{m}.input.inputJobClasses(1,end+1) = {taggedModel.stations{m}.input.inputJobClasses{1,r}};
+                        taggedModel.stations{m}.server.serviceProcess{end+1} = taggedModel.stations{m}.server.serviceProcess{r};
+                        taggedModel.stations{m}.server.serviceProcess{end}{end}=taggedModel.stations{m}.server.serviceProcess{end}{end}.copy;
+                        taggedModel.stations{m}.schedStrategyPar(end+1) = taggedModel.stations{m}.schedStrategyPar(r);
+                        taggedModel.stations{m}.classCap(1,end+1) = 1;
+                        taggedModel.stations{m}.classCap(1,r) = taggedModel.stations{m}.classCap(r) - 1;
+                    end
+                end
+            end
+            taggedModel.classes{jobclass.index,1}.population = taggedModel.classes{jobclass.index}.population - 1;
+
+            for ir=1:length(chainIndexes)
+                r = chainIndexes(ir);
+                for is=1:length(chainIndexes)
+                    s = chainIndexes(is);
+                    Plinked{R+ir,R+is} = Plinked{r,s};
+                end
+            end
+            Rp = taggedModel.getNumberOfClasses;            
+            for r=1:Rp
+                for s=1:Rp
+                    if isempty(Plinked{r,s})
+                        Plinked{r,s} = zeros(I);
+                    end
+                end
+            end
+            taggedModel.sn = [];
+            taggedModel.link(Plinked);
+            taggedModel.reset(true);
+            taggedModel.refreshStruct(true);
+            tchains = taggedModel.getChains;
+            taggedJob = tchains{end};
+        end
+           
     end
 
     % Private methods
@@ -685,10 +775,14 @@ classdef Network < Model
             highlight(h,self.getNodeTypes==3,'NodeColor','r'); % class-switch nodes
         end
 
+        function varargout = getMarkedCTMC( varargin )
+            [varargout{1:nargout}] = getCTMC( varargin{:} ); 
+        end
+
         function mctmc = getCTMC(self, par1, par2)
             if nargin<2
                 options = SolverCTMC.defaultOptions;
-            elseif ischar(par1)                
+            elseif ischar(par1)
                 options = SolverCTMC.defaultOptions;
                 options.(par1) = par2;
                 options.cache = false;
@@ -900,36 +994,5 @@ classdef Network < Model
             SolverCTMC.printEventFilt(sync,D,SS,myevents);
         end
 
-        function ret = exportNetworkStruct(sn, language)
-            % @todo unfinished
-            if nargin<2
-                language='json';
-            end
-            ret = javaObject('java.util.HashMap');
-            switch language
-                case {'json'}
-                    sn.rtfun = func2str(sn.rtfun);
-                    for i=1:size(sn.lst,1)
-                        for r=1:length(sn.lst{i})
-                            if ~isempty(sn.lst{i}{r})
-                                sn.lst{i}{r}=func2str(sn.lst{i}{r});
-                            end
-                        end
-                    end
-                    ret = jsonencode(sn);
-                case {'java'}
-                    fieldNames = fields(sn);
-                    for f=1:length(fieldNames)
-                        switch fieldNames{f}
-                            case 'sync'
-                                %noop
-                            otherwise
-                                field = sn.(fieldNames{f});
-
-                        end
-                        ret.put(fieldNames{f},exportJava(field));
-                    end
-            end
-        end
     end
 end

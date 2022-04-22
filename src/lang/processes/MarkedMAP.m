@@ -16,16 +16,16 @@ classdef MarkedMAP < MarkovModulated
             self@MarkovModulated('MarkedMAP',K+2);
 
             if K == length(D)-1
-                setParam(self, 1, 'D0', D{1}, 'java.lang.Double');
-                setParam(self, 2, 'D1', cellsum({D{2:end}}), 'java.lang.Double');
+                setParam(self, 1, 'D0', D{1});
+                setParam(self, 2, 'D1', cellsum({D{2:end}}));
                 for k=1:K
-                    setParam(self, 2+k, sprintf('D1%d',k), D{1+k}, 'java.lang.Double');
+                    setParam(self, 2+k, sprintf('D1%d',k), D{1+k});
                 end
             elseif K == length(D)-2
-                setParam(self, 1, 'D0', D{1}, 'java.lang.Double');
-                setParam(self, 2, 'D1', D{2}, 'java.lang.Double');
+                setParam(self, 1, 'D0', D{1});
+                setParam(self, 2, 'D1', D{2});
                 for k=1:K
-                    setParam(self, 2+k, sprintf('D1%d',k), D{2+k}, 'java.lang.Double');
+                    setParam(self, 2+k, sprintf('D1%d',k), D{2+k});
                 end
             else
                 line_error(mfilename,'Inconsistency between the number of classes and the number of supplied D matrices.')

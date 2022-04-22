@@ -14,9 +14,7 @@ classdef Det < ContinuousDistrib & DiscreteDistrib
             % Construct a deterministic distribution with value t
             self@ContinuousDistrib('Det',1,[t,t]);
             self@DiscreteDistrib('Det',1,[t,t]);
-            setParam(self, 1, 't', t, 'java.lang.Double');
-            %            self.javaClass = 'jmt.engine.random.DeterministicDistr';
-            %            self.javaParClass = 'jmt.engine.random.DeterministicDistrPar';
+            setParam(self, 1, 't', t);
         end
         
         function ex = getMean(self)

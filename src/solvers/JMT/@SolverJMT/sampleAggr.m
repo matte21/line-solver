@@ -19,7 +19,7 @@ modelCopy.resetNetwork;
 
 % determine the nodes to logs
 isNodeClassLogged = false(modelCopy.getNumberOfNodes, modelCopy.getNumberOfClasses);
-ind = self.model.getNodeIndex(node.getName);
+ind = self.model.getNodeIndex(node.name);
 for r=1:modelCopy.getNumberOfClasses
     isNodeClassLogged(ind,r) = true;
 end

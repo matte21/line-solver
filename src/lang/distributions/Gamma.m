@@ -11,10 +11,8 @@ classdef Gamma < ContinuousDistrib
             % Constructs a gamma distribution from shape and scale
             % parameters
             self@ContinuousDistrib('Gamma',2,[0,Inf]);
-            setParam(self, 1, 'alpha', shape, 'java.lang.Double');
-            setParam(self, 2, 'beta', scale, 'java.lang.Double');
-            %            self.javaClass = 'jmt.engine.random.GammaDistr';
-            %            self.javaParClass = 'jmt.engine.random.GammaDistrPar';
+            setParam(self, 1, 'alpha', shape);
+            setParam(self, 2, 'beta', scale);
         end
     end
     

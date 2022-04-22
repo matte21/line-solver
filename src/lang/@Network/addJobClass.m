@@ -3,7 +3,7 @@ function addJobClass(self, customerClass)
 
 % Copyright (c) 2012-2022, Imperial College London
 % All rights reserved.
-if self.doChecks
+if self.enableChecks
     if sum(cellfun(@(x) strcmp(x.name,customerClass.name), {self.classes{1:end}}))>0
         line_error(mfilename,sprintf('A class with name %s already exists.\n', customerClass.name));
     end

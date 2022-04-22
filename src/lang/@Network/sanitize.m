@@ -36,12 +36,14 @@ if isempty(self.sn)
             case 'Join'
                 for k=1:K
                     self.nodes{i}.classCap(k) = Inf;
+                    self.nodes{i}.dropRule(k) = DropStrategy.ID_WAITQ;
                 end
             case 'Queue'
                 for k=1:K
                     if k > length(self.nodes{i}.server.serviceProcess) || isempty(self.nodes{i}.server.serviceProcess{k})
                         self.nodes{i}.serviceProcess{k} = Disabled.getInstance();
                         self.nodes{i}.classCap(k) = 0;
+                        self.nodes{i}.dropRule(k) = DropStrategy.ID_WAITQ;
                         self.nodes{i}.schedStrategyPar(k) = 0;
                         self.nodes{i}.server.serviceProcess{k} = {[],ServiceStrategy.LI,Disabled.getInstance()};
                         self.nodes{i}.input.inputJobClasses{k} = {[],SchedStrategyType.NP,DropStrategy.WaitingQueue};
@@ -84,6 +86,7 @@ if isempty(self.sn)
                     if k > length(self.nodes{i}.server.serviceProcess) || isempty(self.nodes{i}.server.serviceProcess{k})
                         self.nodes{i}.serviceProcess{k} = Disabled.getInstance();
                         self.nodes{i}.classCap(k) = 0;
+                        self.nodes{i}.dropRule(k) = DropStrategy.ID_WAITQ;
                         self.nodes{i}.schedStrategyPar(k) = 0;
                         self.nodes{i}.server.serviceProcess{k} = {[],ServiceStrategy.LI,Disabled.getInstance()};
                         self.nodes{i}.input.inputJobClasses{k} = {[],SchedStrategyType.NP,DropStrategy.WaitingQueue};

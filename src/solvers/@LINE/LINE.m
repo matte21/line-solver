@@ -5,9 +5,9 @@ classdef LINE
     %All rights reserved.
 
     properties
-        CANDIDATE_MAM = 1;
-        CANDIDATE_MVA = 2;
-        CANDIDATE_NC = 3;
+        CANDIDATE_MVA = 1;
+        CANDIDATE_NC = 2;
+        CANDIDATE_MAM = 3;
         CANDIDATE_FLUID = 4;
         CANDIDATE_JMT = 5;
         CANDIDATE_SSA = 6;
@@ -35,7 +35,7 @@ classdef LINE
             self.model = model;
             self.name = 'LINE';
             if self.options.verbose
-                line_printf('Running LINE version %s.',model.getVersion);
+                line_printf('Running LINE version %s',model.getVersion);
             end
             %solvers sorted from fastest to slowest
             self.solvers = {};
@@ -53,7 +53,7 @@ classdef LINE
                         boolSolver(s) = self.solvers{s}.supports(self.model);
                         self.solvers{s}.setOptions(self.options);
                     end
-                    self.candidates = {self.solvers{find(boolSolver)}};
+                    self.candidates = {self.solvers{find(boolSolver)}}; %#ok<FNDSB> 
                 case 'LayeredNetwork'
                     self.solvers{1,self.CANDIDATE_LQNS} = SolverLQNS(model,self.options);
                     self.solvers{1,self.CANDIDATE_LN_NC} = SolverLN(model,@(m) SolverNC(m),self.options);
@@ -88,34 +88,10 @@ classdef LINE
     end
 
     methods
-        function bool = supports(self, model)
-            %BOOL = SUPPORTS(MODEL)
-
-            if isempty(self.candidates)
-                bool = false;
-            else
-                bool = true;
-            end
-        end
-
-        function runtime = runAnalyzer(self, options) % generic method to run the solver
-            %RUNTIME = RUN()
-            %Run the solver % GENERIC METHOD TO RUN THE SOLVER
-
-            T0 = tic;
-            runtime = toc(T0);
-            if nargin<2
-                options = self.getOptions;
-            end
-            if nargin<3
-                config = [];
-            end
-
-        end
-
-        function AvgChainTable = getAvgChainTable(self)
-            % [AVGCHAINTABLE] = GETAVGCHAINTABLE(self)
+        
+        function varargout = delegate(self, method, nretout, varargin)
             model = self.model;
+
             switch class(model)
                 case 'Network'
                     % first try with chosen solver, if the method is not available
@@ -128,10 +104,43 @@ classdef LINE
                     end
                     for s=1:length(proposedSolvers)
                         try
-                            AvgChainTable = proposedSolvers{s}.getAvgChainTable;
+                            switch nretout
+                                case 1
+                                    varargout{1} = proposedSolvers{s}.(method)(varargin);
+                                case 2
+                                    [r1,r2] = proposedSolvers{s}.(method)(varargin);
+                                    varargout{1} = r1;
+                                    varargout{2} = r2;
+                                case 3
+                                    [r1,r2,r3] = proposedSolvers{s}.(method)(varargin);
+                                    varargout{1} = r1;
+                                    varargout{2} = r2;
+                                    varargout{3} = r3;
+                                case 4
+                                    [r1,r2,r3,r4] = proposedSolvers{s}.(method)(varargin);
+                                    varargout{1} = r1;
+                                    varargout{2} = r2;
+                                    varargout{3} = r3;
+                                    varargout{4} = r4;
+                                case 5
+                                    [r1,r2,r3,r4,r5] = proposedSolvers{s}.(method)(varargin);
+                                    varargout{1} = r1;
+                                    varargout{2} = r2;
+                                    varargout{3} = r3;
+                                    varargout{4} = r4;
+                                    varargout{5} = r5;
+                                case 6
+                                    [r1,r2,r3,r4,r5,r6] = proposedSolvers{s}.(method)(varargin);
+                                    varargout{1} = r1;
+                                    varargout{2} = r2;
+                                    varargout{3} = r3;
+                                    varargout{4} = r4;
+                                    varargout{5} = r5;
+                                    varargout{6} = r6;
+                            end
                             return
-                        catch
-                            line_printf('Switching solver.');
+                        catch me                            
+                            line_printf('Switching solver to %s.',proposedSolvers{s}.getName);
                         end
                     end
                 case 'LayeredNetwork'
@@ -145,220 +154,188 @@ classdef LINE
                     end
                     for s=1:length(proposedSolvers)
                         try
-                            AvgChainTable = proposedSolvers{s}.getAvgChainTable;
+                            switch nretout
+                                case 1
+                                    varargout{1} = proposedSolvers{s}.(method)(varargin);
+                                case 2
+                                    [r1,r2] = proposedSolvers{s}.(method)(varargin);
+                                    varargout{1} = r1;
+                                    varargout{2} = r2;
+                                case 3
+                                    [r1,r2,r3] = proposedSolvers{s}.(method)(varargin);
+                                    varargout{1} = r1;
+                                    varargout{2} = r2;
+                                    varargout{3} = r3;
+                                case 4
+                                    [r1,r2,r3,r4] = proposedSolvers{s}.(method)(varargin);
+                                    varargout{1} = r1;
+                                    varargout{2} = r2;
+                                    varargout{3} = r3;
+                                    varargout{4} = r4;
+                                case 5
+                                    [r1,r2,r3,r4,r5] = proposedSolvers{s}.(method)(varargin);
+                                    varargout{1} = r1;
+                                    varargout{2} = r2;
+                                    varargout{3} = r3;
+                                    varargout{4} = r4;
+                                    varargout{5} = r5;
+                                case 6
+                                    [r1,r2,r3,r4,r5,r6] = proposedSolvers{s}.(method)(varargin);
+                                    varargout{1} = r1;
+                                    varargout{2} = r2;
+                                    varargout{3} = r3;
+                                    varargout{4} = r4;
+                                    varargout{5} = r5;
+                                    varargout{6} = r6;
+                            end
                             return
                         catch
-                            line_printf('Switching solver.');
+                            line_printf('Switching solver %s.',proposedSolvers{s}.getName);
                         end
                     end
             end
+        end
+
+        function AvgChainTable = getAvgChainTable(self)
+            % [AVGCHAINTABLE] = GETAVGCHAINTABLE(self)
+            AvgChainTable = self.delegate('getAvgChainTable', 1);
+        end
+
+        function AvgQlenTable = getAvgQLenTable(self)
+            AvgQlenTable = self.delegate('getAvgQLenTable', 1);
+        end
+
+        function AvgTputTable = getAvgTputTable(self)
+            AvgTputTable = self.delegate('getAvgTputTable', 1);
+        end
+
+        function AvgRespTTable = getAvgRespTTable(self)
+            AvgRespTTable = self.delegate('getAvgRespTTable', 1);
+        end
+
+        function AvgUtilTable = getAvgUtilTable(self)
+            AvgUtilTable = self.delegate('getAvgUtilTable', 1);
         end
 
         function AvgSysTable = getAvgSysTable(self)
             % [AVGSYSTABLE] = GETAVGSYSTABLE(self)
-            model = self.model;
-            switch class(model)
-                case 'Network'
-                    % first try with chosen solver, if the method is not available
-                    %     or fails keep going with the other candidates
-                    chosenSolver = chooseSolver(self);
-                    if chosenSolver.supports(self.model)
-                        proposedSolvers = {chosenSolver, self.candidates{:}};
-                    else
-                        proposedSolvers = self.candidates;
-                    end
-                    for s=1:length(proposedSolvers)
-                        try
-                            AvgSysTable = proposedSolvers{s}.getAvgSysTable;
-                            return
-                        catch
-                            line_printf('Switching solver.');
-                        end
-                    end
-                case 'LayeredNetwork'
-                    % first try with chosen solver, if the method is not available
-                    %     or fails keep going with the other candidates
-                    chosenSolver = chooseSolver(self);
-                    if chosenSolver.supports(self.model)
-                        proposedSolvers = {chosenSolver, self.candidates};
-                    else
-                        proposedSolvers = self.candidates;
-                    end
-                    for s=1:length(proposedSolvers)
-                        try
-                            AvgSysTable = proposedSolvers{s}.getAvgSysTable;
-                            return
-                        catch
-                            line_printf('Switching solver.');
-                        end
-                    end
-            end
+            AvgSysTable = self.delegate('getAvgSysTable', 1);
         end
 
         function AvgNodeTable = getAvgNodeTable(self)
-            % [AVGTABLE] = GETAVGNODETABLE(self)
-            model = self.model;
-            switch class(model)
-                case 'Network'
-                    % first try with chosen solver, if the method is not available
-                    %     or fails keep going with the other candidates
-                    chosenSolver = chooseSolver(self);
-                    if chosenSolver.supports(self.model)
-                        proposedSolvers = {chosenSolver, self.candidates{:}};
-                    else
-                        proposedSolvers = self.candidates;
-                    end
-                    for s=1:length(proposedSolvers)
-                        try
-                            AvgNodeTable = proposedSolvers{s}.getAvgNodeTable;
-                            return
-                        catch
-                            line_printf('Switching solver.');
-                        end
-                    end
-                case 'LayeredNetwork'
-                    % first try with chosen solver, if the method is not available
-                    %     or fails keep going with the other candidates
-                    chosenSolver = chooseSolver(self);
-                    if chosenSolver.supports(self.model)
-                        proposedSolvers = {chosenSolver, self.candidates};
-                    else
-                        proposedSolvers = self.candidates;
-                    end
-                    for s=1:length(proposedSolvers)
-                        try
-                            AvgNodeTable = proposedSolvers{s}.getAvgNodeTable;
-                            return
-                        catch
-                            line_printf('Switching solver.');
-                        end
-                    end
-            end
+            % [AVGNODETABLE] = GETAVGNODETABLE(self)
+            AvgNodeTable = self.delegate('getAvgNodeTable', 1);
         end
 
-        function [AvgTable,QT,UT,RT,TT,WT] = getAvgTable(self)
-            % [AVGTABLE,QT,UT,RT,TT,WT] = GETAVGTABLE()
-            model = self.model;
-            switch class(model)
-                case 'Network'
-                    % first try with chosen solver, if the method is not available
-                    %     or fails keep going with the other candidates
-                    chosenSolver = chooseSolver(self);
-                    if chosenSolver.supports(self.model)
-                        proposedSolvers = {chosenSolver, self.candidates{:}};
-                    else
-                        proposedSolvers = self.candidates;
-                    end
-                    for s=1:length(proposedSolvers)
-                        try
-                            [AvgTable,QT,UT,RT,TT,WT] = proposedSolvers{s}.getAvgTable;
-                            return
-                        catch
-                            line_printf('Switching solver.');
-                        end
-                    end
-                case 'LayeredNetwork'
-                    % first try with chosen solver, if the method is not available
-                    %     or fails keep going with the other candidates
-                    chosenSolver = chooseSolver(self);
-                    if chosenSolver.supports(self.model)
-                        proposedSolvers = {chosenSolver, self.candidates};
-                    else
-                        proposedSolvers = self.candidates;
-                    end
-                    for s=1:length(proposedSolvers)
-                        try
-                            [AvgTable,QT,UT,RT,TT,WT] = proposedSolvers{s}.getAvgTable;
-                            return
-                        catch
-                            line_printf('Switching solver.');
-                        end
-                    end
-            end
+        function AvgTable = getAvgTable(self)
+            % [AVGTABLE] = GETAVGTABLE(self)
+            AvgTable = self.delegate('getAvgTable', 1);
         end
 
         function [QN,UN,RN,TN,AN,WN] = getAvg(self,Q,U,R,T)
             %[QN,UN,RN,TN] = GETAVG(SELF,Q,U,R,T)
-            model = self.model;
-            switch class(model)
-                case 'Network'
-                    if nargin ==1
-                        [Q,U,R,T] = self.getAvgHandles;
-                    elseif nargin == 2
-                        handlers = Q;
-                        Q=handlers{1};
-                        U=handlers{2};
-                        R=handlers{3};
-                        T=handlers{4};
-                    end
-                    % first try with chosen solver, if the method is not available
-                    %     or fails keep going with the other candidates
-                    chosenSolver = chooseSolver(self);
-                    if chosenSolver.supports(self.model)
-                        proposedSolvers = {chosenSolver, self.candidates};
-                    else
-                        proposedSolvers = {self.candidates};
-                    end
-                    for s=1:length(proposedSolvers)
-                        try
-                            [QN,UN,RN,TN,AN,WN] = proposedSolvers{s}.getAvg(Q,U,R,T);
-                            return
-                        end
-                    end
-                case 'LayeredNetwork'
-                    % first try with chosen solver, if the method is not available
-                    %     or fails keep going with the other candidates
-                    chosenSolver = chooseSolver(self);
-                    if chosenSolver.supports(self.model)
-                        proposedSolvers = {chosenSolver, self.candidates};
-                    else
-                        proposedSolvers = {self.candidates};
-                    end
-                    for s=1:length(proposedSolvers)
-                        try
-                            [QN,UN,RN,TN,AN,WN] = proposedSolvers{s}.getAvg();
-                            return
-                        end
-                    end
+
+            if nargin>1
+                [QN,UN,RN,TN,AN,WN] = self.delegate('getAvg', 6, Q,U,R,T);
+            else
+                [QN,UN,RN,TN,AN,WN] = self.delegate('getAvg', 6);
             end
         end
 
         function [QNc,UNc,RNc,TNc] = getAvgChain(self,Q,U,R,T)
             %[QNC,UNC,RNC,TNC] = GETAVGCHAIN(SELF,Q,U,R,T)
 
-            proposedSolvers = {chooseSolver(self), self.candidates};
-            for s=1:length(proposedSolvers)
-                try
-                    [QNc,UNc,RNc,TNc] = proposedSolvers{s}.getAvgChain(Q,U,R,T);
-                    return
-                end
+            if nargin>1
+                [QNc,UNc,RNc,TNc] = self.delegate('getAvgChain', 4, Q,U,R,T);
+            else
+                [QNc,UNc,RNc,TNc] = self.delegate('getAvgChain', 4);
             end
         end
 
         function [CNc,XNc] = getAvgSys(self,R,T)
             %[CNC,XNC] = GETAVGSYS(SELF,R,T)
 
-            proposedSolvers = {chooseSolver(self), self.candidates};
-            for s=1:length(proposedSolvers)
-                try
-                    [CNc,XNc] = proposedSolvers{s}.getAvgSys(R,T);
-                    return
-                end
+            if nargin>1
+                [CNc,XNc] = self.delegate('getAvgSys', 2, R,T);
+            else
+                [CNc,XNc] = self.delegate('getAvgSys', 2);
             end
         end
 
         function [QNt,UNt,TNt] = getTranAvg(self,Qt,Ut,Tt)
             % [QNT,UNT,TNT] = GETTRANAVG(SELF,QT,UT,TT)
 
-            proposedSolvers = {chooseSolver(self), self.candidates};
-            for s=1:length(proposedSolvers)
-                try
-                    [QNt,UNt,TNt] = proposedSolvers{s}.getTranAvg(Qt,Ut,Tt);
-                    return
-                end
+            if nargin>1
+                [QNt,UNt,TNt] = self.delegate('getTranAvg', 3, Qt,Ut,Tt);
+            else
+                [QNt,UNt,TNt] = self.delegate('getTranAvg', 3);
             end
         end
 
+        function [QN,UN,RN,TN,AN,WN] = getAvgNode(self,Q,U,R,T,A)               
+            if nargin>1
+                [QN,UN,RN,TN,AN,WN] = self.delegate('getAvgNode', 6, Q,U,R,T,A);
+            else
+                [QN,UN,RN,TN,AN,WN] = self.delegate('getAvgNode', 6);
+            end
+        end
+        
+        function [AN] = getAvgArvRChain(self,A)
+            if nargin>1
+                AN = self.delegate('getAvgArvRChain', 1, A);
+            else
+                AN = self.delegate('getAvgArvRChain', 1);
+            end
+        end
+        
+        function [QN] = getAvgQLenChain(self,Q)
+            if nargin>1
+                QN = self.delegate('getAvgQLenChain', 1, Q);
+            else
+                QN = self.delegate('getAvgQLenChain', 1);
+            end
+        end
+        
+        function [UN] = getAvgUtilChain(self,U)
+            if nargin>1
+                UN = self.delegate('getAvgUtilChain', 1, U);
+            else
+                UN = self.delegate('getAvgUtilChain', 1);
+            end
+        end
+        
+        function [RN] = getAvgRespTChain(self,R)
+            if nargin>1
+                RN = self.delegate('getAvgRespTChain', 1, R);
+            else
+                RN = self.delegate('getAvgRespTChain', 1);
+            end
+        end
+        
+        function [TN] = getAvgTputChain(self,T)
+            if nargin>1
+                TN = self.delegate('getAvgTputChain', 1, T);
+            else
+                TN = self.delegate('getAvgTputChain', 1);
+            end
+        end
+        
+        function [RN] = getAvgSysRespT(self,R)
+            if nargin>1
+                RN = self.delegate('getAvgSysRespT', 1, R);
+            else
+                RN = self.delegate('getAvgSysRespT', 1);
+            end
+        end
+        
+        function [TN] = getAvgSysTput(self,T)
+            if nargin>1
+                TN = self.delegate('getAvgSysTput', 1, T);
+            else
+                TN = self.delegate('getAvgSysTput', 1);
+            end
+        end        
+        
         % AI-based choose solvers
         function solver = chooseSolverAI(self)
             % SOLVER = CHOOSESOLVERAI()

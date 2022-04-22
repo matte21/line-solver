@@ -42,6 +42,35 @@ classdef (Sealed) NodeType
             % BOOL = ISSTATEFUL(NODETYPE)            
             bool = (nodetype == NodeType.Source | nodetype == NodeType.Delay | nodetype == NodeType.Queue | nodetype == NodeType.Cache | nodetype == NodeType.Join | nodetype == NodeType.Router | nodetype == NodeType.Place);
         end
+
+        function txt=toText(nodetype)
+            switch nodetype
+                case NodeType.ID_TRANSITION
+                    txt = 'Transition';
+                case NodeType.ID_PLACE
+                    txt = 'Place';
+                case NodeType.ID_FORK
+                    txt = 'Fork';
+                case NodeType.ID_ROUTER
+                    txt = 'Router';
+                case NodeType.ID_CACHE
+                    txt = 'Cache';
+                case NodeType.ID_LOGGER
+                    txt = 'Logger';
+                case NodeType.ID_CLASSSWITCH
+                    txt = 'ClassSwitch';
+                case NodeType.ID_DELAY
+                    txt = 'Delay';
+                case NodeType.ID_SOURCE
+                    txt = 'Source';
+                case NodeType.ID_QUEUE
+                    txt = 'Queue';
+                case NodeType.ID_SINK
+                    txt = 'Join';
+                case NodeType.ID_JOIN
+                    txt = 'Sink';
+            end
+        end
     end
     
 end

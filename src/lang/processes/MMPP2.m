@@ -10,12 +10,10 @@ classdef MMPP2 < MarkovModulated
             % SELF = MMPP2(LAMBDA0,LAMBDA1,SIGMA0,SIGMA1)
 
             self@MarkovModulated('MMPP2',4);
-            setParam(self, 1, 'lambda0', lambda0, 'java.lang.Double');
-            setParam(self, 2, 'lambda1', lambda1, 'java.lang.Double');
-            setParam(self, 3, 'sigma0', sigma0, 'java.lang.Double');
-            setParam(self, 4, 'sigma1', sigma1, 'java.lang.Double');
-            %            self.javaClass = 'jmt.engine.random.MMPP2Distr';
-            %            self.javaParClass = 'jmt.engine.random.MMPP2Par';
+            setParam(self, 1, 'lambda0', lambda0);
+            setParam(self, 2, 'lambda1', lambda1);
+            setParam(self, 3, 'sigma0', sigma0);
+            setParam(self, 4, 'sigma1', sigma1);
         end
 
         function Di = D(self, i, wantSparse)

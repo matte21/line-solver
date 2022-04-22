@@ -11,10 +11,8 @@ classdef Erlang < MarkovianDistribution
             % Constructs an erlang distribution from the rate in each state
             % and the number of phases
             self@MarkovianDistribution('Erlang',2);
-            setParam(self, 1, 'alpha', phaseRate, 'java.lang.Double'); % rate in each state
-            setParam(self, 2, 'r', round(nphases), 'java.lang.Long'); % number of phases
-            %            self.javaClass = 'jmt.engine.random.Erlang';
-            %            self.javaParClass = 'jmt.engine.random.ErlangPar';
+            setParam(self, 1, 'alpha', phaseRate); % rate in each state
+            setParam(self, 2, 'r', round(nphases)); % number of phases
         end
         
         function phases = getNumberOfPhases(self)
@@ -82,6 +80,7 @@ classdef Erlang < MarkovianDistribution
             % Fit distribution from first three central moments (mean,
             % SCV, skewness)
             er = Erlang.fitMeanAndSCV(MEAN,SCV);
+            er.immediate = MEAN < Distrib.Tol;
         end
         
         function er = fitRate(RATE)
@@ -90,6 +89,7 @@ classdef Erlang < MarkovianDistribution
             % Fit distribution with given rate
             line_warning(mfilename,'The Erlang distribution is underspecified by the rate, setting the number of phases to 2.');
             er = Erlang.fitMeanAndOrder(1/RATE, 2);
+            er.immediate = 1/RATE < Distrib.Tol;
         end
         
         function er = fitMean(MEAN)
@@ -98,6 +98,7 @@ classdef Erlang < MarkovianDistribution
             % Fit distribution with given mean
             line_warning(mfilename,'The Erlang distribution is underspecified by the mean, setting the number of phases to 2.');
             er = Erlang.fitMeanAndOrder(MEAN, 2);
+            er.immediate = MEAN < Distrib.Tol;
         end
         
         function er = fitMeanAndSCV(MEAN, SCV)
@@ -109,6 +110,7 @@ classdef Erlang < MarkovianDistribution
             r = ceil(1/SCV);
             alpha = r/MEAN;
             er = Erlang(alpha, r);
+            er.immediate = MEAN < Distrib.Tol;
         end
         
         function er = fitMeanAndOrder(MEAN, n)
@@ -119,7 +121,8 @@ classdef Erlang < MarkovianDistribution
             r = ceil(1/SCV);
             alpha = r/MEAN;
             er = Erlang(alpha, r);
-        end
+            er.immediate = MEAN < Distrib.Tol;
+     end
     end
     
 end

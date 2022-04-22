@@ -25,6 +25,8 @@ schedid = sn.schedid;
 %chains = sn.chains;
 C = sn.nchains;
 SCV = sn.scv;
+gamma = zeros(M,1);
+V = cellsum(sn.visits);
 ST = 1 ./ sn.rates;
 ST(isnan(ST))=0;
 ST0=ST;
@@ -38,7 +40,6 @@ end
 
 eta_1 = zeros(1,M);
 eta = ones(1,M);
-ca_1 = ones(1,M);
 if all(schedid~=SchedStrategy.ID_FCFS) options.iter_max=1; end
 it = 0;
 while max(abs(1-eta./eta_1)) > options.iter_tol && it < options.iter_max
@@ -49,12 +50,12 @@ while max(abs(1-eta./eta_1)) > options.iter_tol && it < options.iter_max
     C = sn.nchains;
     Lchain = zeros(M,C);
     STchain = zeros(M,C);
-    
+
     SCVchain = zeros(M,C);
     Nchain = zeros(1,C);
     refstatchain = zeros(C,1);
     for c=1:C
-        inchain = find(sn.chains(c,:));
+        inchain = sn.inchain{c};
         isOpenChain = any(isinf(sn.njobs(inchain)));
         for i=1:M
             % we assume that the visits in L(i,inchain) are equal to 1
@@ -77,7 +78,7 @@ while max(abs(1-eta./eta_1)) > options.iter_tol && it < options.iter_max
     Lchain(~isfinite(Lchain))=0;
     Tstart = tic;
     Nt = sum(Nchain(isfinite(Nchain)));
-    
+
     Lms = zeros(M,C);
     mu = zeros(M,Nt);
     infServers = [];
@@ -104,7 +105,7 @@ while max(abs(1-eta./eta_1)) > options.iter_tol && it < options.iter_max
     lG = real(lG);
     Xchain=[];
     Qchain=[];
-    
+
     if isempty(Xchain)
         for r=1:C
             %r
@@ -155,124 +156,38 @@ while max(abs(1-eta./eta_1)) > options.iter_tol && it < options.iter_max
             end
         end
     end
-    
+
     if isnan(Xchain)
         line_warning(mfilename,'Normalizing constant computations produced a floating-point range exception. Model is likely too large.');
     end
-    
+
     Z = sum(Z(1:M,:),1);
-    
+
     Rchain = Qchain ./ repmat(Xchain,M,1) ./ Vchain;
     Rchain(infServers,:) = Lchain(infServers,:) ./ Vchain(infServers,:);
     Tchain = repmat(Xchain,M,1) .* Vchain;
     Uchain = Tchain .* Lchain;
     Cchain = Nchain ./ Xchain - Z;
-    
+
     Xchain=real(Xchain);
     Uchain=real(Uchain);
     Qchain=real(Qchain);
     Rchain=real(Rchain);
-    
+
     Xchain(~isfinite(Xchain))=0;
     Uchain(~isfinite(Uchain))=0;
     Qchain(~isfinite(Qchain))=0;
     Rchain(~isfinite(Rchain))=0;
-    
+
     Xchain(Nchain==0)=0;
     Uchain(:,Nchain==0)=0;
     Qchain(:,Nchain==0)=0;
     Rchain(:,Nchain==0)=0;
     Tchain(:,Nchain==0)=0;
-    
-    for c=1:sn.nchains
-        inchain = find(sn.chains(c,:));
-        for k=inchain(:)'
-            X(k) = Xchain(c) * alpha(sn.refstat(k),k);
-            for i=1:sn.nstations
-                if isinf(nservers(i))
-                    U(i,k) = ST(i,k) * (Xchain(c) * Vchain(i,c) / Vchain(sn.refstat(k),c)) * alpha(i,k);
-                else
-                    U(i,k) = ST(i,k) * (Xchain(c) * Vchain(i,c) / Vchain(sn.refstat(k),c)) * alpha(i,k) / nservers(i);
-                end
-                if Lchain(i,c) > 0
-                    Q(i,k) = Rchain(i,c) * ST(i,k) / STchain(i,c) * Xchain(c) * Vchain(i,c) / Vchain(sn.refstat(k),c) * alpha(i,k);
-                    T(i,k) = Tchain(i,c) * alpha(i,k);
-                    R(i,k) = Q(i,k) / T(i,k);
-                    % R(i,k) = Rchain(i,c) * ST(i,k) / STchain(i,c) * alpha(i,k) / sum(alpha(sn.refstat(k),inchain)');
-                else
-                    T(i,k) = 0;
-                    R(i,k) = 0;
-                    Q(i,k) = 0;
-                end
-            end
-            C(k) = sn.njobs(k) / X(k);
-        end
-    end
-    
-    for i=1:M
-        rho(i) = sum(U(i,:)); % true utilization of each server, critical to use this
-    end
-    
-    if it==1
-        ca= zeros(M,1);
-        ca_1 = ones(M,1);
-        cs_1 = ones(M,1);
-        for i=1:M
-            sd = sn.rates(i,:)>0;
-            cs_1(i) = mean(SCV(i,sd));
-        end
-    else
-        ca_1 = ca;
-        cs_1 = cs;
-    end
-    
-    for i=1:M
-        sd = sn.rates(i,:)>0;
-        switch schedid(i)
-            case SchedStrategy.ID_FCFS
-                if range(ST0(i,sd))>0 && (max(SCV(i,sd))>1 - Distrib.Zero || min(SCV(i,sd))<1 + Distrib.Zero) % check if non-product-form
-                    %                    if rho(i) <= 1
-                    %                     else
-                    %                         ca(i) = 0;
-                    %                         for j=1:M
-                    %                             for r=1:K
-                    %                                 if ST0(j,r)>0
-                    %                                     for s=1:K
-                    %                                         if ST0(i,s)>0
-                    %                                             pji_rs = sn.rt((j-1)*sn.nclasses + r, (i-1)*sn.nclasses + s);
-                    %                                             ca(i) = ca(i) + (T(j,r)*pji_rs/sum(T(i,sd)))*(1 - pji_rs + pji_rs*((1-rho(j)^2)*ca_1(j) + rho(j)^2*cs_1(j)));
-                    %                                         end
-                    %                                     end
-                    %                                 end
-                    %                             end
-                    %                         end
-                    %                     end
-                    ca(i) = 1;
-                    cs(i) = (SCV(i,sd)*T(i,sd)')/sum(T(i,sd));
-                    gamma(i) = (rho(i)^nservers(i)+rho(i))/2; % multi-server
-                    % asymptotic decay rate (diffusion approximation, Kobayashi JACM)
-                    eta(i) = exp(-2*(1-rho(i))/(cs(i)+ca(i)*rho(i)));
-                    %[~,eta(i)]=qsys_gig1_approx_klb(sum(T(i,sd))/nservers(i),rho(i) / (sum(T(i,sd))/nservers(i)),ca(i),cs(i));
-                    %eta(i) = rho(i);
-                end
-        end
-    end
-    
-    
-    for i=1:M
-        sd = sn.rates(i,:)>0;
-        switch schedid(i)
-            case SchedStrategy.ID_FCFS
-                if range(ST0(i,sd))>0 && (max(SCV(i,sd))>1 - Distrib.Zero || min(SCV(i,sd))<1 + Distrib.Zero) % check if non-product-form
-                    for k=1:K
-                        if sn.rates(i,k)>0
-                            ST(i,k) = (1-rho(i)^8)*ST0(i,k) + rho(i)^8*((1-rho(i)^8) * gamma(i)*nservers(i)/sum(T(i,sd)) +  rho(i)^8* eta(i)*nservers(i)/sum(T(i,sd)) );
-                        end
-                    end
-                end
-        end
-    end
-    
+
+    [Q,U,R,T,C,X] = snDeaggregateChainResults(sn, Lchain, ST, STchain, Vchain, alpha, [], [], Rchain, Tchain, [], Xchain);
+
+    [ST,gamma,~,~,~,~,eta] = handlerHighVar(options.config.highvar,sn,ST0,V,SCV,X,U,gamma,nservers);
 end
 
 runtime = toc(Tstart);

@@ -40,7 +40,7 @@ for ind=1:sn.nnodes
                                 case {RoutingStrategy.ID_RROBIN, RoutingStrategy.ID_WRROBIN, RoutingStrategy.ID_JSQ}
                                     new_sync.passive{1} = Event(EventType.ID_ARV, jnd, s, @(state_before, state_after) at(self.sn.rtfun(state_before, state_after), (isf-1)*nclasses+r, (jsf-1)*nclasses+s));
                                 otherwise
-                                    new_sync.passive{1} = Event(EventType.ID_ARV, jnd, s, self.sn.rt((isf-1)*nclasses+r, (jsf-1)*nclasses+s));
+                                    new_sync.passive{1} = Event(EventType.ID_ARV, jnd, s, sn.rt((isf-1)*nclasses+r, (jsf-1)*nclasses+s));
                             end
                             sync{end+1,1} = new_sync;
                         end

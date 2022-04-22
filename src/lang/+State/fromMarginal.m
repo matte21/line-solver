@@ -24,7 +24,7 @@ if sn.isstation(ind) && any(sn.procid(sn.nodeToStation(ind),:)==ProcessType.ID_M
     if sn.nservers(ind)>1
         line_error(mfilename,'Multiserver MAP stations are not supported.')
     end
-    if sn.schedid(ind) ~= SchedStrategy.ID_FCFS
+    if sn.schedid(ind) ~= SchedStrategy.ID_FCFS & sn.nodetype ~= NodeType.ID_SOURCE
         line_error(mfilename,'Non-FCFS MAP stations are not supported.')
     end
 end

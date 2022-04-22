@@ -33,8 +33,8 @@ classdef EnsembleSolver < Solver
             
         end
         
-        function [QN,UN,RT,TT] = getAvg(self)
-            % [QN,UN,RT,TT] = GETAVG()
+        function [QN,UN,RT,TT] = getEnsembleAvg(self)
+            % [QN,UN,RT,TT] = GETENSEMBLEAVG()
             
             line_error(mfilename,'Line:AbstractMethodCall','An abstract method was called. The function needs to be overridden by a subclass.');
             

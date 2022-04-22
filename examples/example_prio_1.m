@@ -12,7 +12,7 @@ node{6} = Sink(model, 'Sink');
 
 %% Block 2: classes
 jobclass{1} = OpenClass(model, 'Class1', 0);
-jobclass{2} = OpenClass(model, 'Class2', 1);
+jobclass{2} = OpenClass(model, 'Class2', 1); % higher priority
 jobclass{3} = OpenClass(model, 'Class3', 0);
 
 node{1}.setArrival(jobclass{1}, Exp.fitMean(10.000000)); % (Source of Customers,Class0)

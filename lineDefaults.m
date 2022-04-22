@@ -49,6 +49,7 @@ switch solverName
         options.verbose = 0;    
     case 'Fluid'
         options = Solver.defaultOptions();
+        options.config.highvar = 'none';
         options.iter_max = 200;
         options.stiff = true;
         options.timespan = [0,Inf];
@@ -66,14 +67,17 @@ switch solverName
         options.timespan = [Inf,Inf];
         options.keep = true;
     case 'MAM'
+        options.iter_max = 100;
         options.timespan = [Inf,Inf];
     case 'MVA'
-        options.config.highvar = 'default';
+        options.iter_max = 1000;
+        options.config.highvar = 'none';
         options.config.multiserver = 'default';
         options.config.np_priority = 'default';
     case 'NC'        
         options.samples = 1e5;
         options.timespan = [Inf,Inf];
+        options.config.highvar = 'interp';
     case 'SSA'
         options.timespan = [0,Inf];
         options.verbose = true;

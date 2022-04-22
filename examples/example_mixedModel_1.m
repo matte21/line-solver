@@ -6,8 +6,8 @@ node{2} = Queue(model, 'Queue1', SchedStrategy.PS);
 node{3} = Source(model,'Source');
 node{4} = Sink(model,'Sink');
 
-jobclass{1} = ClosedClass(model, 'Class1', 2, node{1}, 0);
-jobclass{2} = OpenClass(model, 'Class2', 0);
+jobclass{1} = ClosedClass(model, 'ClosedClass', 2, node{1}, 0);
+jobclass{2} = OpenClass(model, 'OpenClass', 0);
 
 node{1}.setService(jobclass{1}, Erlang(3,2));
 node{1}.setService(jobclass{2}, HyperExp(0.5,3.0,10.0));
@@ -44,6 +44,7 @@ solver{end+1} = SolverSSA(model,options);
 %solver{end+1} = SolverFluid(model,options);
 solver{end+1} = SolverMVA(model,options);
 %solver{end+1} = SolverNC(model,options);
+solver{end+1} = SolverMAM(model,options);
 for s=1:length(solver)
     fprintf(1,'SOLVER: %s\n',solver{s}.getName());
     AvgTable{s} = solver{s}.getAvgTable();

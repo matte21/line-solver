@@ -10,8 +10,8 @@ classdef PH < MarkovianDistribution
             
             % Abstract class constructor
             self@MarkovianDistribution('PH', 2);
-            self.setParam(1, 'alpha', alpha, 'java.lang.Double');
-            self.setParam(2, 'T', T, 'java.lang.Double');
+            self.setParam(1, 'alpha', alpha);
+            self.setParam(2, 'T', T);
         end
     end
     
@@ -66,8 +66,8 @@ classdef PH < MarkovianDistribution
             ph = kpcfit_ph_auto([e1,e2,e3],options);
             [alpha,T]=map2ph(ph{1,1});
             
-            self.setParam(1, 'alpha', alpha, 'java.lang.Double');
-            self.setParam(2, 'T', T, 'java.lang.Double');
+            self.setParam(1, 'alpha', alpha);
+            self.setParam(2, 'T', T);
         end
         
         function updateMean(self,MEAN)
@@ -76,8 +76,8 @@ classdef PH < MarkovianDistribution
             % Update parameters to match the given mean
             ph = self.getRepres;
             ph = map_scale(ph,MEAN);
-            self.setParam(1, 'alpha', map_pie(ph), 'java.lang.Double');
-            self.setParam(2, 'T', ph{1}, 'java.lang.Double');
+            self.setParam(1, 'alpha', map_pie(ph));
+            self.setParam(2, 'T', ph{1});
         end
         
         function updateMeanAndSCV(self, MEAN, SCV)
@@ -91,8 +91,8 @@ classdef PH < MarkovianDistribution
             %options = kpcfit_ph_options([e1,e2],'MinNumStates',2,'MaxNumStates',2,'Verbose',false);
             %ph = kpcfit_ph_auto([e1,e2],options);
             %[alpha,T]=map2ph(ph{1,1});            
-            self.setParam(1, 'alpha', alpha, 'java.lang.Double');
-            self.setParam(2, 'T', T, 'java.lang.Double');
+            self.setParam(1, 'alpha', alpha);
+            self.setParam(2, 'T', T);
         end
         
         function ph = getRepres(self)

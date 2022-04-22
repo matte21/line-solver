@@ -76,7 +76,7 @@ for c=1:size(callupdmap,1)
             %eidxclass = self.ensemble{self.idxhash(tidx)}.attribute.calls(find(self.ensemble{self.idxhash(tidx)}.attribute.calls(:,4) == eidx),1);
             %eidxchain = find(self.ensemble{self.idxhash(tidx)}.getStruct.chains(:,eidxclass)>0);
             %qn = self.ensemble{self.idxhash(tidx)}.getStruct;            
-            %svctproc{eidx}.updateMean(svctproc{eidx}.getMean * qn.visits{eidxchain}(1,find(qn.refclass)) / qn.visits{eidxchain}(2,eidxclass))
+            %svctproc{eidx}.updateMean(svctproc{eidx}.getMean * qn.visits{eidxchain}(1,qn.refclass(eidxchain)) / qn.visits{eidxchain}(2,eidxclass))
             %%task_tput = sum(self.results{end,self.idxhash(tidx)}.TN(self.ensemble{self.idxhash(tidx)}.attribute.serverIdx,eidxclass))
             %%entry_tput = sum(self.results{end,self.idxhash(tidx)}.TN(self.ensemble{self.idxhash(tidx)}.attribute.serverIdx,eidxclass))
             ensemble{idxhash(idx)}.nodes{nodeidx}.setService(class, svctproc{eidx});

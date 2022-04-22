@@ -13,21 +13,22 @@ M = sn.nstations;
 K = sn.nclasses;
 chains = sn.chains;
 refstat = sn.refstat;
-
-for c=1:size(chains,1)
-    inchain = find(chains(c,:));
-    if sum(refstat(inchain) == refstat(inchain(1))) ~= length(inchain)
-        refstat(inchain) = refstat(inchain(1));
-        %        line_error(mfilename,sprintf('Classes in chain %d have different reference stations. Chain %d classes: %s', c, c, int2str(inchain)));
+nchains = size(chains,1);
+inchain = cell(1,nchains);
+for c=1:nchains
+    inchain{c} = find(chains(c,:));
+    if sum(refstat(inchain{c}) == refstat(inchain{c}(1))) ~= length(inchain{c})
+        refstat(inchain{c}) = refstat(inchain{c}(1));
+        %        line_error(mfilename,sprintf('Classes in chain %d have different reference stations. Chain %d classes: %s', c, c, int2str(inchain{c})));
     end
 end
 
 visits = cell(size(chains,1),1); % visits{c}(i,j) is the number of visits that a chain-c job pays at node i in class j
 for c=1:size(chains,1)
-    inchain = find(chains(c,:));
+    inchain{c} = find(chains(c,:));
     cols = [];
     for i=1:M
-        for k=inchain(:)'
+        for k=inchain{c}(:)'
             cols(end+1) = (i-1)*K+k;
         end
     end
@@ -36,7 +37,7 @@ for c=1:size(chains,1)
     
     %                Pchain(visited,visited)
     %                if ~dtmc_isfeasible(Pchain(visited,visited))
-    %                    line_error(mfilename,sprintf('The routing matrix in chain %d is not stochastic. Chain %d classes: %s',c, c, int2str(inchain)));
+    %                    line_error(mfilename,sprintf('The routing matrix in chain %d is not stochastic. Chain %d classes: %s',c, c, int2str(inchain{c})));
     %                end
     alpha_visited = dtmc_solve(Pchain(visited,visited));
     alpha = zeros(1,M*K); alpha(visited) = alpha_visited;
@@ -46,11 +47,11 @@ for c=1:size(chains,1)
     
     visits{c} = zeros(M,K);
     for i=1:M
-        for k=1:length(inchain)
-            visits{c}(i,inchain(k)) = alpha((i-1)*length(inchain)+k);
+        for k=1:length(inchain{c})
+            visits{c}(i,inchain{c}(k)) = alpha((i-1)*length(inchain{c})+k);
         end
     end
-    visits{c} = visits{c} / sum(visits{c}(refstat(inchain(1)),inchain));
+    visits{c} = visits{c} / sum(visits{c}(refstat(inchain{c}(1)),inchain{c}));
 end
 qnchains = cell(1, size(chains,1));
 for c=1:size(chains,1)

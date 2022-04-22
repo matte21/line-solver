@@ -1,6 +1,7 @@
 function [estVal,fObjFun] = estimatorUBO(self, node)
 % UBO Utilization-based optimization
 % This demand estimator is based on the method proposed in:
+%
 % Liu, Z., Wynter, L., Xia, C. H. and Zhang, F.
 % Parameter inference of queueing models for IT systems using end-to-end measurements
 % Performance Evaluation, Elsevier, 2006.
@@ -31,7 +32,7 @@ function [estVal,fObjFun] = estimatorUBO(self, node)
 % end
 
 %%
-% rescale utilization to be mean number of busy serveers
+% rescale utilization to be mean number of busy servers
 sn = self.model.getStruct;
 
 if isfinite(node.getNumberOfServers())

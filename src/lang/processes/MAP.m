@@ -15,8 +15,8 @@ classdef MAP < MarkovModulated
                 D0 = M{1};
                 D1 = M{2};
             end
-            setParam(self, 1, 'D0', D0, 'java.lang.Double');
-            setParam(self, 2, 'D1', D1, 'java.lang.Double');
+            setParam(self, 1, 'D0', D0);
+            setParam(self, 2, 'D1', D1);
 
             if ~map_isfeasible(self.D)
                 line_warning(mfilename,'MAP is infeasible.');

@@ -172,7 +172,7 @@ end
 
 refstatchain = zeros(C,1);
 for c=1:sn.nchains
-    inchain = find(sn.chains(c,:));
+    inchain = sn.inchain{c};
     refstatchain(c) = sn.refstat(inchain(1));
 end
 

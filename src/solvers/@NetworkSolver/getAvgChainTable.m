@@ -8,7 +8,19 @@ sn = self.model.getStruct;
 M = sn.nstations;
 K = sn.nchains;
 if nargin == 1
-    [Q,U,R,T] = getAvgHandles(self);
+   [Q,U,R,T] = getAvgHandles(self);
+end
+if nargin == 2
+    if iscell(Q) && ~isempty(Q)
+        param = Q;
+        Q = param{1};
+        U = param{2};
+        R = param{3};
+        T = param{4};    
+        % case where varargin is passed as input
+    elseif iscell(Q) && isempty(Q)
+        [Q,U,R,T] = getAvgHandles(self);
+    end
 end
 [QNc,UNc,RNc,TNc] = self.getAvgChain(Q,U,R,T);
 

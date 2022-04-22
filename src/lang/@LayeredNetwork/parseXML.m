@@ -16,7 +16,7 @@ import java.io.File;
 import LayeredNetwork.*;
 
 % LQN
-myLN = LayeredNetwork(filename);
+myLN = LayeredNetwork(strrep(filename,'_','\_'));
 
 if nargin<2%~exist('verbose','var')
     verbose = 0;

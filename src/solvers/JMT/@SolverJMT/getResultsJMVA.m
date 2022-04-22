@@ -125,7 +125,7 @@ end
 %Xchain
 %Tchain
 % for c=1:sn.nchains
-%     inchain = find(sn.chains(c,:));
+%     inchain = sn.inchain{c};
 %     for k=inchain(:)'
 %         X(k) = Xchain(c) * alpha(sn.refstat(k),k);
 %         for i=1:sn.nstations
@@ -154,7 +154,7 @@ end
 for i=1:length(statres)
     classres = statres(i).classresults;
     for c=1:length(classres)
-        inchain = find(sn.chains(c,:));
+        inchain = sn.inchain{c};
         for m=1:length(classres(c).measure)
             for k=inchain(:)'
                 s = struct();

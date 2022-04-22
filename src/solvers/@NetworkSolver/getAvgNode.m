@@ -53,7 +53,7 @@ end
 % update tputs for all nodes but the sink and the joins
 for ind=1:I
     for c = 1:C
-        inchain = find(sn.chains(c,:));
+        inchain = sn.inchain{c};
         for r = inchain
             %anystat = find(sn.visits{c}(:,r));
             refstat = sn.refstat(c);
@@ -84,7 +84,7 @@ end
 
 for ind=1:I
     for c = 1:C
-        inchain = find(sn.chains(c,:));
+        inchain = sn.inchain{c};
         for r = inchain
             anystat = find(sn.visits{c}(:,r));
             if ~isempty(anystat)

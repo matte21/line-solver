@@ -14,7 +14,8 @@ map21 = APH([1,0],[-2,2; 0,-0.5]);
 map22 = MAP([-1],[1]).toPH(); 
 % non-renewal
 map31 = MAP([-20,0; 0,-1],[0,20;0.8,0.2]);
-map32 = MMPP2(1,2,3,4).toMAP();
+map32 = MAP([-20,0; 0,-1],[0,20;0.8,0.2]);
+%map32 = MMPP2(1,2,3,4).toMAP();
 
 node{1}.setService(jobclass{1}, HyperExp.fitMeanAndSCV(1,25));
 node{2}.setService(jobclass{1}, map21);

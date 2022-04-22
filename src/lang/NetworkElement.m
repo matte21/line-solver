@@ -5,7 +5,7 @@ classdef NetworkElement < Element
     % All rights reserved.
     
      properties (Hidden)
-         attribute; % arbitrary attribute
+         attribute; % custom attribute
      end
     
     methods
@@ -13,8 +13,7 @@ classdef NetworkElement < Element
         function self = NetworkElement(name)
             % SELF = NETWORKELEMENT(NAME)            
             self@Element(name);
-        end
-        
+        end        
     end
     
 end

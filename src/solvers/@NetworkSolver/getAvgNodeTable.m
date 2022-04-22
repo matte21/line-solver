@@ -40,7 +40,7 @@ elseif ~keepDisabled
             end
         end
     end
-    
+
     Qval = []; Uval = [];
     Rval = []; Tval = []; Aval=[];
     Residval = [];
@@ -50,7 +50,7 @@ elseif ~keepDisabled
         for k=1:K
             if any(sum([QN(i,k),UN(i,k),RN(i,k),TN(i,k),AN(i,k)])>0)
                 c = find(sn.chains(:,k));
-                inchain = find(sn.chains(c,:));                
+                inchain = sn.inchain{c};
                 JobClass{end+1,1} = sn.classnames{k};
                 Node{end+1,1} = sn.nodenames{i};
                 Qval(end+1) = QN(i,k);
@@ -59,8 +59,8 @@ elseif ~keepDisabled
                 if RN(i,k)<Distrib.Zero
                     Residval(end+1) = RN(i,k);
                 else
-                    if any(intersect(inchain,find(sn.refclass)))
-                        Residval(end+1) = RN(i,k)*V(i,k)/sum(V(sn.refstat(k),sn.refclass(intersect(inchain,find(sn.refclass)))));
+                    if sn.refclass(c)>0
+                        Residval(end+1) = RN(i,k)*V(i,k)/sum(V(sn.refstat(k),sn.refclass(c)));
                     else
                         Residval(end+1) = RN(i,k)*V(i,k)/sum(V(sn.refstat(k),sn.chains(c,:)));
                     end
@@ -99,7 +99,7 @@ else
             end
         end
     end
-    
+
     Qval = zeros(I,K); Uval = zeros(I,K);
     Rval = zeros(I,K); Tval = zeros(I,K); Aval = zeros(I,K);
     Residval = zeros(I,K);
@@ -108,7 +108,7 @@ else
     for i=1:I
         for k=1:K
             c = find(sn.chains(:,k));
-            inchain = find(sn.chains(c,:));            
+            inchain = sn.inchain{c};
             JobClass{end+1,1} = sn.classnames{k};
             Node{end+1,1} = sn.nodenames{i};
             Qval((i-1)*K+k) = QN(i,k);
@@ -117,13 +117,13 @@ else
             if RN(i,k)<Distrib.Zero
                 Residval((i-1)*K+k) = RN(i,k);
             else
-                if any(intersect(inchain,find(sn.refclass)))                    
-                    Residval((i-1)*K+k) = RN(i,k)*V(i,k)/sum(V(sn.refstat(k),sn.refclass(intersect(inchain,find(sn.refclass)))));
+                if sn.refclass(c)>0
+                    Residval((i-1)*K+k)  = RN(i,k)*V(i,k)/sum(V(sn.refstat(k),sn.refclass(c)));
                 else
-                    Residval((i-1)*K+k) = RN(i,k)*V(i,k)/sum(V(sn.refstat(k),sn.chains(c,:)));
+                    Residval((i-1)*K+k)  = RN(i,k)*V(i,k)/sum(V(sn.refstat(k),sn.chains(c,:)));
                 end
             end
-            
+
             Tval((i-1)*K+k) = TN(i,k);
             Aval((i-1)*K+k) = AN(i,k);
         end

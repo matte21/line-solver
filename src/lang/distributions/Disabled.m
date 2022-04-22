@@ -11,7 +11,7 @@ classdef Disabled < ContinuousDistrib & DiscreteDistrib
             % Constructs a disabled distribution
             self@ContinuousDistrib('Disabled',1,[NaN,NaN]);
             self@DiscreteDistrib('Disabled',1,[NaN,NaN]);
-            setParam(self, 1, 'value', NaN, 'java.lang.Double');
+            setParam(self, 1, 'value', NaN);
         end
     end
     

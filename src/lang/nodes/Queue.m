@@ -29,6 +29,7 @@ classdef Queue < Station
             self.schedStrategyPar = zeros(1,length(model.classes));
             self.setModel(model);
             self.model.addNode(self);
+            self.dropRule = [];
             
             if nargin>=3 %exist('schedStrategy','var')
                 self.schedStrategy = schedStrategy;
@@ -141,12 +142,13 @@ classdef Queue < Station
             end
             self.serviceProcess{class.index} = distribution;
             self.input.inputJobClasses{class.index} = {class, self.schedPolicy, DropStrategy.WaitingQueue};
-            self.server.serviceProcess{1, class.index}{2} = ServiceStrategy.LI;
+            server = self.server;
+            server.serviceProcess{1, class.index}{2} = ServiceStrategy.LI;
             
             if distribution.isImmediate()
-                self.server.serviceProcess{1, class.index}{3} = Immediate.getInstance();
+                server.serviceProcess{1, class.index}{3} = Immediate.getInstance();
             else
-                self.server.serviceProcess{1, class.index}{3} = distribution;
+                server.serviceProcess{1, class.index}{3} = distribution;
             end
             if length(self.classCap) < class.index
                 self.classCap((length(self.classCap)+1):class.index) = Inf;
@@ -159,6 +161,7 @@ classdef Queue < Station
             %if self.model.hasStruct
             %self.model.refreshService(self.stationIndex,class.index);
             %end
+            self.dropRule(class.index) = DropStrategy.ID_WAITQ;
         end
         
         function sections = getSections(self)

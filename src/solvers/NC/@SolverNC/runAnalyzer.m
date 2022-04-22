@@ -54,7 +54,6 @@ if sn.nclosedjobs == 0 && length(sn.nodetype)==3 && all(sort(sn.nodetype)' == so
     self.model.refreshChains;
 else % queueing network
     if any(sn.nodetype == NodeType.Cache)
-        options = Solver.defaultOptions;
         lambda = zeros(1,self.model.getNumberOfClasses);
         lambda_1 = zeros(1,self.model.getNumberOfClasses);
         for it=1:options.iter_max

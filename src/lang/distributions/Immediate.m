@@ -10,6 +10,7 @@ classdef Immediate < Distrib
             % SELF = IMMEDIATE()
             
             self@Distrib('Immediate', 0,[0,0]);
+            self.immediate = true;
         end
     end
     

@@ -1,19 +1,19 @@
-function c = getClassChain(self, className)
-% C = GETCLASSCHAIN(CLASSNAME)
+function chain = getClassChain(self, jobClass)
+% C = GETCLASSCHAININDEX(JOBCLASS)
+% C = GETCLASSCHAININDEX(CLASSNAME)
+
+if ischar(jobClass)
+    className = jobClass;
+else
+    className = jobClass.getName;
+end
 
 chains = self.getChains;
-if ischar(className)
-    for c = 1:length(chains)
-        if any(cell2mat(strfind(chains{c}.classnames,className)))
-            return
-        end
-    end
-else
-    for c = 1:length(chains)
-        if any(cell2mat(chains{c}.index==1))
-            return
-        end
+for c = 1:length(chains)
+    if any(cell2mat(strfind(chains{c}.classnames,className)))
+        chain = chains{c};
+        return
     end
 end
-c = -1;
+chain = [];
 end

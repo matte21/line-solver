@@ -5,10 +5,20 @@ options = Solver.parseOptions(varargin, SolverNC.defaultOptions);
 % backup initial parameters
 Rin = length(N);
 
+if sum(N)==0 || isempty(N)
+    lG = 0;
+    X = [];
+    Q = [];
+    return
+end
+
+if isempty(lambda)
+    lambda=0*N;
+end
+
 X=[]; Q=[];
 
 % compute open class contributions
-ocl = find(isinf(N));
 Qopen = [];
 lGopen = 0;
 for i=1:size(L,1)
@@ -30,6 +40,7 @@ lambda = lambda(:,nnzClasses);
 L = L(:,nnzClasses);
 N = N(:,nnzClasses);
 Z = Z(:,nnzClasses);
+ocl = find(isinf(N));
 
 % then scale demands in [0,1], importat that stays before the other
 % simplications in case both D and Z are all very small or very large in a
@@ -37,9 +48,15 @@ Z = Z(:,nnzClasses);
 % are at the same scale
 R = length(N);
 scalevec = ones(1,R);
+%switch options.method
+%    case {'adaptive','comom','default'}
+%        % no-op
+%    otherwise
+%end
 for r=1:R
     scalevec(r) = max([L(:,r);Z(:,r)]);
 end
+%end
 L = L ./ repmat(scalevec,size(L,1),1);
 Z = Z ./ scalevec;
 
@@ -151,15 +168,24 @@ switch options.method
         elseif sum(Z,1)==0 % single queue, no delay
             lG = -N*log(L)';
         else % repairman model
-            if sum(N) < 10
-                [~,~,~,~,lG] = pfqn_mva(L,N,sum(Z,1));
-            elseif sum(N) < 50 % otherwise numerical issues
-                [~,lG] = pfqn_mmint2(L,N,sum(Z,1));
-                if isnan(lG)
+            if R>1
+                if N<200
+                    try
+                        [lG] = pfqn_comomrm(L,N,Z);
+                    catch
+                        % java exception, probably singular linear system
+                        line_warning(mfilename,'Normalizing constant computations produced an exception upon running comom. Switching to logistic expansion.');
+                        [~,lG] = pfqn_le(L,N,sum(Z,1));
+                    end
+                else
                     [~,lG] = pfqn_le(L,N,sum(Z,1));
                 end
-            else
-                [~,lG] = pfqn_le(L,N,sum(Z,1));
+            else % R=1
+                if N<200
+                    [X,Q,~,~,lG] = pfqn_mva(L,N,Z);
+                else
+                    [~,lG] = pfqn_le(L,N,sum(Z,1));
+                end
             end
         end
     case {'sampling'}
@@ -209,10 +235,18 @@ switch options.method
         else
             [X,Q,~,~,lG] = pfqn_mva(L,N,Z);
         end
+    case {'comombtf'}
+        [~,lG,X,Q] = pfqn_comombtf_java(L,N,Z);
     case {'comom'}
         if R>1
             try
-                [~,lG,X,Q] = pfqn_comombtf(L,N,Z);
+                % comom has a bug in computing X, sometimes the
+                % order is switched
+                if M>1
+                    [~,lG,X,Q] = pfqn_comombtf_java(L,N,Z);
+                else % use double precision script for M=1
+                    [lG] = pfqn_comomrm(L,N,Z);
+                end
             catch
                 % java exception, probably singular linear system
                 line_warning(mfilename,'Numerical problems.');

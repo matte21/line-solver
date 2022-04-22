@@ -18,7 +18,7 @@ S = sn.nservers;
 %gamma = sn.cdscaling;
 
 for c=1:sn.nchains
-    inchain = find(sn.chains(c,:));
+    inchain = sn.inchain{c};
     for k=inchain(:)'
         X(k) = Xchain(c) * alpha(sn.refstat(k),k);
         for i=1:sn.nstations

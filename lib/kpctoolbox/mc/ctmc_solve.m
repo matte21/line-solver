@@ -13,7 +13,7 @@ function [p, Q, nConnComp, connComp]=ctmc_solve(Q,options)
 
 
 if length(Q) > 6000 && (nargin==1 || ~options.force)
-    fprintf(1,'ctmc_solve: the order of Q is greater than 6000, i.e., %d elements. Press key to continue.',length(Q));
+    fprintf(1,'ctmc_solve: the order of Q is greater than 6000, i.e., %d elements. Press key to continue.\n',length(Q));
     pause;
 end
 

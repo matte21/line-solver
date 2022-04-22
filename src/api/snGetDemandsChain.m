@@ -15,10 +15,10 @@ ST(isnan(ST))=0;
 alpha = zeros(sn.nstations,sn.nclasses);
 Vchain = zeros(sn.nstations,sn.nchains);
 for c=1:sn.nchains
-    inchain = find(sn.chains(c,:));
-    if any(intersect(inchain,find(sn.refclass))) % if the model has a ref class
+    inchain = sn.inchain{c};    
+    if sn.refclass(c)>0 % if the model has a ref class
         for i=1:sn.nstations
-            Vchain(i,c) = sum(sn.visits{c}(i,inchain)) / sum(sn.visits{c}(sn.refstat(inchain(1)),intersect(inchain,find(sn.refclass))));
+            Vchain(i,c) = sum(sn.visits{c}(i,inchain)) / sum(sn.visits{c}(sn.refstat(inchain(1)),sn.refclass(c)));
             for k=inchain
                 alpha(i,k) = alpha(i,k) + sn.visits{c}(i,k) / sum(sn.visits{c}(i,inchain));
             end
@@ -35,7 +35,7 @@ end
 
 Vchain(~isfinite(Vchain))=0;
 for c=1:sn.nchains
-    inchain = find(sn.chains(c,:));
+    inchain = sn.inchain{c};
     Vchain(:,c) = Vchain(:,c) / Vchain(sn.refstat(inchain(1)),c);
 end
 alpha(~isfinite(alpha))=0;
@@ -47,7 +47,7 @@ SCVchain = zeros(1,C);
 Nchain = zeros(1,C);
 refstatchain = zeros(C,1);
 for c=1:sn.nchains
-    inchain = find(sn.chains(c,:));
+    inchain = sn.inchain{c};
     Nchain(c) = sum(N(inchain));
     isOpenChain = any(isinf(N(inchain)));
     for i=1:sn.nstations

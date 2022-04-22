@@ -9,8 +9,9 @@ if nargin<3 %~exist('keepDisabled','var')
     keepDisabled = false;
 end
 
-M = sn.nstations();
-K = sn.nclasses();
+sn = self.getStruct;
+M = sn.nstations;
+K = sn.nclasses;
 if nargin == 1
     U = getAvgUtilHandles(self);
 end

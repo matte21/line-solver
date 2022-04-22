@@ -19,23 +19,39 @@ P{1,1} = circul(2);
 
 model.link(P);
 %%
+solver = SolverJMT(model,'seed',23000);
+FC = solver.getCdfRespT();
+fprintf(1,'\n')
+for i=1:model.getNumberOfStations
+    for c=1:model.getNumberOfClasses
+%        plot(FC{i,c}(:,2),FC{i,c}(:,1)); hold all;
+        AvgRespTfromCDFSim(i,c) = diff(FC{i,c}(:,1))'*FC{i,c}(2:end,2); %mean
+        PowerMoment2_R(i,c) = diff(FC{i,c}(:,1))'*(FC{i,c}(2:end,2).^2);
+        Variance_R(i,c) = PowerMoment2_R(i,c)-AvgRespTfromCDFSim(i,c)^2; %variance
+        SqCoeffOfVariationRespTfromCDFSim(i,c) = (Variance_R(i,c))/AvgRespTfromCDFSim(i,c)^2; %scv
+    end
+end
+%%
 solver = SolverFluid(model);
 FC = solver.getCdfRespT();
 %%
 for i=1:model.getNumberOfStations
     for c=1:model.getNumberOfClasses
 %        plot(FC{i,c}(:,2),FC{i,c}(:,1)); hold all;
-        AvgRespTfromCDF(i,c) = diff(FC{i,c}(:,1))'*FC{i,c}(2:end,2); %mean
+        AvgRespTfromCDFFluid(i,c) = diff(FC{i,c}(:,1))'*FC{i,c}(2:end,2); %mean
         PowerMoment2_R(i,c) = diff(FC{i,c}(:,1))'*(FC{i,c}(2:end,2).^2);
-        Variance_R(i,c) = PowerMoment2_R(i,c)-AvgRespTfromCDF(i,c)^2; %variance
-        SqCoeffOfVariationRespTfromCDF(i,c) = (Variance_R(i,c))/AvgRespTfromCDF(i,c)^2; %scv
+        Variance_R(i,c) = PowerMoment2_R(i,c)-AvgRespTfromCDFFluid(i,c)^2; %variance
+        SqCoeffOfVariationRespTfromCDFFluid(i,c) = (Variance_R(i,c))/AvgRespTfromCDFFluid(i,c)^2; %scv
     end
 end
 fprintf(1,'\n')
 disp('Since there is a single job, mean and squared coefficient of variation');
-disp('of response times match, up to fluid approximation precision, those');
+disp('of response times are close, up to fluid approximation precision, those');
 fprintf(1,'of the service time distribution.\n\n');
 AvgRespTfromTheory = [servProc1.getMean; servProc2.getMean]
-AvgRespTfromCDF
+AvgRespTfromCDFSim
+AvgRespTfromCDFFluid
 SqCoeffOfVariationRespTfromTheory = [servProc1.getSCV; servProc2.getSCV]
-SqCoeffOfVariationRespTfromCDF
+SqCoeffOfVariationRespTfromCDFSim
+SqCoeffOfVariationRespTfromCDFFluid
+

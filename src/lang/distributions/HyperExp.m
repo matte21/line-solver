@@ -13,19 +13,15 @@ classdef HyperExp < MarkovianDistribution
             if length(varargin)==2
                 p = varargin{1};
                 lambda = varargin{2};
-                setParam(self, 1, 'p', p, 'java.lang.Double');
-                setParam(self, 2, 'lambda', lambda, 'java.lang.Double');
-                %                self.javaClass = ''; % no corresponding class in JMT
-                %                self.javaParClass = ''; % no corresponding class in JMT
+                setParam(self, 1, 'p', p);
+                setParam(self, 2, 'lambda', lambda);
             elseif length(varargin)==3
                 p1 = varargin{1};
                 lambda1 = varargin{2};
                 lambda2 = varargin{3};
-                setParam(self, 1, 'p', p1, 'java.lang.Double');
-                setParam(self, 2, 'lambda1', lambda1, 'java.lang.Double');
-                setParam(self, 3, 'lambda2', lambda2, 'java.lang.Double');
-                self.javaClass = 'jmt.engine.random.HyperExp';
-                self.javaParClass = 'jmt.engine.random.HyperExpPar';
+                setParam(self, 1, 'p', p1);
+                setParam(self, 2, 'lambda1', lambda1);
+                setParam(self, 3, 'lambda2', lambda2);
             end
         end
         
@@ -105,18 +101,21 @@ classdef HyperExp < MarkovianDistribution
                 end
             end
             he = HyperExp.fitMeanAndSCV(MEAN,SCV);
+            he.immediate = MEAN < Distrib.Tol;
         end
         
         function he = fitRate(RATE)
             % HE = FITRATE(RATE)
             % Fit distribution with given rate
             he = HyperExp(p, RATE, RATE);
+            he.immediate = 1/RATE < Distrib.Tol;
         end
         
         function he = fitMean(MEAN)
             % HE = FITMEAN(MEAN)
             % Fit distribution with given mean
             he = HyperExp(p, 1/MEAN, 1/MEAN);
+            he.immediate = MEAN < Distrib.Tol;
         end
         
         function he = fitMeanAndSCV(MEAN, SCV)
@@ -124,6 +123,7 @@ classdef HyperExp < MarkovianDistribution
             % Fit distribution with given mean and squared coefficient of variation (SCV=variance/mean^2)
             [~,mu1,mu2,p] = map_hyperexp(MEAN,SCV);
             he = HyperExp(p, mu1, mu2);
+            he.immediate = MEAN < Distrib.Tol;
         end
         
         function he = fitMeanAndSCVBalanced(MEAN, SCV)
@@ -142,6 +142,7 @@ classdef HyperExp < MarkovianDistribution
             mu1 = real(mu1);
             mu2 = real(mu2);
             he = HyperExp(p, mu1, mu2);           
+            he.immediate = MEAN < Distrib.Tol;
         end
     end
     

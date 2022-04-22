@@ -16,12 +16,10 @@ classdef Zipf < DiscreteDistrib
             self@DiscreteDistrib('Zipf',4,[1,n]);
             p = 1./((1:n).^s)/Zipf.genHarmonic(s,n);
             x = 1:n;
-            setParam(self, 1, 'p', p(:)', 'java.lang.Double');
-            setParam(self, 2, 'x', x(:)', 'java.lang.Double');
-            setParam(self, 3, 's', s, 'java.lang.Double');
-            setParam(self, 4, 'n', n, 'java.lang.Integer');
-            %            self.javaClass = '';
-            %            self.javaParClass = '';
+            setParam(self, 1, 'p', p(:)');
+            setParam(self, 2, 'x', x(:)');
+            setParam(self, 3, 's', s);
+            setParam(self, 4, 'n', n);
         end
         
         function ex = getMean(self)

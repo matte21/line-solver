@@ -1,5 +1,5 @@
-function [rt, rtfun, rtnodes] = refreshRoutingMatrix(self, rates)
-% [RT, RTFUN, CSMASK, RTNODES] = REFRESHROUTINGMATRIX(RATES)
+function [rt, rtfun, rtnodes, sn] = refreshRoutingMatrix(self, rates)
+% [RT, RTFUN, CSMASK, RTNODES, SN] = REFRESHROUTINGMATRIX(RATES)
 %
 % Copyright (c) 2012-2022, Imperial College London
 % All rights reserved.
@@ -22,11 +22,16 @@ for r = self.getIndexOpenClasses
     arvRates(r) = rates(self.getIndexSourceStation,r);
 end
 
-[rt, rtnodes, linksmat] = self.getRoutingMatrix(arvRates);
+self.sn = sn;
+[rt, rtnodes, linksmat, chains] = self.getRoutingMatrix(arvRates);
+sn = self.sn;
+sn.chains = chains;
 
-for r=1:self.sn.nclasses
-    if all(self.sn.routing(:,r) == -1)
-        line_error(mfilename,sprintf('Routing strategy in class %d is unspecified at all nodes.',r));
+if self.enableChecks
+    for r=1:self.sn.nclasses
+        if all(self.sn.routing(:,r) == -1)
+            line_error(mfilename,sprintf('Routing strategy in class %d is unspecified at all nodes.',r));
+        end
     end
 end
 
@@ -81,15 +86,28 @@ else
     rtfun = @(state_before, state_after) dtmc_stochcomp(rtnodes, statefulNodesClasses);
 end
 
-if ~isempty(self.sn)
-    self.sn.rt = rt;
-    self.sn.rtnodes = rtnodes;
-    self.sn.rtfun = rtfun;
+nchains = size(chains,1);
+inchain = cell(1,nchains);
+for c=1:nchains
+    inchain{c} = find(chains(c,:));
 end
+
+sn.rt = rt;
+sn.rtnodes = rtnodes;
+sn.rtfun = rtfun;
+sn.chains = chains;
+sn.nchains = nchains;
+sn.inchain = inchain;
+for c=1:sn.nchains
+    if range(sn.refstat(inchain{c}))>0
+        line_error(mfilename,sprintf('Classes within chain %d (classes: %s) have different reference stations.',c,mat2str(find(sn.chains(c,:)))));
+    end
+end
+self.sn = sn;
 
     function p = sub_rr(ind, jnd, r, s, linksmat, state_before, state_after)
         % P = SUB_RR(IND, JND, R, S, LINKSMAT, STATE_BEFORE, STATE_AFTER)
-        
+
         R = sn.nclasses;
         isf = sn.nodeToStateful(ind);
         if isempty(state_before{isf})
@@ -121,7 +139,7 @@ end
 
     function p = sub_jsq(ind, jnd, r, s, linksmat, state_before, state_after) %#ok<INUSD>
         % P = SUB_JSQ(IND, JND, R, S, LINKSMAT, STATE_BEFORE, STATE_AFTER) %#OK<INUSD>
-        
+
         isf = sn.nodeToStateful(ind);
         if isempty(state_before{isf})
             p = min(linksmat(ind,jnd),1);

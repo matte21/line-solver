@@ -10,11 +10,10 @@ classdef Exp < MarkovianDistribution
             % Constructs an exponential distribution from the rate
             % parameter
             self@MarkovianDistribution('Exponential', 1);
-            setParam(self, 1, 'lambda', lambda, 'java.lang.Double');
-            %            self.javaClass = 'jmt.engine.random.Exponential';
-            %            self.javaParClass = 'jmt.engine.random.ExponentialPar';
+            setParam(self, 1, 'lambda', lambda);
+            self.immediate = (1/lambda) < Distrib.Zero;
         end
-        
+            
         function X = sample(self, n)
             % X = SAMPLE(N)            
             % Get n samples from the distribution

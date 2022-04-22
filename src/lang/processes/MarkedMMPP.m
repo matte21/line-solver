@@ -17,24 +17,24 @@ classdef MarkedMMPP < MarkovModulated
             self@MarkovModulated('MarkedMMPP',K+2);
 
             if K == length(D)-1
-                setParam(self, 1, 'D0', D{1}, 'java.lang.Double');
+                setParam(self, 1, 'D0', D{1});
                 D1 = cellsum({D{2:end}});
                 if any(D1-diag(diag(D1)))
                     line_error(mfilename,'Non-diagonal elements in the D1k matrices, not a Marked MMPP.');
                 end
-                setParam(self, 2, 'D1', D1, 'java.lang.Double');
+                setParam(self, 2, 'D1', D1);
                 for k=1:K
-                    setParam(self, 2+k, sprintf('D1%d',k), D{1+k}, 'java.lang.Double');
+                    setParam(self, 2+k, sprintf('D1%d',k), D{1+k});
                 end
             elseif K == length(D)-2
-                setParam(self, 1, 'D0', D{1}, 'java.lang.Double');
+                setParam(self, 1, 'D0', D{1});
                 D1 = D{2};
                 if any(D1-diag(diag(D1)))
                     line_error(mfilename,'Non-diagonal  elements in the D1k matrices, not a Marked MMPP.');
                 end
-                setParam(self, 2, 'D1', D1, 'java.lang.Double');
+                setParam(self, 2, 'D1', D1);
                 for k=1:K
-                    setParam(self, 2+k, sprintf('D1%d',k), D{2+k}, 'java.lang.Double');
+                    setParam(self, 2+k, sprintf('D1%d',k), D{2+k});
                 end
             else
                 line_error(mfilename,'Inconsistency between the number of classes and the number of supplied D matrices.')

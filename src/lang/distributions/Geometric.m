@@ -13,9 +13,7 @@ classdef Geometric < DiscreteDistrib
             self@DiscreteDistrib('Geometric',1,[1,Inf]);
             % Construct a geometric distribution with probability p
             
-            setParam(self, 1, 'p', p, 'java.lang.Double');
-            %            self.javaClass = '';
-            %            self.javaParClass = '';
+            setParam(self, 1, 'p', p);
         end
         
         function ex = getMean(self)

@@ -15,7 +15,7 @@ sn = self.model.getStruct();
 % compute average chain metrics
 TN = zeros(sn.nstations, sn.nchains);
 for c=1:sn.nchains
-    inchain = find(sn.chains(c,:));
+    inchain = sn.inchain{c};
     for i=1:sn.nstations
         if ~isempty(TNclass)
             TN(i,c) = sum(TNclass(i,inchain)); %#ok<FNDSB>

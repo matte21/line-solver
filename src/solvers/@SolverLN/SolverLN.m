@@ -67,13 +67,13 @@ classdef SolverLN < LayeredNetworkSolver & EnsembleSolver
             if nargin>1 && isstruct(solverFactory)
                 options = solverFactory;
                 self.setOptions(options);
-                solverFactory = @(m) SolverNC(m,'method','adaptive','verbose',false);
+                solverFactory = @(m) SolverNC(m,'method','le','verbose',false);
             else
                 self.setOptions(SolverLN.defaultOptions);
                 if nargin>2
                     if ischar(solverFactory)
                         inputvar = {solverFactory,varargin{:}};
-                        solverFactory = @(m) SolverNC(m,'method','adaptive','verbose',false);
+                        solverFactory = @(m) SolverNC(m,'method','le','verbose',false);
                     else
                         inputvar = varargin;
                     end
@@ -247,8 +247,8 @@ classdef SolverLN < LayeredNetworkSolver & EnsembleSolver
                         refreshRates(self.ensemble{e}); % note: this does not refresh the sn.proc field, only sn.rates and sn.scv
                     otherwise
                         refreshService(self.ensemble{e});
-                end
-                self.solvers{e}.reset();
+                end                
+                %self.solvers{e}.reset(); %% commenting this out des not seem to produce a problem
             end
             
             if it==1
@@ -268,12 +268,24 @@ classdef SolverLN < LayeredNetworkSolver & EnsembleSolver
             if self.options.verbose
                 line_printf('\n');
             end
+            E = size(self.results,2);
+            for e=1:E
+                s = self.solvers{e};
+                s.getAvgTable();
+                self.solvers{e} = s;
+            end
             self.model.ensemble = self.ensemble;
         end
         
         
-        function [QN,UN,RN,TN,AN,WN] = getAvg(self,~,~,~,~, useLQNSnaming)
+        function varargout = getAvg(varargin)
             % [QN,UN,RN,TN,AN,WN] = GETAVG(SELF,~,~,~,~,USELQNSNAMING)
+            [varargout{1:nargout}] = getEnsembleAvg( varargin{:} );
+        end
+
+        
+        function [QN,UN,RN,TN,AN,WN] = getEnsembleAvg(self,~,~,~,~, useLQNSnaming)
+            % [QN,UN,RN,TN,AN,WN] = GETENSEMBLEAVG(SELF,~,~,~,~,USELQNSNAMING)
             
             if nargin < 5
                 useLQNSnaming = false;

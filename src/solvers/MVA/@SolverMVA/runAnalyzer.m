@@ -70,7 +70,7 @@ elseif sn.nclosedjobs == 0 && length(sn.nodetype)==3 && all(sort(sn.nodetype)' =
             self.model.nodes{ind}.setResultMissProb(1-hitprob);
         end
     end
-    self.model.refreshChains;
+    self.model.refreshChains();
 else % queueing network
     if any(sn.nodetype == NodeType.Cache)
         options = Solver.defaultOptions;
@@ -157,8 +157,8 @@ else % queueing network
                 break
             end
         end
+        self.model.refreshChains();
     end
-    self.model.refreshChains();
     switch method
         case {'aba.upper', 'aba.lower', 'bjb.upper', 'bjb.lower', 'pb.upper', 'pb.lower', 'gb.upper', 'gb.lower', 'sb.upper', 'sb.lower'}
             [QN,UN,RN,TN,CN,XN,lG,runtime] = solver_mva_bound_analyzer(sn, options);

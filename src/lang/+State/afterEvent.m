@@ -386,7 +386,7 @@ if sn.isstation(ind)
                                                 pentry_svc_class = pie{ist}{start_svc_class};
                                                 if ismkvmodclass(start_svc_class)
                                                     pentry_svc_class = zeros(size(pentry_svc_class));
-                                                    pentry_svc_class(space_var_kd(sn.varsparam{ind}.mapshift(start_svc_class)+1)) = 1.0;
+                                                    pentry_svc_class(space_var_kd(sum(sn.nvars(ind,1:(start_svc_class-1)))+1)) = 1.0;
                                                 end
                                                 for kentry = 1:K(start_svc_class)
                                                     space_srv(en_wbuf,Ks(start_svc_class)+kentry) = space_srv(en_wbuf,Ks(start_svc_class)+kentry) + 1;
@@ -617,7 +617,7 @@ if sn.isstation(ind)
                             space_buf_k = space_buf(en,:);
                             space_var_k = space_var(en,:);
                             if ismkvmodclass(class)
-                                space_var_k(sn.varsparam{ind}.mapshift(class)+1) = kdest;
+                                space_var_k(sum(sn.nvars(ind,1:class))) = kdest;
                             end
                             space_srv_k(:,Ks(class)+k) = space_srv_k(:,Ks(class)+k) - 1;
                             space_srv_k(:,Ks(class)+kdest) = space_srv_k(:,Ks(class)+kdest) + 1;

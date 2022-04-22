@@ -14,7 +14,7 @@ classdef RenewalProcess < SinkProcess
             % SELF = RENEWALPROCESS(DISTRIB)
             
             self@SinkProcess('RenewalProcess',1);
-            setParam(self, 1, 'distrib', distrib, 'java.lang.Double');
+            setParam(self, 1, 'distrib', distrib);
         end
     end
     

@@ -1,81 +1,139 @@
-function [G,lG,XN,QN]=pfqn_comom(Din,Nin,Zin)
-try
-    import DataStructures.*; %#ok<SIMPT>
-    import QueueingNet.*; %#ok<SIMPT>
-    import DataStructures.*; %#ok<SIMPT>
-    import Utilities.*; %#ok<SIMPT>
-catch
-    javaaddpath(which('pfqn_nclib.jar'));
-    import DataStructures.*; %#ok<SIMPT>
-    import QueueingNet.*; %#ok<SIMPT>
-    import DataStructures.*; %#ok<SIMPT>
-    import Utilities.*; %#ok<SIMPT>
-end
-
-Din=Din(sum(Din,2)>Distrib.Zero,:);
-% rescale
-numdigits = max(arrayfun(@(e) numel(num2str(e)), [Din(:);Zin(:)]));
-scaleexp = min(numdigits,8);  % java.lang.Integer takes max 10 digits
-scale = 10^(scaleexp);
-Din = round(Din*scale);
-Zin = round(sum(Zin*scale,1));
-
-[M,R]=size(Din);
-[~,I]=sort(sum(Din,1),'descend');
-Din = Din(:,I);
-Nin = Nin(1,I);
-Zin = Zin(:,I);
-
-N = javaArray('java.lang.Integer',R);
+function lG=pfqn_comom_doubleprec(L,N,Z)
+[M,R]=size(L);
+% rescale demands
+Lmax = L; % use L
+Lmax(Lmax<Distrib.Tol)=Z(Lmax<Distrib.Tol); % unless zero
+L = L./repmat(Lmax,M,1);
+Z = Z./repmat(Lmax,M,1);
+% sort from smallest to largest
+%[~,rsort] = sort(Z,'ascend');
+%L=L(:,rsort);
+%Z=Z(:,rsort);
+% prepare comom data structures
+Dn=multichoose(R,M);
+Dn(:,R)=0;
+Dn=sortbynnzpos(Dn);
+% initialize
+nvec=zeros(1,R);
+h=ginit(L);
+lh=log(h) + factln(sum(nvec)+M-1) - sum(factln(nvec));
+h=exp(lh);
+scale=zeros(1,sum(N));
+% iterate
 for r=1:R
-    N(r) = java.lang.Integer(Nin(r));
-end
-
-mult = javaArray('java.lang.Integer',M);
-for i=1:M
-    mult(i) = java.lang.Integer(1);
-end
-
-Z= javaArray('java.lang.Integer',R);
-for r=1:R
-    Z(r) = java.lang.Integer(Zin(r));
-end
-
-D = javaArray('java.lang.Integer',M,R);
-for i=1:M
-    for r=1:R
-        D(i,r) = java.lang.Integer(Din(i,r));
+    for Nr=1:N(r)
+        nvec(r)=nvec(r)+1;
+        if Nr==1
+            [A,B,DA]=genmatrix(L,nvec,Z,r);
+        else
+            A=A+DA;   
+        end
+        b = B*h*nvec(r)/(sum(nvec)+M-1);
+        h = A\b;
+        nt=sum(nvec);
+        scale(nt)=abs(sum(sort(h)));
+        h = abs(h)/scale(nt); % rescale so that |h|=1
     end
 end
+% unscale and return the log of the normalizing constant
+lG=log(h(end-(R-1))) + factln(sum(N)+M-1) - sum(factln(N)) + N*log(Lmax)' + sum(log(scale));
 
-tic
-qnm = QNModel(M,R);
-qnm.N = PopulationVector(N);
-qnm.Z = EnhancedVector(Z);
-qnm.multiplicities = MultiplicitiesVector(mult);
-qnm.D = D;
-comom = CoMoMSimpleSolver(qnm,1);
-comom.computeNormalisingConstant();
-G = qnm.getNormalisingConstant();
-lG = G.log();
-lG = lG - sum(Nin)*log(scale);
-G = exp(lG);
-
-if nargout > 2
-    comom.computePerformanceMeasures();
-    XNbig = qnm.getMeanThroughputs();
-    XN = zeros(1,R);
-    for r=1:length(XNbig)
-        XN(r) = XNbig(r).approximateAsDouble;
+    function [A,B,DA,rr]=genmatrix(L,N,Z,r)
+        [M,R]=size(L);
+        A=zeros(nchoosek(M+R-1,M)*(M+1));
+        DA=zeros(nchoosek(M+R-1,M)*(M+1));
+        B=zeros(nchoosek(M+R-1,M)*(M+1));
+        row=0;
+        rr=[]; % artificial rows
+        lastnnz=0;
+        for d=1:length(Dn)
+            hnnz=hashnnz(Dn(d,:),R);
+            if hnnz~=lastnnz
+                lastnnz=hnnz;
+            end
+        end
+        for d=1:length(Dn)
+            if sum(Dn(d,(r):R-1))>0
+                % dummy rows for unused norm consts
+                for k=0:M
+                    row=row+1;
+                    col = hash(N,N-Dn(d,:),k+1);
+                    A(row,col)=1;                    
+                    if sum(Dn(d,(r+1):R-1))>0
+                        col = hash(N,N-Dn(d,:),k+1);
+                        B(row,col)=1;
+                    else
+                        er=zeros(1,R); er(r)=1;
+                        col = hash(N,N-Dn(d,:)+er,k+1);
+                        B(row,col)=1;
+                    end
+                end
+            else
+                if sum(Dn(d,1:r))<M
+                    for k=1:M
+                        % add CE
+                        row=row+1;
+                        A(row,hash(N,N-Dn(d,:),k+1))=1;
+                        A(row,hash(N,N-Dn(d,:),0+1))=-1;
+                        for s=1:r-1
+                            A(row,hash(N,oner(N-Dn(d,:),s),k+1))=-L(k,s);
+                        end
+                        B(row,hash(N,N-Dn(d,:),k+1))=L(k,r);
+                    end
+                    for s=1:(r-1)
+                        % add PC to A
+                        row=row+1;
+                        n=N-Dn(d,:);
+                        A(row,hash(N,n,0+1))=n(s);
+                        A(row,hash(N,oner(n,s),0+1))=-Z(s);
+                        for k=1:M
+                            A(row,hash(N,oner(n,s),k+1))=-L(k,s);
+                        end
+                        B(row,:)=0;
+                    end
+                end
+            end
+        end
+        %add PC of class R
+        for d=1:length(Dn)
+            if sum(Dn(d,(r):R-1))<=0
+                row=row+1;
+                n=N-Dn(d,:);
+                A(row,hash(N,n,0+1))=n(r);
+                DA(row,hash(N,n,0+1))=1;
+                B(row,hash(N,n,0+1))=Z(r);
+                for k=1:M
+                    B(row,hash(N,n,k+1))=L(k,r);
+                end
+            end
+        end
+        rr=unique(rr);
     end
-    XN = XN * scale;
-    QNbig = qnm.getMeanQueueLengths();
-    QN = zeros(M,R);
-    for i=1:M
-        for r=1:R
-            QN(i,r) = QNbig(i,r).approximateAsDouble;
+
+    function val=hashnnz(dn,R)
+        val=0;
+        for t=1:R
+            if dn(t)==0
+                val=val+2^(t-1);
+            end
         end
     end
-    QN(I,:)=QN;
-end
+
+    function col=hash(N,n,i)
+        if i==1
+            col=size(Dn,1)*M+matchrow(Dn,N-n);
+        else
+            col=(matchrow(Dn,N-n)-1)*M+i-1;
+        end
+    end
+
+    function g=ginit(L)
+        e1=zeros(1,R);
+        g=zeros(size(Dn,1)*(M+1),1);
+        for i=0:M
+            g(hash(N,N,i+1))=1;
+        end
+        g=g(:);
+    end
+
 end

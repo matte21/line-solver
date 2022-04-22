@@ -5,6 +5,7 @@ R = self.getNumberOfClasses;
 nvars = zeros(self.getNumberOfNodes, 2*R+1);
 varsparam = cell(self.getNumberOfNodes, 1);
 rtnodes = self.sn.rtnodes;
+sn = self.sn;
 
 for ind=1:self.getNumberOfNodes
     node = self.getNodeByIndex(ind);
@@ -49,27 +50,23 @@ for ind=1:self.getNumberOfNodes
             varsparam{ind}.jobClass = node.getJobClass;
             varsparam{ind}.timeSameClass = node.getTimeSameClass;
             varsparam{ind}.timeAnyClass = node.getTimeAnyClass;
+        case {'Queue','QueueingStation','Delay','DelayStation','Transition'}
+            for r=1:self.getNumberOfClasses
+                switch class(node.server.serviceProcess{r}{3})
+                    case 'MAP'
+                        nvars(ind,r) = nvars(ind,r) + 1;
+                    case 'Replayer'
+                        if isempty(varsparam{ind})
+                            varsparam{ind} = cell(1,self.getNumberOfClasses);
+                        end
+                        varsparam{ind}{r} = struct();
+                        varsparam{ind}{r}.(node.server.serviceProcess{r}{3}.params{1}.paramName) = node.server.serviceProcess{r}{3}.params{1}.paramValue;
+                end
+            end
     end
 
-    for r=1:self.getNumberOfClasses
-        if isprop(node,'serviceProcess')
-            switch class(node.server.serviceProcess{r}{3})
-                case 'MAP'
-                    nvars(ind,r) = nvars(ind,r) + 1;
-                    if isempty(varsparam{ind})
-                        varsparam{ind} = struct();
-                    end
-                    varsparam{ind}.mapshift = [0,cumsum(self.sn.procid(self.sn.nodeToStation(ind),:) == ProcessType.ID_MAP)];
-                    varsparam{ind}.mapshift(end) = [];
-                case 'Replayer'
-                    if isempty(varsparam{ind})
-                        varsparam{ind} = cell(1,self.getNumberOfClasses);
-                    end
-                    varsparam{ind}{r} = struct();
-                    varsparam{ind}{r}.(node.server.serviceProcess{r}{3}.params{1}.paramName) = node.server.serviceProcess{r}{3}.params{1}.paramValue;
-            end
-        end
-        switch self.sn.routing(ind,r)
+    for r=1:R
+        switch sn.routing(ind,r)
             case RoutingStrategy.ID_KCHOICES
                 varsparam{ind}{r}.k = node.output.outputStrategy{r}{3}{1};
                 varsparam{ind}{r}.withMemory = node.output.outputStrategy{r}{3}{2};

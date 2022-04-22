@@ -32,6 +32,7 @@ solver{end+1} = SolverSSA(model,'seed',23000,'verbose',true,'samples',5e3);
 solver{end+1} = SolverFluid(model);
 solver{end+1} = SolverMVA(model,'exact');
 solver{end+1} = SolverNC(model,'exact');
+solver{end+1} = SolverMAM(model);
 solver{end+1} = LINE(model);
 for s=1:length(solver)
     fprintf(1,'SOLVER: %s\n',solver{s}.getName());

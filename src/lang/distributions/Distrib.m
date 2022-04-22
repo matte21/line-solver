@@ -6,13 +6,12 @@ classdef Distrib < Copyable
     
     properties (Hidden)
         mean; % cached mean
+        immediate; % true if immediate
     end
     
     properties
         name
         params
-        javaClass
-        javaParClass
         support; % support interval
     end
     
@@ -84,6 +83,7 @@ classdef Distrib < Copyable
             self.name = name;
             self.support = support;
             self.setNumParams(numParam);
+            self.immediate = false;
         end
     end
     
@@ -93,7 +93,7 @@ classdef Distrib < Copyable
             % Initializes the parameters
             self.params = cell(1,numParam);
             for i=1:numParam
-                self.params{i}=struct('paramName','','paramValue',NaN,'paramClass','');
+                self.params{i}=struct('paramName','','paramValue',NaN);
             end
         end
         
@@ -103,13 +103,12 @@ classdef Distrib < Copyable
             nParam = length(self.params);
         end
         
-        function setParam(self, id, name, value, typeClass)
+        function setParam(self, id, name, value)
             % SETPARAM(ID, NAME, VALUE, TYPECLASS)
             % Set a distribution parameter given id, name, value, Java
             % class type (for JMT translation)
             self.params{id}.paramName=name;
             self.params{id}.paramValue=value;
-            self.params{id}.paramClass=typeClass;
         end
         
         function param = getParam(self,id)
@@ -130,7 +129,7 @@ classdef Distrib < Copyable
             % BOOL = ISIMMEDIATE()
             % Check if the distribution is equivalent to an Immediate
             % distribution
-            bool = getMean(self) < Distrib.Zero;
+            bool = self.immediate;
         end
         
         function bool = isContinuous(self)

@@ -21,7 +21,8 @@ classdef SolverCTMC < NetworkSolver
         [Pi_t, SSnode_a] = getTranProbAggr(self, node)
         [Pi_t, SSsys] = getTranProbSys(self)     
         [Pi_t, SSnode] = getTranProb(self, node)
-        %RD = getCdfRespT(self, R)
+        RD = getCdfRespT(self, R)
+        RD = getCdfSysRespT(self)
         
         [stateSpace,nodeStateSpace] = getStateSpace(self, options)
         stateSpaceAggr = getStateSpaceAggr(self)

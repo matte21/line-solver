@@ -5,7 +5,7 @@ classdef Place < Station
     % All rights reserved.
     
     properties
-        dropid;
+               
         schedStrategies;
         schedStrategy;
         schedStrategyPar;
@@ -31,33 +31,26 @@ classdef Place < Station
             self.classCap = [];
             self.cap = [];
             self.schedStrategies = [];
+            self.dropRule = [];
         end
 
-        function init(self)
+        function init(self)            
             numOfClasses = length(self.model.classes);
             self.schedStrategy = SchedStrategy.FCFS;
             self.schedStrategyPar = zeros(1,numOfClasses);
 
             self.classCap = Inf(1,numOfClasses);
             self.cap = Inf;
-            self.dropid = [];
-            for r=1:numOfClasses
-                self.dropid(r) = DropStrategy.ID_WAITQ;
-            end
             self.schedStrategies = ones(1, numOfClasses);
+            for r=1:numOfClasses
+                self.dropRule(self.model.classes{r}.index) = DropStrategy.ID_WAITQ;
+            end
         end
 
         function self = setClassCapacity(self, class, capacity)
             % SELF = SETCLASSCAPACITY(CLASS, CAPACITY)
             
             self.classCap(class) = capacity;
-        end
-
-        function self = setDropRule(self, class, drop)
-            % SELF = SETDROPRULE(CLASS, DROPRULE)
-
-            self.dropid(class) = DropStrategy.toId(drop);
-            self.input.inputJobClasses{class}{3}=drop;
         end
 
         function self = setSchedStrategies(self, class, strategy)

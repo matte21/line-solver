@@ -10,11 +10,6 @@ classdef SolverNC < NetworkSolver
             
             self@NetworkSolver(model, mfilename);
             self.setOptions(Solver.parseOptions(varargin, self.defaultOptions));
-            persistent isNCLibLoaded;
-            if isempty(isNCLibLoaded)
-                javaaddpath(which('pfqn_nclib.jar'));
-                isNCLibLoaded = true;
-            end
         end
         
         runtime = runAnalyzer(self, options)

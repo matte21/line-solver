@@ -91,6 +91,9 @@ classdef MarkovianDistribution < ContinuousDistrib
                 end
                 self.mean = MEAN;
             end
+            if isnan(self.immediate)
+                self.immediate = MEAN < Distrib.Zero;
+            end
         end
         
         function SCV = getSCV(self)
@@ -172,6 +175,14 @@ classdef MarkovianDistribution < ContinuousDistrib
         
         function reset(self)
             self.invSubgenerator = [];
+        end
+
+        % overload isImmediate for higher perofrmance
+        function bool = isImmediate(self)
+            % BOOL = ISIMMEDIATE()
+            % Check if the distribution is equivalent to an Immediate
+            % distribution
+            bool = self.immediate;
         end
         
         function update(self,varargin)

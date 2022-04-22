@@ -11,10 +11,8 @@ classdef Uniform < ContinuousDistrib
             % Constructs an uniform distribution with specified minimum and
             % maximum values
             self@ContinuousDistrib('Uniform',2,[minVal,maxVal]);
-            setParam(self, 1, 'min', minVal, 'java.lang.Double');
-            setParam(self, 2, 'max', maxVal, 'java.lang.Double');
-            %            self.javaClass = 'jmt.engine.random.Uniform';
-            %            self.javaParClass = 'jmt.engine.random.UniformPar';
+            setParam(self, 1, 'min', minVal);
+            setParam(self, 2, 'max', maxVal);
         end
         
         function ex = getMean(self)

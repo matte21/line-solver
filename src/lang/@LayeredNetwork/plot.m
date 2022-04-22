@@ -1,4 +1,4 @@
-function plot(self,useNodes, showProcs)
+function plot(self,useNodes, showHostProcs)
 % PLOT(SELF,USENODES, SHOWPROCS)
 
 % Copyright (c) 2012-2022, Imperial College London
@@ -8,7 +8,7 @@ if nargin<2 %~exist('useNodes','var')
     useNodes = true;
 end
 if nargin<3 %~exist('showProcs','var')
-    showProcs = true;
+    showHostProcs = true;
 end
 
 [lqnGraph,taskGraph] = getGraph(self);
@@ -30,8 +30,7 @@ row = dataTipTextRow('scheduling',cellfun(@(c) c.scheduling,lqnGraph.Nodes.Objec
 h.DataTipTemplate.DataTipRows(end+1) = row;
 title(['Model: ',self.name]);
 
-if showProcs
-    lqnGraph.Nodes.Type
+if showHostProcs
     for r=findstring(lqnGraph.Nodes.Type,'P')
         if r>0
             highlight(h,r,'NodeColor','white','Marker','h');

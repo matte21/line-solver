@@ -7,6 +7,7 @@ classdef Station < StatefulNode
     properties
         numberOfServers;
         cap;
+        dropRule;
         classCap;        
         lldScaling; % limited load-dependence scaling factors
         lcdScaling; % limited class-dependence scaling factors
@@ -51,6 +52,15 @@ classdef Station < StatefulNode
     end
     
     methods
+
+        function self = setDropRule(self, class, drop)
+            % SELF = SETDROPRULE(CLASS, DROPRULE)
+
+            self.dropRule(class) = DropStrategy.toId(drop);
+            self.input.inputJobClasses{class}{3}=drop;
+        end
+
+
         function setNumServers(self, value)
             % SETNUMSERVERS(VALUE)
             
@@ -89,7 +99,7 @@ classdef Station < StatefulNode
                 line_error(mfilename,'The method requires in input a capacity value for each chain.');
             end
             for c = 1:sn.nchains
-                inchain = find(sn.chains(c,:));
+                inchain = sn.inchain{c};
                 for r = inchain
                     if ~self.isServiceDisabled(r)
                         self.classCap(r) = values(c);
@@ -275,6 +285,17 @@ classdef Station < StatefulNode
                     phi{r}  = NaN;
                 end
             end
+        end
+
+        function summary(self)
+            % SUMMARY()
+
+            line_printf('\nNode: <strong>%s</strong>',self.getName);            
+            line_printf('Scheduling: %s',self.schedStrategy);            
+            line_printf('Number of Servers: %d',self.numberOfServers);            
+            %            self.input.summary;
+            %            self.server.summary;
+            %            self.output.summary;
         end
         
     end

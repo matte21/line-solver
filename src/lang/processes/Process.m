@@ -26,7 +26,7 @@ classdef Process < Copyable
             self.name = name;
             self.params = cell(1,numParam);
             for i=1:numParam
-                self.params{i}=struct('paramName','','paramValue',-1,'paramClass','');
+                self.params{i}=struct('paramName','','paramValue',-1);
             end
         end
         
@@ -41,7 +41,6 @@ classdef Process < Copyable
             
             self.params{id}.paramName=name;
             self.params{id}.paramValue=value;
-            self.params{id}.paramClass=typeClass;
         end
         
         

@@ -83,13 +83,13 @@ if ~hasSCVChanged
     end
 end
 
-if ~isempty(self.sn)
+%if ~isempty(self.sn)
     if hasRateChanged
         self.sn.rates = rates;
     end
     if hasSCVChanged
         self.sn.scv = scv;
     end
-end
+%end
 
 end

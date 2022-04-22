@@ -8,7 +8,7 @@ classdef JobClass < NetworkElement
         priority;
         refstat; % reference station
         isrefclass; % is this a reference class within a chain?
-        index;
+        index; % node index
         type;
         completes; % true if passage through reference station is a completion        
     end

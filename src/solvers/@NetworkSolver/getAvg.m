@@ -1,5 +1,5 @@
 function [QNclass,UNclass,RNclass,TNclass,ANclass,WNclass] = getAvg(self,Q,U,R,T)
-% [QNCLASS,UNCLASS,RNCLASS,TNCLASS] = GETAVG(SELF,Q,U,R,T)
+% [QNCLASS,UNCLASS,RNCLASS,TNCLASS,ANCLASS,WNCLASS] = GETAVG(SELF,Q,U,R,T)
 
 % Return average station metrics at steady-state
 %
@@ -141,15 +141,15 @@ for i=1:M
     for k=1:K
         if ~isempty(RNclass) && RNclass(i,k)>0
             c = find(sn.chains(:,k));
-            inchain = find(sn.chains(c,:));
             if RNclass(i,k) < Distrib.Zero
                 WNclass(i,k) = RNclass(i,k);
-            else
-                if any(intersect(inchain,find(sn.refclass)))
+            else                
+                refclass = sn.refclass(c);
+                if refclass>0
                     % if there is a reference class, use this
-                    WNclass(i,k) = RNclass(i,k)*V(i,k)/sum(V(sn.refstat(k),intersect(inchain,find(sn.refclass))));
+                    WNclass(i,k) = RNclass(i,k)*V(i,k)/sum(V(sn.refstat(k),refclass));
                 else
-                    WNclass(i,k) = RNclass(i,k)*V(i,k)/sum(V(sn.refstat(k),sn.chains(c,:)));
+                    WNclass(i,k) = RNclass(i,k)*V(i,k)/sum(V(sn.refstat(k),sn.inchain{c}));
                 end
             end
         end

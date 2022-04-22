@@ -127,7 +127,7 @@ classdef Cache < StatefulNode
                 end
                 switch class(distribution)
                     case 'Zipf'
-                        self.popularity{itemclass.index, jobclass.index}.setParam(2, 'n', itemclass.nitems, 'java.lang.Integer');
+                        self.popularity{itemclass.index, jobclass.index}.setParam(2, 'n', itemclass.nitems);
                 end
                 %                self.probselect(itemclass.index, jobclass.index) = probselect;
             else
@@ -144,7 +144,7 @@ classdef Cache < StatefulNode
                 self.popularity{jobclass.index} = popularity.copy;
                 switch class(popularity)
                     case 'Zipf'
-                        self.popularity{jobclass.index}.setParam(2, 'n', cardinality, 'java.lang.Integer');
+                        self.popularity{jobclass.index}.setParam(2, 'n', cardinality);
                 end
                 
             else
