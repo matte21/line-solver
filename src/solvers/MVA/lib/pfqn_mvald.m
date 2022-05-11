@@ -62,7 +62,7 @@ while n~=-1
         end
     end
     
-    last_nnz = max(n>0);
+    last_nnz = find(n>0, 1, 'last' );
     if sum(n(1:last_nnz-1)) == sum(N(1:last_nnz-1)) && sum(n((last_nnz+1):R))==0
         logX = log(Xs(last_nnz,hashpop(n,N)));
         %hashpop(n,N)

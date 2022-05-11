@@ -90,7 +90,7 @@ for j=1:size(chainStationPos,1)
             if any(stateMarg_i > capacityc(ind,:))
                 netstates{j,isf} = State.getHash(sn,ind,[]);
             elseif sn.nodetype(ind) == NodeType.Cache                
-                cacheClasses = union(sn.varsparam{ind}.hitclass, sn.varsparam{ind}.missclass);
+                cacheClasses = union(sn.nodeparam{ind}.hitclass, sn.nodeparam{ind}.missclass);
                 %if sum(stateMarg_i(cacheClasses)) > 1 || sum(stateMarg_i(setdiff(1:sn.nclasses,cacheClasses))) > 0                                        
                 if sum(stateMarg_i(1:sn.nclasses)) > 1
                     netstates{j,isf} = State.getHash(sn,ind,[]);

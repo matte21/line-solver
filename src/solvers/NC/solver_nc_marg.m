@@ -1,36 +1,20 @@
-function [Pr,G,runtime] = solver_nc_marg(sn, options, lG)
+function [lPr,G,runtime] = solver_nc_marg(sn, options, lG)
 % [PR,G,RUNTIME] = SOLVER_NC_MARG(QN, OPTIONS)
 
 % Copyright (c) 2012-2022, Imperial College London
 % All rights reserved.
 
-if nargin == 2
-    lG = NaN;
-end
 
+%% initialization
 M = sn.nstations;    %number of stations
 K = sn.nclasses;    %number of classes
 state = sn.state;
 S = sn.nservers;
-NK = sn.njobs';  % initial population per class
-C = sn.nchains;
-
-PHr = sn.proc;
-
-%% initialization
-
-% determine service times
-ST = zeros(M,K);
-V = zeros(M,K);
-for k = 1:K
-    for i=1:M
-        ST(i,k) = 1 ./ map_lambda(PHr{i}{k});
-    end
-end
+V = cellsum(sn.visits);
+rates = sn.rates;
+ST  = 1./rates;
 ST(isnan(ST))=0;
-for c=1:sn.nchains
-    V = V + sn.visits{c};
-end
+
 
 [Lchain,STchain,~,~,Nchain] = snGetDemandsChain(sn);
 
@@ -47,23 +31,23 @@ for i=1:M
     end
 end
 
-if isnan(lG)
-    G = exp(pfqn_ncld(Lchain, Nchain, 0*Nchain, mu));
-else
-    G = exp(lG);
+if nargin < 3
+    lG = pfqn_ncld(Lchain, Nchain, 0*Nchain, mu, options);
 end
+G = exp(lG);
 
+lPr = zeros(sn.nstations,1);
 for ist=1:sn.nstations
     ind = sn.stationToNode(ist);
     isf = sn.stationToStateful(ist);
     [~,nirvec,sivec,kirvec] = State.toMarginal(sn, ind, state{isf});
     if min(nirvec) < 0 % user flags that state of i should be ignored
-        Pr(i) = NaN;
+        lPr(i) = NaN;
     else
         set_ist = setdiff(1:sn.nstations,ist);
         nivec_chain = nirvec * sn.chains';
-        G_minus_i = exp(pfqn_ncld(Lchain(set_ist,:), Nchain-nivec_chain, 0*Nchain, mu(set_ist,:), options));
-        F_i = 1;
+        lG_minus_i = pfqn_ncld(Lchain(set_ist,:), Nchain-nivec_chain, 0*Nchain, mu(set_ist,:), options);
+        lF_i = 0;
         switch sn.schedid(ist)
             case SchedStrategy.ID_FCFS
                 for r=1:K
@@ -78,11 +62,11 @@ for ist=1:sn.nstations
                         end
                     end
                 end
-                ci = find(sivec);
+                ci = find(sivec, 1);
                 if ~isempty(ci)
-                    F_i = F_i * prod(exp(nirvec(1,:).*log(V(ist,r))))./prod(mu(ist,1:sum(kirvec(:))));
+                    lF_i = lF_i + sum((nirvec(1,:).*log(V(ist,r)))) - sum(log(mu(ist,1:sum(kirvec(:)))));
                 else
-                    F_i = 1;
+                    lF_i = 0;
                 end
             case SchedStrategy.ID_SIRO
                 for r=1:K
@@ -99,9 +83,9 @@ for ist=1:sn.nstations
                 end
                 ci = find(sivec);
                 if ~isempty(ci)
-                    F_i = (nirvec(ci)/sum(nirvec)) * exp(pfqn_ncldld(ST(ist,:).*V(ist,:), nirvec, 0*nirvec, mu(ist,:), options));
+                    lF_i = lF_i + log(nirvec(ci)) - log(sum(nirvec)) + pfqn_ncldld(ST(ist,:).*V(ist,:), nirvec, 0*nirvec, mu(ist,:), options);
                 else
-                    F_i = 1;
+                    lF_i = 0;
                 end
             case SchedStrategy.ID_PS
                 for r=1:K
@@ -109,27 +93,26 @@ for ist=1:sn.nstations
                     if ~isempty(PHr)
                         kir = kirvec(1,r,:); kir=kir(:)';
                         Ar = map_pie(PHr)*inv(-PHr{1});
-                        F_i = F_i * prod(exp(kir.*log(V(ist,r)*Ar)))./prod(factorial(kir));
+                        lF_i = lF_i + sum(kir.*log(V(ist,r)*Ar)) - sum(factln(kir));
                     end
                 end
-                F_i = F_i * factorial(sum(kirvec(:)))./prod(mu(ist,1:sum(kirvec(:))));
+                lF_i = lF_i + factln(sum(kirvec(:))) - sum(log(mu(ist,1:sum(kirvec(:)))));
             case SchedStrategy.ID_INF
                 for r=1:K
                     PHr = sn.proc{ist}{r};
                     if ~isempty(PHr)
                         kir = kirvec(1,r,:); kir=kir(:)';
                         Ar = map_pie(PHr)*inv(-PHr{1});
-                        F_i = F_i * prod(exp(kir.*log(V(ist,r)*Ar)))./prod(factorial(kir));
+                        lF_i = lF_i + sum(kir.*log(V(ist,r)*Ar)) - sum(factln(kir));
                     end
                 end
         end
-        Pr(ist) =  F_i * G_minus_i / G;
+        lPr(ist) =  lF_i + lG_minus_i - lG;
     end
 end
 
 runtime = toc(Tstart);
-Pr(isnan(Pr))=0;
-lG = log(G);
+lPr(isnan(lPr))=0;
 if options.verbose
     line_printf('\nNormalizing constant (NC) analysis completed. Runtime: %f seconds.\n',runtime);
 end

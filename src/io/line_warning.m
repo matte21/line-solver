@@ -13,6 +13,7 @@ persistent suppressedAnnouncement;
 suppressedAnnouncement = false;
 errmsg=sprintf(MSG, varargin{:});
 w = warning('QUERY','ALL');
+w(1).state = 'on'; % always print warnings by default
 switch w(1).state
     case 'on'
         %warning('[%s] %s',caller,MSG);

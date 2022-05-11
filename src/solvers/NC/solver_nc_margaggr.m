@@ -1,5 +1,5 @@
-function [Pr,G,runtime] = solver_nc_margaggr(sn, options, lG)
-% [PR,G,RUNTIME] = SOLVER_NC_MARGAGGR(QN, OPTIONS)
+function [Pr,G,lG,runtime] = solver_nc_margaggr(sn, options, lG)
+% [PR,G,LG,RUNTIME] = SOLVER_NC_MARGAGGR(QN, OPTIONS)
 
 % Copyright (c) 2012-2022, Imperial College London
 % All rights reserved.
@@ -13,10 +13,6 @@ C = sn.nchains;
 
 PH = sn.proc;
 
-if nargin == 2
-    lG = NaN;
-end
-
 %% initialization
 
 % determine service times
@@ -28,7 +24,8 @@ for k = 1:K
 end
 ST(isnan(ST))=0;
 
-[Lchain,STchain,Vchain,~,Nchain] = snGetDemandsChain(sn);
+[Lchain,STchain,~,~,Nchain] = snGetDemandsChain(sn);
+
 V = zeros(sn.nstations,sn.nclasses);
 for c=1:sn.nchains
     inchain = sn.inchain{c};
@@ -52,44 +49,30 @@ for i=1:M
     end
 end
 
-if isnan(lG)
-    G = exp(pfqn_ncld(Lchain, Nchain, 0*Nchain, mu));
-else
-    G = exp(lG);
+if nargin == 2
+    lG = pfqn_ncld(Lchain, Nchain, 0*Nchain, mu, options);
 end
+G = exp(lG);
 
-%Pr = zeros(sn.nstations,1);
+lPr = zeros(sn.nstations,1);
 for ist=1:sn.nstations
     ind = sn.stationToNode(ist);
     isf = sn.stationToStateful(ist);
     [~,nivec] = State.toMarginal(sn, ind, state{isf});
     if min(nivec) < 0 % user flags that state of i should be ignored
-        Pr(i) = NaN;
+        lPr(i) = NaN;
     else
         set_ist = setdiff(1:sn.nstations,ist);
         nivec_chain = nivec * sn.chains';
-        G_minus_i = exp(pfqn_ncld(Lchain(set_ist,:), Nchain-nivec_chain, 0*Nchain, mu(set_ist,:), options));
-        F_i = exp(pfqn_ncld(ST(ist,:).*V(ist,:), nivec, 0*nivec, mu(ist,:), options));
-        Pr(ist) =  F_i * G_minus_i / G;
+        lG_minus_i = pfqn_ncld(Lchain(set_ist,:), Nchain-nivec_chain, 0*Nchain, mu(set_ist,:), options);
+        lF_i = pfqn_ncld(ST(ist,:).*V(ist,:), nivec, 0*nivec, mu(ist,:), options);
+        lPr(ist) =  lF_i + lG_minus_i - lG;
     end
 end
-
-% Pr = 1;
-% for i=1:M
-%     isf = sn.stationToStateful(i);
-%     [~,nivec] = State.toMarginal(sn, i, state{isf});
-%     nivec_chain = nivec * sn.chains';
-%     F_i = exp(pfqn_ncld(Lchain(i,:), nivec_chain, mu_chain(i,:));
-%     G_minus_i = exp(pfqn_ncld(Lchain(setdiff(1:M,i),:), Nchain-nivec_chain, mu_chain(setdiff(1:M,i),:));
-%     g0_i = exp(pfqn_ncld(ST(i,:).*alpha(i,:),nivec, mu_chain(i,:));
-%     G0_i = exp(pfqn_ncld(STchain(i,:),nivec_chain, mu_chain(i,:));
-%     Pr = F_i * G_minus_i / G * (g0_i / G0_i);
-% end
-%
-
-runtime = toc(Tstart);
+Pr = exp(lPr);
 Pr(isnan(Pr))=0;
 lG = log(G);
+runtime = toc(Tstart);
 if options.verbose
     line_printf('Normalizing constant (NC) analysis completed. Runtime: %f seconds.\n',runtime);
 end

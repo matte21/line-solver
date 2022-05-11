@@ -230,8 +230,8 @@ classdef Solver < handle
                 'jmt','jsim','jmva','jmva.mva','jmva.recal','jmva.mom','jmva.comom','jmva.chow','jmva.bs','jmva.aql','jmva.lin','jmva.dmlin','jmva.ls',...
                 'jmt.jsim','jmt.jmva','jmt.jmva.mva','jmt.jmva.amva','jmt.jmva.recal','jmt.jmva.comom','jmt.jmva.chow','jmt.jmva.bs','jmt.jmva.aql','jmt.jmva.lin','jmt.jmva.dmlin','jmt.jmva.ls',...
                 'brute','ca','comom','gm','mom','propfair','recal','kt', 'rd', 'nr.probit', 'nr.logit', 'nc.brute','nc.ca', 'nc.comom','nc.gm','nc.mom','nc.propfair','nc.recal','nc.kt', 'nc.rd', 'nc.nr.probit', 'nc.nr.logit', ...
-                'fluid','statedep''stateindep','fluid.statedep''fluid.stateindep',...
-                'nc','nc.exact','nc.imci','nc.ls','nc.le','nc.panacea','panacea','nc.mmint2','mmint2','mam','dec.source','dec.mmap',...
+                'fluid','matrix','statedep','closing','fluid.statedep''fluid.closing','fluid.matrix',...
+                'nc','nc.exact','nc.imci','ls','nc.ls','nc.grm','grm','le','nc.le','nc.panacea','panacea','nc.mmint2','mmint2','mam','dec.source','dec.mmap',...
                 'mmk','gigk', 'gigk.kingman_approx', ...
                 'mm1','mg1','gm1','gig1','gim1','gig1.kingman','gig1.gelenbe','gig1.heyman','gig1.kimura','gig1.allen','gig1.kobayashi','gig1.klb','gig1.marchal','gig1.myskja','gig1.myskja.b',...
                 'aba.upper','aba.lower','gb.upper','gb.lower','sb.upper','sb.lower','bjb.upper','bjb.lower','pb.upper','pb.lower'};
@@ -248,6 +248,7 @@ classdef Solver < handle
             % OPTIONS = DEFAULTOPTIONS()
             % Return default options
             options = lineDefaults('MVA');
+            options.iter_max = 100;
         end
         
         function options = parseOptions(varargin, defaultOptions)
@@ -324,11 +325,11 @@ classdef Solver < handle
                     if strcmp(options.method,'jmt'), options.method='default'; end
                     options.method = erase(options.method,'jmt.');
                     solver = SolverJMT(model, options);
-                case {'fluid','fluid.statedep','fluid.stateindep'}
+                case {'fluid','fluid.statedep','fluid.closing'}
                     if strcmp(options.method,'fluid'), options.method='default'; end
                     options.method = erase(options.method,'fluid.');
                     solver = SolverFluid(model, options);
-                case {'nc','nc.exact','nc.imci','nc.ls','nc.le','nc.panacea','nc.pana','nc.mmint2','nc.kt','nc.deterministic','nc.sampling','nc.propfair','nc.comom','nc.mom','nc.gm','nc.brute','nc.rd', 'nc.nr.probit', 'nc.nr.logit'}
+                case {'nc','nc.exact','nc.imci','nc.ls','nc.grm','grm','ls','nc.le','le','mmint2','nc.panacea','nc.pana','nc.mmint2','nc.kt','nc.deterministic','nc.sampling','nc.propfair','nc.comom','nc.mom','nc.gm','nc.brute','nc.rd', 'nc.nr.probit', 'nc.nr.logit'}
                     if strcmp(options.method,'nc'), options.method='default'; end
                     options.method = erase(options.method,'nc.');
                     solver = SolverNC(model, options);

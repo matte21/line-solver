@@ -31,12 +31,12 @@ options.verbose = 0;
 %options.method = 'lqsim';
 %options.samples = 1e4;
 solver{1} = SolverLQNS(model, options);
-AvgTable{1} = solver{1}.getAvgTable
+AvgTable{1} = solver{1}.getAvgTable; AvgTable{1}
 
 lnoptions = SolverLN.defaultOptions;
 lnoptions.verbose = 0;
 solveroptions = Solver.defaultOptions; 
-options.method = 'comom';
+%options.method = 'comom';
 solveroptions.verbose = 0;
 solver{2} = SolverLN(model, @(l)SolverNC(l,solveroptions), lnoptions);
-AvgTable{2} = solver{2}.getAvgTable
+AvgTable{2} = solver{2}.getAvgTable; AvgTable{2}

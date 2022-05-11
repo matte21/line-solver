@@ -54,7 +54,7 @@ if ~isLoadDep
     if isempty(Zli)
         Zli = 0*N;
     end
-    options.method='exact';
+    options.method='ca';
     lG = pfqn_nc(lambda,Lli, N, sum(Zli,1), options);
     G = exp(lG);
     return
@@ -65,12 +65,12 @@ if M==0 G=0; lG=log(G); return; end
 if sum(N==zeros(1,R))==R G=1; lG=log(G); return; end
 
 if R==1
-    G=pfqn_gmvaldsingle(L,N,mu);
-    lG=log(G);
+    G = pfqn_gmvaldsingle(L,N,mu);
+    lG = log(G);
     return
 end
 
-G=G + pfqn_gmvald(L(1:(M-1),:),N,mu(1:(M-1),:));
+G = G + pfqn_gmvald(L(1:(M-1),:),N,mu(1:(M-1),:));
 for r=1:R
     if N(r)>0
         if R>1
@@ -81,7 +81,8 @@ for r=1:R
         G = G + (L(M,r)/mu(M,1))*pfqn_gmvald(L,N_1,mushift(mu,M));
     end
 end
-lG=log(G);
+lG = log(G);
+
 return
 end
 

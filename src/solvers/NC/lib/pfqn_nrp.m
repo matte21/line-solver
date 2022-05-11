@@ -3,9 +3,9 @@ function [lG] = pfqn_nrp(L,N,Z,alpha,options)
 Nt = sum(N); 
 if sum(Z)>0
     L = [L;Z];
-    alpha(end+1,:)=1:Nt;    
+    alpha(end+1,1:Nt)=1:Nt;
 end
-if M==1
+if M==1 && sum(Z)==0
     [~,lG] = pfqn_gld(L,N,alpha);
     return
 else

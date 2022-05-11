@@ -1,10 +1,8 @@
-function [Qfull, Ufull, Rfull, Tfull, Cfull, Xfull, t, Qfull_t, Ufull_t, Tfull_t, lastSolution] = solver_fluid_analyzer(sn, options)
-% [QFULL, UFULL, RFULL, TFULL, CFULL, XFULL, T, QFULL_T, UFULL_T, TFULL_T, LASTSOLUTION] = SOLVER_FLUID_ANALYZER(QN, OPTIONS)
+function [QN, UN, RN, TN, CN, XN, t, QNt, UNt, TNt, xvec] = solver_fluid_analyzer(sn, options)
+% [QN, UN, RN, TN, CN, XN, T, QNT, UNT, TNT, XVEC] = SOLVER_FLUID_ANALYZER(QN, OPTIONS)
 
 % Copyright (c) 2012-2022, Imperial College London
 % All rights reserved.
-
-Cfull=[]; Xfull=[];
 
 M = sn.nstations;
 K = sn.nclasses;
@@ -23,11 +21,25 @@ end
 
 outer_iters = 1;
 outer_runtime = tic;
-[Qfull, Ufull, Rfull, Tfull, ymean, Qfull_t, Ufull_t, Tfull_t, ~, t] = solver_fluid_analyzer_inner(sn, options);
+switch options.method
+    case {'statedep','closing'}
+        [QN, UN, RN, TN, xvec_iter, QNt, UNt, TNt, ~, t] = solver_fluid_analyzer_inner(sn, options);
+    case {'matrix'}
+        if any(isnan(rates0(:)))
+            line_warning(mfilename, 'The model includes disabled transitions that are not supported by the matrix method. Switching to the ''closing'' method.');
+            options.method = 'closing';
+            [QN, UN, RN, TN, xvec_iter, QNt, UNt, TNt, ~, t] = solver_fluid_analyzer_inner(sn, options);
+        else
+            [QN, UN, RN, TN, xvec_iter, QNt, UNt, TNt, ~, t] = solver_fluid_matrix(sn, options);
+        end
+    otherwise
+        line_error(mfilename,'Unsupported method');
+end
 outer_runtime = toc(outer_runtime);
 
+
 switch options.method
-    case {'default','stateindep'}
+    case {'matrix','closing'}
         % approximate FCFS nodes as state-independent stations
         if any(schedid==SchedStrategy.ID_FCFS)
             iter = 0;
@@ -40,19 +52,19 @@ switch options.method
                 eta_1 = eta;
                 for i=1:M
                     sd = rates0(i,:)>0;
-                    Ufull(i,sd) = Tfull(i,sd) ./ rates0(i,sd);
+                    UN(i,sd) = TN(i,sd) ./ rates0(i,sd);
                 end
                 ST0 = 1./rates0;
                 ST0(isinf(ST0)) = Distrib.Inf;
                 ST0(isnan(ST0)) = Distrib.Zero;
 
-                Xfull = zeros(1,K);
+                XN = zeros(1,K);
                 for k=1:K
                     if sn.refstat(k)>0 % ignore artificial classes
-                        Xfull(k) = Tfull(sn.refstat(k),k);
+                        XN(k) = TN(sn.refstat(k),k);
                     end
                 end
-                [ST,gamma,~,~,~,~,eta] = handlerHighVar(options.config.highvar,sn,ST0,V,SCV,Xfull,Ufull,gamma,S);
+                [ST,gamma,~,~,~,~,eta] = handlerHighVar(options.config.highvar,sn,ST0,V,SCV,XN,UN,gamma,S);
 
                 rates = 1./ST;
                 rates(isinf(rates)) = Distrib.Inf;
@@ -62,10 +74,10 @@ switch options.method
                     switch sn.schedid(i)
                         case SchedStrategy.ID_FCFS
                             for k=1:K
-                                if rates(i,k)>0 & SCV(i,k)>0                                    
+                                if rates(i,k)>0 && SCV(i,k)>0
                                     [cx,muik,phiik] = Coxian.fitMeanAndSCV(1/rates(i,k), SCV(i,k));
                                     % we now handle the case that due to either numerical issues
-                                    % or different relationship between scv and mean the size of
+                                    % or different relationship between scv and mean if the size of
                                     % the phase-type representation has changed
                                     phases(i,k) = length(muik);
                                     if phases(i,k) ~= phases_last(i,k) % if number of phases changed
@@ -87,13 +99,18 @@ switch options.method
                             end
                     end
 
-                    options.init_sol = ymean{end}(:);
+                    options.init_sol = xvec_iter{end}(:);
                     if any(phases_last-phases~=0) % If there is a change of phases reset
                         options.init_sol = solver_fluid_initsol(sn);
                     end
                 end
                 sn.phases = phases;
-                [~, Ufull, ~, Tfull, ymean, ~, ~, ~, ~, ~, inner_iters, inner_runtime] = solver_fluid_analyzer_inner(sn, options);
+                switch options.method
+                    case {'statedep','closing'}
+                        [~, UN, ~, TN, xvec_iter, ~, ~, ~, ~, ~, inner_iters, inner_runtime] = solver_fluid_analyzer_inner(sn, options);
+                    case {'matrix'}
+                        [~, UN, ~, TN, xvec_iter, ~, ~, ~, ~, ~, inner_iters, inner_runtime] = solver_fluid_matrix(sn, options);
+                end
                 phases_last = phases;
                 outer_iters = outer_iters + inner_iters;
                 outer_runtime = outer_runtime + inner_runtime;
@@ -103,7 +120,12 @@ switch options.method
             % model parameters and we rerun everything from the true initial point
             % so that we get the correct transient.
             options.init_sol = solver_fluid_initsol(sn, options);
-            [Qfull, Ufull, Rfull, Tfull, ymean, Qfull_t, Ufull_t, Tfull_t, ~, t] = solver_fluid_analyzer_inner(sn, options);
+            switch options.method
+                case {'statedep','closing'}
+                    [QN, UN, RN, TN, xvec_iter, QNt, UNt, TNt, ~, t] = solver_fluid_analyzer_inner(sn, options);
+                case {'matrix'}
+                    [QN, UN, RN, TN, xvec_iter, QNt, UNt, TNt, ~, t] = solver_fluid_matrix(sn, options);
+            end
         end
     case 'statedep'
         % do nothing, a single iteration is sufficient
@@ -120,65 +142,75 @@ for i=1:M
     end
 end
 
-Ufull0 = Ufull;
+Ufull0 = UN;
 for i=1:M
-    sd = find(Qfull(i,:)>0);
-    Ufull(i,Qfull(i,:)==0)=0;
+    sd = find(QN(i,:)>0);
+    UN(i,QN(i,:)==0)=0;
     switch sn.schedid(i)
         case SchedStrategy.ID_INF
             for k=sd
-                Ufull(i,k) = Qfull(i,k);
-                Ufull_t{i,k} = Qfull_t{i,k};
-                Tfull_t{i,k}  = Ufull_t{i,k}*sn.rates(i,k);
+                UN(i,k) = QN(i,k);
+                UNt{i,k} = QNt{i,k};
+                TNt{i,k}  = UNt{i,k}*sn.rates(i,k);
             end
         case SchedStrategy.ID_DPS
-            w = sn.schedparam(i,:);
-            wcorr = w(:)*Qfull(i,:)/(w(sd)*Qfull(i,sd)');
+            %w = sn.schedparam(i,:);
+            %wcorr = w(:)*QN(i,:)/(w(sd)*QN(i,sd)');
             for k=sd
                 % correct for the real rates, instead of the diffusion
                 % approximation rates
-                Ufull(i,k) = min([1,Qfull(i,k)/S(i),sum(Ufull0(i,sd)) * (Tfull(i,k)./(rates0(i,k)))/sum(Tfull(i,sd)./(rates0(i,sd)))]);
-                Tfull_t{i,k}  = Ufull_t{i,k}*sn.rates(i,k)*sn.nservers(i); % not sure if this is needed
+                UN(i,k) = min([1,QN(i,k)/S(i),sum(Ufull0(i,sd)) * (TN(i,k)./(rates0(i,k)))/sum(TN(i,sd)./(rates0(i,sd)))]);
+                TNt{i,k}  = UNt{i,k}*sn.rates(i,k)*sn.nservers(i); % not sure if this is needed
             end
         otherwise
             for k=sd
                 % correct for the real rates, instead of the diffusion
                 % approximation rates
-                Ufull(i,k) = min([1,Qfull(i,k)/S(i),sum(Ufull0(i,sd)) * (Tfull(i,k)./rates0(i,k))/sum(Tfull(i,sd)./rates0(i,sd))]);
-                Tfull_t{i,k}  = Ufull_t{i,k}*sn.rates(i,k)*sn.nservers(i);
+                UN(i,k) = min([1,QN(i,k)/S(i),sum(Ufull0(i,sd)) * (TN(i,k)./rates0(i,k))/sum(TN(i,sd)./rates0(i,sd))]);
+                TNt{i,k}  = UNt{i,k}*sn.rates(i,k)*sn.nservers(i);
             end
     end
 end
-Ufull(isnan(Ufull))=0;
+UN(isnan(UN))=0;
+
+%switch options.method
+%case {'statedep','closing'}
+%         for i=1:M
+%             if sn.nservers(i) > 0 % not INF
+%                 for k = 1:K
+%                     UNt{i,k} = min(QNt{i,k} / S(i), QNt{i,k} ./ cellsum({QNt{i,:}}) ); % if not an infinite server then this is a number between 0 and 1
+%                     UNt{i,k}(isnan(UNt{i,k})) = 0; % fix cases where qlen is 0
+%                 end
+%             else % infinite server
+%                 for k = 1:K
+%                     UNt{i,k} = QNt{i,k};
+%                 end
+%             end
+%         end
 
 for i=1:M
-    sd = find(Qfull(i,:)>0);
-    Rfull(i,Qfull(i,:)==0)=0;
+    sd = find(QN(i,:)>0);
+    RN(i,QN(i,:)==0)=0;
     for k=sd
         switch sn.schedid(i)
             case SchedStrategy.ID_INF
                 % no-op
             otherwise
-                Rfull(i,k) = Qfull(i,k) / Tfull(i,k);
+                RN(i,k) = QN(i,k) / TN(i,k);
         end
     end
 end
-Rfull(isnan(Rfull))=0;
+RN(isnan(RN))=0;
+%end
 
-Xfull = zeros(1,K);
+XN = zeros(1,K);
+CN = zeros(1,K);
 for k=1:K
     if sn.refstat(k)>0 % ignore artificial classes
-        Xfull(k) = Tfull(sn.refstat(k),k);
+        XN(k) = TN(sn.refstat(k),k);
+        CN(k) = sn.njobs(k) ./ XN(k);
     end
 end
-
-Cfull = zeros(1,K);
-for k=1:K
-    if sn.refstat(k)>0 % ignore artificial classes
-        Cfull(k) = sn.njobs(k) ./ Xfull(k);
-    end
-end
-
-lastSolution.odeStateVec = ymean{end};
-lastSolution.sn = sn;
+xvec.odeStateVec = xvec_iter{end};
+xvec.sn = sn;
 end

@@ -32,34 +32,29 @@ switch options.method
     case 'exact'
         Tstart = tic;
         [Lchain,~,~,~,Nchain] = snGetDemandsChain(sn);
-        G = exp(pfqn_ncld(Lchain, Nchain, 0*Nchain, mu));
+        lG = pfqn_ncld(Lchain, Nchain, 0*Nchain, mu);
         ST = 1 ./ sn.rates;
         ST(isnan(ST))=0;
     otherwise
         % unclear if this is correct as it doesn't consider the
         % transformation to ld model
         [~,~,~,~,~,~,lG,ST] = solver_nc(sn, options);
-        G = exp(lG);
 end
+G = exp(lG);
 
-Tstart = tic;
-Pr = 1;
+lPr = 0;
 for ist=1:M
     isf = sn.stationToStateful(ist);
     [~,nivec] = State.toMarginal(sn, ist, state{isf});
     nivec = unique(nivec,'rows');
     nivec_chain = nivec * sn.chains';
     if any(nivec_chain>0)
-        % note that these terms have just one station so fast to compute
-        %F_i = exp(pfqn_ncld(Lchain(i,:), nivec_chain, mu(i,:));
-        %g0_i = exp(pfqn_ncld(ST(i,:).*alpha(i,:),nivec, mu(i,:));
-        %G0_i = exp(pfqn_ncld(STchain(i,:),nivec_chain, mu(i,:));
-        %Pr = Pr * g0_i * (F_i / G0_i);
-        F_i = exp(pfqn_ncld(ST(ist,:).*V(ist,:), nivec, 0*nivec, mu(ist,:), options));
-        Pr = Pr * F_i ;
+        lF_i = pfqn_ncld(ST(ist,:).*V(ist,:), nivec, 0*nivec, mu(ist,:), options);
+        lPr = lPr + lF_i ;
     end
 end
-Pr = Pr / G;
+lPr = lPr - lG;
+Pr = exp(lPr);
 
 runtime = toc(Tstart);
 return

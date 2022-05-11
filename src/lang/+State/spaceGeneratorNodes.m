@@ -42,7 +42,7 @@ for ind=1:sn.nnodes
         switch sn.nodetype(ind)
             case NodeType.Cache
                 for r=1:sn.nclasses % restrict state space generation to immediate events
-                    if isnan(sn.varsparam{ind}.pref{r})
+                    if isnan(sn.nodeparam{ind}.pread{r})
                         capacityc(ind,r) =  1; %
                     else
                         capacityc(ind,r) =  1; %

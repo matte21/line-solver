@@ -16,9 +16,9 @@ sourceRate = sn.rates(source_ist,:);
 sourceRate(isnan(sourceRate)) = 0;
 TN(source_ist,:) = sourceRate;
 
-ch = sn.varsparam{sn.nodetype == NodeType.Cache};
+ch = sn.nodeparam{sn.nodetype == NodeType.Cache};
 
-m = ch.cap;
+m = ch.itemcap;
 n = ch.nitems;
 
 if n<m+2
@@ -32,28 +32,25 @@ lambda = zeros(u,n,h);
 for v=1:u
     for k=1:n
         for l=1:(h+1)
-            if ~isnan(ch.pref{v})
-                lambda(v,k,l) = sourceRate(v) * ch.pref{v}(k);
+            if ~isnan(ch.pread{v})
+                lambda(v,k,l) = sourceRate(v) * ch.pread{v}(k);
             end
         end
     end
 end
 
 R = ch.accost;
-pij = [];
 gamma = mucache_gamma_lp(lambda,R);
 switch options.method
     case 'exact'
         [pij] = mucache_prob_erec(gamma, m);
-        %         [pij,~] = mucache_sim_rr(lambda,m,R,options.samples);
         missRate = zeros(1,u);
         for v=1:u
             missRate(v) = lambda(v,:,1)*pij(:,1);
         end
     otherwise
         [~,missRate,~,~,lE] = mucache_miss_rayint(gamma, m, lambda);
-        %pij = pi0(:); % temporary, only miss rates
-        [pij] = mucache_prob_rayint(gamma,m, lE);
+        pij = mucache_prob_rayint(gamma, m, lE);
 end
 
 for r = 1:sn.nclasses

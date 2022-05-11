@@ -6,6 +6,7 @@ function sn=NetworkStruct()
  
  sn=[]; %faster than sn=struct();
  sn.cap=[];     % total buffer size
+ sn.cdscaling={}; % class-dependent scalings
  sn.chains=[];     % binary CxK matrix where 1 in entry (i,j) indicates that class j is in chain i.
  sn.classcap=[];    % buffer size for each class
  sn.classnames=string([]);  % name of each job class
@@ -16,10 +17,12 @@ function sn=NetworkStruct()
  % (MKxMK matrix with integer entries), indexed first by
  % station, then by class
  sn.dropid=[]; % (i,r) gives the drop rule for class r at station i
+ sn.inchain={}; % entry c is a vector with class ids in chain c
  sn.isstatedep=[]; % state dependent routing
  sn.isstation=[]; % element i is true if node i is a station
  sn.isstateful=[]; % element i is true if node i is stateful
  sn.isslc=[]; % element r is true if class r self-loops at its reference station
+ sn.lldscaling={}; % limited load-dependent scalings
  sn.lst={}; % laplace-stieltjes transform
  sn.mu={};          % service rate in each service phase, for each job class in each station
  % (MxK cell with n_{i,k}x1 double entries)
@@ -33,15 +36,16 @@ function sn=NetworkStruct()
  sn.nstateful=[];  % number of stations (int)
  sn.nvars=[]; % number of local variables
  sn.nodenames=string([]);   % name of each node
- sn.nodevisits={};  % visits placed by classes at the nodes
+ sn.nodeparam={};     % parameters for local variables
  sn.nodetype=[]; % server type in each node
+ sn.nodevisits={};  % visits placed by classes at the nodes
  sn.phases=[]; % number of phases in each service or arrival process
  sn.phasessz=[]; % number of phases
  sn.phaseshift=[]; % shift for phases
- sn.pie={};        % probability of entry in each each service phase
  sn.phi={};         % probability of service completion in each service phase,
  % for each job class in each station
  % (MxK cell with n_{i,k}x1 double entries)
+ sn.pie={};        % probability of entry in each each service phase
  sn.proc={};     % cell matrix of service and arrival process representations
  sn.procid=[]; % service or arrival process type id
  sn.rates=[];       % service rate for each job class in each station
@@ -66,7 +70,6 @@ function sn=NetworkStruct()
  sn.stateprior={};  % prior distribution of initial or current state
  sn.scv=[]; % squared coefficient of variation of service times (MxK)
  sn.visits={};           % visits placed by classes at the resources
- sn.varsparam={};     % parameters for local variables
  
  % hashing maps
  sn.nodeToStateful=[];

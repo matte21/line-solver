@@ -42,13 +42,13 @@ for r=1:K
             concStratNode2.setAttribute('classPath', 'java.lang.Integer');
             concStratNode2.setAttribute('name', 'k');
             concStratNode2ValueNode = simDoc.createElement('value');
-            concStratNode2ValueNode.appendChild(simDoc.createTextNode(sprintf('%d',sn.varsparam{ind}{r}.k)));
+            concStratNode2ValueNode.appendChild(simDoc.createTextNode(sprintf('%d',sn.nodeparam{ind}{r}.k)));
             concStratNode2.appendChild(concStratNode2ValueNode);
             concStratNode3 = simDoc.createElement('subParameter');
             concStratNode3.setAttribute('classPath', 'java.lang.Boolean');
             concStratNode3.setAttribute('name', 'withMemory');
             concStratNode3ValueNode = simDoc.createElement('value');
-            if sn.varsparam{ind}{r}.withMemory
+            if sn.nodeparam{ind}{r}.withMemory
                 concStratNode3ValueNode.appendChild(simDoc.createTextNode('true'));
             else
                 concStratNode3ValueNode.appendChild(simDoc.createTextNode('false'));
@@ -65,7 +65,7 @@ for r=1:K
             concStratNode2.setAttribute('classPath', 'jmt.engine.NetStrategies.RoutingStrategies.WeightEntry');
             concStratNode2.setAttribute('name', 'WeightEntryArray');
             for j=find(sn.connmatrix(i,:)) % linked stations          
-                    weight = sn.varsparam{ind}{r}.weights(j);                    
+                    weight = sn.nodeparam{ind}{r}.weights(j);                    
                     concStratNode3 = simDoc.createElement('subParameter');
                     concStratNode3.setAttribute('classPath', 'jmt.engine.NetStrategies.RoutingStrategies.WeightEntry');
                     concStratNode3.setAttribute('name', 'WeightEntry');

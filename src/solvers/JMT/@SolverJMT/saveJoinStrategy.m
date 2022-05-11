@@ -11,7 +11,7 @@ strategyNode.setAttribute('name', 'JoinStrategy');
 sn = self.getStruct;
 numOfClasses = sn.nclasses;
 for r=1:numOfClasses    
-    switch sn.varsparam{ind}.joinStrategy{r}
+    switch sn.nodeparam{ind}.joinStrategy{r}
         case JoinStrategy.STD
             refClassNode2 = simDoc.createElement('refClass');
             refClassNode2.appendChild(simDoc.createTextNode(sn.classnames{r}));
@@ -24,7 +24,7 @@ for r=1:numOfClasses
             reqNode.setAttribute('classPath', 'java.lang.Integer');
             reqNode.setAttribute('name', 'numRequired');
             valueNode = simDoc.createElement('value');
-            valueNode.appendChild(simDoc.createTextNode(int2str(sn.varsparam{ind}.fanIn{r})));
+            valueNode.appendChild(simDoc.createTextNode(int2str(sn.nodeparam{ind}.fanIn{r})));
             reqNode.appendChild(valueNode);
             joinStrategyNode.appendChild(reqNode);
             strategyNode.appendChild(joinStrategyNode);
@@ -41,7 +41,7 @@ for r=1:numOfClasses
             reqNode.setAttribute('classPath', 'java.lang.Integer');
             reqNode.setAttribute('name', 'numRequired');
             valueNode = simDoc.createElement('value');
-            valueNode.appendChild(simDoc.createTextNode(int2str(sn.varsparam{ind}.joinRequired{r})));
+            valueNode.appendChild(simDoc.createTextNode(int2str(sn.nodeparam{ind}.joinRequired{r})));
             reqNode.appendChild(valueNode);
             joinStrategyNode.appendChild(reqNode);
             strategyNode.appendChild(joinStrategyNode);
@@ -58,7 +58,7 @@ for r=1:numOfClasses
             reqNode.setAttribute('classPath', 'java.lang.Integer');
             reqNode.setAttribute('name', 'numRequired');
             valueNode = simDoc.createElement('value');
-            valueNode.appendChild(simDoc.createTextNode(int2str(sn.varsparam{ind}.joinRequired{r})));
+            valueNode.appendChild(simDoc.createTextNode(int2str(sn.nodeparam{ind}.joinRequired{r})));
             reqNode.appendChild(valueNode);
             joinStrategyNode.appendChild(reqNode);
             strategyNode.appendChild(joinStrategyNode);

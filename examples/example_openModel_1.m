@@ -25,6 +25,7 @@ options.keep=true;
 options.verbose=1;
 options.cutoff = 10;
 options.seed = 23000;
+options.iter_max = 200;
 %options.samples=2e4;
 
 disp('This example shows the execution of the solver on a 1-class 2-node open model.')

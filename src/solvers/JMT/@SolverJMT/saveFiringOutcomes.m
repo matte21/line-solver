@@ -14,7 +14,7 @@ outputs = [find(sn.connmatrix(ind,:))];
 connections = {sn.nodenames{outputs}};    
 numOfOutput = length(connections);
 
-numOfModes = sn.nmodes(ind);
+numOfModes = sn.nodeparam{ind}.nmodes;
 numOfClasses = length(self.model.classes);
 for m=1:numOfModes
     
@@ -59,7 +59,7 @@ for m=1:numOfModes
             subParameterNode.setAttribute('name', 'firingEntry');
             
             valueNode2 = simDoc.createElement('value');
-            valueNode2.appendChild(simDoc.createTextNode(int2str(sn.firing{ind}{m}(outputs(k),j))));
+            valueNode2.appendChild(simDoc.createTextNode(int2str(sn.nodeparam{ind}.firing{m}(outputs(k),j))));
             
             subParameterNode.appendChild(valueNode2);
             subFiringEntriesNode.appendChild(subParameterNode);

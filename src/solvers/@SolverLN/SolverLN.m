@@ -248,7 +248,7 @@ classdef SolverLN < LayeredNetworkSolver & EnsembleSolver
                     otherwise
                         refreshService(self.ensemble{e});
                 end                
-                %self.solvers{e}.reset(); %% commenting this out des not seem to produce a problem
+                self.solvers{e}.reset(); % commenting this out des not seem to produce a problem, but it goes faster with it
             end
             
             if it==1

@@ -1,13 +1,12 @@
 model = LayeredNetwork('cacheInLayeredNetwork');
 
-%% definition of layered network
 %% client
 P1 = Processor(model, 'P1', 1, SchedStrategy.PS);
 T1 = Task(model, 'T1', 1, SchedStrategy.REF).on(P1);
 E1 = Entry(model, 'E1').on(T1);
 
 %% cachetask
-totalitems = 3;
+totalitems = 4;
 cachecapacity = 2;
 pAccess = DiscreteSampler((1/totalitems)*ones(1,totalitems));
 PC = Processor(model, 'PC', 1, SchedStrategy.PS);

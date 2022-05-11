@@ -1,34 +1,22 @@
-function [Pr,G,runtime] = solver_nc_jointaggr_ld(sn, options)
-% [PR,G,RUNTIME] = SOLVER_NC_JOINTAGGR(QN, OPTIONS)
+function [Pr,G,lG,runtime] = solver_nc_jointaggr_ld(sn, options)
+% [PR,G,LG,RUNTIME] = SOLVER_NC_JOINTAGGR(QN, OPTIONS)
 
 % Copyright (c) 2012-2022, Imperial College London
 % All rights reserved.
 
-M = sn.nstations;    %number of stations
-K = sn.nclasses;    %number of classes
+%% initialization
 state = sn.state;
 S = sn.nservers;
-NK = sn.njobs';  % initial population per class
-C = sn.nchains;
-PH = sn.proc;
-%% initialization
-
+rates = sn.rates;
 % determine service times
-ST = zeros(M,K);
-for k = 1:K
-    for i=1:M
-        ST(i,k) = 1 ./ map_lambda(PH{i}{k});
-    end
-end
+ST  = 1./rates;
 ST(isnan(ST))=0;
-
-[Lchain, STchain, Vchain, alpha, Nchain] = snGetDemandsChain(sn);
+[Lchain,STchain,~,alpha,Nchain] = snGetDemandsChain(sn);
 
 Tstart = tic;
 
 [M,K]=size(STchain);
 
-Lchain = zeros(M,K);
 mu_chain = ones(M,sum(Nchain));
 for i=1:M
     if isinf(S(i)) % infinite server
@@ -38,22 +26,21 @@ for i=1:M
     end
 end
 
-G = exp(pfqn_ncld(Lchain, Nchain, 0*Nchain, mu_chain));
-Pr = 1;
+lG = pfqn_ncld(Lchain, Nchain, 0*Nchain, mu_chain);
+lPr = 0;
 for i=1:M
     isf = sn.stationToStateful(i);
     [~,nivec] = State.toMarginal(sn, i, state{isf});
     nivec_chain = nivec * sn.chains';
-    F_i = exp(pfqn_ncld(Lchain(i,:), nivec_chain, 0*nivec_chain, mu_chain(i,:)));
-    g0_i = exp(pfqn_ncld(ST(i,:).*alpha(i,:), nivec, 0*nivec, mu_chain(i,:)));
-    G0_i = exp(pfqn_ncld(STchain(i,:),nivec_chain, 0*nivec_chain, mu_chain(i,:)));
-    Pr = Pr * F_i * (g0_i / G0_i);
+    lF_i = pfqn_ncld(Lchain(i,:), nivec_chain, 0*nivec_chain, mu_chain(i,:), options);
+    lg0_i = pfqn_ncld(ST(i,:).*alpha(i,:), nivec, 0*nivec, mu_chain(i,:), options);
+    lG0_i = pfqn_ncld(STchain(i,:),nivec_chain, 0*nivec_chain, mu_chain(i,:), options);
+    lPr = lPr + lF_i + (lg0_i - lG0_i);
 end
-Pr = Pr / G;
-
+Pr = exp(lPr - lG);
+G=exp(lG);
 runtime = toc(Tstart);
 
-lG = log(G);
 if options.verbose
     line_printf('\nNormalizing constant (NC) analysis completed. Runtime: %f seconds.\n',runtime);
 end

@@ -264,11 +264,11 @@ if sn.isstation(ind)
                 end
                 switch sn.routing(ind,class)
                     case RoutingStrategy.ID_RROBIN
-                        idx = find(space_var(sum(sn.nvars(ind,1:(R+class)))) == sn.varsparam{ind}{class}.outlinks);
-                        if idx < length(sn.varsparam{ind}{class}.outlinks)
-                            space_var(sum(sn.nvars(ind,1:(R+class)))) = sn.varsparam{ind}{class}.outlinks(idx+1);
+                        idx = find(space_var(sum(sn.nvars(ind,1:(R+class)))) == sn.nodeparam{ind}{class}.outlinks);
+                        if idx < length(sn.nodeparam{ind}{class}.outlinks)
+                            space_var(sum(sn.nvars(ind,1:(R+class)))) = sn.nodeparam{ind}{class}.outlinks(idx+1);
                         else
-                            space_var(sum(sn.nvars(ind,1:(R+class)))) = sn.varsparam{ind}{class}.outlinks(1);
+                            space_var(sum(sn.nvars(ind,1:(R+class)))) = sn.nodeparam{ind}{class}.outlinks(1);
                         end
                 end
                 if sir(class)>0 % is a job of class is in service
@@ -687,15 +687,15 @@ elseif sn.isstateful(ind)
                         outrate = Distrib.InfRate*ones(size(outspace,1)); % passive action, rate is unspecified
                     end
                 case EventType.ID_READ
-                    n = sn.varsparam{ind}.nitems; % n items
-                    m = sn.varsparam{ind}.cap; % capacity
-                    ac = sn.varsparam{ind}.accost; % access cost
-                    hitclass = sn.varsparam{ind}.hitclass;
-                    missclass = sn.varsparam{ind}.missclass;
+                    n = sn.nodeparam{ind}.nitems; % n items
+                    m = sn.nodeparam{ind}.itemcap; % capacity
+                    ac = sn.nodeparam{ind}.accost; % access cost
+                    hitclass = sn.nodeparam{ind}.hitclass;
+                    missclass = sn.nodeparam{ind}.missclass;
                     h = length(m);
-                    rpolicy_id = sn.varsparam{ind}.rpolicy;
+                    rpolicy_id = sn.nodeparam{ind}.rpolicy;
                     if space_srv(class)>0 && sum(space_srv)==1 % is a job of class is in
-                        p = sn.varsparam{ind}.pref{class};
+                        p = sn.nodeparam{ind}.pread{class};
                         en =  space_srv(:,class) > 0;
                         space_srv_k = [];
                         space_var_k = [];

@@ -1,5 +1,5 @@
-function [ymean, ymean_t, t, iter] = solver_fluid_iteration(sn, N, Mu, Phi, PH, P, S, ymean, ydefault, slowrate, Tstart, max_time, options)
-% [YMEAN, YMEAN_T, T, ITER] = SOLVER_FLUID_ITERATION(QN, N, MU, PHI, PH, P, S, YMEAN, YDEFAULT, SLOWRATE, TSTART, MAX_TIME, OPTIONS)
+function [xvec_it, xvec_t, t, iter] = solver_fluid_iteration(sn, N, Mu, Phi, PH, P, S, xvec_it, ydefault, slowrate, Tstart, max_time, options)
+% [XVEC_IT, XVEC_T, T, ITER] = SOLVER_FLUID_ITERATION(QN, N, MU, PHI, PH, P, S, YMEAN, YDEFAULT, SLOWRATE, TSTART, MAX_TIME, OPTIONS)
 
 % Copyright (c) 2012-2022, Imperial College London
 % All rights reserved.
@@ -17,7 +17,7 @@ allt=[];
 ally =[];
 lastmsg = '';
 t=[];
-ymean_t=[];
+xvec_t=[];
 % heuristic to select stiff or non-stiff ODE solver
 nonZeroRates = slowrate(:);
 nonZeroRates = nonZeroRates( nonZeroRates >Distrib.Tol );
@@ -31,7 +31,7 @@ rategap = log10(max(nonZeroRates)/min(nonZeroRates)); % if the max rate is Distr
 T0 = timespan(1);
 %opt = odeset();
 %opt = odeset('AbsTol', min(10^(-rategap),1e-4), 'RelTol', 1e-3, 'NonNegative', 1:length(y0));
-odeopt = odeset('AbsTol', tol, 'RelTol', tol, 'NonNegative', 1:length(ymean{1}));
+odeopt = odeset('AbsTol', tol, 'RelTol', tol, 'NonNegative', 1:length(xvec_it{1}));
 T = 0;
 while (isfinite(timespan(2)) && T < timespan(2)) || (goon && iter < iter_max)
     iter = iter + 1;
@@ -41,7 +41,7 @@ while (isfinite(timespan(2)) && T < timespan(2)) || (goon && iter < iter_max)
     end
     
     % determine entry state vector in e
-    y0 = ymean{iter-1 +1};
+    y0 = xvec_it{iter-1 +1};
     
     if iter == 1 % first iteration
         T = min(timespan(2),abs(10/min(nonZeroRates))); % solve ode until T = 1 event with slowest exit rate
@@ -61,10 +61,10 @@ while (isfinite(timespan(2)) && T < timespan(2)) || (goon && iter < iter_max)
         odeopt = odeset('AbsTol', tol, 'RelTol', tol, 'NonNegative', 1:length(ydefault));
         [t_iter, ymean_t_iter] = ode_solve(ode_h, trange, ydefault, odeopt, options);
     end
-    ymean_t(end+1:end+size(ymean_t_iter,1),:) = ymean_t_iter;
+    xvec_t(end+1:end+size(ymean_t_iter,1),:) = ymean_t_iter;
     t(end+1:end+size(t_iter,1),:) = t_iter;
-    ymean{iter +1} = ymean_t(end,:);
-    movedMassRatio = norm(ymean{iter +1} - ymean{iter-1 +1}, 1) / 2 / sum(ymean{iter-1 +1});
+    xvec_it{iter +1} = xvec_t(end,:);
+    movedMassRatio = norm(xvec_it{iter +1} - xvec_it{iter-1 +1}, 1) / 2 / sum(xvec_it{iter-1 +1});
     T0  = T; % for next iteration
     
     if nargout>3
@@ -73,7 +73,7 @@ while (isfinite(timespan(2)) && T < timespan(2)) || (goon && iter < iter_max)
         else
             allt = [allt; allt(end)+t];
         end
-        ally = [ally; ymean_t];
+        ally = [ally; xvec_t];
     end
     
     % check termination condition

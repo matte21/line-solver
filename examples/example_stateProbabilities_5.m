@@ -50,6 +50,8 @@ end
 state = model.getState;
 
 %% getProbAggr
+% marginal probabilities for the aggregated state space where station i
+% is specified by a tuple (nir), r=1,...R, R being the number of classes.
 solver = SolverCTMC(model,options);
 Pr = solver.getProbAggr(node{M});
 fprintf(1,'Station %d is in state %s with probability %d\n',i,mat2str(state{i}),Pr);
@@ -71,6 +73,8 @@ fprintf(1,'Station %d is in state %s with probability %d\n',i,mat2str(state{i}),
 Pmarga_jmt = Pr
 
 %% getProb
+% marginal probabilities for the detailed state space, which tracks also
+% the phases of service
 solver = SolverCTMC(model,options);
 Pr = solver.getProb(node{M});
 fprintf(1,'Station %d is in state %s with probability %d\n',i,mat2str(state{i}),Pr);
@@ -78,7 +82,7 @@ Pmarg_ctmc = Pr
 
 % solver = SolverNC(model,options);
 % Pr = solver.getProb(node{M});
-% Pjoint_nc = Pr
+% Pmarg_nc = Pr
 
 solver = SolverSSA(model,options);
 Pr = solver.getProb(node{M});
@@ -86,6 +90,8 @@ fprintf(1,'Station %d is in state %s with probability %d\n',i,mat2str(state{i}),
 Pmarg_ssa = Pr
 
 %% getProbSysAggr
+% joint state probabilities for the aggregated state space where station i
+% is specified by a tuple (nir), r=1,...R, R being the number of classes.
 solver = SolverCTMC(model,options);
 Pr = solver.getProbSysAggr();
 Pjointa_ctmc = Pr
@@ -103,6 +109,8 @@ Pr = solver.getProbSysAggr();
 Pjointa_jmt = Pr
 
 %% getProbSys
+% joint state probabilities for the detailed state space, which tracks also
+% the phases of service
 solver = SolverCTMC(model,options);
 Pr = solver.getProbSys();
 Pjoint_ctmc = Pr

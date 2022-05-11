@@ -14,7 +14,8 @@ classdef HyperExp < MarkovianDistribution
                 p = varargin{1};
                 lambda = varargin{2};
                 setParam(self, 1, 'p', p);
-                setParam(self, 2, 'lambda', lambda);
+                setParam(self, 2, 'lambda1', lambda);
+                setParam(self, 3, 'lambda2', lambda);
             elseif length(varargin)==3
                 p1 = varargin{1};
                 lambda1 = varargin{2};

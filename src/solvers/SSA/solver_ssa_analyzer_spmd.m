@@ -76,11 +76,11 @@ spmd
         for isf=1:snc.nstateful
             if snc.nodetype(isf) == NodeType.Cache
                 ind = snc.statefulToNode(isf);
-                if length(snc.varsparam{ind}.hitclass)>=k
-                    h = snc.varsparam{ind}.hitclass(k);
-                    m = snc.varsparam{ind}.missclass(k);
-                    snc.varsparam{ind}.actualhitprob(k) = TNcache(isf,h)/sum(TNcache(isf,[h,m]));
-                    snc.varsparam{ind}.actualmissprob(k) = TNcache(isf,m)/sum(TNcache(isf,[h,m]));
+                if length(snc.nodeparam{ind}.hitclass)>=k
+                    h = snc.nodeparam{ind}.hitclass(k);
+                    m = snc.nodeparam{ind}.missclass(k);
+                    snc.nodeparam{ind}.actualhitprob(k) = TNcache(isf,h)/sum(TNcache(isf,[h,m]));
+                    snc.nodeparam{ind}.actualmissprob(k) = TNcache(isf,m)/sum(TNcache(isf,[h,m]));
                 end
             end
         end
@@ -99,13 +99,13 @@ for k=1:K
     for isf=1:sn.nstateful
         if sn.nodetype(isf) == NodeType.Cache
             ind = sn.statefulToNode(isf);
-            sn.varsparam{ind}.actualhitprob(k) = 0;
-            sn.varsparam{ind}.actualmissprob(k) = 0;
+            sn.nodeparam{ind}.actualhitprob(k) = 0;
+            sn.nodeparam{ind}.actualmissprob(k) = 0;
             for l=1:nLabs
                 qntmp = snc{l};                
-                if length(qntmp.varsparam{ind}.hitclass)>=k                
-                    sn.varsparam{ind}.actualhitprob(k) = sn.varsparam{ind}.actualhitprob(k) + (1/nLabs) * qntmp.varsparam{ind}.actualhitprob(k);
-                    sn.varsparam{ind}.actualmissprob(k) = sn.varsparam{ind}.actualmissprob(k) + (1/nLabs) * qntmp.varsparam{ind}.actualmissprob(k);
+                if length(qntmp.nodeparam{ind}.hitclass)>=k                
+                    sn.nodeparam{ind}.actualhitprob(k) = sn.nodeparam{ind}.actualhitprob(k) + (1/nLabs) * qntmp.nodeparam{ind}.actualhitprob(k);
+                    sn.nodeparam{ind}.actualmissprob(k) = sn.nodeparam{ind}.actualmissprob(k) + (1/nLabs) * qntmp.nodeparam{ind}.actualmissprob(k);
                 end
             end
         end

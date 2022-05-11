@@ -38,6 +38,15 @@ classdef Erlang < MarkovianDistribution
             r = self.getParam(2).paramValue;
             SCV = 1/r;
         end
+
+        function updateMean(self,MEAN)
+            % UPDATEMEAN(SELF,MEAN)            
+            % Update parameters to match the given mean
+            updateMean@MarkovianDistribution(self,MEAN);
+            r = self.getParam(2).paramValue;
+            self.setParam(1, 'alpha', r/MEAN);            
+        end
+        
         
         function Ft = evalCDF(self,t)
             % FT = EVALCDF(SELF,T)

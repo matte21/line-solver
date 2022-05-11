@@ -1,0 +1,136 @@
+function [QN,UN,RN,TN,xvec_it,QNt,UNt,TNt,xvec_t,t,iters,runtime] = solver_fluid_matrix(sn, options)
+
+% [QN,UN,RN,TN,CN,RUNTIME] = SOLVER_FLUID_MATRIX(QN, OPTIONS)
+
+% Copyright (c) 2012-2022, Imperial College London
+% All rights reserved.
+
+T0 = tic;
+M = sn.nstations;    %number of stations
+K = sn.nclasses;    %number of classes
+pie = sn.pie;
+PH = sn.proc;
+P = sn.rt;
+NK = sn.njobs';  %initial population
+S = sn.nservers;
+infServers = isinf(S);
+S(infServers) = sum(NK);
+nphases = sn.phases;
+%refstat = sn.refstat; % reference station
+weights = ones(M,K);
+
+% ODE building as per Ruuskanen et al., PEVA 151 (2021).
+Psi = [];
+A = [];
+B = [];
+for i=1:M
+    for r=1:K
+        Psi = blkdiag(Psi,PH{i}{r}{1});
+        B = blkdiag(B,sum(PH{i}{r}{2},2));
+        A = blkdiag(A,pie{i}{r}');        
+    end
+end
+W = Psi + B*P*A';
+
+Qa = []; % state mapping to queues (called Q(a) in Ruuskanen et al.)
+SQC = zeros(M,0); % to compute per-class queue length at the end
+SUC = zeros(M,0); % to compute per-class utilizations at the end
+STC = zeros(M,0); % to compute per-class throughput at the end
+x0 = options.init_sol(:);
+%x0 = []; % initial state
+state = 0;
+for i=1:M
+    for r=1:K
+        for k=1:nphases(i,r)
+            state = state + 1;
+            Qa(1,state)=i; %#ok<*AGROW>
+            SQC((i-1)*K+r,state) = 1;
+            SUC((i-1)*K+r,state) = 1/S(i);
+            STC((i-1)*K+r,state) = sum(sn.proc{i}{r}{2}(k,:));
+        end
+        % code to initialize all jobs at ref station
+        %if i == refstat(r)
+        %    x0 = [x0; NK(r)*pie{i}{r}']; % initial probability of PH
+        %else
+        %    x0 = [x0; zeros(nphases(i,r),1)];
+        %end
+    end
+end
+
+SQ = zeros(0,length(x0)); % to compute total queue length in ODEs
+for i=1:M
+    for r=1:K
+        for k=1:nphases(i,r)
+            SQ(end+1,find(Qa==i)) = weights(i,r); %#ok<FNDSB>
+        end
+    end
+end
+
+%x0
+
+tol = options.tol;
+timespan = options.timespan;
+itermax = options.iter_max;
+odeopt = odeset('AbsTol', tol, 'RelTol', tol, 'NonNegative', 1:length(x0));
+nonZeroRates = abs(W(abs(W)>0)); nonZeroRates=nonZeroRates(:);
+trange = [timespan(1),min(timespan(2),abs(10*itermax/min(nonZeroRates)))];
+
+iters = 1;
+if options.stiff
+    [t, xvec_t] = ode_solve_stiff(@(t,x) W'*(x./(Distrib.Zero+SQ*x).*min(S(Qa),Distrib.Zero+SQ*x)), trange, x0, odeopt, options);
+else
+    [t, xvec_t] = ode_solve(@(t,x) W'*(x./(Distrib.Zero+SQ*x).*min(S(Qa),Distrib.Zero+SQ*x)), trange, x0, odeopt, options);
+end
+
+Tmax = size(xvec_t,1);
+QNtmp = cell(1,Tmax);
+UNtmp = cell(1,Tmax);
+RNtmp = cell(1,Tmax);
+TNtmp = cell(1,Tmax);
+Sa = S(Qa);
+S = repmat(S,1,K)'; S=S(:);
+for j=1:Tmax
+    x = xvec_t(j,:)';
+    QNtmp{j} = SQC*x;
+    QNtmp{j} = reshape(QNtmp{j},K,M)';
+    TNtmp{j} = STC*(x./(Distrib.Zero+SQ*x).*min(Sa,Distrib.Zero+SQ*x));
+    UNtmp{j} = SUC*(x./(Distrib.Zero+SQ*x).*min(Sa,Distrib.Zero+SQ*x));
+    TNtmp{j} = reshape(TNtmp{j},K,M)';
+    UNtmp{j} = reshape(UNtmp{j},K,M)';
+    % Little's law is invalid in transient so this vector is not returned
+    % except the last element as an approximation of the actual RN
+    RNtmp{j} = QNtmp{j}./TNtmp{j};
+    RNtmp{j} = reshape(RNtmp{j},M,K);
+end
+% steady state metrics
+for j=1:Tmax
+    QNtmp{j} = QNtmp{j}(:);
+    UNtmp{j} = UNtmp{j}(:);
+    RNtmp{j} = RNtmp{j}(:);
+    TNtmp{j} = TNtmp{j}(:);
+end
+
+% compute cell array with time-varying metrics for stations and classes
+QNtmp = cell2mat(QNtmp)';
+UNtmp = cell2mat(UNtmp)';
+RNtmp = cell2mat(RNtmp)';
+TNtmp = cell2mat(TNtmp)';
+QNt = cell(M,K);
+UNt = cell(M,K);
+RNt = cell(M,K);
+TNt = cell(M,K);
+for i=1:M
+    for r=1:K
+        QNt{i,r} = QNtmp(:,(i-1)*K+r);
+        UNt{i,r} = UNtmp(:,(i-1)*K+r);
+        RNt{i,r} = RNtmp(:,(i-1)*K+r);
+        TNt{i,r} = TNtmp(:,(i-1)*K+r);
+    end
+end
+QN = reshape(QNtmp(end,:),M,K);
+UN = reshape(UNtmp(end,:),M,K);
+RN = reshape(RNtmp(end,:),M,K);
+TN = reshape(TNtmp(end,:),M,K);
+runtime = toc(T0);
+xvec_it = {xvec_t(end,:)};
+end

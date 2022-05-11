@@ -55,17 +55,17 @@ end
 
 %% define ODE system to be returned
 switch options.method
-    case {'default','stateindep'}
+    case 'statedep'
+        ode_sd_h = @(t,x) ode_statedep(x, phi, Mu, PH, M, K, enabled, q_indices, P, Kic, nservers, w, schedid);
+        ode_h = ode_sd_h;
+        %ode_sd_h = @(t,x) ode_hybrid(x, Phi, Mu, PH, M, K, enabled, q_indices, P, Kic, nservers, w, sched_id, all_jumps, rateBase, eventIdx);
+    otherwise
         % determine all the jumps, and saves them for later use
         all_jumps = ode_jumps_new(M, K, enabled, q_indices, P, Kic);
         % determines a vector with the fixed part of the rates,
         % and defines the indexes that correspond to the events that occur
         [rateBase, eventIdx] = ode_rate_base(phi, Mu, PH, M, K, enabled, q_indices, P, Kic, schedid, all_jumps);
-        ode_si_h = @(t,x) all_jumps * ode_rates_stateindep(x, M, K, enabled, q_indices, Kic, nservers, w, schedid, rateBase, eventIdx);
+        ode_si_h = @(t,x) all_jumps * ode_rates_closing(x, M, K, enabled, q_indices, Kic, nservers, w, schedid, rateBase, eventIdx);
         ode_h = ode_si_h;
-    case 'statedep'
-        ode_sd_h = @(t,x) ode_statedep(x, phi, Mu, PH, M, K, enabled, q_indices, P, Kic, nservers, w, schedid);
-        ode_h = ode_sd_h;
-        %ode_sd_h = @(t,x) ode_hybrid(x, Phi, Mu, PH, M, K, enabled, q_indices, P, Kic, nservers, w, sched_id, all_jumps, rateBase, eventIdx);
 end
 end

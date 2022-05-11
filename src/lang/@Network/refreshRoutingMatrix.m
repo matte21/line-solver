@@ -4,32 +4,32 @@ function [rt, rtfun, rtnodes, sn] = refreshRoutingMatrix(self, rates)
 % Copyright (c) 2012-2022, Imperial College London
 % All rights reserved.
 
+sn = self.sn;
 if nargin == 1
-    if isempty(self.sn)
+    if isempty(sn)
         line_error(mfilename,'refreshRoutingMatrix cannot retrieve station rates, pass them as an input parameters.');
     else
-        rates = self.sn.rates;
+        rates = sn.rates;
     end
 end
-
-sn = self.sn;
-M = self.getNumberOfNodes;
-K = getNumberOfClasses(self);
+M = sn.nnodes;
+K = sn.nclasses;
 arvRates = zeros(1,K);
-stateful = self.getIndexStatefulNodes;
+stateful = find(sn.isstateful)';
 
-for r = self.getIndexOpenClasses
-    arvRates(r) = rates(self.getIndexSourceStation,r);
+indSource = find(sn.nodetype == NodeType.ID_SOURCE);
+indOpenClasses = find(sn.njobs == Inf);
+for r = indOpenClasses
+    arvRates(r) = rates(sn.nodeToStation(indSource),r);
 end
 
-self.sn = sn;
 [rt, rtnodes, linksmat, chains] = self.getRoutingMatrix(arvRates);
 sn = self.sn;
 sn.chains = chains;
 
 if self.enableChecks
-    for r=1:self.sn.nclasses
-        if all(self.sn.routing(:,r) == -1)
+    for r=1:K
+        if all(sn.routing(:,r) == -1)
             line_error(mfilename,sprintf('Routing strategy in class %d is unspecified at all nodes.',r));
         end
     end

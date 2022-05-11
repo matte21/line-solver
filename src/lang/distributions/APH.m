@@ -60,6 +60,7 @@ classdef APH < MarkovianDistribution
             [alpha,T] = APHFrom3Moments([e1,e2,e3]);
             self.setParam(1, 'alpha', alpha);
             self.setParam(2, 'T', T);
+            self.immediate = NaN;
         end
 
         function updateFromRawMoments(self,varargin)
@@ -155,16 +156,14 @@ classdef APH < MarkovianDistribution
             end
             self.setParam(1, 'alpha', alpha);
             self.setParam(2, 'T', T);
+            self.immediate = NaN;
         end
 
         function updateMean(self,MEAN)
             % UPDATEMEAN(SELF,MEAN)
 
             % Update parameters to match the given mean
-            APH = self.getRepres;
-            APH = map_scale(APH,MEAN);
-            self.setParam(1, 'alpha', map_pie(APH));
-            self.setParam(2, 'T', APH{1});
+            updateMean@MarkovianDistribution(self,MEAN);
         end
 
         function updateMeanAndSCV(self, MEAN, SCV)
@@ -177,6 +176,7 @@ classdef APH < MarkovianDistribution
             [alpha,T] = APHFrom2Moments([e1,e2]);
             self.setParam(1, 'alpha', alpha);
             self.setParam(2, 'T', T);
+            self.immediate = NaN;
         end
 
         function APH = getRepres(self)

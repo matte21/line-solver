@@ -17,16 +17,21 @@ lGremaind= 0;
 zerodemands=find(L<1e-6);
 if ~isempty(zerodemands)
     lGremaind = lGremaind + N(zerodemands) * log(Z(zerodemands))' - sum(log(N(zerodemands)));
-    L(zerodemands)=[];
-    Z(zerodemands)=[];
-    N(zerodemands)=[];
+    L(:,zerodemands)=[];
+    Z(:,zerodemands)=[];
+    N(:,zerodemands)=[];
 end
-% find zero think time classes
-%zerothinktimes=find(Z<1e-6);
-%if ~isempty(zerothinktimes)
-%    lGremaind = lGremaind + log(sum(N(zerothinktimes))) + N(zerothinktimes) * log(L(zerothinktimes))' - sum(log(N(zerothinktimes)));
-%    L(zerothinktimes)=[];
-%    Z(zerothinktimes)=[];
-%    N(zerothinktimes)=[];
-%end
+% rescale demands
+Lmax = max(L,[],1); % use L, which has been santized to always be ~=0
+L = L./repmat(Lmax,size(L,1),1);
+Z = Z./repmat(Lmax,size(Z,1),1);
+lGremaind = lGremaind + N*log(Lmax)';
+% sort from smallest to largest think time
+[~,rsort] = sort(Z,'ascend'); L=L(:,rsort); N=N(:,rsort); Z=Z(:,rsort);
+% ensure zero think time classes are anyway frist
+zerothinktimes=find(Z<1e-16);
+nonzerothinktimes = setdiff(1:size(L,2),zerothinktimes);
+L=L(:,[zerothinktimes,nonzerothinktimes]);
+N=N(:,[zerothinktimes,nonzerothinktimes]);
+Z=Z(:,[zerothinktimes,nonzerothinktimes]);
 end

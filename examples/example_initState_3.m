@@ -44,7 +44,6 @@ solver{end+1} = SolverJMT(model,options);
 solver{end+1} = SolverSSA(model,options);
 solver{end+1} = SolverFluid(model,options);
 solver{end+1} = SolverMVA(model,options);
-options.method = 'pnc2';
 solver{end+1} = SolverNC(model,options);
 AvgTable = [];
 for s=1:length(solver)

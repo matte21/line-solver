@@ -376,7 +376,7 @@ for r=1:numOfClasses
                 subParNodeAlpha.setAttribute('classPath', 'java.lang.String');
                 subParNodeAlpha.setAttribute('name', 'fileName');
                 subParValue = simDoc.createElement('value');
-                subParValue.appendChild(simDoc.createTextNode(sn.varsparam{ind}{r}.fileName));
+                subParValue.appendChild(simDoc.createTextNode(sn.nodeparam{ind}{r}.fileName));
                 subParNodeAlpha.appendChild(subParValue);
                 distrParNode.appendChild(subParNodeAlpha);
         end        

@@ -14,7 +14,8 @@ for c=1:sn.nchains
     s = inchain(N(inchain)>0); % tag a class that has non-zero jobs.
     jobclass = self.model.getClassByIndex(s);
     chain = self.model.getClassChain(jobclass);
-    [taggedModel, taggedJob] = self.model.tagChain(chain,jobclass); % diminish jobclass population by 1
+    [taggedModel, taggedJob] = self.model.tagChain(chain,jobclass); % diminish jobclass population by 1    
+    %taggedModel.stations{:}
     [Q,F,ev] = SolverCTMC(taggedModel,self.options).getGenerator(); % Q: generator, F: filtration, ev: events
     tsn = taggedModel.getStruct;
     tinchain = cell2mat(taggedJob.index);

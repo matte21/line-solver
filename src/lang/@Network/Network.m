@@ -76,7 +76,7 @@ classdef Network < Model
         [sched, schedid, schedparam] = refreshScheduling(self);
         [rates, mu, phi, phases] = refreshArrival(self);
         [rates, scv, mu, phi, phases] = refreshService(self, statSet, classSet);
-        [chains, visits, rt] = refreshChains(self, propagate)        
+        [chains, visits, rt] = refreshChains(self, propagate)
         [cap, classcap] = refreshCapacity(self);
         nvars = refreshLocalVars(self);
     end
@@ -101,7 +101,7 @@ classdef Network < Model
             self.sourceidx = [];
             self.sinkidx = [];
             self.setChecks(true);
-            self.hasStruct = false;            
+            self.hasStruct = false;
         end
 
         setInitialized(self, bool);
@@ -222,7 +222,7 @@ classdef Network < Model
 
         function stationnames = getStationNames(self)
             % STATIONNAMES = GETSTATIONNAMES()
-            
+
             if self.hasStruct
                 nodenames = self.sn.nodenames;
                 isstation = self.sn.isstation;
@@ -303,14 +303,14 @@ classdef Network < Model
         end
 
         function summary(self)
-            % SUMMARY()            
+            % SUMMARY()
             for i=1:self.getNumberOfNodes
                 self.nodes{i}.summary();
             end
             line_printf('\n<strong>Routing matrix</strong>:');
             self.printRoutingMatrix
             line_printf('\n<strong>Product-form parameters</strong>:');
-            [arvRates,svcDemands,nJobs,thinkTimes,ldScalings,nServers]= getProductFormParameters(self)            
+            [arvRates,svcDemands,nJobs,thinkTimes,ldScalings,nServers]= getProductFormParameters(self)
         end
 
         function [D,Z] = getDemands(self)
@@ -326,6 +326,32 @@ classdef Network < Model
             % required by MVALDMX
 
             [lambda,D,N,Z,mu,S] = snGetProductFormParams(self.getStruct);
+        end
+
+        function [lambda,D,N,Z,mu,S]= getProductFormChainParameters(self)
+            % [LAMBDA,D,N,Z,MU,S]= GETPRODUCTFORMCHAINPARAMETERS()
+
+            % mu also returns max(S) elements after population |N| as this is
+            % required by MVALDMX
+        
+            qn = self.getStruct; 
+            [lambda,~,N,~,mu,~] = snGetProductFormParams(qn);
+            [Dchain,~,~,alpha,Nchain,~,~] = snGetDemandsChain(qn);            
+            for c=1:qn.nchains
+                lambda_chains(c) = sum(lambda(qn.inchain{c}));
+                if qn.refclass(c)>0
+                    D_chains(:,c) = Dchain(find(isfinite(qn.nservers)),c)/alpha(qn.refstat(c),qn.refclass(c));
+                    Z_chains(:,c) = Dchain(find(isinf(qn.nservers)),c)/alpha(qn.refstat(c),qn.refclass(c));
+                else
+                    D_chains(:,c) = Dchain(find(isfinite(qn.nservers)),c);
+                    Z_chains(:,c) = Dchain(find(isinf(qn.nservers)),c);
+                end
+            end           
+            S = qn.nservers(find(isfinite(qn.nservers)));
+            lambda = lambda_chains;
+            N = Nchain;
+            D = D_chains;
+            Z = Z_chains;
         end
 
         function statefulnodes = getStatefulNodes(self)
@@ -485,7 +511,7 @@ classdef Network < Model
 
             snPrintRoutingMatrix(self.getStruct);
         end
-        
+
         function [taggedModel, taggedJob] = tagChain(self, chain, jobclass, suffix)
             % the tagged job will be removed from the initial
             % population of JOBCLASS
@@ -508,7 +534,7 @@ classdef Network < Model
 
             taggedModel.resetNetwork; % resets cs Nodes as well
             taggedModel.reset(true);
-            
+
             chainIndexes = cell2mat(chain.index);
             for r=chainIndexes
                 % create a tagged class
@@ -516,9 +542,9 @@ classdef Network < Model
                 taggedModel.classes{end,1}.index=length(taggedModel.classes);
                 taggedModel.classes{end,1}.name=[taggedModel.classes{r,1}.name,suffix];
                 if r==jobclass.index
-                    taggedModel.classes{end}.population = 1;                
+                    taggedModel.classes{end}.population = 1;
                 else
-                    taggedModel.classes{end}.population = 0;                
+                    taggedModel.classes{end}.population = 0;
                 end
 
                 % clone station sections for tagged class
@@ -527,23 +553,28 @@ classdef Network < Model
                 end
 
                 for m=1:length(taggedModel.stations)
-                    if self.stations{m}.server.serviceProcess{end}{end}.isDisabled
+                    if self.stations{m}.server.serviceProcess{r}{end}.isDisabled
                         taggedModel.stations{m}.input.inputJobClasses(1,end+1) = {[]};
+                        taggedModel.stations{m}.serviceProcess{end+1} = taggedModel.stations{m}.server.serviceProcess{end}{end}.copy;
                         taggedModel.stations{m}.server.serviceProcess{end+1} = taggedModel.stations{m}.server.serviceProcess{r};
-                        taggedModel.stations{m}.server.serviceProcess{end}{end}=taggedModel.stations{m}.server.serviceProcess{end}{end}.copy;
+                        taggedModel.stations{m}.server.serviceProcess{end}{end}=taggedModel.stations{m}.server.serviceProcess{r}{end}.copy;
                         taggedModel.stations{m}.schedStrategyPar(end+1) = 0;
+                        taggedModel.stations{m}.dropRule(1,end+1) = -1;
                         taggedModel.stations{m}.classCap(1,r) = 0;
                         taggedModel.stations{m}.classCap(1,end+1) = 0;
                     else
                         taggedModel.stations{m}.input.inputJobClasses(1,end+1) = {taggedModel.stations{m}.input.inputJobClasses{1,r}};
+                        taggedModel.stations{m}.serviceProcess{end+1} = taggedModel.stations{m}.server.serviceProcess{r}{end}.copy;
                         taggedModel.stations{m}.server.serviceProcess{end+1} = taggedModel.stations{m}.server.serviceProcess{r};
-                        taggedModel.stations{m}.server.serviceProcess{end}{end}=taggedModel.stations{m}.server.serviceProcess{end}{end}.copy;
+                        taggedModel.stations{m}.server.serviceProcess{end}{end}=taggedModel.stations{m}.server.serviceProcess{r}{end}.copy;
                         taggedModel.stations{m}.schedStrategyPar(end+1) = taggedModel.stations{m}.schedStrategyPar(r);
                         taggedModel.stations{m}.classCap(1,end+1) = 1;
+                        taggedModel.stations{m}.dropRule(1,end+1) = -1;
                         taggedModel.stations{m}.classCap(1,r) = taggedModel.stations{m}.classCap(r) - 1;
                     end
                 end
             end
+                        
             taggedModel.classes{jobclass.index,1}.population = taggedModel.classes{jobclass.index}.population - 1;
 
             for ir=1:length(chainIndexes)
@@ -553,7 +584,7 @@ classdef Network < Model
                     Plinked{R+ir,R+is} = Plinked{r,s};
                 end
             end
-            Rp = taggedModel.getNumberOfClasses;            
+            Rp = taggedModel.getNumberOfClasses;
             for r=1:Rp
                 for s=1:Rp
                     if isempty(Plinked{r,s})
@@ -564,11 +595,12 @@ classdef Network < Model
             taggedModel.sn = [];
             taggedModel.link(Plinked);
             taggedModel.reset(true);
-            taggedModel.refreshStruct(true);
+            taggedModel.refreshStruct(true);            
+            taggedModel.initDefault;
             tchains = taggedModel.getChains;
             taggedJob = tchains{end};
         end
-           
+
     end
 
     % Private methods
@@ -776,7 +808,7 @@ classdef Network < Model
         end
 
         function varargout = getMarkedCTMC( varargin )
-            [varargout{1:nargout}] = getCTMC( varargin{:} ); 
+            [varargout{1:nargout}] = getCTMC( varargin{:} );
         end
 
         function mctmc = getCTMC(self, par1, par2)

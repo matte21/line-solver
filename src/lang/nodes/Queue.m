@@ -132,36 +132,34 @@ classdef Queue < Station
             if nargin<4 %~exist('weight','var')
                 weight=1.0;
             end
-            resetInitState = false;
-            if length(self.server.serviceProcess) >= class.index % this is to enable the next if
-                if length(self.server.serviceProcess{1,class.index})<= 3 % if the distribution was already configured
-                    % this is a forced state reset in case for example the number of phases changes
-                    resetInitState = true; % must be carried out at the end
-                    self.state=[]; % reset the state vector
-                end
-            end
-            self.serviceProcess{class.index} = distribution;
-            self.input.inputJobClasses{class.index} = {class, self.schedPolicy, DropStrategy.WaitingQueue};
-            server = self.server;
-            server.serviceProcess{1, class.index}{2} = ServiceStrategy.LI;
-            
             if distribution.isImmediate()
-                server.serviceProcess{1, class.index}{3} = Immediate.getInstance();
-            else
-                server.serviceProcess{1, class.index}{3} = distribution;
+                distribution = Immediate.getInstance();
             end
-            if length(self.classCap) < class.index
-                self.classCap((length(self.classCap)+1):class.index) = Inf;
+            server = self.server; % by reference
+            c = class.index;
+            if length(server.serviceProcess) >= c && ~isempty(server.serviceProcess{1,c}) % if the distribution was already configured                   
+                    % this is a forced state reset in case for example the number of phases changes
+                    % appears to run faster without checks, probably due to
+                    % isa being slow
+                    %oldDistribution = server.serviceProcess{1, c}{3};
+                    %isOldMarkovian = isa(oldDistribution,'MarkovianDistribution');
+                    %isNewMarkovian = isa(distribution,'MarkovianDistribution');
+                    %if distribution.getNumParams ~= oldDistribution.getNumParams 
+                    % %|| (isOldMarkovian && ~isNewMarkovian) || (~isOldMarkovian && isNewMarkovian) || (isOldMarkovian && isNewMarkovian && distribution.getNumberOfPhases ~= oldDistribution.getNumberOfPhases)
+                        self.model.setInitialized(false); % this is a better way to invalidate to avoid that sequential calls to setService all trigger an initDefault
+                        self.state=[]; % reset the state vector
+                    %end
+            else % if first configuration
+                if length(self.classCap) < c
+                    self.classCap((length(self.classCap)+1):c) = Inf;
+                end
+                self.input.inputJobClasses{c} = {class, self.schedPolicy, DropStrategy.WaitingQueue};
+                self.setStrategyParam(class, weight);
+                self.dropRule(c) = DropStrategy.ID_WAITQ;
+                server.serviceProcess{1, c}{2} = ServiceStrategy.LI;                                       
             end
-            self.setStrategyParam(class, weight);
-            if resetInitState % invalidate initial state
-                %self.model.initDefault(self.model.getNodeIndex(self));
-                self.model.setInitialized(false); % this is a better way to invalidate to avoid that sequential calls to setService all trigger an initDefault
-            end
-            %if self.model.hasStruct
-            %self.model.refreshService(self.stationIndex,class.index);
-            %end
-            self.dropRule(class.index) = DropStrategy.ID_WAITQ;
+            server.serviceProcess{1, c}{3} = distribution;
+            self.serviceProcess{c} = distribution;            
         end
         
         function sections = getSections(self)

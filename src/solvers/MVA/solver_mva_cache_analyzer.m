@@ -16,9 +16,9 @@ sourceRate = sn.rates(source_ist,:);
 sourceRate(isnan(sourceRate)) = 0;
 TN(source_ist,:) = sourceRate;
 
-ch = sn.varsparam{sn.nodetype == NodeType.Cache};
+ch = sn.nodeparam{sn.nodetype == NodeType.Cache};
 
-m = ch.cap;
+m = ch.itemcap;
 n = ch.nitems;
 h = length(m);
 u = sn.nclasses;
@@ -27,8 +27,8 @@ lambda = zeros(u,n,h);
 for v=1:u
     for k=1:n
         for l=1:(h+1)
-            if ~isnan(ch.pref{v})
-                lambda(v,k,l) = sourceRate(v) * ch.pref{v}(k);
+            if ~isnan(ch.pread{v})
+                lambda(v,k,l) = sourceRate(v) * ch.pread{v}(k);
             end
         end
     end

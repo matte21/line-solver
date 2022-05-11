@@ -109,15 +109,15 @@ for k=1:K
     for isf=1:sn.nstateful
         if sn.nodetype(isf) == NodeType.Cache
             ind = sn.statefulToNode(isf);
-            if length(sn.varsparam{ind}.hitclass)>=k
-                h = sn.varsparam{ind}.hitclass(k);
-                m = sn.varsparam{ind}.missclass(k);
+            if length(sn.nodeparam{ind}.hitclass)>=k
+                h = sn.nodeparam{ind}.hitclass(k);
+                m = sn.nodeparam{ind}.missclass(k);
                 if h==0 || m==0
-                    sn.varsparam{ind}.actualhitprob(k) = NaN;
-                    sn.varsparam{ind}.actualmissprob(k) = NaN;
+                    sn.nodeparam{ind}.actualhitprob(k) = NaN;
+                    sn.nodeparam{ind}.actualmissprob(k) = NaN;
                 else
-                    sn.varsparam{ind}.actualhitprob(k) = TNcache(isf,h)/sum(TNcache(isf,[h,m]));
-                    sn.varsparam{ind}.actualmissprob(k) = TNcache(isf,m)/sum(TNcache(isf,[h,m]));
+                    sn.nodeparam{ind}.actualhitprob(k) = TNcache(isf,h)/sum(TNcache(isf,[h,m]));
+                    sn.nodeparam{ind}.actualmissprob(k) = TNcache(isf,m)/sum(TNcache(isf,[h,m]));
                 end
             end
         end

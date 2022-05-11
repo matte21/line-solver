@@ -22,22 +22,31 @@ UNclass_t={};
 %RNclass_t={};
 TNclass_t={};
 
+options = self.options;
+switch options.method 
+    case 'default'
+        options.method = 'closing';
+    otherwise
+        line_warning(mfilename,'getTranAvg is not offered by the specified method. Setting the solution method to ''''closing''''.');        
+        options.method = 'closing';
+        self.resetResults;
+end
 sn = self.model.getStruct;
 minrate = min(sn.rates(isfinite(sn.rates)));
 if ~hasTranResults(self)
-    if isinf(self.options.timespan(1)) && isinf(self.options.timespan(2))
-        self.options.timespan = [0,30/minrate];
-        line_warning(mfilename,'Timespan of transient analysis unspecified, setting the timespan option to [0, %d]. Use %s(model,''timespan'',[0,T]) to customize.',self.options.timespan(2),class(self));
+    if isinf(options.timespan(1)) && isinf(options.timespan(2))
+        options.timespan = [0,30/minrate];
+        line_warning(mfilename,'Timespan of transient analysis unspecified, setting the timespan option to [0, %d]. Use %s(model,''timespan'',[0,T]) to customize.',options.timespan(2),class(self));
     end
-    if isinf(self.options.timespan(1))
-        line_warning(mfilename,'Start time of transient analysis unspecified, setting the timespan option to [0,%d].',self.options.timespan(2));
-        self.options.timespan(1) = 0;
+    if isinf(options.timespan(1))
+        line_warning(mfilename,'Start time of transient analysis unspecified, setting the timespan option to [0,%d].',options.timespan(2));
+        options.timespan(1) = 0;
     end
-    if isinf(self.options.timespan(2))
-        self.options.timespan(2) = 30/minrate;
-        line_warning(mfilename,'End time of transient analysis unspecified, setting the timespan option to [%d,%d]. Use %s(model,''timespan'',[0,T]) to customize.',self.options.timespan(1),self.options.timespan(2),class(self));
+    if isinf(options.timespan(2))
+        options.timespan(2) = 30/minrate;
+        line_warning(mfilename,'End time of transient analysis unspecified, setting the timespan option to [%d,%d]. Use %s(model,''timespan'',[0,T]) to customize.',options.timespan(1),options.timespan(2),class(self));
     end
-    runAnalyzer(self);
+    runAnalyzer(self, options);
 end
 
 M = sn.nstations;
@@ -52,41 +61,41 @@ if ~isempty(Qt)
             %%
             if ~Qt{i,k}.disabled && ~isempty(self.result.Tran.Avg.Q)
                 ret = self.result.Tran.Avg.Q{i,k};
+                metricVal = struct();
+                metricVal.handle = {self.model.stations{i}, self.model.classes{k}};
+                metricVal.t = ret(:,2);
+                metricVal.metric = ret(:,1);
+                metricVal.isaggregate = true;
+                QNclass_t{i,k} = metricVal;
             else
                 ret = NaN;
             end
-            metricVal = struct();
-            metricVal.handle = {self.model.stations{i}, self.model.classes{k}};
-            metricVal.t = ret(:,2);
-            metricVal.metric = ret(:,1);
-            metricVal.isaggregate = true;
-            QNclass_t{i,k} = metricVal;
             
             %%
             if ~Ut{i,k}.disabled && ~isempty(self.result.Tran.Avg.U)
                 ret = self.result.Tran.Avg.U{i,k};
+                metricVal = struct();
+                metricVal.handle = {self.model.stations{i}, self.model.classes{k}};
+                metricVal.t = ret(:,2);
+                metricVal.metric = ret(:,1);
+                metricVal.isaggregate = true;
+                UNclass_t{i,k} = metricVal;
             else
                 ret = NaN;
             end
-            metricVal = struct();
-                metricVal.handle = {self.model.stations{i}, self.model.classes{k}};
-            metricVal.t = ret(:,2);
-            metricVal.metric = ret(:,1);
-            metricVal.isaggregate = true;
-            UNclass_t{i,k} = metricVal;
             
             %%
             if ~Tt{i,k}.disabled && ~isempty(self.result.Tran.Avg.T)
                 ret = self.result.Tran.Avg.T{i,k};
+                metricVal = struct();
+                metricVal.handle = {self.model.stations{i}, self.model.classes{k}};
+                metricVal.t = ret(:,2);
+                metricVal.metric = ret(:,1);
+                metricVal.isaggregate = true;
+                TNclass_t{i,k} = metricVal;
             else
                 ret = NaN;
             end
-            metricVal = struct();
-            metricVal.handle = {self.model.stations{i}, self.model.classes{k}};
-            metricVal.t = ret(:,2);
-            metricVal.metric = ret(:,1);
-            metricVal.isaggregate = true;
-            TNclass_t{i,k} = metricVal;
         end
     end
 end

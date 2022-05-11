@@ -67,8 +67,8 @@ if isinf(options.timespan(1))
         self.model.nodes{ind}.setState(sn.state{isf});
         switch class(self.model.nodes{sn.statefulToNode(isf)})
             case 'Cache'
-                self.model.nodes{sn.statefulToNode(isf)}.setResultHitProb(sn.varsparam{ind}.actualhitprob);
-                self.model.nodes{sn.statefulToNode(isf)}.setResultMissProb(sn.varsparam{ind}.actualmissprob);
+                self.model.nodes{sn.statefulToNode(isf)}.setResultHitProb(sn.nodeparam{ind}.actualhitprob);
+                self.model.nodes{sn.statefulToNode(isf)}.setResultMissProb(sn.nodeparam{ind}.actualmissprob);
                 self.model.refreshChains();
         end
     end

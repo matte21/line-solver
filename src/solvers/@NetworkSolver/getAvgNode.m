@@ -65,9 +65,9 @@ for ind=1:I
                 %else
                 switch sn.nodetype(ind)
                     case NodeType.Cache
-                        if any(find(r==sn.varsparam{ind}.hitclass))
+                        if any(find(r==sn.nodeparam{ind}.hitclass))
                         TNn(ind, r) =  (sn.nodevisits{c}(ind,r) / sum(sn.visits{c}(refstat,inchain))) * sum(TN(refstat,inchain));
-                        elseif any(find(r==sn.varsparam{ind}.missclass))
+                        elseif any(find(r==sn.nodeparam{ind}.missclass))
                         TNn(ind, r) =  (sn.nodevisits{c}(ind,r) / sum(sn.visits{c}(refstat,inchain))) * sum(TN(refstat,inchain));
                         else
                         ANn(ind, r) =  (sn.nodevisits{c}(ind,r) / sum(sn.visits{c}(refstat,inchain))) * sum(TN(refstat,inchain));

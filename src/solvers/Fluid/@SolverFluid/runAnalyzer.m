@@ -6,13 +6,26 @@ T0=tic;
 if nargin<2
     options = self.getOptions;
 end
+sn = getStruct(self); % this gets modified later on so pass by copy
 
+hasOpenClasses = any(sn.nodetype==NodeType.ID_SOURCE);
 switch options.method
-    case {'default','stateindep','statedep'}
+    case {'matrix'}
+        if hasOpenClasses
+            line_error(mfilename,'The matrix solver does not support open arrivals. Use options.method=''''closing'''' instead.');
+            options.method = 'closing';
+        end
+    case {'default'}
+        if hasOpenClasses
+            options.method = 'closing';
+        else
+            options.method = 'matrix';
+        end
+    case {'closing','statedep'}
         % do nothing
     otherwise
-    line_warning(mfilename,'This solver does not support the specified method. Setting to default.');
-    options.method  = 'default';
+        line_warning(mfilename,'This solver does not support the specified method. Setting to default.');
+        options.method  = 'default';    
 end
 
 if isinf(options.timespan(1))
@@ -32,7 +45,7 @@ if self.enableChecks && ~self.supports(self.model)
     throw(ME);
 end
 
-sn = getStruct(self); % this gets modified later on so pass by copy
+self.setOptions(options);
 
 M = sn.nstations;
 K = sn.nclasses;
@@ -59,6 +72,7 @@ while s0_id>=0 % for all possible initial states
     sn = self.model.getStruct;
     if s0prior_val > 0        
         [Qfull, Ufull, Rfull, Tfull, Cfull, Xfull, t, Qfull_t, Ufull_t, Tfull_t, lastSol] = solver_fluid_analyzer(sn, options);
+        
         [t,uniqueIdx] = unique(t);
         if isempty(lastSol) % if solution fails
             Q = NaN*ones(M,K); R = NaN*ones(M,K);

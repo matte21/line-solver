@@ -10,15 +10,15 @@ strategyNode.setAttribute('classPath', 'jmt.engine.NetStrategies.ServiceStrategy
 strategyNode.setAttribute('name', 'timingStrategies');
 
 sn = self.getStruct;
-numOfModes = sn.nmodes(ind);
+numOfModes = sn.nodeparam{ind}.nmodes;
 for m=1:numOfModes
     
     timimgStrategyNode = simDoc.createElement('subParameter');
     
-    if sn.firingid{ind}(m) == TimingStrategy.ID_IMMEDIATE
+    if sn.nodeparam{ind}.firingid(m) == TimingStrategy.ID_IMMEDIATE
         timimgStrategyNode.setAttribute('classPath', 'jmt.engine.NetStrategies.ServiceStrategies.ZeroServiceTimeStrategy');
         timimgStrategyNode.setAttribute('name', 'ZeroServiceTimeStrategy');
-    elseif sn.firingprocid{ind}(m) == ProcessType.ID_APH|| sn.firingprocid{ind}(m) == ProcessType.ID_COXIAN || (sn.firingphases{ind}(m)>2 && sn.firingprocid{ind}(m) == ProcessType.ID_HYPEREXP) %|| (sn.phases(i,r)>2 && sn.procid(i,r) == ProcessType.ID_COXIAN) || (sn.phases(i,r)>2 && sn.procid(i,r) == ProcessType.ID_HYPEREXP)
+    elseif sn.nodeparam{ind}.firingprocid(m) == ProcessType.ID_APH|| sn.nodeparam{ind}.firingprocid(m) == ProcessType.ID_COXIAN || (sn.nodeparam{ind}.firingphases(m)>2 && sn.nodeparam{ind}.firingprocid(m) == ProcessType.ID_HYPEREXP) %|| (sn.phases(i,r)>2 && sn.procid(i,r) == ProcessType.ID_COXIAN) || (sn.phases(i,r)>2 && sn.procid(i,r) == ProcessType.ID_HYPEREXP)
         % Coxian and HyperExp have 2 parameters when they have a {mu, p} input specification
         timimgStrategyNode.setAttribute('classPath', 'jmt.engine.NetStrategies.ServiceStrategies.ServiceTimeStrategy');
         timimgStrategyNode.setAttribute('name', 'timingStrategy');
@@ -37,9 +37,9 @@ for m=1:numOfModes
         subParNodeAlphaVec.setAttribute('array', 'true');
         subParNodeAlphaVec.setAttribute('classPath', 'java.lang.Object');
         subParNodeAlphaVec.setAttribute('name', 'vector');
-        PH=sn.firingproc{ind}{m};
+        PH=sn.nodeparam{ind}.firingproc{m};
         alpha = abs(map_pie(PH));
-        nphases=sn.firingphases{ind}(m);
+        nphases=sn.nodeparam{ind}.firingphases(m);
         for k=1:nphases
             subParNodeAlphaElem = simDoc.createElement('subParameter');
             subParNodeAlphaElem.setAttribute('classPath', 'java.lang.Double');
@@ -81,7 +81,7 @@ for m=1:numOfModes
         distrParNode.appendChild(subParNodeT);
         timimgStrategyNode.appendChild(distributionNode);
         timimgStrategyNode.appendChild(distrParNode);
-    elseif sn.firingprocid{ind}(m) == ProcessType.ID_MAP
+    elseif sn.nodeparam{ind}.firingprocid(m) == ProcessType.ID_MAP
         timimgStrategyNode.setAttribute('classPath', 'jmt.engine.NetStrategies.ServiceStrategies.ServiceTimeStrategy');
         timimgStrategyNode.setAttribute('name', 'timingStrategy');
         distributionNode = simDoc.createElement('subParameter');
@@ -91,7 +91,7 @@ for m=1:numOfModes
         distrParNode.setAttribute('classPath', 'jmt.engine.random.MAPPar');
         distrParNode.setAttribute('name', 'distrPar');
         
-        MAP = sn.firingproc{ind}{m};
+        MAP = sn.nodeparam{ind}.firingproc{m};
         
         subParNodeD0 = simDoc.createElement('subParameter');
         subParNodeD0.setAttribute('array', 'true');
@@ -146,7 +146,7 @@ for m=1:numOfModes
         timimgStrategyNode.setAttribute('name', 'timingStrategy');
         
         distributionNode = simDoc.createElement('subParameter');
-        switch sn.firingprocid{ind}(m)
+        switch sn.nodeparam{ind}.firingprocid(m)
             case ProcessType.ID_DET
                 javaClass = 'jmt.engine.random.DeterministicDistr';
                 javaParClass = 'jmt.engine.random.DeterministicDistrPar';
@@ -185,7 +185,7 @@ for m=1:numOfModes
                 javaParClass = 'jmt.engine.random.ReplayerPar';
         end
         distributionNode.setAttribute('classPath', javaClass);
-        switch sn.firingprocid{ind}(m)
+        switch sn.nodeparam{ind}.firingprocid(m)
             case {ProcessType.ID_REPLAYER, ProcessType.ID_TRACE}
                 distributionNode.setAttribute('name', 'Replayer');
             case ProcessType.ID_EXP
@@ -193,7 +193,7 @@ for m=1:numOfModes
             case ProcessType.ID_HYPEREXP
                 distributionNode.setAttribute('name', 'Hyperexponential');
             otherwise
-                distributionNode.setAttribute('name', ProcessType.toText(ProcessType.fromId(sn.firingprocid{ind}(m))));
+                distributionNode.setAttribute('name', ProcessType.toText(ProcessType.fromId(sn.nodeparam{ind}.firingprocid(m))));
         end
         timimgStrategyNode.appendChild(distributionNode);
         
@@ -201,13 +201,13 @@ for m=1:numOfModes
         distrParNode.setAttribute('classPath', javaParClass);
         distrParNode.setAttribute('name', 'distrPar');
         
-        switch sn.firingprocid{ind}(m)
+        switch sn.nodeparam{ind}.firingprocid(m)
             case ProcessType.ID_DET
                 subParNodeAlpha = simDoc.createElement('subParameter');
                 subParNodeAlpha.setAttribute('classPath', 'java.lang.Double');
                 subParNodeAlpha.setAttribute('name', 't');
                 subParValue = simDoc.createElement('value');
-                subParValue.appendChild(simDoc.createTextNode(sprintf('%.12f',map_lambda(sn.firingproc{ind}{m}))));
+                subParValue.appendChild(simDoc.createTextNode(sprintf('%.12f',map_lambda(sn.nodeparam{ind}.firingproc{m}))));
                 subParNodeAlpha.appendChild(subParValue);
                 distrParNode.appendChild(subParNodeAlpha);
             case ProcessType.ID_EXP
@@ -215,7 +215,7 @@ for m=1:numOfModes
                 subParNodeAlpha.setAttribute('classPath', 'java.lang.Double');
                 subParNodeAlpha.setAttribute('name', 'lambda');
                 subParValue = simDoc.createElement('value');
-                subParValue.appendChild(simDoc.createTextNode(sprintf('%.12f',map_lambda(sn.firingproc{ind}{m}))));
+                subParValue.appendChild(simDoc.createTextNode(sprintf('%.12f',map_lambda(sn.nodeparam{ind}.firingproc{m}))));
                 subParNodeAlpha.appendChild(subParValue);
                 distrParNode.appendChild(subParNodeAlpha);
             case ProcessType.ID_HYPEREXP
@@ -223,7 +223,7 @@ for m=1:numOfModes
                 subParNodeAlpha.setAttribute('classPath', 'java.lang.Double');
                 subParNodeAlpha.setAttribute('name', 'p');
                 subParValue = simDoc.createElement('value');
-                pie = map_pie(sn.firingprocid{ind}(m));
+                pie = map_pie(sn.nodeparam{ind}.firingprocid(m));
                 subParValue.appendChild(simDoc.createTextNode(sprintf('%.12f',pie(1))));
                 subParNodeAlpha.appendChild(subParValue);
                 distrParNode.appendChild(subParNodeAlpha);
@@ -231,14 +231,14 @@ for m=1:numOfModes
                 subParNodeAlpha.setAttribute('classPath', 'java.lang.Double');
                 subParNodeAlpha.setAttribute('name', 'lambda1');
                 subParValue = simDoc.createElement('value');
-                subParValue.appendChild(simDoc.createTextNode(sprintf('%.12f',-sn.firingproc{ind}{m}{1}(1,1))));
+                subParValue.appendChild(simDoc.createTextNode(sprintf('%.12f',-sn.nodeparam{ind}.firingproc{m}{1}(1,1))));
                 subParNodeAlpha.appendChild(subParValue);
                 distrParNode.appendChild(subParNodeAlpha);
                 subParNodeAlpha = simDoc.createElement('subParameter');
                 subParNodeAlpha.setAttribute('classPath', 'java.lang.Double');
                 subParNodeAlpha.setAttribute('name', 'lambda2');
                 subParValue = simDoc.createElement('value');
-                subParValue.appendChild(simDoc.createTextNode(sprintf('%.12f',-sn.firingproc{ind}{m}{1}(2,2))));
+                subParValue.appendChild(simDoc.createTextNode(sprintf('%.12f',-sn.nodeparam{ind}.firingproc{m}{1}(2,2))));
                 subParNodeAlpha.appendChild(subParValue);
                 distrParNode.appendChild(subParNodeAlpha);
             case ProcessType.ID_ERLANG
@@ -246,8 +246,8 @@ for m=1:numOfModes
                 subParNodeAlpha.setAttribute('classPath', 'java.lang.Double');
                 subParNodeAlpha.setAttribute('name', 'alpha');
                 subParValue = simDoc.createElement('value');
-                timingrate = map_lambda(sn.firingproc{ind}{m});
-                nphases = sn.firingphases{ind}(m);
+                timingrate = map_lambda(sn.nodeparam{ind}.firingproc{m});
+                nphases = sn.nodeparam{ind}.firingphases(m);
                 subParValue.appendChild(simDoc.createTextNode(sprintf('%.12f',timingrate*nphases)));
                 subParNodeAlpha.appendChild(subParValue);
                 distrParNode.appendChild(subParNodeAlpha);
@@ -263,28 +263,28 @@ for m=1:numOfModes
                 subParNodeAlpha.setAttribute('classPath', 'java.lang.Double');
                 subParNodeAlpha.setAttribute('name', 'lambda0');
                 subParValue = simDoc.createElement('value');
-                subParValue.appendChild(simDoc.createTextNode(sprintf('%.12f',sn.firingproc{ind}{m}{2}(1,1))));
+                subParValue.appendChild(simDoc.createTextNode(sprintf('%.12f',sn.nodeparam{ind}.firingproc{m}{2}(1,1))));
                 subParNodeAlpha.appendChild(subParValue);
                 distrParNode.appendChild(subParNodeAlpha);
                 subParNodeAlpha = simDoc.createElement('subParameter');
                 subParNodeAlpha.setAttribute('classPath', 'java.lang.Double');
                 subParNodeAlpha.setAttribute('name', 'lambda1');
                 subParValue = simDoc.createElement('value');
-                subParValue.appendChild(simDoc.createTextNode(sprintf('%.12f',sn.firingproc{ind}{m}{2}(2,2))));
+                subParValue.appendChild(simDoc.createTextNode(sprintf('%.12f',sn.nodeparam{ind}.firingproc{m}{2}(2,2))));
                 subParNodeAlpha.appendChild(subParValue);
                 distrParNode.appendChild(subParNodeAlpha);
                 subParNodeAlpha = simDoc.createElement('subParameter');
                 subParNodeAlpha.setAttribute('classPath', 'java.lang.Double');
                 subParNodeAlpha.setAttribute('name', 'sigma0');
                 subParValue = simDoc.createElement('value');
-                subParValue.appendChild(simDoc.createTextNode(sprintf('%.12f',sn.firingproc{ind}{m}{1}(1,2))));
+                subParValue.appendChild(simDoc.createTextNode(sprintf('%.12f',sn.nodeparam{ind}.firingproc{m}{1}(1,2))));
                 subParNodeAlpha.appendChild(subParValue);
                 distrParNode.appendChild(subParNodeAlpha);
                 subParNodeAlpha = simDoc.createElement('subParameter');
                 subParNodeAlpha.setAttribute('classPath', 'java.lang.Double');
                 subParNodeAlpha.setAttribute('name', 'sigma1');
                 subParValue = simDoc.createElement('value');
-                subParValue.appendChild(simDoc.createTextNode(sprintf('%.12f',sn.firingproc{ind}{m}{1}(2,1))));
+                subParValue.appendChild(simDoc.createTextNode(sprintf('%.12f',sn.nodeparam{ind}.firingproc{m}{1}(2,1))));
                 subParNodeAlpha.appendChild(subParValue);
                 distrParNode.appendChild(subParNodeAlpha);
             case ProcessType.ID_GAMMA
@@ -349,7 +349,7 @@ for m=1:numOfModes
                 % subParNodeAlpha.setAttribute('classPath', 'java.lang.String');
                 % subParNodeAlpha.setAttribute('name', 'fileName');
                 % subParValue = simDoc.createElement('value');
-                % subParValue.appendChild(simDoc.createTextNode(sn.varsparam{ind}{r}.fileName));
+                % subParValue.appendChild(simDoc.createTextNode(sn.nodeparam{ind}{r}.fileName));
                 % subParNodeAlpha.appendChild(subParValue);
                 % distrParNode.appendChild(subParNodeAlpha);
         end

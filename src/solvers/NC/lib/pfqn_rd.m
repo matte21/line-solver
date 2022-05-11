@@ -5,6 +5,9 @@ if sum(N)<0
     lGN=-Inf;
     return
 end
+if nargin<5
+    options=SolverNC.defaultOptions;
+end
 % L
 % N
 % Z
@@ -52,6 +55,7 @@ for i=1:M
         %isDelay(i) = true;
     end
 end
+
 % eliminating the delays seems to produce problems
 % Z = sum([Z; L(isDelay,:)],1);
 % L(isDelay,:)=[];
@@ -60,6 +64,7 @@ end
 % y(isDelay,:)=[];
 % isLI(isDelay) = [];
 % M = M - sum(isDelay);
+
 beta = ones(M,sum(N));
 for i=1:M
     beta(i,1) = gamma(i,1) / (1-gamma(i,1)) ;
@@ -70,7 +75,7 @@ end
 beta(isnan(beta))=Inf;
 
 if (all(beta==Inf))
-    options.method='adaptive';
+    options.method='default';
     lGN = pfqn_nc(lambda,L,N,Z,options);
     return
 else
@@ -88,7 +93,7 @@ else
         EN = exp(lEN(vtot+1));
         Cgamma = Cgamma + ((sum(N)-max(0,max(vtot-1)))/sum(N)) * EN;
     end
-    options.method='adaptive';
+    options.method='default';
     lGN = pfqn_nc(lambda,y,N,Z,options);
     lGN = lGN + log(Cgamma);
 end

@@ -1,5 +1,5 @@
-function [QN,ymean,QNt,UNt,ymean_t,t,iters,runtime] = solver_fluid(sn, options)
-% [QN,YMEAN,QNT,UNT,YMEAN_T,T,ITERS,RUNTIME] = SOLVER_FLUID(QN, OPTIONS)
+function [QN,xvec_it,QNt,UNt,xvec_t,t,iters,runtime] = solver_fluid(sn, options)
+% [QN,XVEC_IT,QNT,UNT,XVEC_T,T,ITERS,RUNTIME] = SOLVER_FLUID(QN, OPTIONS)
 
 % Copyright (c) 2012-2022, Imperial College London
 % All rights reserved.
@@ -55,7 +55,7 @@ end
 
 %NK(isinf(NK))=1e6;
 iters = 0;
-ymean = {};
+xvec_it = {};
 y0 = [];
 assigned = zeros(1,K); %number of jobs of each class already assigned
 for i = 1:M
@@ -82,15 +82,15 @@ for i = 1:M
 end
 
 if isempty(options.init_sol)
-    ymean{iters +1} = y0(:)'; % average state embedded at stage change transitions out of e
+    xvec_it{iters +1} = y0(:)'; % average state embedded at stage change transitions out of e
     ydefault = y0(:)'; % not used in this case
 else
-    ymean{iters +1} = options.init_sol(:)';
+    xvec_it{iters +1} = options.init_sol(:)';
     ydefault = y0(:)'; % default solution if init_sol fails
 end
 
 %% solve ode
-[ymean, ymean_t, t, iters] = solver_fluid_iteration(sn, N, Mu, Phi, PH, rt, S, ymean, ydefault, slowrate, Tstart, max_time, options);
+[xvec_it, xvec_t, t, iters] = solver_fluid_iteration(sn, N, Mu, Phi, PH, rt, S, xvec_it, ydefault, slowrate, Tstart, max_time, options);
 
 runtime = toc(Tstart);
 % if options.verbose >= 2
@@ -110,8 +110,8 @@ for i=1:M
     Qt{i} = 0;
     for k = 1:K
         shift = sum(sum(phases(1:i-1,:))) + sum( phases(i,1:k-1) ) + 1;
-        QN(i,k) = sum(ymean{end}(shift:shift+phases(i,k)-1));
-        QNt{i,k} = sum(ymean_t(:,shift:shift+phases(i,k)-1),2);
+        QN(i,k) = sum(xvec_it{end}(shift:shift+phases(i,k)-1));
+        QNt{i,k} = sum(xvec_t(:,shift:shift+phases(i,k)-1),2);
         Qt{i} = Qt{i} + QNt{i,k};
         % computes queue length in each node and stage, summing the total
         % number in service and waiting in that station
@@ -131,6 +131,5 @@ for i=1:M
         end
     end
 end
-
 return
 end

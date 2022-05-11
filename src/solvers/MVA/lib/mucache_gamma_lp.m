@@ -11,13 +11,12 @@ for i = 1:n % for all items
         for v=1:u
             Rvi = Rvi + R{v,i};
         end
-        Pij =[];
+        Pij =[1+j];
         pr_j = par(Rvi, 1+j);
         while ~isempty(pr_j)
-            Pij(end+1) = pr_j;
+            Pij =[pr_j, Pij];
             pr_j = par(Rvi, pr_j);
-        end
-        Pij  = [Pij,1+j];
+        end        
         if isempty(Pij)
             gamma(i,j)=0;
         else

@@ -1,7 +1,17 @@
 function [lG,X,Q] = pfqn_nc(lambda,L,N,Z,varargin)
-% [LGN] = PFQN_NC(L,N,Z,VARARGIN)
+% [LG,X,Q] = PFQN_NC(L,N,Z,VARARGIN)
+%
+% L: Service demand matrix
+% N: Population vector
+% Z: Think time vector
+% varargin: solver options (e.g., SolverNC.defaultOptions)
+%
+% LG: Logarithm of normalizing constant
+% X: System throughputs
+% Q: Mean queue-lengths
 
 options = Solver.parseOptions(varargin, SolverNC.defaultOptions);
+
 % backup initial parameters
 Rin = length(N);
 
@@ -139,21 +149,15 @@ end
 lG = lGopen + lGnzdem + lGzdem + N*log(scalevecz)';
 end
 
-
-
 function [lG,X,Q] = compute_norm_const(L,N,Z,options)
 % LG = COMPUTE_NORM_CONST(L,N,Z,OPTIONS)
+% Auxiliary script that computes LG after the initial filtering of L,N,Z
+
 [M,R] = size(L);
 X=[];Q=[];
 switch options.method
     case {'ca'}
         [~,lG] = pfqn_ca(L,N,sum(Z,1));
-    case {'exact'}
-        if M>=R || sum(N)>20 || sum(Z)>0
-            [~,lG] = pfqn_ca(L,N,sum(Z,1));
-        else
-            [~,lG] = pfqn_recal(L,N,sum(Z,1));% implemented with Z=0
-        end
     case {'adaptive','default'}
         if M>1
             if R==1 || (R <= 3 && sum(N)<50)
@@ -168,24 +172,11 @@ switch options.method
         elseif sum(Z,1)==0 % single queue, no delay
             lG = -N*log(L)';
         else % repairman model
-            if R>1
-                if N<200
-                    try
-                        [lG] = pfqn_comomrm(L,N,Z);
-                    catch
-                        % java exception, probably singular linear system
-                        line_warning(mfilename,'Normalizing constant computations produced an exception upon running comom. Switching to logistic expansion.');
-                        [~,lG] = pfqn_le(L,N,sum(Z,1));
-                    end
-                else
-                    [~,lG] = pfqn_le(L,N,sum(Z,1));
-                end
-            else % R=1
-                if N<200
-                    [X,Q,~,~,lG] = pfqn_mva(L,N,Z);
-                else
-                    [~,lG] = pfqn_le(L,N,sum(Z,1));
-                end
+            if N<10000
+                %[lG] = pfqn_comomrm(L,N,sum(Z,1));
+                [~,lG] = pfqn_mmint2_gausslegendre(L,N,sum(Z,1));
+            else
+                [~,lG] = pfqn_le(L,N,sum(Z,1));
             end
         end
     case {'sampling'}
@@ -196,11 +187,11 @@ switch options.method
         else
             [~,lG] = pfqn_ls(L,N,sum(Z,1),options.samples);
         end
-    case {'mmint','pnc2'}
+    case {'mmint2'}
         if size(L,1)>1
             line_error(mfilename,sprintf('The %s method requires a model with a delay and a single queueing station.',options.method));
         end
-        [~,lG] = pfqn_mmint2(L,N,sum(Z,1));
+        [~,lG] = pfqn_mmint2_gausslegendre(L,N,sum(Z,1));
     case {'grm'}
         if size(L,1)>1
             line_error(mfilename,sprintf('The %s method requires a model with a delay and a single queueing station.',options.method));
@@ -235,9 +226,13 @@ switch options.method
         else
             [X,Q,~,~,lG] = pfqn_mva(L,N,Z);
         end
-    case {'comombtf'}
-        [~,lG,X,Q] = pfqn_comombtf_java(L,N,Z);
-    case {'comom'}
+    %case {'exact'}
+        %if M>=R || sum(N)>20 || sum(Z)>0
+        %    [~,lG] = pfqn_ca(L,N,sum(Z,1));
+        %else
+        %    [~,lG] = pfqn_recal(L,N,sum(Z,1));% implemented with Z=0
+        %end
+    case {'exact','comom'}
         if R>1
             try
                 % comom has a bug in computing X, sometimes the
@@ -270,5 +265,4 @@ switch options.method
     otherwise
         line_error(mfilename,sprintf('Unrecognized method: %s',options.method));
 end
-return
 end

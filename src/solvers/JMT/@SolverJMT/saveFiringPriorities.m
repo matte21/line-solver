@@ -10,7 +10,7 @@ firingPrioritiesNode.setAttribute('name', 'firingPriorities');
 firingPrioritiesNode.setAttribute('array', 'true');
 
 sn = self.getStruct;
-numOfModes = sn.nmodes(ind);
+numOfModes = sn.nodeparam{ind}.nmodes;
 for m=1:(numOfModes)
     
     subFiringPriorityNode = simDoc.createElement('subParameter');
@@ -18,7 +18,7 @@ for m=1:(numOfModes)
     subFiringPriorityNode.setAttribute('name', 'firingPriority');
     
     valueNode = simDoc.createElement('value');
-    firingPrio = sn.fireprio{ind}(m);
+    firingPrio = sn.nodeparam{ind}.firingprio(m);
     
     if isinf(firingPrio)
         valueNode.appendChild(simDoc.createTextNode(int2str(-1)));

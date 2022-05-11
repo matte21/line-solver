@@ -1,12 +1,12 @@
-function [Qfull, Ufull, Rfull, Tfull, ymean, Qfull_t, Ufull_t, Tfull_t, ymean_t, t,iters,runtime] = solver_fluid_analyzer_inner(sn, options)
-% [QFULL, UFULL, RFULL, TFULL, YMEAN, QFULL_T, UFULL_T, TFULL_T, YMEAN_T, T,ITERS,RUNTIME] = SOLVER_FLUID_ANALYZER_INNER(QN, OPTIONS)
+function [QN, UN, RN, TN, xvec_it, QNt, UNt, TNt, xvec_t, t, iters, runtime] = solver_fluid_analyzer_inner(sn, options)
+% [QN, UN, RN, TN, XVEC, QNt, UNt, TNt, XVEC_T, T, ITERS, RUNTIME] = SOLVER_FLUID_ANALYZER_INNER(QN, OPTIONS)
 
 % Copyright (c) 2012-2022, Imperial College London
 % All rights reserved.
 chains = sn.chains;
 
 % inner iteration of fluid analysis
-[Q,ymean,Qfull_t,Ufull_t,ymean_t,t,iters,runtime] = solver_fluid(sn, options);
+[Q,xvec_it,QNt,UNt,xvec_t,t,iters,runtime] = solver_fluid(sn, options);
 
 %% assumes the existence of a delay node through which all classes pass
 delayNodes = zeros(1,sn.nstations);
@@ -31,15 +31,15 @@ phi = sn.phi;
 phases = sn.phases;
 
 %Qlength for all stations, classes,
-Qfull = ymean{end};
+QN = xvec_it{end};
 
 %% Tput for all classes in each station
 Rlittle = zeros(sn.nstations,sn.nclasses); % throughput of every class at each station
-Tfull = zeros(sn.nstations,sn.nclasses); % throughput of every class at each station
-Tfull_t = cell(size(Tfull));
-for i=1:size(Tfull_t,1)
-    for j=1:size(Tfull_t,2)
-        Tfull_t{i,j} = 0;
+TN = zeros(sn.nstations,sn.nclasses); % throughput of every class at each station
+TNt = cell(size(TN));
+for i=1:size(TNt,1)
+    for j=1:size(TNt,2)
+        TNt{i,j} = 0;
     end
 end
 Xservice = cell(M,K); %throughput per class, station and phase
@@ -49,16 +49,16 @@ for i = 1:sn.nstations
             idx = sum(sum(phases(1:i-1,:))) + sum( phases(i,1:k-1) );
             Xservice{i,k} = zeros(phases(i,k),1);
             for f = 1:phases(i,k)         
-                Tfull(i,k) = Tfull(i,k) + Qfull(idx+f)*Lambda{i}{k}(f)*phi{i}{k}(f);
-                Tfull_t{i,k} = Tfull_t{i,k} + Qfull_t{i,k}*Lambda{i}{k}(f)*phi{i}{k}(f);
-                Xservice{i,k}(f) = Qfull(idx+f)*Lambda{i}{k}(f);
+                TN(i,k) = TN(i,k) + QN(idx+f)*Lambda{i}{k}(f)*phi{i}{k}(f);
+                TNt{i,k} = TNt{i,k} + QNt{i,k}*Lambda{i}{k}(f)*phi{i}{k}(f);
+                Xservice{i,k}(f) = QN(idx+f)*Lambda{i}{k}(f);
             end
         end
     else
         xi = sum(Q(i,:)); %number of jobs in the station
-        xi_t = Qfull_t{i,1};
-        for r=2:size(Qfull_t,2)
-            xi_t = xi_t + Qfull_t{i,r};
+        xi_t = QNt{i,1};
+        for r=2:size(QNt,2)
+            xi_t = xi_t + QNt{i,r};
         end
         
         if xi>0
@@ -69,11 +69,11 @@ for i = 1:sn.nstations
                     for k = 1:sn.nclasses
                         idx = sum(sum(phases(1:i-1,:))) + sum( phases(i,1:k-1) );
                         wi(k) = map_mean(sn.proc{i}{k});
-                        wni = wni + wi(k)*sum(Qfull((idx+1):(idx+phases(i,k))));
+                        wni = wni + wi(k)*sum(QN((idx+1):(idx+phases(i,k))));
                     end
-                    wni_t = 0*Qfull_t{i,1};
+                    wni_t = 0*QNt{i,1};
                     for r=1:sn.nclasses
-                        wni_t = wni_t + wi(r)* Qfull_t{i,r};
+                        wni_t = wni_t + wi(r)* QNt{i,r};
                     end
                     
             end
@@ -85,38 +85,38 @@ for i = 1:sn.nstations
                     switch sn.schedid(i)
                         case SchedStrategy.ID_EXT
                             if f==1
-                                Tfull(i,k) = Tfull(i,k) + (1-sum(Qfull(idx+(2:phases(i,k)))))*Lambda{i}{k}(f)*phi{i}{k}(f);
-                                Tfull_t{i,k} = Tfull_t{i,k} + (1-sum(ymean_t(:,idx+(2:phases(i,k))),2))*Lambda{i}{k}(f)*phi{i}{k}(f);
-                                Xservice{i,k}(f) = (1-sum(Qfull(idx+(2:phases(i,k)))))*Lambda{i}{k}(f);
+                                TN(i,k) = TN(i,k) + (1-sum(QN(idx+(2:phases(i,k)))))*Lambda{i}{k}(f)*phi{i}{k}(f);
+                                TNt{i,k} = TNt{i,k} + (1-sum(xvec_t(:,idx+(2:phases(i,k))),2))*Lambda{i}{k}(f)*phi{i}{k}(f);
+                                Xservice{i,k}(f) = (1-sum(QN(idx+(2:phases(i,k)))))*Lambda{i}{k}(f);
                             else
-                                Tfull(i,k) = Tfull(i,k) + Qfull(idx+f)*Lambda{i}{k}(f)*phi{i}{k}(f);
-                                Tfull_t{i,k} = Tfull_t{i,k} + ymean_t(:,idx+f)*Lambda{i}{k}(f)*phi{i}{k}(f);
-                                Xservice{i,k}(f) = Qfull(idx+f)*Lambda{i}{k}(f);
+                                TN(i,k) = TN(i,k) + QN(idx+f)*Lambda{i}{k}(f)*phi{i}{k}(f);
+                                TNt{i,k} = TNt{i,k} + xvec_t(:,idx+f)*Lambda{i}{k}(f)*phi{i}{k}(f);
+                                Xservice{i,k}(f) = QN(idx+f)*Lambda{i}{k}(f);
                             end
                         case {SchedStrategy.ID_INF, SchedStrategy.ID_PS}
-                            Tfull(i,k) = Tfull(i,k) + Qfull(idx+f)*Lambda{i}{k}(f)*phi{i}{k}(f)/xi*min(xi,sn.nservers(i));
-                            Tfull_t{i,k} = Tfull_t{i,k} + ymean_t(:,idx+f)*Lambda{i}{k}(f)*phi{i}{k}(f)./xi_t.*min(xi_t,sn.nservers(i));
-                            Xservice{i,k}(f) = Qfull(idx+f)*Lambda{i}{k}(f)/xi*min(xi,sn.nservers(i));
+                            TN(i,k) = TN(i,k) + QN(idx+f)*Lambda{i}{k}(f)*phi{i}{k}(f)/xi*min(xi,sn.nservers(i));
+                            TNt{i,k} = TNt{i,k} + xvec_t(:,idx+f)*Lambda{i}{k}(f)*phi{i}{k}(f)./xi_t.*min(xi_t,sn.nservers(i));
+                            Xservice{i,k}(f) = QN(idx+f)*Lambda{i}{k}(f)/xi*min(xi,sn.nservers(i));
                         case SchedStrategy.ID_DPS
                             w = sn.schedparam(i,:);
                             wxi = w*Q(i,:)'; %number of jobs in the station
-                            wxi_t = w(1)*Qfull_t{i,1};
-                            for r=2:size(Qfull_t,2)
-                                wxi_t = wxi_t + w(r)*Qfull_t{i,r};
+                            wxi_t = w(1)*QNt{i,1};
+                            for r=2:size(QNt,2)
+                                wxi_t = wxi_t + w(r)*QNt{i,r};
                             end
-                            Tfull(i,k) = Tfull(i,k) + Qfull(idx+f)*Lambda{i}{k}(f)*phi{i}{k}(f)*w(k)/wxi*min(xi,sn.nservers(i));
-                            Tfull_t{i,k} = Tfull_t{i,k} + ymean_t(:,idx+f)*Lambda{i}{k}(f)*phi{i}{k}(f)*w(k)./wxi_t.*min(xi_t,sn.nservers(i));
-                            Xservice{i,k}(f) = Qfull(idx+f)*Lambda{i}{k}(f)*w(k)/wxi*min(xi,sn.nservers(i));
+                            TN(i,k) = TN(i,k) + QN(idx+f)*Lambda{i}{k}(f)*phi{i}{k}(f)*w(k)/wxi*min(xi,sn.nservers(i));
+                            TNt{i,k} = TNt{i,k} + xvec_t(:,idx+f)*Lambda{i}{k}(f)*phi{i}{k}(f)*w(k)./wxi_t.*min(xi_t,sn.nservers(i));
+                            Xservice{i,k}(f) = QN(idx+f)*Lambda{i}{k}(f)*w(k)/wxi*min(xi,sn.nservers(i));
                         case {SchedStrategy.ID_FCFS, SchedStrategy.ID_SIRO}
                             switch options.method
-                                case {'default','stateindep'}
-                                    Tfull(i,k) = Tfull(i,k) + Qfull(idx+f)*Lambda{i}{k}(f)*phi{i}{k}(f)/xi*min(xi,sn.nservers(i));
-                                    Tfull_t{i,k} = Tfull_t{i,k} + ymean_t(:,idx+f)*Lambda{i}{k}(f)*phi{i}{k}(f)./xi_t.*min(xi_t,sn.nservers(i));
-                                    Xservice{i,k}(f) = Qfull(idx+f)*Lambda{i}{k}(f)/xi*min(xi,sn.nservers(i));
+                                case {'default','closing'}
+                                    TN(i,k) = TN(i,k) + QN(idx+f)*Lambda{i}{k}(f)*phi{i}{k}(f)/xi*min(xi,sn.nservers(i));
+                                    TNt{i,k} = TNt{i,k} + xvec_t(:,idx+f)*Lambda{i}{k}(f)*phi{i}{k}(f)./xi_t.*min(xi_t,sn.nservers(i));
+                                    Xservice{i,k}(f) = QN(idx+f)*Lambda{i}{k}(f)/xi*min(xi,sn.nservers(i));
                                 case 'statedep'
-                                    Tfull(i,k) = Tfull(i,k) + Qfull(idx+f)*Lambda{i}{k}(f)*phi{i}{k}(f)*wi(k)/wni*min(xi,sn.nservers(i));
-                                    Tfull_t{i,k} = Tfull_t{i,k} + ymean_t(:,idx+f)*Lambda{i}{k}(f)*phi{i}{k}(f)./xi_t.*min(xi_t,sn.nservers(i));
-                                    Xservice{i,k}(f) = Qfull(idx+f)*Lambda{i}{k}(f)*wi(k)/wni*min(xi,sn.nservers(i));
+                                    TN(i,k) = TN(i,k) + QN(idx+f)*Lambda{i}{k}(f)*phi{i}{k}(f)*wi(k)/wni*min(xi,sn.nservers(i));
+                                    TNt{i,k} = TNt{i,k} + xvec_t(:,idx+f)*Lambda{i}{k}(f)*phi{i}{k}(f)./xi_t.*min(xi_t,sn.nservers(i));
+                                    Xservice{i,k}(f) = QN(idx+f)*Lambda{i}{k}(f)*wi(k)/wni*min(xi,sn.nservers(i));
                                     
                                     %Tfull(i,k) = Tfull(i,k) + Qfull(idx+f)*Lambda{i}{k}(f)*phi{i}{k}(f)*min(xi,sn.nservers(i))*wi(k);
                                     %Tfull_t{i,k} = Tfull_t{i,k} + ymean_t(:,idx+f)*Lambda{i}{k}(f)*phi{i}{k}(f).*min(xi_t,sn.nservers(i)) * wi(k);
@@ -134,10 +134,10 @@ for i = 1:sn.nstations
         end
     end
 end
-for i=1:size(Tfull_t,1)
-    for j=1:size(Tfull_t,2)
-        if numel(Tfull_t{i,j}) == 1
-            Tfull_t{i,j} = Tfull_t{i,j} * ones(size(ymean_t(:,1),1),1);
+for i=1:size(TNt,1)
+    for j=1:size(TNt,2)
+        if numel(TNt{i,j}) == 1
+            TNt{i,j} = TNt{i,j} * ones(size(xvec_t(:,1),1),1);
         end
     end
 end
@@ -146,7 +146,7 @@ origK = size(chains,1);
 % This is approximate, Little's law does not hold in transient
 R = zeros(sn.nstations, sn.nclasses);
 for i = 1:sn.nstations
-    R(i, Tfull(i,:)>0) = Q(i,Tfull(i,:)>0) ./ Tfull(i,Tfull(i,:)>0);
+    R(i, TN(i,:)>0) = Q(i,TN(i,:)>0) ./ TN(i,TN(i,:)>0);
 end
 %R = Rlittle;
 %Tfull = Tlittle;
@@ -175,29 +175,29 @@ for k = 1:origK
     newR(delayrefstat==0,chains(k,:)==1) = R(delayrefstat==0,chains(k,:)==1).*eventualVisitProb;
     
     %X(k,find(chains(k,:)))= sum(Tfull(refNode,find(chains(k,:))));
-    X(1,k) = sum( Tfull(refNode,chains(k,:)==1) );
+    X(1,k) = sum( TN(refNode,chains(k,:)==1) );
     newQ(:,k) = sum( Q(:,chains(k,:)==1),2 );
 end
-Qfull = Q;
-Rfull = R;
+QN = Q;
+RN = R;
 
 %% Utilization
-Ufull = zeros(M,K);
+UN = zeros(M,K);
 for i =1:M
     for k = 1:K
         idx = Xservice{i,k}>0;
-        Ufull(i,k) = sum(Xservice{i,k}(idx)./ Lambda{i}{k}(idx));
+        UN(i,k) = sum(Xservice{i,k}(idx)./ Lambda{i}{k}(idx));
         switch sn.schedid(i)
             case SchedStrategy.ID_FCFS
                 switch options.method
                     case 'statedep'                    
-                        Tfull(i,k) = sum(Xservice{i,k}(idx));
+                        TN(i,k) = sum(Xservice{i,k}(idx));
                 end
         end
     end
 end
 
-Ufull(delayNodes==0,:) = Ufull(delayNodes==0,:)./repmat(sn.nservers(delayNodes==0),1,K);
+UN(delayNodes==0,:) = UN(delayNodes==0,:)./repmat(sn.nservers(delayNodes==0),1,K);
 
 % for i = 1:sn.nstations
 %     for k=1:sn.nclasses

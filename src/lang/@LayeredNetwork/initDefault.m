@@ -3,6 +3,7 @@ function self = initDefault(self)
 
 % Copyright (c) 2012-2022, Imperial College London
 % All rights reserved.
+self.getGraph;
 self.lqnGraph.Edges.Weight=log(self.lqnGraph.Edges.Weight); % use log-weights
 V=self.lqnGraph.distances; V=exp(V); V(isinf(V))=0; % mean number of calls to the node from ref task
 D=self.lqnGraph.Nodes.D;

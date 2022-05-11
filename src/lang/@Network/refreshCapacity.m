@@ -21,7 +21,7 @@ for c = 1:C
         chainCap = sum(njobs(inchain));
         for i=1:M
             station = self.getStationByIndex(i);
-            if sn.nodetype(sn.stationToNode(i)) ~= NodeType.ID_SOURCE                
+            if sn.nodetype(sn.stationToNode(i)) ~= NodeType.ID_SOURCE     
                 dropid(i,r) = station.dropRule(r);
             end 
             if isnan(rates(i,r))

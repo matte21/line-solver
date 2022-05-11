@@ -15,7 +15,7 @@ connections = {sn.nodenames{inputs}};
 numOfInputs = length(connections);
 
 numOfClasses = sn.nclasses;
-numOfModes = sn.nmodes(ind);
+numOfModes = sn.nodeparam{ind}.nmodes;
 for m=1:numOfModes    
     subInhibitingConditionNode = simDoc.createElement('subParameter');
     subInhibitingConditionNode.setAttribute('classPath', 'jmt.engine.NetStrategies.TransitionUtilities.TransitionMatrix');
@@ -57,10 +57,10 @@ for m=1:numOfModes
             
             valueNode2 = simDoc.createElement('value');
             
-            if isinf(sn.inhibiting{ind}{m}(k,r))
+            if isinf(sn.nodeparam{ind}.inhibiting{m}(k,r))
                 valueNode2.appendChild(simDoc.createTextNode(int2str(-1)));
             else
-                valueNode2.appendChild(simDoc.createTextNode(int2str(sn.inhibiting{ind}{m}(inputs(k),r))));
+                valueNode2.appendChild(simDoc.createTextNode(int2str(sn.nodeparam{ind}.inhibiting{m}(inputs(k),r))));
             end
             
             subParameterNode.appendChild(valueNode2);

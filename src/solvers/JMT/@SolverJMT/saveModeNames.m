@@ -10,7 +10,7 @@ modeNamesNode.setAttribute('name', 'modeNames');
 modeNamesNode.setAttribute('array', 'true');
 
 sn = self.getStruct;
-numOfModes = sn.nmodes(ind);
+numOfModes = sn.nodeparam{ind}.nmodes;
 for m=1:numOfModes
     
     subModeNameNode = simDoc.createElement('subParameter');
@@ -18,7 +18,7 @@ for m=1:numOfModes
     subModeNameNode.setAttribute('name', 'modeName');
     
     valueNode = simDoc.createElement('value');
-    valueNode.appendChild(simDoc.createTextNode(sn.modenames{ind}{m}));
+    valueNode.appendChild(simDoc.createTextNode(sn.nodeparam{ind}.modenames{m}));
     
     subModeNameNode.appendChild(valueNode);
     modeNamesNode.appendChild(subModeNameNode);

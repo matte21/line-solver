@@ -20,9 +20,13 @@ Advanced features include nodes to describe caching, randomly-evolving environme
 
 To get started, expand the archive (or clone the repository) in the chosen installation folder.
 
-Start MATLAB and change the active directory to the installation folder. Then add all LINE folders to the path
+Start MATLAB and change the active directory to the installation folder and run only the first time
 ```
-addpath(genpath(pwd))
+lineInstall
+```
+LINE is now configured. To add all LINE folders to the path type:
+```
+lineStart
 ```
 Finally, run the LINE demonstrators using
 ```

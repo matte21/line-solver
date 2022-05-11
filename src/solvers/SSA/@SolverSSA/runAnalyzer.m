@@ -33,8 +33,8 @@ switch options.method
             ind = sn.statefulToNode(isf);
             switch sn.nodetype(sn.statefulToNode(isf))
                 case NodeType.Cache
-                    self.model.nodes{sn.statefulToNode(isf)}.setResultHitProb(sn.varsparam{ind}.actualhitprob);
-                    self.model.nodes{sn.statefulToNode(isf)}.setResultMissProb(sn.varsparam{ind}.actualmissprob);
+                    self.model.nodes{sn.statefulToNode(isf)}.setResultHitProb(sn.nodeparam{ind}.actualhitprob);
+                    self.model.nodes{sn.statefulToNode(isf)}.setResultMissProb(sn.nodeparam{ind}.actualmissprob);
                     self.model.refreshChains();
             end
         end

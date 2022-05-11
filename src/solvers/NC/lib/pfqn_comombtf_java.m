@@ -1,4 +1,4 @@
-function [G,lG,XN,QN]=pfqn_comombtf(Din,Nin,Zin)
+function [G,lG,XN,QN]=pfqn_comombtf_java(Din,Nin,Zin)
 persistent isNCLibLoaded;
 if isempty(isNCLibLoaded)
     javaaddpath(which('pfqn_nclib.jar'));
@@ -9,19 +9,19 @@ import QueueingNet.*; %#ok<SIMPT>
 import DataStructures.*; %#ok<SIMPT>
 import Utilities.*; %#ok<SIMPT>
 
-Din=Din(sum(Din,2)>Distrib.Zero,:);
+%Din=Din(sum(Din,2)>Distrib.Zero,:);
 
 % rescale
-numdigits = max(arrayfun(@(e) numel(num2str(e)), [Din(:);Zin(:)]));
-scaleexp = min(numdigits,8);  % java.lang.Integer takes max 10 digits
+numdigits = ceil(max(abs(log10(abs([Din(:);Zin(:)])))));
+scaleexp = min(numdigits,10);  % java.lang.Integer takes max 10 digits
 scale = 10^(scaleexp);
 Din = round(Din*scale);
 Zin = round(sum(Zin*scale,1));
 
 [M,R]=size(Din);
-[~,I]=sort(sum(Din,1),'descend');
+[~,I]=sort(sum(Din>0,1),'descend');
 Din = Din(:,I);
-Nin = Nin(1,I);
+Nin = Nin(I);
 Zin = Zin(:,I);
 
 N = javaArray('java.lang.Integer',R);

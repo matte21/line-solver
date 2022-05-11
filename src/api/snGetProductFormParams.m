@@ -1,4 +1,4 @@
-function [lambda,D,N,Z,mu,S]= networkstruct_getproductformparams(sn)
+function [lambda,D,N,Z,mu,S]= snGetProductFormParams(sn)
 % [LAMBDA,D,N,Z,MU,S]= NETWORKSTRUCT_GETPRODUCTFORMPARAMS()
 
 % mu also returns max(S) elements after population |N| as this is
@@ -24,16 +24,24 @@ Nct = sum(N(isfinite(N)));
 mu = ones(Mq, Nct+max(S(isfinite(S))));
 for i=1:Mq
     for r=1:R
-        c = find(sn.chains(:,r));
-        D(i,r) = sn.visits{c}(queueIndices(i),r) / sn.rates(queueIndices(i),r);
+        c = find(sn.chains(:,r),1);
+        if sn.refclass(c)>0
+            D(i,r) = sn.visits{c}(queueIndices(i),r) / sn.rates(queueIndices(i),r) / sn.visits{c}(sn.refstat(r),sn.refclass(c));
+        else
+            D(i,r) = sn.visits{c}(queueIndices(i),r) / sn.rates(queueIndices(i),r);
+        end
     end
     mu(i,1:size(mu,2)) = min(1:size(mu,2), sn.nservers(queueIndices(i)));
 end
 Z = zeros(max(1,Mz),R);
 for i=1:Mz
     for r=1:R
-        c = find(sn.chains(:,r));
-        Z(i,r) = sn.visits{c}(delayIndices(i),r) / sn.rates(delayIndices(i),r);
+        c = find(sn.chains(:,r),1);
+        if sn.refclass(c)>0
+            Z(r) = sn.visits{c}(delayIndices(i),r) / sn.rates(delayIndices(i),r) / sn.visits{c}(sn.refstat(r),sn.refclass(c));
+        else
+            Z(r) = sn.visits{c}(delayIndices(i),r) / sn.rates(delayIndices(i),r);
+        end
     end
 end
 end

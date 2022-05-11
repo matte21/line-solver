@@ -22,7 +22,7 @@ for ind=1:sn.nnodes
         end
         if sn.isstateful(ind)
             if sn.nodetype(ind) == NodeType.Cache
-                if ~isnan(sn.varsparam{ind}.pref{r}) % class can read
+                if ~isnan(sn.nodeparam{ind}.pread{r}) % class can read
                     sync{end+1,1}.active{1} = Event(EventType.ID_READ, ind, r);
                     sync{end,1}.passive{1} = Event(EventType.ID_READ, local, r, 1.0);
                 end

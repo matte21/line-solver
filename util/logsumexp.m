@@ -13,6 +13,7 @@ function lse = logsumexp(x)
 % FUNCTIONS, IMA Journal of Numerical Analysis, draa038, https://doi.org/10.1093/imanum/draa038
 n = length(x);
 [a, k] = max(x);
+w = zeros(1,n);
 s = 0;
 for i=1:n
     w(i) =  exp(x(i)-a);
@@ -20,5 +21,5 @@ for i=1:n
         s = s + w(i);
     end
 end
-lse = a ;+ log1p(s);
+lse = a + log1p(s);
 end

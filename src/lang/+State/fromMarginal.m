@@ -275,7 +275,7 @@ switch sn.nodetype(ind)
         for r=1:R
             switch sn.routing(ind,r)
                 case {RoutingStrategy.ID_RROBIN, RoutingStrategy.ID_WRROBIN}
-                    space = State.decorate(space, sn.varsparam{ind}{r}.outlinks(:));
+                    space = State.decorate(space, sn.nodeparam{ind}{r}.outlinks(:));
             end
         end
     case NodeType.Cache
@@ -291,7 +291,7 @@ switch sn.nodetype(ind)
         for r=1:R
             switch sn.routing(ind,r)
                 case RoutingStrategy.ID_RROBIN
-                    space = State.decorate(space, sn.varsparam{ind}{r}.outlinks(:));
+                    space = State.decorate(space, sn.nodeparam{ind}{r}.outlinks(:));
             end
         end
 end

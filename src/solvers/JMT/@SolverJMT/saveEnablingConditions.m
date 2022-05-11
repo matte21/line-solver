@@ -12,8 +12,7 @@ enablingNode.setAttribute('name', 'enablingConditions');
 sn = self.getStruct;
 numOfNodes = sn.nnodes;
 numOfClasses = sn.nclasses;
-i = ind;
-numOfModes = sn.nmodes(ind);
+numOfModes = sn.nodeparam{ind}.nmodes;
 for m=1:(numOfModes)
     
     subEnablingConditionNode = simDoc.createElement('subParameter');
@@ -58,13 +57,13 @@ for m=1:(numOfModes)
             
             valueNode2 = simDoc.createElement('value');
             
-            if isinf(sn.enabling{i}{m}(k,r))
+            if isinf(sn.nodeparam{ind}.enabling{m}(k,r))
                 valueNode2.appendChild(simDoc.createTextNode(int2str(-1)));
                 exists = true;
-            elseif sn.enabling{i}{m}(k,r) > 0
-                valueNode2.appendChild(simDoc.createTextNode(int2str(sn.enabling{i}{m}(k,r))));
+            elseif sn.nodeparam{ind}.enabling{m}(k,r) > 0
+                valueNode2.appendChild(simDoc.createTextNode(int2str(sn.nodeparam{ind}.enabling{m}(k,r))));
                 exists = true;
-            elseif ~isinf(sn.inhibiting{i}{m}(k,r)) && sn.inhibiting{i}{m}(k,r) > 0
+            elseif ~isinf(sn.nodeparam{ind}.inhibiting{m}(k,r)) && sn.nodeparam{ind}.inhibiting{m}(k,r) > 0
                 valueNode2.appendChild(simDoc.createTextNode(int2str(0)));
                 exists = true;
             end

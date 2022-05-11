@@ -147,7 +147,7 @@ while max(abs(1-eta./eta_1)) > options.iter_tol && it < options.iter_max
     end
 
     Z = sum(Z(1:M,:),1);
-
+    
     Rchain = Qchain ./ repmat(Xchain,M,1) ./ Vchain;
     Rchain(infServers,:) = Lchain(infServers,:) ./ Vchain(infServers,:);
     Tchain = repmat(Xchain,M,1) .* Vchain;
