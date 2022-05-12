@@ -28,7 +28,7 @@ LINE is now installed. To begin using it, add all LINE folders to the path with 
 ```
 lineStart
 ```
-The last command will need to be used at the begin of every MATLAB session. Finally, run the LINE demonstrators using
+The last command is required at the begin of every MATLAB session. Finally, run the LINE demonstrators using
 ```
 allExamples
 ```
