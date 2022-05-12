@@ -6,13 +6,13 @@ function jmtPath = jmtGetPath
 
 jmtPath = fileparts(which('JMT.jar'));
 if isempty(jmtPath)
-    line_printf('\nJava Modelling Tools cannot be found. LINE will try to download the latest JMT version.\n')
+    line_printf('\nJava Modelling Tools cannot be found. LINE will try to download the latest JMT version (download approx. 30MB).\n')
     jmtSolverFolder = fileparts(mfilename('fullpath'));
-    if isdeployed
+%    if isdeployed
         m='Y';
-    else
-        m = input('Do you want to continue (download approx. 30MB), Y/N [N]: ','s');
-    end
+%    else
+%        m = input('Do you want to continue (download approx. 30MB), Y/N: ','s');
+%    end
     if m=='Y'
         try
             line_printf('\nDownload started, please be patient this may take several minutes.')
