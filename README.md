@@ -24,7 +24,7 @@ Start MATLAB and change the active directory to the installation folder and run 
 ```
 lineInstall
 ```
-LINE is now configured. To add all LINE folders to the path type:
+LINE is now installed. To begin using it, add all LINE folders to the path:
 ```
 lineStart
 ```
