@@ -16,19 +16,21 @@ The engine offers a language to specify queueing networks that decouples model d
 
 Advanced features include nodes to describe caching, randomly-evolving environments, computation of response time percentiles, and transient solutions.
 
-### Getting started (MATLAB SOURCE)
+### Installation (MATLAB SOURCE)
 
-To get started, expand the archive (or clone the repository) in the chosen installation folder.
+To install LINE, expand the archive (or clone the repository) in the chosen installation folder.
 
 Start MATLAB and change the active directory to the installation folder and run only the first time
 ```
 lineInstall
 ```
-LINE is now installed. To begin using it, add all LINE folders to the path with the following command:
+
+### Getting started (MATLAB SOURCE)
+To begin using LINE, add all LINE folders to the path using the following command:
 ```
 lineStart
 ```
-The last command is required at the begin of every MATLAB session. Finally, run the LINE demonstrators using
+The last command is required at the begin of every MATLAB session. You can now use LINE. For example, run the LINE demonstrators using
 ```
 allExamples
 ```
