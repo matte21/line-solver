@@ -24,11 +24,11 @@ Start MATLAB and change the active directory to the installation folder and run 
 ```
 lineInstall
 ```
-LINE is now installed. To begin using it, add all LINE folders to the path:
+LINE is now installed. To begin using it, add all LINE folders to the path with the following command:
 ```
 lineStart
 ```
-Finally, run the LINE demonstrators using
+The last command will need to be used at the begin of every MATLAB session. Finally, run the LINE demonstrators using
 ```
 allExamples
 ```
