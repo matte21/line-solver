@@ -15,7 +15,7 @@ if isempty(jmtPath)
 %    end
     if m=='Y'
         try
-            line_printf('\nDownload started, please be patient this may take several minutes.')
+            line_printf('\nDownload started, please wait - this may take several minutes.')
             if exist('websave')==2
                 if ispc
                     outfilename = websave([jmtSolverFolder,'\JMT.jar'],'http://jmt.sourceforge.net/latest/JMT.jar');
