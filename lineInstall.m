@@ -18,8 +18,8 @@ if none(strcmp('Global Optimization Toolbox', {v.Name}))
     warning('The Global Optimization Toolbox is not installed, this is required for LINE.')
     hasWarnings = true;
 end
-if none(strcmp('Global Optimization Toolbox', {v.Name}))
-    warning('The Global Optimization Toolbox is not installed, this is required for LINE.')
+if none(strcmp('Parallel Computing Toolbox', {v.Name}))
+    warning('The Parallel Computing Toolbox is not installed, this is required for LINE.')
     hasWarnings = true;
 end
 if none(strcmp('Symbolic Math Toolbox ', {v.Name}))
