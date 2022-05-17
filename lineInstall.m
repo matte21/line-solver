@@ -3,22 +3,27 @@ warning on
 disp('Checking JAVA...')
 [status,result] = system('java');
 hasWarnings = false;
+v = ver;
 if status == 0
     error('ERROR: the Java Runtime Environment (JRE) is not installed, this is required for LINE.')
 end
 disp('Checking MATLAB toolboxes...')
-if license('test','statistics_toolbox')==0
+if none(strcmp('Statistics and Machine Learning Toolbox', {v.Name}))
     warning('ERROR: the Statistics and Machine Learning toolbox is not installed, this is required for LINE.')
 end
-if license('test','optimization_toolbox')==0
+if none(strcmp('Optimization Toolbox', {v.Name}))
     warning('ERROR: the Optimization Toolbox is not installed, this is required for LINE.')
 end
-if license('test','gads_toolbox')==0
+if none(strcmp('Global Optimization Toolbox', {v.Name}))
     warning('The Global Optimization Toolbox is not installed, this is required for LINE.')
     hasWarnings = true;
 end
-if license('test','symbolic_toolbox')==0
-    warning('The Symbolic Toolbox is not installed, this may be required by some LINE methods.')
+if none(strcmp('Global Optimization Toolbox', {v.Name}))
+    warning('The Global Optimization Toolbox is not installed, this is required for LINE.')
+    hasWarnings = true;
+end
+if none(strcmp('Symbolic Math Toolbox ', {v.Name}))
+    warning('The Symbolic Math Toolbox is not installed, this may be required by some LINE methods.')
     hasWarnings = true;
 end
 disp('Checking LQNS...')
