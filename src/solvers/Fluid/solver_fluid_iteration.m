@@ -26,7 +26,7 @@ nonZeroRates = nonZeroRates(isfinite(nonZeroRates));
 rategap = log10(max(nonZeroRates)/min(nonZeroRates)); % if the max rate is Distrib.InfRate and the min is 1, then rategap = 6
 
 % init ode
-[ode_h, ~] = solver_fluid_odes(N, Mu, Phi, PH, P, S, sn.sched, sn.schedparam, options);
+[ode_h, ~] = solver_fluid_odes(sn, N, Mu, Phi, PH, P, S, sn.sched, sn.schedparam, options);
 
 T0 = timespan(1);
 %opt = odeset();

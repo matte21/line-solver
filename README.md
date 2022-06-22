@@ -20,7 +20,7 @@ Advanced features include nodes to describe caching, randomly-evolving environme
 
 To install LINE, expand the archive (or clone the repository) in the chosen installation folder.
 
-Start MATLAB and change the active directory to the installation folder and run only the first time
+Start MATLAB, change the active directory to the installation folder and run only the first time:
 ```
 lineInstall
 ```

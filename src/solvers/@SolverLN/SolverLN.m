@@ -67,13 +67,13 @@ classdef SolverLN < LayeredNetworkSolver & EnsembleSolver
             if nargin>1 && isstruct(solverFactory)
                 options = solverFactory;
                 self.setOptions(options);
-                solverFactory = @(m) SolverNC(m,'method','le','verbose',false);
+                solverFactory = @(m) SolverNC(m,'verbose',false);
             else
                 self.setOptions(SolverLN.defaultOptions);
                 if nargin>2
                     if ischar(solverFactory)
                         inputvar = {solverFactory,varargin{:}};
-                        solverFactory = @(m) SolverNC(m,'method','le','verbose',false);
+                        solverFactory = @(m) SolverNC(m,'verbose',false);
                     else
                         inputvar = varargin;
                     end
@@ -182,7 +182,7 @@ classdef SolverLN < LayeredNetworkSolver & EnsembleSolver
                         self.insist = false;
                     else
                         if self.options.verbose
-                            line_printf( sprintf('\nSolverLN completed in %d iterations.\n',size(self.results,1)));
+                            line_printf( sprintf('\nSolverLN completed in %d iterations.',size(self.results,1)));
                         end
                         bool = true;
                     end

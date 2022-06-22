@@ -194,7 +194,7 @@ return
         
         % setup the ODEs for the new QN
         %        options.method  = 'statedep'; % default doesn't seem to work in some models
-        [ode_h_c, ~] = solver_fluid_odes(N, new_mu', new_pi', new_proc, new_rt, S, sn.sched, sn.schedparam, options);
+        [ode_h_c, ~] = solver_fluid_odes(sn, N, new_mu', new_pi', new_proc, new_rt, S, sn.sched, sn.schedparam, options);
         
         % setup initial point
         y0_c = zeros(1, sum(sum(phases_c(:,:))));

@@ -42,7 +42,7 @@ eta_1 = zeros(1,M);
 eta = ones(1,M);
 if all(schedid~=SchedStrategy.ID_FCFS) options.iter_max=1; end
 it = 0;
-while max(abs(1-eta./eta_1)) > options.iter_tol && it < options.iter_max
+while max(abs(1-eta./eta_1)) > options.iter_tol & it < options.iter_max
     it = it + 1;
     eta_1 = eta;
     M = sn.nstations;    %number of stations
@@ -187,7 +187,7 @@ while max(abs(1-eta./eta_1)) > options.iter_tol && it < options.iter_max
 
     [Q,U,R,T,C,X] = snDeaggregateChainResults(sn, Lchain, ST, STchain, Vchain, alpha, [], [], Rchain, Tchain, [], Xchain);
 
-    [ST,gamma,~,~,~,~,eta] = handlerHighVar(options.config.highvar,sn,ST0,V,SCV,X,U,gamma,nservers);
+    [ST,gamma,~,~,~,~,eta] = npfqn_nonexp_approx(options.config.highvar,sn,ST0,V,SCV,X,U,gamma,nservers);
 end
 
 runtime = toc(Tstart);

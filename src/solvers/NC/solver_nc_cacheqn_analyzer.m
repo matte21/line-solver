@@ -53,16 +53,16 @@ for it=1:options.iter_max
             end
         end
 
-        gamma = mucache_gamma_lp(lambda_cache,ch.accost);
+        gamma = cache_gamma_lp(lambda_cache,ch.accost);
         switch options.method
             case 'exact'
-                [pij] = mucache_prob_erec(gamma, m);
+                [pij] = cache_prob_erec(gamma, m);
                 missrate(ind,:) = zeros(1,u);
                 for v=1:u
                     missrate(ind,v) = lambda_cache(v,:,1)*pij(:,1);
                 end
             otherwise
-                [~,missrate(ind,:)] = mucache_miss_rayint(gamma, m, lambda_cache);
+                [~,missrate(ind,:)] = cache_miss_rayint(gamma, m, lambda_cache);
         end
 
         missprob(ind,:) = missrate(ind,:) ./ lambda; %  we set to NaN if no arrivals

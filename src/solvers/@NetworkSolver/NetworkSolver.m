@@ -223,6 +223,7 @@ classdef NetworkSolver < Solver
         [AvgTable,TT] = getAvgTputTable(self,T,keepDisabled);
         
         [NodeAvgTable,QTn,UTn,RTn,TTn] = getAvgNodeTable(self,Q,U,R,T,A,keepDisabled);
+        [AvgChain,QTc,UTc,RTc,WTc,TTc] = getAvgChainTable(self,Q,U,R,T);
         
         [QNc,UNc,RNc,TNc]   = getAvgChain(self,Q,U,R,T);
         [AN]                = getAvgArvRChain(self,Q);

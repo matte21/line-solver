@@ -169,7 +169,7 @@ while nanmax(nanmax(abs(TN-TN_1))) > Distrib.Tol && it <= options.iter_max %#ok<
                                     UN(ist,k) = S(ist,k)*TN(ist,k);
                                 end
                                 %Nc = sum(sn.njobs(inchain)); % closed population
-                                Uden = min([1-Distrib.Tol,sum(UN(ist,:))]);
+                                Uden = min([1-Distrib.Zero,sum(UN(ist,:))]);
                                 for k=inchain
                                     %QN(ist,k) = (UN(ist,k)-UN(ist,k)^(Nc+1))/(1-Uden); % geometric bound type approximation
                                     QN(ist,k) = UN(ist,k)/(1-Uden);
@@ -207,8 +207,8 @@ while nanmax(nanmax(abs(TN-TN_1))) > Distrib.Tol && it <= options.iter_max %#ok<
                                     line_error(mfilename,'Solver MAM requires either identical priorities or all distinct priorities');
                                 end
                             else
-                                aggrUtil = sum(mmap_lambda(aggrArrivalAtNode)./(Distrib.Tol+sn.rates(ist,1:K)));
-                                if aggrUtil < 1-Distrib.Tol
+                                aggrUtil = sum(mmap_lambda(aggrArrivalAtNode)./(Distrib.Zero+sn.rates(ist,1:K)));
+                                if aggrUtil < 1-Distrib.Zero
                                     if any(isinf(N))
                                         [Qret{1:K}] = MMAPPH1FCFS({aggrArrivalAtNode{[1,3:end]}}, {pie{ist}{:}}, {D0{ist,:}}, 'ncMoms', 1);
                                     else % all closed classes

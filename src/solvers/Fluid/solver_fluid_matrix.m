@@ -25,17 +25,28 @@ A = [];
 B = [];
 for i=1:M
     for r=1:K
-        Psi = blkdiag(Psi,PH{i}{r}{1});
-        B = blkdiag(B,sum(PH{i}{r}{2},2));
-        A = blkdiag(A,pie{i}{r}');        
+        if nphases(i,r)==0
+            Psi = blkdiag(Psi,0);
+            B = blkdiag(B,0);
+            A = blkdiag(A,NaN);        
+        else
+            Psi = blkdiag(Psi,PH{i}{r}{1});
+            B = blkdiag(B,sum(PH{i}{r}{2},2));
+            A = blkdiag(A,pie{i}{r}');        
+        end
     end
 end
 W = Psi + B*P*A';
 
+% remove disabled transitions
+keep = find(~isnan(sum(W,1)));
+W = W(keep,:);
+W = W(:,keep);
+
 Qa = []; % state mapping to queues (called Q(a) in Ruuskanen et al.)
-SQC = zeros(M,0); % to compute per-class queue length at the end
-SUC = zeros(M,0); % to compute per-class utilizations at the end
-STC = zeros(M,0); % to compute per-class throughput at the end
+SQC = zeros(M*K,0); % to compute per-class queue length at the end
+SUC = zeros(M*K,0); % to compute per-class utilizations at the end
+STC = zeros(M*K,0); % to compute per-class throughput at the end
 x0 = options.init_sol(:);
 %x0 = []; % initial state
 state = 0;
@@ -91,16 +102,22 @@ Sa = S(Qa);
 S = repmat(S,1,K)'; S=S(:);
 for j=1:Tmax
     x = xvec_t(j,:)';
-    QNtmp{j} = SQC*x;
-    QNtmp{j} = reshape(QNtmp{j},K,M)';
-    TNtmp{j} = STC*(x./(Distrib.Zero+SQ*x).*min(Sa,Distrib.Zero+SQ*x));
-    UNtmp{j} = SUC*(x./(Distrib.Zero+SQ*x).*min(Sa,Distrib.Zero+SQ*x));
-    TNtmp{j} = reshape(TNtmp{j},K,M)';
-    UNtmp{j} = reshape(UNtmp{j},K,M)';
+    QNtmp{j} = zeros(K,M);
+    TNtmp{j} = zeros(K,M);
+    UNtmp{j} = zeros(K,M);
+    RNtmp{j} = zeros(K,M);
+
+    QNtmp{j}(:) = SQC*x;
+    TNtmp{j}(:) = STC*(x./(Distrib.Zero+SQ*x).*min(Sa,Distrib.Zero+SQ*x));
+    UNtmp{j}(:) = SUC*(x./(Distrib.Zero+SQ*x).*min(Sa,Distrib.Zero+SQ*x));
     % Little's law is invalid in transient so this vector is not returned
     % except the last element as an approximation of the actual RN
-    RNtmp{j} = QNtmp{j}./TNtmp{j};
-    RNtmp{j} = reshape(RNtmp{j},M,K);
+    RNtmp{j}(:) = QNtmp{j}(:)./TNtmp{j}(:);
+
+    QNtmp{j} = QNtmp{j}';
+    UNtmp{j} = UNtmp{j}';
+    RNtmp{j} = RNtmp{j}';
+    TNtmp{j} = TNtmp{j}';
 end
 % steady state metrics
 for j=1:Tmax

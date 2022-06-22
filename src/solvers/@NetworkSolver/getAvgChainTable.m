@@ -1,14 +1,14 @@
-function [AvgChain,QTc,UTc,RTc,TTc] = getAvgChainTable(self,Q,U,R,T)
-% [AVGCHAIN,QTC,UTC,RTC,TTC] = GETAVGCHAINTABLE(SELF,Q,U,R,T)
+function [AvgChain,QTc,UTc,RTc,WTc,TTc] = getAvgChainTable(self,Q,U,R,T)
+% [AVGCHAIN,QTC,UTC,RTC,WTc,TTC] = GETAVGCHAINTABLE(SELF,Q,U,R,T)
 
 % Copyright (c) 2012-2022, Imperial College London
 % All rights reserved.
 
 sn = self.model.getStruct;
 M = sn.nstations;
-K = sn.nchains;
+C = sn.nchains;
 if nargin == 1
-   [Q,U,R,T] = getAvgHandles(self);
+    [Q,U,R,T] = getAvgHandles(self);
 end
 if nargin == 2
     if iscell(Q) && ~isempty(Q)
@@ -16,7 +16,7 @@ if nargin == 2
         Q = param{1};
         U = param{2};
         R = param{3};
-        T = param{4};    
+        T = param{4};
         % case where varargin is passed as input
     elseif iscell(Q) && isempty(Q)
         [Q,U,R,T] = getAvgHandles(self);
@@ -37,20 +37,22 @@ if isempty(QNc)
     RTc = Table();
     TTc = Table();
 else
-    Qval = zeros(M,K); Uval = zeros(M,K);
-    Rval = zeros(M,K); Tval = zeros(M,K);
-    Chain = cell(K*M,1);
-    JobClasses = cell(K*M,1);
-    Station = cell(K*M,1);
-    for i=1:M
-        for k=1:K
-            Chain{(i-1)*K+k} = ChainName{k};
-            JobClasses((i-1)*K+k,1) = {label(ChainClasses{k}(:))};
-            Station{(i-1)*K+k} = Q{i,k}.station.name;
-            Qval((i-1)*K+k) = QNc(i,k);
-            Uval((i-1)*K+k) = UNc(i,k);
-            Rval((i-1)*K+k) = RNc(i,k);
-            Tval((i-1)*K+k) = TNc(i,k);
+    Qval = zeros(M,C); Uval = zeros(M,C);
+    Rval = zeros(M,C); Tval = zeros(M,C);
+    Resval = zeros(M,C);
+    Chain = cell(C*M,1);
+    JobClasses = cell(C*M,1);
+    Station = cell(C*M,1);
+    for c=1:sn.nchains
+        for i=1:M
+            Chain{(i-1)*C+c} = ChainName{c};
+            JobClasses((i-1)*C+c,1) = {label(ChainClasses{c}(:))};
+            Station{(i-1)*C+c} = Q{i,c}.station.name;
+            Qval((i-1)*C+c) = QNc(i,c);
+            Uval((i-1)*C+c) = UNc(i,c);
+            Rval((i-1)*C+c) = RNc(i,c);
+            Resval((i-1)*C+c) = RNc(i,c)/sum(sn.visits{c}(i,:));
+            Tval((i-1)*C+c) = TNc(i,c);
         end
     end
     Chain = label(Chain);
@@ -61,8 +63,10 @@ else
     UTc = Table(Station,Chain,JobClasses,Util);
     RespT = Rval(:); % we need to save first in a variable named like the column
     RTc = Table(Station,Chain,JobClasses,RespT);
+    ResidT = Resval(:); % we need to save first in a variable named like the column
+    WTc = Table(Station,Chain,JobClasses,ResidT);
     Tput = Tval(:); % we need to save first in a variable named like the column
     TTc = Table(Station,Chain,JobClasses,Tput);
-    AvgChain = Table(Station,Chain,JobClasses,QLen,Util,RespT,Tput);
+    AvgChain = Table(Station,Chain,JobClasses,QLen,Util,RespT,ResidT,Tput);
 end
 end

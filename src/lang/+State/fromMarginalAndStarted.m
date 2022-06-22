@@ -100,7 +100,7 @@ switch sn.nodetype(ind)
                 end
             case {SchedStrategy.ID_FCFS, SchedStrategy.ID_HOL, SchedStrategy.ID_LCFS}
                 if sum(n) == 0
-                    space = zeros(1,1+sum(K));
+                    space = zeros(1,1+max(R,sum(K)));
                     return
                 end
                 % in these policies we track an ordered buffer and

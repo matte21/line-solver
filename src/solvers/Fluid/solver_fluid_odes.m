@@ -1,5 +1,5 @@
-function [ode_h,q_indices] = solver_fluid_odes(N, Mu, phi, PH, P, nservers, sched, schedparam, options)
-% [ODE_H,Q_INDICES] = SOLVER_FLUID_ODES(N, MU, PHI, PH, P, NSERVERS, SCHED, SCHEDPARAM)
+function [ode_h,q_indices] = solver_fluid_odes(sn, N, Mu, phi, PH, P, nservers, sched, schedparam, options)
+% [ODE_H,Q_INDICES] = SOLVER_FLUID_ODES(sn, N, MU, PHI, PH, P, NSERVERS, SCHED, SCHEDPARAM)
 
 % Copyright (c) 2012-2022, Imperial College London
 % All rights reserved.
@@ -64,7 +64,7 @@ switch options.method
         all_jumps = ode_jumps_new(M, K, enabled, q_indices, P, Kic);
         % determines a vector with the fixed part of the rates,
         % and defines the indexes that correspond to the events that occur
-        [rateBase, eventIdx] = ode_rate_base(phi, Mu, PH, M, K, enabled, q_indices, P, Kic, schedid, all_jumps);
+        [rateBase, eventIdx] = ode_rate_base(sn, phi, Mu, PH, M, K, enabled, q_indices, P, Kic, schedid, all_jumps);
         ode_si_h = @(t,x) all_jumps * ode_rates_closing(x, M, K, enabled, q_indices, Kic, nservers, w, schedid, rateBase, eventIdx);
         ode_h = ode_si_h;
 end

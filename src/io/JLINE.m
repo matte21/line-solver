@@ -14,6 +14,8 @@ classdef JLINE
                 java_dist = jline.lang.distributions.Exp(line_dist.getParam(1).paramValue);
             elseif isa(line_dist, 'Erlang')
                 java_dist = jline.lang.distributions.Erlang(line_dist.getParam(1).paramValue, line_dist.getParam(2).paramValue);
+            elseif isa(line_dist, 'HyperExp')
+                java_dist = jline.lang.distributions.HyperExp(line_dist.getParam(1).paramValue, line_dist.getParam(2).paramValue, line_dist.getParam(3).paramValue);
             elseif isa(line_dist, 'Immediate')
                 java_dist = jline.lang.distributions.Immediate();
             elseif isa(line_dist, 'Disabled')
@@ -171,8 +173,6 @@ classdef JLINE
                     if ~strcmp(output_strat{2}, 'Probabilities') && ~strcmp(output_strat{2}, 'Random');
                         line_error(mfilename, 'Routing Strategy not supported by JLINE');
                     end
-
-
                     for j = 1:length(probabilities)
                         dest_idx = line_network.getNodeIndex(probabilities{j}{1}.name);
                         if (connections(i, j) ~= 0)

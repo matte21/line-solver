@@ -51,18 +51,18 @@ for it=1:options.iter_max
         end
 
         R = ch.accost;
-        gamma = mucache_gamma_lp(lambda_cache,R);
+        gamma = cache_gamma_lp(lambda_cache,R);
 
         switch options.method
             case 'exact'
-                [~,~,pij] = mucache_mva(gamma, m);
+                [~,~,pij] = cache_mva(gamma, m);
                 pij = [abs(1-sum(pij,2)),pij];
                 missprob(ind,:) = zeros(1,u);
                 for v=1:u
                     missrate(ind,v) = lambda_cache(v,:,1)*pij(:,1);
                 end
             otherwise
-                pij = mucache_prob_asy(gamma,m); % FPI method
+                pij = cache_prob_asy(gamma,m); % FPI method
                 missprob(ind,:) = zeros(1,u);
                 for v=1:u
                     missrate(ind,v) = lambda_cache(v,:,1)*pij(:,1);

@@ -22,16 +22,10 @@ end
 outer_iters = 1;
 outer_runtime = tic;
 switch options.method
-    case {'statedep','closing'}
-        [QN, UN, RN, TN, xvec_iter, QNt, UNt, TNt, ~, t] = solver_fluid_analyzer_inner(sn, options);
     case {'matrix'}
-        if any(isnan(rates0(:)))
-            line_warning(mfilename, 'The model includes disabled transitions that are not supported by the matrix method. Switching to the ''closing'' method.');
-            options.method = 'closing';
-            [QN, UN, RN, TN, xvec_iter, QNt, UNt, TNt, ~, t] = solver_fluid_analyzer_inner(sn, options);
-        else
-            [QN, UN, RN, TN, xvec_iter, QNt, UNt, TNt, ~, t] = solver_fluid_matrix(sn, options);
-        end
+        [QN, UN, RN, TN, xvec_iter, QNt, UNt, TNt, ~, t] = solver_fluid_matrix(sn, options);
+    case {'closing','statedep'}        
+        [QN, UN, RN, TN, xvec_iter, QNt, UNt, TNt, ~, t] = solver_fluid_closing(sn, options);
     otherwise
         line_error(mfilename,'Unsupported method');
 end
@@ -47,7 +41,7 @@ switch options.method
             eta = Inf*ones(1,M);
             tol = 1e-2;
 
-            while max(abs(1-eta./eta_1)) > tol && iter <= options.iter_max
+            while max(abs(1-eta./eta_1)) > tol & iter <= options.iter_max
                 iter = iter + 1;
                 eta_1 = eta;
                 for i=1:M
@@ -64,7 +58,7 @@ switch options.method
                         XN(k) = TN(sn.refstat(k),k);
                     end
                 end
-                [ST,gamma,~,~,~,~,eta] = handlerHighVar(options.config.highvar,sn,ST0,V,SCV,XN,UN,gamma,S);
+                [ST,gamma,~,~,~,~,eta] = npfqn_nonexp_approx(options.config.highvar,sn,ST0,V,SCV,XN,UN,gamma,S);
 
                 rates = 1./ST;
                 rates(isinf(rates)) = Distrib.Inf;
@@ -106,10 +100,10 @@ switch options.method
                 end
                 sn.phases = phases;
                 switch options.method
-                    case {'statedep','closing'}
-                        [~, UN, ~, TN, xvec_iter, ~, ~, ~, ~, ~, inner_iters, inner_runtime] = solver_fluid_analyzer_inner(sn, options);
                     case {'matrix'}
                         [~, UN, ~, TN, xvec_iter, ~, ~, ~, ~, ~, inner_iters, inner_runtime] = solver_fluid_matrix(sn, options);
+                    case {'closing','statedep'}
+                        [~, UN, ~, TN, xvec_iter, ~, ~, ~, ~, ~, inner_iters, inner_runtime] = solver_fluid_closing(sn, options);
                 end
                 phases_last = phases;
                 outer_iters = outer_iters + inner_iters;
@@ -121,10 +115,10 @@ switch options.method
             % so that we get the correct transient.
             options.init_sol = solver_fluid_initsol(sn, options);
             switch options.method
-                case {'statedep','closing'}
-                    [QN, UN, RN, TN, xvec_iter, QNt, UNt, TNt, ~, t] = solver_fluid_analyzer_inner(sn, options);
                 case {'matrix'}
                     [QN, UN, RN, TN, xvec_iter, QNt, UNt, TNt, ~, t] = solver_fluid_matrix(sn, options);
+                case {'closing','statedep'}
+                    [QN, UN, RN, TN, xvec_iter, QNt, UNt, TNt, ~, t] = solver_fluid_closing(sn, options);
             end
         end
     case 'statedep'
@@ -174,7 +168,7 @@ end
 UN(isnan(UN))=0;
 
 %switch options.method
-%case {'statedep','closing'}
+%case {'closing','statedep'}
 %         for i=1:M
 %             if sn.nservers(i) > 0 % not INF
 %                 for k = 1:K

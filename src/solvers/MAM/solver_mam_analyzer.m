@@ -1,5 +1,5 @@
 function [QN,UN,RN,TN,CN,XN,runtime] = solver_mam_analyzer(sn, options)
-% [QN,UN,RN,TN,CN,XN,RUNTIME] = SOLVER_MAM_ANALYZER(QN, OPTIONS)
+    % [QN,UN,RN,TN,CN,XN,RUNTIME] = SOLVER_MAM_ANALYZER(QN, OPTIONS)
 
 % Copyright (c) 2012-2022, Imperial College London
 % All rights reserved.
@@ -9,8 +9,8 @@ Tstart = tic;
 if nargin<2 || isempty(options.config) || ~isfield(options.config,'merge')
     options.config = struct();
     options.config.merge = 'super';
-    %options.config.compress = 'mixture.order1';
-    options.config.compress = 'none';
+    options.config.compress = 'mixture.order1';
+    %options.config.compress = 'none';
     options.config.space_max = 128;
 end
 

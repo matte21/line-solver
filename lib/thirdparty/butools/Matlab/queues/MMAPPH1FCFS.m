@@ -174,7 +174,7 @@ function varargout = MMAPPH1FCFS(D, sigma, S, varargin)
     % ==========================================
 
     % solve Y0 and calculate T
-    Y0 = FluidFundamentalMatrices(kron(Ia,Sa), kron(Ia,-sum(Sa,2)), iVec, D0, 'P', precision);
+    Y0 = FluidFundamentalMatrices (kron(Ia,Sa), kron(Ia,-sum(Sa,2)), iVec, D0, 'P', precision);
     T = kron(Ia,Sa) + Y0 * iVec;
 
     % calculate pi0 and v0
@@ -190,7 +190,6 @@ function varargout = MMAPPH1FCFS(D, sigma, S, varargin)
     % step 2. calculate performance measures
     % ======================================
     Ret = {};
-    
     for k=classes
         argIx = 1;
         clo = iT*kron(oa,sv{k});

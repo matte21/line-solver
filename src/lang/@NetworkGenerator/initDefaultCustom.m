@@ -22,7 +22,7 @@ for i=nodes
             s0(r) = min(n0(r),s);
             s = s - s0(r);
         end
-        state_i = fromMarginalAndStarted(qn,i,n0(:)',s0(:)');
+        state_i = fromMarginalAndStarted(sn,i,n0(:)',s0(:)');
         switch sn.nodetype(i)
             case NodeType.Cache
                 state_i = [state_i, 1:sn.nvars(i,2*R+1)];
@@ -57,7 +57,7 @@ for i=nodes
 end
 end
 
-function space = fromMarginalAndStarted(qn, ind, n, s, options)
+function space = fromMarginalAndStarted(sn, ind, n, s, options)
 % SPACE = FROMMARGINALANDSTARTED(QN, IND, N, S, OPTIONS)
 
 % Copyright (c) 2012-2022, Imperial College London
@@ -66,8 +66,8 @@ function space = fromMarginalAndStarted(qn, ind, n, s, options)
 if ~exist('options','var')
     options.force = true;
 end
-if isa(qn,'Network')
-    qn = sn.getStruct();
+if isa(sn,'Network')
+    sn = sn.getStruct();
 end
 % generate one initial state such that the marginal queue-lengths are as in vector n
 % n(r): number of jobs at the station in class r

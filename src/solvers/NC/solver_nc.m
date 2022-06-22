@@ -25,7 +25,7 @@ C = sn.nchains;
 
 if all(schedid~=SchedStrategy.ID_FCFS) options.iter_max=1; end
 it = 0;
-while max(abs(1-eta./eta_1)) > options.iter_tol && it < options.iter_max
+while max(abs(1-eta./eta_1)) > options.iter_tol & it < options.iter_max
     it = it + 1;
     eta_1 = eta;
 
@@ -156,7 +156,7 @@ while max(abs(1-eta./eta_1)) > options.iter_tol && it < options.iter_max
 
     [Q,U,R,T,~,X] = snDeaggregateChainResults(sn, Lchain, ST, STchain, Vchain, alpha, [], [], Rchain, Tchain, [], Xchain);
     STeff = ST;% effective service time at the last iteration
-    [ST,gamma,~,~,~,~,eta] = handlerHighVar(options.config.highvar,sn,ST0,V,SCV,X,U,gamma,nservers);
+    [ST,gamma,~,~,~,~,eta] = npfqn_nonexp_approx(options.config.highvar,sn,ST0,V,SCV,X,U,gamma,nservers);
 end
 
 Q=abs(Q); R=abs(R); X=abs(X); U=abs(U);

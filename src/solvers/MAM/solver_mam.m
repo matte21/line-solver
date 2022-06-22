@@ -78,7 +78,7 @@ if all(isinf(sn.njobs)) % is open
         end
         
         
-        ARV = solver_mam_estflows(sn, DEP, config);
+        ARV = solver_mam_traffic(sn, DEP, config);
         
         QN_1 = QN;
         

@@ -40,17 +40,17 @@ for v=1:u
 end
 
 R = ch.accost;
-gamma = mucache_gamma_lp(lambda,R);
+gamma = cache_gamma_lp(lambda,R);
 switch options.method
     case 'exact'
-        [pij] = mucache_prob_erec(gamma, m);
+        [pij] = cache_prob_erec(gamma, m);
         missRate = zeros(1,u);
         for v=1:u
             missRate(v) = lambda(v,:,1)*pij(:,1);
         end
     otherwise
-        [~,missRate,~,~,lE] = mucache_miss_rayint(gamma, m, lambda);
-        pij = mucache_prob_rayint(gamma, m, lE);
+        [~,missRate,~,~,lE] = cache_miss_rayint(gamma, m, lambda);
+        pij = cache_prob_rayint(gamma, m, lE);
 end
 
 for r = 1:sn.nclasses
