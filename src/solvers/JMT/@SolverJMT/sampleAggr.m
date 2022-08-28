@@ -1,9 +1,14 @@
-function stationStateAggr = sampleAggr(self, node, numEvents)
+function stationStateAggr = sampleAggr(self, node, numEvents, markActivePassive)
 % STATIONSTATEAGGR = SAMPLEAGGR(NODE, NUMEVENTS)
 
 if nargin<2 %~exist('node','var')
     line_error(mfilename,'sampleAggr requires to specify a node.');
 end
+
+if nargin<4
+    markActivePassive = false;
+end
+
 if nargin<3 %~exist('numEvents','var')
     numEvents = -1;
 else
@@ -85,7 +90,7 @@ stationStateAggr.t = stationStateAggr.t(1:min(length(t),1+numEvents),:);
 stationStateAggr.t = [0; stationStateAggr.t(1:end-1)];
 stationStateAggr.state = cell2mat(nir);
 stationStateAggr.state = stationStateAggr.state(1:min(length(t),1+numEvents),:);
-%stationStateAggr.job_id = 
+%stationStateAggr.job_id =
 
 event = cellmerge(event);
 event = {event{cellisa(event,'Event')}}';
@@ -95,4 +100,23 @@ event_t = event_t(event_t <= max(stationStateAggr.t));
 stationStateAggr.event = {event{I}};
 stationStateAggr.event = stationStateAggr.event';
 stationStateAggr.isaggregate = true;
+
+if markActivePassive
+    apevent = cell(1,length(stationStateAggr.t)-1);
+    for ti = 1:length(apevent)
+        apevent{ti} = struct('active',[],'passive',[]);
+    end
+    for e=1:length(stationStateAggr.event)
+        ti = find(stationStateAggr.event{e}.t == stationStateAggr.t);
+        if ~isempty(ti)
+            switch stationStateAggr.event{e}.event
+                case EventType.ID_ARV
+                    apevent{ti-1}.passive = stationStateAggr.event{e};
+                otherwise
+                    apevent{ti-1}.active = stationStateAggr.event{e};
+            end
+        end
+    end
+    stationStateAggr.event = apevent';
+end
 end

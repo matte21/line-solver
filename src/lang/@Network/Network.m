@@ -14,9 +14,11 @@ classdef Network < Model
     end
 
     properties (Hidden)
+        obj; % empty
         sn;
         csmatrix;
         hasStruct;
+        allowReplace;
     end
 
     properties (Hidden)
@@ -38,15 +40,16 @@ classdef Network < Model
         nodes = getNodes(self)
         sa = getStruct(self, structType, wantState) % get abritrary representation
         used = getUsedLangFeatures(self) % get used features
-        ft = getForks(self, rt) % get fork table
+        ft = getForkJoins(self, rt) % get fork-join pairs
         [chainsObj,chainsMatrix] = getChains(self, rt) % get chain table
         [rt,rtNodes,connections,chains,rtNodesByClass,rtNodesByStation] = getRoutingMatrix(self, arvRates) % get routing matrix
-        [Q,U,R,T,A] = getAvgHandles(self)
-        A = getAvgArvRHandles(self);
-        T = getAvgTputHandles(self);
+        [Q,U,R,T,A,W] = getAvgHandles(self)
         Q = getAvgQLenHandles(self);
-        R = getAvgRespTHandles(self);
         U = getAvgUtilHandles(self);
+        R = getAvgRespTHandles(self);
+        T = getAvgTputHandles(self);
+        A = getAvgArvRHandles(self);
+        W = getAvgResidTHandles(self);
         [Qt,Ut,Tt] = getTranHandles(self)
         connections = getConnectionMatrix(self);
     end
@@ -62,7 +65,7 @@ classdef Network < Model
         reset(self, resetState)
         resetHandles(self)
         resetModel(self, resetState)
-        nodes = resetNetwork(self)
+        nodes = resetNetwork(self, deleteCSnodes)
         resetStruct(self)
 
         refreshStruct(self, hard);
@@ -79,6 +82,7 @@ classdef Network < Model
         [chains, visits, rt] = refreshChains(self, propagate)
         [cap, classcap] = refreshCapacity(self);
         nvars = refreshLocalVars(self);
+        [nonfjmodel, fjclassmap, fjforkmap, fanout] = approxForkJoins(self, forkLambda);
     end
 
     % PUBLIC METHODS
@@ -100,13 +104,20 @@ classdef Network < Model
             self.regions = {};
             self.sourceidx = [];
             self.sinkidx = [];
-            self.setChecks(true);
+            self.setDoChecks(true);
             self.hasStruct = false;
+            self.allowReplace = false;
+            try
+                jline.lang.distributions.Immediate();
+            catch
+                javaaddpath(which('linesolver.jar'));
+                import jline.*;
+            end
         end
 
         setInitialized(self, bool);
 
-        function self = setChecks(self, bool)
+        function self = setDoChecks(self, bool)
             self.enableChecks = bool;
         end
 
@@ -302,6 +313,43 @@ classdef Network < Model
             [stateSpace,nodeStateSpace] = SolverCTMC(self).getStateSpace(varargin{:});
         end
 
+        function P=summaryChains(self)
+            if ~self.hasStruct()
+                self.getStruct;
+            end
+            G = digraph(self.sn.rtnodes);
+            for c=1:self.sn.nchains
+                inchain = find(self.sn.chains(c,:));
+                if self.sn.refclass(c)>0
+                    root = (self.sn.stationToNode(self.sn.refstat(inchain(1)))-1)+self.sn.refclass(c);
+                    [~,E]=G.dfsearch(root,'edgetonew');
+                    [~,E2]=G.dfsearch(root,'edgetodiscovered');
+                    [~,E3]=G.dfsearch(root,'edgetofinished');
+                    E(end+1:end+size(E2,1),:)=E2;
+                    E(end+1:end+size(E3,1),:)=E3;
+                    for j=1:size(E,1)                        
+                        rfrom=mod(G.Edges.EndNodes(E(j),1),self.sn.nclasses);
+                        if rfrom==0
+                            rfrom = self.sn.nclasses;
+                        end
+                        ifrom=(G.Edges.EndNodes(E(j),1)-mod(G.Edges.EndNodes(E(j),1),self.sn.nclasses))/self.sn.nclasses + 1;
+                        rto=mod(G.Edges.EndNodes(E(j),2),self.sn.nclasses);
+                        if rto==0
+                            rto = self.sn.nclasses;
+                        end
+                        ito=(G.Edges.EndNodes(E(j),2)-mod(G.Edges.EndNodes(E(j),2),self.sn.nclasses))/self.sn.nclasses + 1;
+                        P{c}{j,1} = self.sn.classnames{rfrom};
+                        P{c}{j,2} = self.sn.nodenames{ifrom};
+                        P{c}{j,3} = self.sn.classnames{rto};
+                        P{c}{j,4} = self.sn.nodenames{ito};
+                    end
+                    P{c} = sortrows(P{c},'ascend');
+                else
+                    line_warning(mfilename,'Chain %d has no reference class set, skipping.',c);
+                end
+            end
+        end
+
         function summary(self)
             % SUMMARY()
             for i=1:self.getNumberOfNodes
@@ -310,7 +358,13 @@ classdef Network < Model
             line_printf('\n<strong>Routing matrix</strong>:');
             self.printRoutingMatrix
             line_printf('\n<strong>Product-form parameters</strong>:');
-            [arvRates,svcDemands,nJobs,thinkTimes,ldScalings,nServers]= getProductFormParameters(self)
+            [arvRates,svcDemands,nJobs,thinkTimes,ldScalings,nServers]= getProductFormParameters(self);
+            line_printf('\nArrival rates: %s',mat2str(arvRates,6));
+            line_printf('\nService demands: %s',mat2str(svcDemands,6));
+            line_printf('\nNumber of jobs: %s',mat2str(nJobs));
+            line_printf('\nThink times: %s',mat2str(thinkTimes,6));
+            line_printf('\nLoad-dependent scalings: %s',mat2str(ldScalings,6));
+            line_printf('\nNumber of servers: %s',mat2str(nServers));
         end
 
         function [D,Z] = getDemands(self)
@@ -333,10 +387,10 @@ classdef Network < Model
 
             % mu also returns max(S) elements after population |N| as this is
             % required by MVALDMX
-        
-            qn = self.getStruct; 
+
+            qn = self.getStruct;
             [lambda,~,N,~,mu,~] = snGetProductFormParams(qn);
-            [Dchain,~,~,alpha,Nchain,~,~] = snGetDemandsChain(qn);            
+            [Dchain,~,~,alpha,Nchain,~,~] = snGetDemandsChain(qn);
             for c=1:qn.nchains
                 lambda_chains(c) = sum(lambda(qn.inchain{c}));
                 if qn.refclass(c)>0
@@ -346,7 +400,7 @@ classdef Network < Model
                     D_chains(:,c) = Dchain(find(isfinite(qn.nservers)),c);
                     Z_chains(:,c) = Dchain(find(isinf(qn.nservers)),c);
                 end
-            end           
+            end
             S = qn.nservers(find(isfinite(qn.nservers)));
             lambda = lambda_chains;
             N = Nchain;
@@ -419,7 +473,7 @@ classdef Network < Model
 
         %% Add the components to the model
         addJobClass(self, customerClass);
-        addNode(self, node);
+        bool = addNode(self, node);
         addRegion(self, nodes);
         addLink(self, nodeA, nodeB);
         addLinks(self, nodeList);
@@ -506,10 +560,13 @@ classdef Network < Model
             mask = self.getStruct.csmask;
         end
 
-        function printRoutingMatrix(self)
+        function printRoutingMatrix(self, onlyclass)
             % PRINTROUTINGMATRIX()
-
-            snPrintRoutingMatrix(self.getStruct);
+            if nargin==1
+                snPrintRoutingMatrix(self.getStruct);
+            else
+                snPrintRoutingMatrix(self.getStruct, onlyclass);
+            end
         end
 
         function [taggedModel, taggedJob] = tagChain(self, chain, jobclass, suffix)
@@ -574,7 +631,7 @@ classdef Network < Model
                     end
                 end
             end
-                        
+
             taggedModel.classes{jobclass.index,1}.population = taggedModel.classes{jobclass.index}.population - 1;
 
             for ir=1:length(chainIndexes)
@@ -595,7 +652,7 @@ classdef Network < Model
             taggedModel.sn = [];
             taggedModel.link(Plinked);
             taggedModel.reset(true);
-            taggedModel.refreshStruct(true);            
+            taggedModel.refreshStruct(true);
             taggedModel.initDefault;
             tchains = taggedModel.getChains;
             taggedJob = tchains{end};

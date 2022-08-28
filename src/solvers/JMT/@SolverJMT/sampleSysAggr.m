@@ -1,14 +1,19 @@
-function sysStateAggr = sampleSysAggr(self, numEvents)
+function sysStateAggr = sampleSysAggr(self, numEvents, markActivePassive)
 % SYSSTATEAGGR = SAMPLESYSAGGR(NUMEVENTS)
 
 if nargin<2 %~exist('numEvents','var')
     numEvents = self.options.samples;
 end
 
+if nargin<3
+    markActivePassive = false;
+end
+
 sn = self.getStruct;
 numEvents = numEvents - 1; % we include the initialization as an event
 Q = getAvgQLenHandles(self);
 statStateAggr = cell(sn.nstations,1);
+
 % create a temp model
 modelCopy = self.model.copy;
 modelCopy.resetNetwork;
@@ -27,6 +32,7 @@ for i= 1:modelCopy.getNumberOfStations
         end
     end
 end
+
 % apply logging to the copied model
 Plinked = sn.rtorig;
 isNodeLogged = max(isNodeClassLogged,[],2);
@@ -168,4 +174,23 @@ sysStateAggr.event = sysStateAggr.event';
 sysStateAggr.isaggregate = true;
 %sysStateAggr.arv_job_id = logData{2}.arvID;
 %sysStateAggr.dep_job_id = logData{2}.depID;
+
+if markActivePassive
+    apevent = cell(1,length(sysStateAggr.t)-1);
+    for ti = 1:length(apevent)
+        apevent{ti} = struct('active',[],'passive',[]);
+    end
+    for e=1:length(sysStateAggr.event)
+        ti = find(sysStateAggr.event{e}.t == sysStateAggr.t);
+        if ~isempty(ti)
+        switch sysStateAggr.event{e}.event
+            case EventType.ID_ARV
+                apevent{ti-1}.passive = sysStateAggr.event{e};
+            otherwise
+                apevent{ti-1}.active = sysStateAggr.event{e};
+        end
+        end
+    end
+    sysStateAggr.event = apevent';
+end
 end

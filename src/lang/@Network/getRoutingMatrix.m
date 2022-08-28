@@ -11,7 +11,7 @@ if self.hasStruct
     indexOpenClasses = find(isinf(sn.njobs));
     hasOpen = ~isempty(indexOpenClasses);
     if nargin<2
-        arvRates = sn.rates(idxSource,indexOpenClasses);
+        arvRates = sn.rates(sn.nodeToStation(idxSource),indexOpenClasses);
     end
     nodes = self.nodes;
     conn = sn.connmatrix;
@@ -35,7 +35,11 @@ else
     NK = self.getNumberOfJobs;
     for ind=1:I
         for k=1:K
-            sn.routing(ind,k) = RoutingStrategy.toId(nodes{ind}.output.outputStrategy{k}{2});
+            if isempty(self.nodes{ind}.output.outputStrategy{k})
+                sn.routing(ind,k) = RoutingStrategy.ID_DISABLED;
+            else
+                sn.routing(ind,k) = RoutingStrategy.toId(nodes{ind}.output.outputStrategy{k}{2});
+            end
         end
     end
     statefulNodes = self.getIndexStatefulNodes;
@@ -53,8 +57,13 @@ for ind=1:I
         case 'Forker'
             for jnd=1:I
                 for k=1:K
-                    if conn(ind,jnd)>0
-                        rtnodes((ind-1)*K+k,(jnd-1)*K+k)=1.0;
+                    if conn(ind,jnd)>0                      
+                        if length(node_i.output.outputStrategy{k})>=3
+                            fanout = length(node_i.output.outputStrategy{k}{3});
+                        else
+                            fanout = 1;
+                        end
+                        rtnodes((ind-1)*K+k,(jnd-1)*K+k)=1.0/fanout;
                         outputStrategy_k = outputStrategy{k};
                         switch sn.routing(ind,k)
                             case RoutingStrategy.ID_PROB
@@ -249,7 +258,18 @@ catch % old MATLABs
     chains = sortrows(chains);
 end
 
-
+% overlapping chains can occur if a class that enters in a Cache
+% reappars downhill in the network in rtnodes in that case we merge
+% the two chains
+splitChains = [];
+for col=find(sum(chains,1)>1)
+    rows = find(chains(:,col));
+    for r=rows(2:end)'
+        chains(rows(1),:) = chains(rows(1),:) | chains(r,:);
+        splitChains(end+1)=r;
+    end
+end
+chains(splitChains,:)=[];
 
 % We now obtain the routing matrix P by ignoring the non-stateful
 % nodes and calculating by the stochastic complement method the

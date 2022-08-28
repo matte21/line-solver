@@ -17,6 +17,7 @@ function sn=NetworkStruct()
  % (MKxMK matrix with integer entries), indexed first by
  % station, then by class
  sn.dropid=[]; % (i,r) gives the drop rule for class r at station i
+ sn.fj=[]; % (i,j) is true if node j can join jobs forked by node i
  sn.inchain={}; % entry c is a vector with class ids in chain c
  sn.isstatedep=[]; % state dependent routing
  sn.isstation=[]; % element i is true if node i is a station

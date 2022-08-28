@@ -4,7 +4,7 @@ function lqn = getStruct(self)
 %
 % Copyright 2012-2022, Imperial College London
 
-lqn = struct();
+lqn = LayeredNetworkStruct();
 lqn.nidx = 0;  % total number of hosts, tasks, entries, and activities, except the reference tasks
 lqn.nhosts = length(self.hosts);
 lqn.ntasks = length(self.tasks);
@@ -161,8 +161,8 @@ lqn.callnames = {};
 lqn.callhashnames = {};
 %lqn.callshortnames = {};
 lqn.taskgraph = sparse([],lqn.ntasks, lqn.ntasks);
-lqn.actpre = sparse(lqn.nidx,1);
-lqn.actpost = sparse(lqn.nidx,1);
+lqn.actpretype = sparse(lqn.nidx,1);
+lqn.actposttype = sparse(lqn.nidx,1);
 
 for t = 1:lqn.ntasks
     tidx = lqn.taskidx(t);
@@ -237,7 +237,7 @@ for t = 1:lqn.ntasks
         for prea = 1:length(preacts)
             preaidx = findstring(lqn.hashnames, ['A:',tasks{t}.precedences(ap).preActs{prea}]);
             switch pretype
-                case ActivityPrecedence.PRE_AND
+                case ActivityPrecedenceType.PRE_AND
                     quorum = tasks{t}.precedences(ap).preParams;
                     if isempty(quorum)
                         preParam = 1.0;
@@ -248,37 +248,44 @@ for t = 1:lqn.ntasks
                     preParam = 1.0;
             end
             switch posttype
-                case ActivityPrecedence.POST_OR
+                case ActivityPrecedenceType.POST_OR
                     for posta = 1:length(postacts)
                         postaidx = findstring(lqn.hashnames, ['A:',tasks{t}.precedences(ap).postActs{posta}]);
                         probs = tasks{t}.precedences(ap).postParams;
                         postParam = probs(posta);
                         lqn.graph(preaidx, postaidx) = preParam * postParam;
-                        lqn.actpre(preaidx) = sparse(ActivityPrecedence.getPrecedenceId(tasks{t}.precedences(ap).preType));
-                        lqn.actpost(postaidx) = sparse(ActivityPrecedence.getPrecedenceId(tasks{t}.precedences(ap).postType));
+                        lqn.actpretype(preaidx) = sparse(ActivityPrecedenceType.toId(tasks{t}.precedences(ap).preType));
+                        lqn.actposttype(postaidx) = sparse(ActivityPrecedenceType.toId(tasks{t}.precedences(ap).postType));
                     end
-                case ActivityPrecedence.POST_LOOP
+                case ActivityPrecedenceType.POST_AND
+                    for posta = 1:length(postacts)
+                        postaidx = findstring(lqn.hashnames, ['A:',tasks{t}.precedences(ap).postActs{posta}]);
+                        lqn.graph(preaidx, postaidx) = 1;
+                        lqn.actpretype(preaidx) = sparse(ActivityPrecedenceType.toId(tasks{t}.precedences(ap).preType));
+                        lqn.actposttype(postaidx) = sparse(ActivityPrecedenceType.toId(tasks{t}.precedences(ap).postType));
+                    end
+                case ActivityPrecedenceType.POST_LOOP
                     counts = tasks{t}.precedences(ap).postParams;
                     % add the end activity 
                     enda = length(postacts);
                     endaidx = findstring(lqn.hashnames, ['A:',tasks{t}.precedences(ap).postActs{enda}]);
-                    % add the activities inside the loop in parallel with equal probability and connected them to end activity
+                    % add the activities inside the loop in parallel with equal probability and connected to end activity
                     for posta = 1:(length(postacts)-1) % last one is 'end' of loop activity
                         postaidx = findstring(lqn.hashnames, ['A:',tasks{t}.precedences(ap).postActs{posta}]);
                         postParam = 1.0 / (length(postacts)-1);
                         lqn.graph(preaidx, postaidx) = preParam * postParam;
                         lqn.graph(postaidx, postaidx) = 1.0 - 1.0 / counts;
                         lqn.graph(postaidx, endaidx) = 1 / counts;
-                        lqn.actpost(postaidx) = sparse(ActivityPrecedence.getPrecedenceId(tasks{t}.precedences(ap).postType));
+                        lqn.actposttype(postaidx) = sparse(ActivityPrecedenceType.toId(tasks{t}.precedences(ap).postType));
                     end
-                    lqn.actpost(endaidx) = sparse(ActivityPrecedence.getPrecedenceId(tasks{t}.precedences(ap).postType));
+                    lqn.actposttype(endaidx) = sparse(ActivityPrecedenceType.toId(tasks{t}.precedences(ap).postType));
                 otherwise
                     for posta = 1:length(postacts)
                         postaidx = findstring(lqn.hashnames, ['A:',tasks{t}.precedences(ap).postActs{posta}]);
                         postParam = 1.0;
                         lqn.graph(preaidx, postaidx) = preParam * postParam;
-                        lqn.actpre(preaidx) = sparse(ActivityPrecedence.getPrecedenceId(tasks{t}.precedences(ap).preType));
-                        lqn.actpost(postaidx) = sparse(ActivityPrecedence.getPrecedenceId(tasks{t}.precedences(ap).postType));
+                        lqn.actpretype(preaidx) = sparse(ActivityPrecedenceType.toId(tasks{t}.precedences(ap).preType));
+                        lqn.actposttype(postaidx) = sparse(ActivityPrecedenceType.toId(tasks{t}.precedences(ap).postType));
                     end
             end
         end

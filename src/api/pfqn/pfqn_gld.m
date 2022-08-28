@@ -60,8 +60,16 @@ if ~isLoadDep
 end
 
 G=0;
-if M==0 G=0; lG=log(G); return; end
-if sum(N==zeros(1,R))==R G=1; lG=log(G); return; end
+if M==0 
+	G=0; 
+	lG=log(G); 
+	return; 
+end
+if sum(N==zeros(1,R))==R 
+	G=1; 
+	lG=log(G); 
+	return; 
+end
 
 if R==1
     G=pfqn_gldsingle(L,N,mu);

@@ -12,37 +12,38 @@ switch self.getOptions.method
             aidx = self.svctmap(r,2);
             nodeidx = self.svctmap(r,3);
             classidx = self.svctmap(r,4);
-            
+
             hidx = lqn.parent(lqn.parent(aidx)); % host idx
             sn = ensemble{self.idxhash(hidx)}.getStruct(false);
-            
+
             % rescale the entries so they have unit visit relatively to the refclass
             %aidxchain = find(sn.chains(:,classidx)>0);
             %refclass = sn.refclass(aidxchain);
             %Vtask = sn.visits{aidxchain}(1,refclass);
             %Ventry = sn.visits{aidxchain}(2,classidx);
+            
             self.svct(aidx) = self.results{end,self.idxhash(idx)}.WN(nodeidx,classidx);% * Vtask / Ventry; % residT
             self.tput(aidx) = self.results{end,self.idxhash(idx)}.TN(nodeidx,classidx);
             self.svctproc{aidx} = Exp.fitMean(self.svct(aidx));
             self.tputproc{aidx} = Exp.fitRate(self.tput(aidx));
         end
-        
+
         % estimate call response times at hostlayers
-        self.callrespt = zeros(self.lqn.ncalls,1);
-        for r=1:size(self.callresptmap,1)
-            idx = self.callresptmap(r,1);
-            cidx = self.callresptmap(r,2);
-            nodeidx = self.callresptmap(r,3);
-            classidx = self.callresptmap(r,4);
+        self.callresidt = zeros(self.lqn.ncalls,1);
+        for r=1:size(self.callresidtmap,1)
+            idx = self.callresidtmap(r,1);
+            cidx = self.callresidtmap(r,2);
+            nodeidx = self.callresidtmap(r,3);
+            classidx = self.callresidtmap(r,4);
             if nodeidx == 1
-                self.callrespt(cidx) = 0;
+                self.callresidt(cidx) = 0;
             else
-                self.callrespt(cidx) = self.results{end, self.idxhash(idx)}.WN(nodeidx,classidx); % respT%, includes mean number of calls already
+                self.callresidt(cidx) = self.results{end, self.idxhash(idx)}.WN(nodeidx,classidx); % residT%, includes mean number of calls already
             end
         end
-        
+
         % then resolve the entry svct summing up these contributions
-        entry_svct = self.svctmatrix*[self.svct;self.callrespt]; % Sum the residT of all the activities connected to this entry
+        entry_svct = self.svctmatrix*[self.svct;self.callresidt]; % Sum the residT of all the activities connected to this entry
         entry_svct(1:self.lqn.eshift) = 0;
         % this block fixes the problem that ResidT is scaled so that the
         % task as Vtask=1, but in call svct the entries need to have Ventry=1
@@ -59,27 +60,31 @@ switch self.getOptions.method
         end
         %self.svct(lqn.eshift+1:lqn.eshift+lqn.nentries) = entry_svct(lqn.eshift+1:lqn.eshift+lqn.nentries);
         entry_svct((self.lqn.ashift+1):end) = 0;
-        for r=1:size(self.callresptmap,1)
-            cidx = self.callresptmap(r,2);
+        for r=1:size(self.callresidtmap,1)
+            cidx = self.callresidtmap(r,2);
             eidx = self.lqn.callpair(cidx,2);
             self.svctproc{eidx} = Exp.fitMean(self.svct(eidx));
         end
-        
+
         % determine call response times processes
-        for r=1:size(self.callresptmap,1)
-            cidx = self.callresptmap(r,2);
+        for r=1:size(self.callresidtmap,1)
+            cidx = self.callresidtmap(r,2);
             eidx = self.lqn.callpair(cidx,2);
             if it==1
                 % note that respt is per visit, so number of calls is 1
-                self.callrespt(cidx) = self.svct(eidx);
-                self.callresptproc{cidx} = self.svctproc{eidx};
+                self.callresidt(cidx) = self.svct(eidx);
+                self.callresidtproc{cidx} = self.svctproc{eidx};
             else
                 % note that respt is per visit, so number of calls is 1
-                self.callresptproc{cidx} = Exp.fitMean(self.callrespt(cidx));
+                self.callresidtproc{cidx} = Exp.fitMean(self.callresidt(cidx));
             end
         end
-        
+
     case 'moment3'
+        % this moment propagates through the layers 3 moments of the
+        % response time distribution computed from the CDF obtained by the
+        % solvers of the individual layers. In the present implementation, 
+        % calls are still assumed to be exponentially distributed.
         if self.hasConverged == 0
             % first obtain svct of activities at hostlayers
             self.svct = zeros(self.lqn.nidx,1);
@@ -93,51 +98,51 @@ switch self.getOptions.method
                 self.tput(aidx) = self.results{end,self.idxhash(idx)}.TN(nodeidx,classidx);
                 self.svctproc{aidx} = Exp.fitMean(self.svct(aidx));
             end
-            
+
             % estimate call response times at hostlayers
-            self.callrespt = zeros(self.lqn.ncalls,1);
-            for r=1:size(self.callresptmap,1)
-                idx = self.callresptmap(r,1);
-                cidx = self.callresptmap(r,2);
-                nodeidx = self.callresptmap(r,3);
-                classidx = self.callresptmap(r,4);
-                %             self.callrespt(cidx) = self.results{end, self.idxhash(idx)}.RN(nodeidx,classidx);
+            self.callresidt = zeros(self.lqn.ncalls,1);
+            for r=1:size(self.callresidtmap,1)
+                idx = self.callresidtmap(r,1);
+                cidx = self.callresidtmap(r,2);
+                nodeidx = self.callresidtmap(r,3);
+                classidx = self.callresidtmap(r,4);
+                %             self.callresidt(cidx) = self.results{end, self.idxhash(idx)}.RN(nodeidx,classidx);
                 if nodeidx == 1
-                    self.callrespt(cidx) = 0;
+                    self.callresidt(cidx) = 0;
                 else
-                    self.callrespt(cidx) = self.results{end, self.idxhash(idx)}.RN(nodeidx,classidx);
-                    %self.callrespt(cidx) = self.results{end, self.idxhash(idx)}.WN(nodeidx,classidx);
+                    self.callresidt(cidx) = self.results{end, self.idxhash(idx)}.RN(nodeidx,classidx);
+                    %self.callresidt(cidx) = self.results{end, self.idxhash(idx)}.WN(nodeidx,classidx);
                 end
             end
-            
+
             % then resolve the entry svct summing up these contributions
-            entry_svct = (eye(self.lqn.nidx+self.lqn.ncalls)-self.svctmatrix)\[self.svct;self.callrespt];
+            entry_svct = (eye(self.lqn.nidx+self.lqn.ncalls)-self.svctmatrix)\[self.svct;self.callresidt];
             entry_svct(1:self.lqn.eshift) = 0;
             self.svct(lqn.eshift+1:lqn.eshift+lqn.nentries) = entry_svct(lqn.eshift+1:lqn.eshift+lqn.nentries);
             entry_svct((self.lqn.ashift+1):end) = 0;
-            for r=1:size(self.callresptmap,1)
-                cidx = self.callresptmap(r,2);
+            for r=1:size(self.callresidtmap,1)
+                cidx = self.callresidtmap(r,2);
                 eidx = self.lqn.callpair(cidx,2);
                 self.svctproc{eidx} = Exp.fitMean(self.svct(eidx));
             end
-            
+
             % determine call response times processes
-            for r=1:size(self.callresptmap,1)
-                cidx = self.callresptmap(r,2);
+            for r=1:size(self.callresidtmap,1)
+                cidx = self.callresidtmap(r,2);
                 eidx = self.lqn.callpair(cidx,2);
                 if it==1
                     % note that respt is per visit, so number of calls is 1
-                    self.callrespt(cidx) = self.svct(eidx);
-                    self.callresptproc{cidx} = self.svctproc{eidx};
+                    self.callresidt(cidx) = self.svct(eidx);
+                    self.callresidtproc{cidx} = self.svctproc{eidx};
                 else
                     % note that respt is per visit, so number of calls is 1
-                    self.callresptproc{cidx} = Exp.fitMean(self.callrespt(cidx));
+                    self.callresidtproc{cidx} = Exp.fitMean(self.callresidt(cidx));
                 end
             end
         else
             self.svctcdf = cell(self.lqn.nidx,1);
             repo = [];
-            
+
             % first obtain svct of activities at hostlayers
             self.svct = zeros(self.lqn.nidx,1);
             for r=1:size(self.svctmap,1)
@@ -146,32 +151,32 @@ switch self.getOptions.method
                 nodeidx = self.svctmap(r,3);
                 classidx = self.svctmap(r,4);
                 self.tput(aidx) = self.results{end,self.idxhash(idx)}.TN(nodeidx,classidx);
-                
+
                 submodelidx = self.idxhash(idx);
                 if submodelidx>length(repo)
                     try
-                    repo{submodelidx} = self.solvers{submodelidx}.getCdfRespT;
+                        repo{submodelidx} = self.solvers{submodelidx}.getCdfRespT;
                     catch me
                         switch me.identifier
                             case 'MATLAB:class:undefinedMethod'
-                            line_warning(mfilename,'The solver for layer %d does not allow response time distribution calculation, switching to fluid solver.');
-                            repo{submodelidx} = SolverFluid(ensemble{submodelidx}).getCdfRespT;
+                                line_warning(mfilename,'The solver for layer %d does not allow response time distribution calculation, switching to fluid solver.');
+                                repo{submodelidx} = SolverFluid(ensemble{submodelidx}).getCdfRespT;
                         end
                     end
                 end
                 self.svctcdf{aidx} =  repo{submodelidx}{nodeidx,classidx};
             end
-            
-            self.callresptcdf = cell(self.lqn.ncalls,1);
-            
+
+            self.callresidtcdf = cell(self.lqn.ncalls,1);
+
             % estimate call response times at hostlayers
-            self.callrespt = zeros(self.lqn.ncalls,1);
-            for r=1:size(self.callresptmap,1)
-                idx = self.callresptmap(r,1);
-                cidx = self.callresptmap(r,2);
-                nodeidx = self.callresptmap(r,3);
-                classidx = self.callresptmap(r,4);
-                
+            self.callresidt = zeros(self.lqn.ncalls,1);
+            for r=1:size(self.callresidtmap,1)
+                idx = self.callresidtmap(r,1);
+                cidx = self.callresidtmap(r,2);
+                nodeidx = self.callresidtmap(r,3);
+                classidx = self.callresidtmap(r,4);
+
                 submodelidx = self.idxhash(idx);
                 if submodelidx>length(repo)
                     %             repo{submodelidx} = self.solvers{submodelidx}.getCdfRespT;
@@ -181,15 +186,15 @@ switch self.getOptions.method
                         repo{submodelidx} = [0,0;0.5,0;1,0]; % ??
                     end
                 end
-                %         self.callresptcdf{cidx} =  repo{submodelidx}{nodeidx,classidx};
+                %         self.callresidtcdf{cidx} =  repo{submodelidx}{nodeidx,classidx};
                 try
-                    self.callresptcdf{cidx} =  repo{submodelidx}{nodeidx,classidx};
+                    self.callresidtcdf{cidx} =  repo{submodelidx}{nodeidx,classidx};
                 catch
-                    self.callresptcdf{cidx} =  repo{submodelidx};
+                    self.callresidtcdf{cidx} =  repo{submodelidx};
                 end
             end
-            self.cdf = [self.svctcdf;self.callresptcdf];
-            
+            self.cdf = [self.svctcdf;self.callresidtcdf];
+
             % then resolve the entry svct summing up these contributions
             matrix = inv((eye(self.lqn.nidx+self.lqn.ncalls)-self.svctmatrix));
             for i = 1:1:lqn.nentries
@@ -200,7 +205,7 @@ switch self.getOptions.method
                 ParamCell = {};
                 while num<length(convolidx)
                     fitidx = convolidx(num+1);
-                    [m1,m2,m3,SCV,SKEW] = EmpiricalCDF(self.cdf{fitidx}).getRawMoments; %% ??
+                    [m1,m2,m3,~,~] = EmpiricalCDF(self.cdf{fitidx}).getRawMoments; %% ??
                     if m1>Distrib.Zero
                         fitdist = APH.fitRawMoments(m1,m2,m3);
                         rep_num = floor(matrix(eidx,fitidx));
@@ -227,8 +232,8 @@ switch self.getOptions.method
                             self.svctproc{fitidx} = Exp.fitMean(m1);
                             self.svct(fitidx) = m1;
                         else
-                            self.callresptproc{fitidx-self.lqn.nidx} = Exp.fitMean(m1);
-                            self.callrespt(fitidx-self.lqn.nidx) = m1;
+                            self.callresidtproc{fitidx-self.lqn.nidx} = Exp.fitMean(m1);
+                            self.callresidt(fitidx-self.lqn.nidx) = m1;
                         end
                     end
                     num = num+1;
@@ -241,17 +246,17 @@ switch self.getOptions.method
                     self.entryproc{eidx-(lqn.nhosts+lqn.ntasks)} = entry_dist;
                     self.svct(eidx) = entry_dist.getMean;
                     self.svctproc{eidx} = Exp.fitMean(self.svct(eidx));
-                    self.getEntryCdfRespT{eidx-(lqn.nhosts+lqn.ntasks)} = entry_dist.evalCDF;
+                    self.entryCdfRespT{eidx-(lqn.nhosts+lqn.ntasks)} = entry_dist.evalCDF;
                 end
             end
-            
+
             % determine call response times processes
-            for r=1:size(self.callresptmap,1)
-                cidx = self.callresptmap(r,2);
+            for r=1:size(self.callresidtmap,1)
+                cidx = self.callresidtmap(r,2);
                 eidx = self.lqn.callpair(cidx,2);
                 if it==1
-                    self.callrespt(cidx) = self.svct(eidx);
-                    self.callresptproc{cidx} = Exp.fitMean(self.svct(eidx));
+                    self.callresidt(cidx) = self.svct(eidx);
+                    self.callresidtproc{cidx} = Exp.fitMean(self.svct(eidx));
                 end
             end
         end

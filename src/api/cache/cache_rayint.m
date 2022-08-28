@@ -7,6 +7,7 @@ if n==mt
     line_warning(mfilename,'The number of items equals the cache capacity');
 end
 
+
 if nargin<3
     xi = cache_xi_bvh(gamma,m); 
 else
@@ -31,8 +32,14 @@ phi = phi - log(xi) * m';
 delta=eye(h);
 for j=1:h
     for l=1:h
-        C1=0; for k=1:n C1=C1+gamma(k,j)/(1+S(k)); end
-        C2=0; for k=1:n C2=C2+gamma(k,j)*gamma(k,l)/(1+S(k))^2; end
+        C1=0; 
+		for k=1:n 
+			C1=C1+gamma(k,j)/(1+S(k)); 
+		end
+        C2=0; 
+		for k=1:n 
+			C2=C2+gamma(k,j)*gamma(k,l)/(1+S(k))^2; 
+		end
         C(j,l) = delta(j,l) * C1 - xi(j) * C2;
     end
 end

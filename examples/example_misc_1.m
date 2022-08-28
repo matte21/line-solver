@@ -44,17 +44,17 @@ solver = SolverJMT(model,options);
 T = model.getAvgTputHandles();
 
 tic;
-[QN,UN,RN,TN] = solver.getAvg([],[],[],T)
+[QN, UN, RN, TN, AN, WN] = solver.getAvg([],[],[],T,[],[])
 toc;
 
 % without parameters, all performance indexes are requested automatically
 tic;
-[QN,UN,RN,TN] = solver.getAvg()
+[QN, UN, RN, TN, AN, WN] = solver.getAvg()
 toc;
 
 % value is now cached
 tic;
-[QN,UN,RN,TN] = solver.getAvg([],[],[],T)
+[QN, UN, RN, TN, AN, WN] = solver.getAvg([],[],[],T,[],[])
 toc;
 
 % we can also solve the model for selective metrics
@@ -68,7 +68,7 @@ Q = model.getAvgQLenHandles();
 
 % value is now cached also for the other handles
 tic;
-[QN,UN,RN,TN] = solver.getAvg(Q,[],[],[])
+[QN, UN, RN, TN, AN, WN] = solver.getAvg(Q,[],[],[],[],[])
 toc;
 
 % same as last but with all handles
@@ -78,5 +78,5 @@ toc;
 
 % value is now cached also for the other handles
 tic;
-[QN,UN,RN,TN] = solver.getAvg()
+[QN, UN, RN, TN, AN, WN] = solver.getAvg()
 toc;

@@ -14,11 +14,39 @@ classdef JLINE
                 java_dist = jline.lang.distributions.Exp(line_dist.getParam(1).paramValue);
             elseif isa(line_dist, 'Erlang')
                 java_dist = jline.lang.distributions.Erlang(line_dist.getParam(1).paramValue, line_dist.getParam(2).paramValue);
-            elseif isa(line_dist, 'HyperExp')
+            elseif isa(line_dist, "HyperExp")
                 java_dist = jline.lang.distributions.HyperExp(line_dist.getParam(1).paramValue, line_dist.getParam(2).paramValue, line_dist.getParam(3).paramValue);
+            elseif isa(line_dist, "APH")
+                alpha = line_dist.getParam(1).paramValue;
+                T = line_dist.getParam(2).paramValue;
+                jline_alpha = java.util.ArrayList();
+                for i = 1:length(alpha)
+                    jline_alpha.add(alpha(i));
+                end
+                jline_T = JLINE.matrix_to_jlinematrix(T);
+                java_dist = jline.lang.distributions.APH(jline_alpha, jline_T);
+            elseif isa(line_dist, 'Coxian')
+                jline_mu = java.util.ArrayList();
+                jline_phi = java.util.ArrayList();
+                if length(line_dist.params) == 3
+                    jline_mu.add(line_dist.getParam(1).paramValue);
+                    jline_mu.add(line_dist.getParam(2).paramValue);
+                    jline_phi.add(line_dist.getParam(3).paramValue);
+                else
+                    mu = line_dist.getParam(1).paramValue;
+                    phi = line_dist.getParam(2).paramValue;
+                    for i = 1:length(mu)
+                        jline_mu.add(mu(i));
+                    end
+
+                    for i = 1:length(phi)
+                        jline_phi.add(phi(i));
+                    end
+                end
+                java_dist = jline.lang.distributions.Coxian(jline_mu, jline_phi);
             elseif isa(line_dist, 'Immediate')
                 java_dist = jline.lang.distributions.Immediate();
-            elseif isa(line_dist, 'Disabled')
+            elseif isempty(line_dist) || isa(line_dist, 'Disabled')
                 java_dist = jline.lang.distributions.DisabledDistribution();
                 return;
             else
@@ -31,6 +59,31 @@ classdef JLINE
                 matlab_dist = Exp(java_dist.getRate());
             elseif isa(java_dist, 'jline.lang.distributions.Erlang')
                 matlab_dist = Erlang(java_dist.getRate(),java_dist.getNumberOfPhases());
+            elseif isa(java_dist, 'jline.lang.distributions.HyperExp')
+                matlab_dist = HyperExp(java_dist.getParam(1).getValue, java_dist.getParam(2).getValue, java_dist.getParam(3).getValue);
+            elseif isa(java_dist, 'jline.lang.distributions.APH')
+                java_alpha = java_dist.getParam(1).getValue;
+                alpha = zeros(1, java_alpha.size);
+                for i = 1:java_alpha.size
+                    alpha(i) = java_alpha.get(i-1);
+                end
+                matlab_dist = APH(alpha, JLINE.jlinematrix_to_matrix(java_dist.getParam(2).getValue));
+            elseif isa(java_dist, 'jline.lang.distributions.Coxian')
+                if java_dist.getNumberOfPhases == 2
+                    matlab_dist = Coxian(java_dist.getParam(1).getValue.get(0), java_dist.getParam(1).getValue.get(1), java_dist.getParam(2).getValue.get(0));
+                else
+                    java_mu = java_dist.getParam(1).getValue;
+                    java_phi = java_dist.getParam(2).getValue;
+                    mu = zeros(1, java_mu.size);
+                    phi = zeros(1, java_phi.size);
+                    for i = 1:java_mu.size
+                        mu(i) = java_mu.get(i-1);
+                    end
+                    for i = 1:java_phi.size
+                        phi(i) = java_phi.get(i-1);
+                    end
+                    matlab_dist = Coxian(mu, phi);
+                end
             elseif isa(java_dist, 'jline.lang.distributions.Immediate')
                 matlab_dist = Immediate();
             elseif isa(java_dist, 'jline.lang.distributions.DisabledDistribution')
@@ -64,16 +117,16 @@ classdef JLINE
         end
 
         function set_line_service(jline_node, line_node, job_classes, line_classes)
-            if (isa(line_node,'Sink'))
+            if (isa(line_node,'Sink')) || isa(line_node, 'ClassSwitch')
                 return;
             end
             for n = 1:job_classes.size()
                 java_dist = jline_node.getServiceProcess(job_classes.get(n-1));
                 matlab_dist = JLINE.from_jline_distribution(java_dist);
 
-                if (isa(jline_node,'jline.lang.nodes.Queue'))
+                if (isa(line_node, 'Queue') || isa(line_node, 'Delay'))
                     line_node.setService(line_classes{n}, matlab_dist);
-                elseif (isa(jline_node, 'jline.lang.nodes.Source'))
+                elseif (isa(line_node, 'Source'))
                     line_node.setArrival(line_classes{n}, matlab_dist);
                 else
                     line_error(mfilename,'Node not supported by JLINE.');
@@ -81,12 +134,48 @@ classdef JLINE
             end
         end
 
-        function node_object = from_line_node(line_node, java_network, job_classes)
+        function node_object = from_line_node(line_node, java_network, ~)
             if isa(line_node, 'Delay')
                 node_object = jline.lang.nodes.Delay(java_network, line_node.getName);
             elseif isa(line_node, 'Queue')
-                node_object = jline.lang.nodes.Queue(java_network, line_node.getName, jline.lang.constant.SchedStrategy.FCFS);
+                switch SchedStrategy.toId(line_node.schedStrategy)
+                    case SchedStrategy.ID_INF
+                        node_object = jline.lang.nodes.Queue(java_network, line_node.getName, jline.lang.constant.SchedStrategy.INF);
+                    case SchedStrategy.ID_FCFS
+                        node_object = jline.lang.nodes.Queue(java_network, line_node.getName, jline.lang.constant.SchedStrategy.FCFS);
+                    case SchedStrategy.ID_LCFS
+                        node_object = jline.lang.nodes.Queue(java_network, line_node.getName, jline.lang.constant.SchedStrategy.LCFS);
+                    case SchedStrategy.ID_SIRO
+                        node_object = jline.lang.nodes.Queue(java_network, line_node.getName, jline.lang.constant.SchedStrategy.SIRO);
+                    case SchedStrategy.ID_SJF
+                        node_object = jline.lang.nodes.Queue(java_network, line_node.getName, jline.lang.constant.SchedStrategy.SJF);
+                    case SchedStrategy.ID_LJF
+                        node_object = jline.lang.nodes.Queue(java_network, line_node.getName, jline.lang.constant.SchedStrategy.LJF);
+                    case SchedStrategy.ID_PS
+                        node_object = jline.lang.nodes.Queue(java_network, line_node.getName, jline.lang.constant.SchedStrategy.PS);
+                    case SchedStrategy.ID_DPS
+                        node_object = jline.lang.nodes.Queue(java_network, line_node.getName, jline.lang.constant.SchedStrategy.DPS);
+                    case SchedStrategy.ID_GPS
+                        node_object = jline.lang.nodes.Queue(java_network, line_node.getName, jline.lang.constant.SchedStrategy.GPS);
+                    case SchedStrategy.ID_SEPT
+                        node_object = jline.lang.nodes.Queue(java_network, line_node.getName, jline.lang.constant.SchedStrategy.SEPT);
+                    case SchedStrategy.ID_LEPT
+                        node_object = jline.lang.nodes.Queue(java_network, line_node.getName, jline.lang.constant.SchedStrategy.LEPT);
+                    case SchedStrategy.ID_HOL
+                        node_object = jline.lang.nodes.Queue(java_network, line_node.getName, jline.lang.constant.SchedStrategy.HOL);
+                    case SchedStrategy.ID_FORK
+                        node_object = jline.lang.nodes.Queue(java_network, line_node.getName, jline.lang.constant.SchedStrategy.FORK);
+                    case SchedStrategy.ID_EXT
+                        node_object = jline.lang.nodes.Queue(java_network, line_node.getName, jline.lang.constant.SchedStrategy.EXT);
+                    case SchedStrategy.ID_REF
+                        node_object = jline.lang.nodes.Queue(java_network, line_node.getName, jline.lang.constant.SchedStrategy.REF);
+                    case SchedStrategy.ID_LCFSPR
+                        node_object = jline.lang.nodes.Queue(java_network, line_node.getName, jline.lang.constant.SchedStrategy.LCFSPR);
+                end
                 node_object.setNumberOfServers(line_node.getNumberOfServers);
+                if ~isempty(line_node.lldScaling)
+                    node_object.setLoadDependence(JLINE.matrix_to_jlinematrix(line_node.lldScaling));
+                end
             elseif isa(line_node, 'Source')
                 node_object = jline.lang.nodes.Source(java_network, line_node.getName);
             elseif isa(line_node, 'Sink')
@@ -96,16 +185,18 @@ classdef JLINE
             elseif isa(line_node, 'ClassSwitch')
                 nClasses = length(line_node.model.classes);
                 classMatrix = java.util.HashMap();
+                csFun = jline.lang.JLineMatrix(nClasses, nClasses);
                 for i = 1:nClasses
                     outputClasses = java.util.HashMap();
                     outClass = java_network.getClasses().get(i-1);
                     for j = 1:nClasses
                         inClass = java_network.getClasses().get(j-1);
                         outputClasses.put(inClass, line_node.server.csFun(i,j,0,0));
+                        csFun.set(i-1, j-1, line_node.server.csFun(i,j,0,0));
                     end
                     classMatrix.put(outClass, outputClasses);
                 end
-                node_object = jline.lang.nodes.ClassSwitch(java_network, line_node.getName, classMatrix);
+                node_object = jline.lang.nodes.ClassSwitch(java_network, line_node.getName, classMatrix, csFun);
             elseif isa(line_node, 'Fork')
                 node_object = jline.lang.nodes.Fork(java_network);
             elseif isa(line_node, 'Join')
@@ -115,12 +206,49 @@ classdef JLINE
             end
         end
 
-        function node_object = from_jline_node(jline_node, line_network)
+        function node_object = from_jline_node(jline_node, line_network, job_classes)
             if isa(jline_node, 'jline.lang.nodes.Delay')
                 node_object = Delay(line_network, jline_node.getName.toCharArray');
             elseif isa(jline_node, 'jline.lang.nodes.Queue')
-                node_object = Queue(line_network, jline_node.getName.toCharArray', SchedStrategy.FCFS);
+                schedStrategy = jline_node.getSchedStrategy;
+                switch schedStrategy.name().toCharArray'
+                    case 'INF'
+                        node_object = Queue(line_network, jline_node.getName.toCharArray', SchedStrategy.INF);
+                    case 'FCFS'
+                        node_object = Queue(line_network, jline_node.getName.toCharArray', SchedStrategy.FCFS);
+                    case 'LCFS'
+                        node_object = Queue(line_network, jline_node.getName.toCharArray', SchedStrategy.LCFS);
+                    case 'SIRO'
+                        node_object = Queue(line_network, jline_node.getName.toCharArray', SchedStrategy.SIRO);
+                    case 'SJF'
+                        node_object = Queue(line_network, jline_node.getName.toCharArray', SchedStrategy.SJF);
+                    case 'LJF'
+                        node_object = Queue(line_network, jline_node.getName.toCharArray', SchedStrategy.LJF);
+                    case 'PS'
+                        node_object = Queue(line_network, jline_node.getName.toCharArray', SchedStrategy.PS);
+                    case 'DPS'
+                        node_object = Queue(line_network, jline_node.getName.toCharArray', SchedStrategy.DPS);
+                    case 'GPS'
+                        node_object = Queue(line_network, jline_node.getName.toCharArray', SchedStrategy.GPS);
+                    case 'SEPT'
+                        node_object = Queue(line_network, jline_node.getName.toCharArray', SchedStrategy.SEPT);
+                    case 'LEPT'
+                        node_object = Queue(line_network, jline_node.getName.toCharArray', SchedStrategy.LEPT);
+                    case 'HOL'
+                        node_object = Queue(line_network, jline_node.getName.toCharArray', SchedStrategy.HOL);
+                    case 'FORK'
+                        node_object = Queue(line_network, jline_node.getName.toCharArray', SchedStrategy.FORK);
+                    case 'EXT'
+                        node_object = Queue(line_network, jline_node.getName.toCharArray', SchedStrategy.EXT);
+                    case 'REF'
+                        node_object = Queue(line_network, jline_node.getName.toCharArray', SchedStrategy.REF);
+                    case 'LCFSPR'
+                        node_object = Queue(line_network, jline_node.getName.toCharArray', SchedStrategy.LCFSPR);
+                end
                 node_object.setNumberOfServers(jline_node.getNumberOfServers);
+                if ~isempty(JLINE.jlinematrix_to_matrix(jline_node.getLimitedLoadDependence))
+                    node_object.setLoadDependence(JLINE.jlinematrix_to_matrix(jline_node.getLimitedLoadDependence));
+                end
             elseif isa(jline_node, 'jline.lang.nodes.Source')
                 node_object = Source(line_network, jline_node.getName.toCharArray');
             elseif isa(jline_node, 'jline.lang.nodes.Sink')
@@ -128,7 +256,14 @@ classdef JLINE
             elseif isa(jline_node, 'jline.lang.nodes.Router')
                 node_object = Router(line_network, jline_node.getName.toCharArray');
             elseif isa(jline_node, 'jline.lang.nodes.ClassSwitch')
-                line_error(mfilename,'Node not supported by JLINE.');
+                nClasses = job_classes.size;
+                csMatrix = zeros(nClasses, nClasses);
+                for r = 1:nClasses
+                    for s = 1:nClasses
+                        csMatrix(r,s) = jline_node.getServer.applyCsFun(r-1,s-1);
+                    end
+                end
+                node_object = ClassSwitch(line_network, jline_node.getName.toCharArray', csMatrix);
             else
                 line_error(mfilename,'Node not supported by JLINE.');
             end
@@ -136,9 +271,9 @@ classdef JLINE
 
         function node_class = from_line_class(line_class, java_network)
             if isa(line_class, 'OpenClass')
-                node_class = jline.lang.OpenClass(java_network, line_class.getName);
+                node_class = jline.lang.OpenClass(java_network, line_class.getName, line_class.priority);
             elseif isa(line_class, 'ClosedClass')
-                node_class = jline.lang.ClosedClass(java_network, line_class.getName, line_class.population, java_network.getNodeByName(line_class.refstat.getName));
+                node_class = jline.lang.ClosedClass(java_network, line_class.getName, line_class.population, java_network.getNodeByName(line_class.refstat.getName), line_class.priority);
             else
                 line_error(mfilename,'Class type not supported by JLINE.');
             end
@@ -146,15 +281,14 @@ classdef JLINE
 
         function node_class = from_jline_class(java_class, line_network)
             if isa(java_class, 'jline.lang.OpenClass')
-                node_class = OpenClass(line_network, java_class.getName.toCharArray');
+                node_class = OpenClass(line_network, java_class.getName.toCharArray', java_class.getPriority);
             elseif isa(java_class, 'jline.lang.ClosedClass')
-                node_class = ClosedClass(line_network, java_class.getName.toCharArray', line_class.getNumberOfJobs, java_network.getNodeByName(line_class.refstat.getName));
+                node_class = ClosedClass(line_network, java_class.getName.toCharArray', java_class.getNumberOfJobs, line_network.getNodeByName(java_class.getRefstat.getName), java_class.getPriority);
             else
                 line_error(mfilename,'Class type not supported by JLINE.');
             end
         end
-
-
+        
         function from_line_links(line_network, network_object)
             connections = line_network.getConnectionMatrix();
             [m, n] = size(connections);
@@ -162,32 +296,50 @@ classdef JLINE
             line_nodes = line_network.getNodes;
             classes = network_object.getClasses();
             n_classes = classes.size();
-            routing_matrix = jline.lang.RoutingMatrix(classes, nodes);
+            routing_matrix = jline.lang.RoutingMatrix(network_object, classes, nodes);
             line_nodes = line_network.getNodes;
             % [ ] Update to consider different weights/routing for classes
             for i = 1:m
                 line_node = line_nodes{i};
                 for k = 1:n_classes
                     output_strat = line_node.output.outputStrategy{k};
-                    probabilities = output_strat{3};
-                    if ~strcmp(output_strat{2}, 'Probabilities') && ~strcmp(output_strat{2}, 'Random');
-                        line_error(mfilename, 'Routing Strategy not supported by JLINE');
-                    end
-                    for j = 1:length(probabilities)
-                        dest_idx = line_network.getNodeIndex(probabilities{j}{1}.name);
-                        if (connections(i, j) ~= 0)
-                                routing_matrix.addConnection(nodes.get(i-1), nodes.get(dest_idx-1), classes.get(k-1), probabilities{j}{2});
+                    if length(output_strat) >= 3
+                        probabilities = output_strat{3};
+                        if ~strcmp(output_strat{2}, 'Probabilities') && ~strcmp(output_strat{2}, 'Random');
+                            line_error(mfilename, 'Routing Strategy not supported by JLINE');
+                        end
+    
+                        for j = 1:length(probabilities)
+                            dest_idx = probabilities{j}{1}.index;
+                            if (connections(i, dest_idx) ~= 0)
+                                    routing_matrix.addConnection(nodes.get(i-1), nodes.get(dest_idx-1), classes.get(k-1), probabilities{j}{2});
+                            end
                         end
                     end
                 end
             end
             network_object.link(routing_matrix);
+
+            %Align the sn.rtorig be the same
+            sn = network_object.getStructWithoutRecompute;
+            rtorig = java.util.HashMap();
+            if ~isempty(line_network.sn.rtorig)
+                for r = 1:n_classes
+                    sub_rtorig = java.util.HashMap();
+                    for s = 1:n_classes
+                        sub_rtorig.put(classes.get(s-1), JLINE.matrix_to_jlinematrix(line_network.sn.rtorig{r,s}));
+                    end
+                    rtorig.put(classes.get(r-1), sub_rtorig);
+                end
+            end
+            sn.rtorig = rtorig;
         end
 
         function line_network = from_jline_links(line_network, java_network)
             P = line_network.initRoutingMatrix;
             java_nodes = java_network.getNodes();
-            n_classes = java_network.getClasses.size();
+            java_classes = java_network.getClasses();
+            n_classes = java_classes.size();
             n_nodes = java_nodes.size();
 
             for n = 1 : n_nodes
@@ -204,11 +356,22 @@ classdef JLINE
                     else
                         strat_class = output_strat.getJobClass();
                         class_idx = java_network.getJobClassIndex(strat_class)+1;
-                        P{class_idx,class_idx,in_idx,out_idx} = output_strat.getProbability();
+                        P{class_idx,class_idx}(in_idx,out_idx) = output_strat.getProbability();
                     end
                 end
             end
             line_network.link(P);
+
+            %Align the sn.rtorig be the same (Assume Java network is
+            %created by calling Network.link)
+            sn = java_network.getStructWithoutRecompute;
+            rtorig = cell(n_classes, n_classes);
+            for r = 1:n_classes
+                for s = 1:n_classes
+                    rtorig{r,s} = JLINE.jlinematrix_to_matrix(sn.rtorig.get(java_classes.get(r-1)).get(java_classes.get(s-1)));
+                end
+            end
+            line_network.sn.rtorig = rtorig;
         end
 
         function [network_object, ssa] = from_line_network(line_network)
@@ -254,11 +417,10 @@ classdef JLINE
             end
 
             for n = 1: length(java_nodes)
-                for m = 1 : length(java_classes)
-                    JLINE.set_service(network_nodes{n}, java_nodes{n}, job_classes);
-                end
+                JLINE.set_service(network_nodes{n}, java_nodes{n}, job_classes);
             end
 
+            % Assume JLINE and LINE network are both created via link
             JLINE.from_line_links(line_network, network_object);
         end
 
@@ -266,6 +428,21 @@ classdef JLINE
             ssa = jline.solvers.ssa.SolverSSA();
             ssa.setOptions().disableResTime = true;
             ssa.compile(network_object);
+        end
+
+        function [ctmc] = SolverCTMC(network_object)
+            ctmc = jline.solvers.ctmc.SolverCTMC();
+            ctmc.compile(network_object);
+        end
+
+        function [fluid] = SolverFluid(network_object)
+            fluid = jline.solvers.fluid.SolverFluid(network_object);
+        end
+
+        function [mva] = SolverMVA(network_object)
+           options = jline.solvers.SolverOptions(jline.lang.constant.SolverType.MVA);
+           options.verbose = options.verbose.SILENT;
+           mva = jline.solvers.mva.SolverMVA(network_object, options);
         end
 
         function line_network = jline_to_line(java_network)
@@ -279,8 +456,8 @@ classdef JLINE
 
 
             for n = 1 : network_nodes.size
-                if ~isa(line_nodes{n}, 'ClassSwitch')
-                    line_nodes{n} = JLINE.from_jline_node(network_nodes.get(n-1), line_network);
+                if ~isa(network_nodes.get(n-1), 'jline.lang.nodes.ClassSwitch')
+                    line_nodes{n} = JLINE.from_jline_node(network_nodes.get(n-1), line_network, job_classes);
                 end
             end
 
@@ -289,12 +466,591 @@ classdef JLINE
             end
 
             for n = 1 : network_nodes.size
-                if isa(line_nodes{n}, 'ClassSwitch')
-                    JLINE.set_line_service(network_nodes.get(n-1), line_nodes{n}, job_classes, line_classes);
+                if isa(network_nodes.get(n-1), 'jline.lang.nodes.ClassSwitch')
+                    line_nodes{n} = JLINE.from_jline_node(network_nodes.get(n-1), line_network, job_classes);
                 end
             end
 
+            for n = 1 : network_nodes.size
+                JLINE.set_line_service(network_nodes.get(n-1), line_nodes{n}, job_classes, line_classes);
+            end
+
+            % Assume JLINE and LINE network are both created via link
             line_network = JLINE.from_jline_links(line_network, java_network);
         end
+
+        function matrix = jlinematrix_to_matrix(jline_matrix)
+            if isempty(jline_matrix)
+                matrix = [];
+            else
+                matrix = zeros(jline_matrix.getNumRows(), jline_matrix.getNumCols());
+                for row = 1:jline_matrix.getNumRows()
+                    for col = 1:jline_matrix.getNumCols()
+                        matrix(row, col) = jline_matrix.get(row-1, col-1);
+                    end
+                end
+            end
+        end
+
+        function jline_matrix = matrix_to_jlinematrix(matrix)
+            [rows, cols] = size(matrix);
+            jline_matrix = jline.lang.JLineMatrix(rows, cols);
+            for row = 1:rows
+                for col = 1:cols
+                    if matrix(row,col) ~= 0
+                        jline_matrix.set(row-1, col-1, matrix(row, col));
+                    end
+                end
+            end
+        end
+    
+        function sn = from_jline_struct(java_network, java_sn)
+            %lst, rtfun and cdscaling are not implemented
+            %Due to the transformation of Java lambda to matlab function
+            %java_sn = java_network.getStruct(false);
+            java_classes = java_network.getClasses;
+            java_nodes = java_network.getNodes;
+            java_stations = java_network.getStations;
+            sn = NetworkStruct();
+
+            sn.nnodes = java_sn.nNodes;
+            sn.nclasses = java_sn.nClasses;
+            sn.nclosedjobs = java_sn.nclosedjobs;
+            sn.nstations = java_sn.nstations;
+            sn.nstateful = java_sn.nStateful;
+            sn.nchains = java_sn.nchains;
+
+            sn.refstat = JLINE.jlinematrix_to_matrix(java_sn.refstat) + 1;
+            sn.njobs = JLINE.jlinematrix_to_matrix(java_sn.njobs);
+            sn.nservers = JLINE.jlinematrix_to_matrix(java_sn.nservers);
+            sn.connmatrix = JLINE.jlinematrix_to_matrix(java_sn.connmatrix);
+            sn.scv = JLINE.jlinematrix_to_matrix(java_sn.scv);
+            sn.isstation = logical(JLINE.jlinematrix_to_matrix(java_sn.isstation));
+            sn.isstateful = logical(JLINE.jlinematrix_to_matrix(java_sn.isstateful));
+            sn.isstatedep = logical(JLINE.jlinematrix_to_matrix(java_sn.isstatedep));
+            sn.nodeToStateful = JLINE.jlinematrix_to_matrix(java_sn.nodeToStateful)+1;
+            sn.nodeToStateful(sn.nodeToStateful==0) = nan;
+            sn.nodeToStation = JLINE.jlinematrix_to_matrix(java_sn.nodeToStation)+1;
+            sn.nodeToStation(sn.nodeToStation==0) = nan;
+            sn.stationToNode = JLINE.jlinematrix_to_matrix(java_sn.stationToNode)+1;
+            sn.stationToNode(sn.stationToNode==0) = nan;
+            sn.stationToStateful = JLINE.jlinematrix_to_matrix(java_sn.stationToStateful)+1;
+            sn.stationToStateful(sn.stationToStateful==0) = nan;
+            sn.statefulToNode = JLINE.jlinematrix_to_matrix(java_sn.statefulToNode)+1;
+            sn.statefulToNode(sn.statefulToNode==0) = nan;
+            sn.rates = JLINE.jlinematrix_to_matrix(java_sn.rates);
+            sn.classprio = JLINE.jlinematrix_to_matrix(java_sn.classprio);
+            sn.phases = JLINE.jlinematrix_to_matrix(java_sn.phases);
+            sn.phasessz = JLINE.jlinematrix_to_matrix(java_sn.phasessz);
+            sn.phaseshift = JLINE.jlinematrix_to_matrix(java_sn.phaseshift);
+            sn.schedparam = JLINE.jlinematrix_to_matrix(java_sn.schedparam);
+            sn.chains = logical(JLINE.jlinematrix_to_matrix(java_sn.chains));
+            sn.rt = JLINE.jlinematrix_to_matrix(java_sn.rt);
+            sn.nvars = JLINE.jlinematrix_to_matrix(java_sn.nvars);
+            sn.rtnodes = JLINE.jlinematrix_to_matrix(java_sn.rtnodes);
+            sn.csmask = logical(JLINE.jlinematrix_to_matrix(java_sn.csmask));
+            sn.isslc = logical(JLINE.jlinematrix_to_matrix(java_sn.isslc));
+            sn.cap = JLINE.jlinematrix_to_matrix(java_sn.cap);
+            sn.classcap = JLINE.jlinematrix_to_matrix(java_sn.classcap);
+            sn.refclass = JLINE.jlinematrix_to_matrix(java_sn.refclass)+1;
+            sn.lldscaling = JLINE.jlinematrix_to_matrix(java_sn.lldscaling);
+
+            if ~isempty(java_sn.cdscaling)
+                %Not implemented since related to lambda function
+            else
+                sn.cdscaling = cell(sn.nstations, 0);
+            end
+
+            if ~isempty(java_sn.nodetypes)
+                sn.nodetype = zeros(sn.nnodes, 1);
+                for i = 1:java_sn.nodetypes.size
+                    nodetype = java_sn.nodetypes.get(i-1);
+                    switch nodetype.name().toCharArray'
+                        case 'Queue'
+                            sn.nodetype(i) = NodeType.ID_QUEUE;
+                        case 'Delay'
+                            sn.nodetype(i) = NodeType.ID_DELAY;
+                        case 'Source'
+                            sn.nodetype(i) = NodeType.ID_SOURCE;
+                        case 'Sink'
+                            sn.nodetype(i) = NodeType.ID_SINK;
+                        case 'Join'
+                            sn.nodetype(i) = NodeType.ID_JOIN;
+                        case 'Fork'
+                            sn.nodetype(i) = NodeType.ID_FORK;
+                        case 'ClassSwitch'
+                            sn.nodetype(i) = NodeType.ID_CLASSSWITCH;
+                        case 'Logger'
+                            sn.nodetype(i) = NodeType.ID_LOGGER;
+                        case 'Cache'  
+                            sn.nodetype(i) = NodeType.ID_CACHE;
+                        case 'Place'  
+                            sn.nodetype(i) = NodeType.ID_PLACE;
+                        case 'Transition'
+                            sn.nodetype(i) = NodeType.ID_TRANSITION;
+                        case 'Router'
+                            sn.nodetype(i) = NodeType.ID_ROUTER;
+                    end
+                end
+            else
+                sn.nodetype = [];
+            end
+
+            if ~isempty(java_sn.classnames)
+                for i = 1:java_sn.classnames.size
+                    sn.classnames(i,1) = java_sn.classnames.get(i-1);
+                end
+            else
+                sn.classnames = [];
+            end
+
+            if ~isempty(java_sn.nodenames)
+                for i = 1:java_sn.nodenames.size
+                    sn.nodenames(i,1) = java_sn.nodenames.get(i-1);
+                end
+            else
+                sn.nodenames = [];
+            end
+
+            if ~isempty(java_sn.rtorig)
+                sn.rtorig = cell(sn.nclasses, sn.nclasses);
+                for r = 1:sn.nclasses
+                    for s = 1:sn.nclasses
+                        sn.rtorig{r,s} = JLINE.jlinematrix_to_matrix(java_sn.rtorig.get(java_classes.get(r-1)).get(java_classes.get(s-1)));
+                    end
+                end
+            else
+                sn.rtorig = [];
+            end
+
+            if ~isempty(java_sn.state)
+                sn.state = cell(sn.nstations, 1);
+                for i = 1:sn.nstations
+                    sn.state{i} = JLINE.jlinematrix_to_matrix(java_sn.state.get(java_stations.get(i-1)));
+                end
+            else
+                sn.state = {};
+            end
+
+            if ~isempty(java_sn.space)
+                sn.space = cell(sn.nstations, 1);
+                for i = 1:sn.nstations
+                    sn.space{i} = JLINE.jlinematrix_to_matrix(java_sn.space.get(java_stations.get(i-1)));
+                end
+            else
+                sn.space = {};
+            end
+
+            if ~isempty(java_sn.routing)
+                sn.routing = zeros(sn.nnodes, sn.nclasses);
+                for i = 1:sn.nnodes
+                    for j = 1:sn.nclasses
+                        routingStrategy = java_sn.routing.get(java_nodes.get(i-1)).get(java_classes.get(j-1));
+                        switch routingStrategy.name().toCharArray'
+                            case 'PROB'
+                                sn.routing(i,j) = RoutingStrategy.ID_PROB;
+                            case 'RAND'
+                                sn.routing(i,j) = RoutingStrategy.ID_RAND;
+                            case 'RROBIN'
+                                sn.routing(i,j) = RoutingStrategy.ID_RROBIN;
+                            case 'WRROBIN'
+                                sn.routing(i,j) = RoutingStrategy.ID_WRROBIN;
+                            case 'JSQ'
+                                sn.routing(i,j) = RoutingStrategy.ID_JSQ;
+                            case 'DISABLED'
+                                sn.routing(i,j) = RoutingStrategy.ID_DISABLED;
+                            case 'FIRING'
+                                sn.routing(i,j) = RoutingStrategy.ID_FIRING;
+                            case 'KCHOICES'
+                                sn.routing(i,j) = RoutingStrategy.ID_KCHOICES;
+                        end
+                    end
+                end
+            else
+                sn.routing = [];
+            end
+
+            if ~isempty(java_sn.proctype)
+                sn.procid = zeros(sn.nstations, sn.nclasses);
+                for i = 1:sn.nstations
+                    for j = 1:sn.nclasses
+                        processType = java_sn.proctype.get(java_stations.get(i-1)).get(java_classes.get(j-1));
+                        %Only EXP, ERLANG, HYPEREXP, APH, COXIAN, IMMEDIATE
+                        %DISABLED are implemented in JLINE.
+                        switch processType.name.toCharArray'
+                            case 'EXP'
+                                sn.procid(i,j) = ProcessType.ID_EXP;
+                            case 'ERLANG'
+                                sn.procid(i,j) = ProcessType.ID_ERLANG;
+                            case 'HYPEREXP'
+                                sn.procid(i,j) = ProcessType.ID_HYPEREXP;
+                            case 'PH'
+                                sn.procid(i,j) = ProcessType.ID_PH;
+                            case 'APH'
+                                sn.procid(i,j) = ProcessType.ID_APH;
+                            case 'MAP'
+                                sn.procid(i,j) = ProcessType.ID_MAP;
+                            case 'UNIFORM'
+                                sn.procid(i,j) = ProcessType.ID_UNIFORM;
+                            case 'DET'
+                                sn.procid(i,j) = ProcessType.ID_DET;
+                            case 'COXIAN'
+                                sn.procid(i,j) = ProcessType.ID_COXIAN;
+                            case 'GAMMA'
+                                sn.procid(i,j) = ProcessType.ID_GAMMA;
+                            case 'PARETO'
+                                sn.procid(i,j) = ProcessType.ID_PARETO;
+                            case 'WEIBULL'
+                                sn.procid(i,j) = ProcessType.ID_WEIBULL;
+                            case 'LOGNORMAL'
+                                sn.procid(i,j) = ProcessType.ID_LOGNORMAL;
+                            case 'MMPP2'
+                                sn.procid(i,j) = ProcessType.ID_MMPP2;
+                            case 'REPLAYER'
+                                sn.procid(i,j) = ProcessType.ID_REPLAYER;
+                            case 'TRACE'
+                                sn.procid(i,j) = ProcessType.ID_TRACE;
+                            case 'IMMEDIATE'
+                                sn.procid(i,j) = ProcessType.ID_IMMEDIATE;
+                            case 'DISABLED'
+                                sn.procid(i,j) = ProcessType.ID_DISABLED;
+                            case 'COX2'
+                                sn.procid(i,j) = ProcessType.ID_COX2;
+                        end
+                    end
+                end
+            else
+                sn.procid = [];
+            end
+
+            if ~isempty(java_sn.mu)
+                sn.mu = cell(sn.nstations, 1);
+                for i = 1:sn.nstations
+                    sn.mu{i} = cell(1, sn.nclasses);
+                    for j = 1:sn.nclasses
+                        sn.mu{i}{j} = JLINE.jlinematrix_to_matrix(java_sn.mu.get(java_stations.get(i-1)).get(java_classes.get(j-1)));
+                    end
+                end
+            else
+                sn.mu = {};
+            end
+
+            if ~isempty(java_sn.phi)
+                sn.phi = cell(sn.nstations, 1);
+                for i = 1:sn.nstations
+                    sn.phi{i} = cell(1, sn.nclasses);
+                    for j = 1:sn.nclasses
+                        sn.phi{i}{j} = JLINE.jlinematrix_to_matrix(java_sn.phi.get(java_stations.get(i-1)).get(java_classes.get(j-1)));
+                    end
+                end
+            else
+                sn.phi = {};
+            end
+
+            if ~isempty(java_sn.proc)
+                sn.proc = cell(sn.nstations, 1);
+                for i = 1:sn.nstations
+                    sn.proc{i} = cell(1, sn.nclasses);
+                    for j = 1:sn.nclasses
+                        proc_i_j = java_sn.proc.get(java_stations.get(i-1)).get(java_classes.get(j-1));
+                        sn.proc{i}{j} = cell(1, proc_i_j.size);
+                        for k = 1:proc_i_j.size
+                            sn.proc{i}{j}{k} = JLINE.jlinematrix_to_matrix(proc_i_j.get(uint32(k-1)));
+                        end
+                    end
+                end
+            else 
+                sn.proc = {};
+            end
+
+            if ~isempty(java_sn.pie)
+                sn.pie = cell(sn.nstations, 1);
+                for i = 1:sn.nstations
+                    sn.pie{i} = cell(1, sn.nclasses);
+                    for j = 1:sn.nclasses
+                        sn.pie{i}{j} = JLINE.jlinematrix_to_matrix(java_sn.pie.get(java_stations.get(i-1)).get(java_classes.get(j-1)));
+                    end
+                end
+            else
+                sn.pie = {};
+            end
+
+            if ~isempty(java_sn.sched)
+                sn.sched = cell(sn.nstations, 1);
+                sn.schedid = zeros(sn.nstations, 1);
+                for i = 1:sn.nstations
+                    schedStrategy = java_sn.sched.get(java_stations.get(i-1));
+                    switch schedStrategy.name.toCharArray'
+                        case 'INF'
+                            sn.sched{i} = SchedStrategy.INF;
+                            sn.schedid(i) = SchedStrategy.ID_INF;
+                        case 'FCFS'
+                            sn.sched{i} = SchedStrategy.FCFS;
+                            sn.schedid(i) = SchedStrategy.ID_FCFS;
+                        case 'LCFS'
+                            sn.sched{i} = SchedStrategy.LCFS;
+                            sn.schedid(i) = SchedStrategy.ID_LCFS;
+                        case 'LCFSPR'
+                            sn.sched{i} = SchedStrategy.LCFSPR;
+                            sn.schedid(i) = SchedStrategy.ID_LCFSPR;
+                        case 'SIRO'
+                            sn.sched{i} = SchedStrategy.SIRO;
+                            sn.schedid(i) = SchedStrategy.ID_SIRO;
+                        case 'SJF'
+                            sn.sched{i} = SchedStrategy.SJF;
+                            sn.schedid(i) = SchedStrategy.ID_SJF;
+                        case 'LJF'
+                            sn.sched{i} = SchedStrategy.LJF;
+                            sn.schedid(i) = SchedStrategy.ID_LJF;
+                        case 'PS'
+                            sn.sched{i} = SchedStrategy.PS;
+                            sn.schedid(i) = SchedStrategy.ID_PS;
+                        case 'DPS'
+                            sn.sched{i} = SchedStrategy.DPS;
+                            sn.schedid(i) = SchedStrategy.ID_DPS;
+                        case 'GPS'
+                            sn.sched{i} = SchedStrategy.GPS;
+                            sn.schedid(i) = SchedStrategy.ID_GPS;
+                        case 'SEPT'
+                            sn.sched{i} = SchedStrategy.SEPT;
+                            sn.schedid(i) = SchedStrategy.ID_SEPT;
+                        case 'LEPT'
+                            sn.sched{i} = SchedStrategy.LEPT;
+                            sn.schedid(i) = SchedStrategy.ID_LEPT;
+                        case 'HOL'
+                            sn.sched{i} = SchedStrategy.HOL;
+                            sn.schedid(i) = SchedStrategy.ID_HOL;
+                        case 'FORK'
+                            sn.sched{i} = SchedStrategy.FORK;
+                            sn.schedid(i) = SchedStrategy.ID_FORK;
+                        case 'EXT'
+                            sn.sched{i} = SchedStrategy.EXT;
+                            sn.schedid(i) = SchedStrategy.ID_EXT;
+                        case 'REF'
+                            sn.sched{i} = SchedStrategy.REF;
+                            sn.schedid(i) = SchedStrategy.ID_REF;
+                    end
+                end
+            else
+                sn.sched = {};
+                sn.shcedid = [];
+            end
+
+            if ~isempty(java_sn.inchain)
+                sn.inchain = cell(1, sn.nchains);
+                for i = 1:sn.nchains
+                    sn.inchain{1,i} = JLINE.jlinematrix_to_matrix(java_sn.inchain.get(uint32(i-1)))+1;
+                end
+            else
+                sn.inchain = {};
+            end
+
+            if ~isempty(java_sn.visits)
+                sn.visits = cell(sn.nchains, 1);
+                for i = 1:sn.nchains
+                    sn.visits{i,1} = JLINE.jlinematrix_to_matrix(java_sn.visits.get(uint32(i-1)));
+                end
+            else
+                sn.visits = {};
+            end
+
+            if ~isempty(java_sn.nodevisits)
+                sn.nodevisits = cell(1, sn.nchains);
+                for i = 1:sn.nchains
+                    sn.nodevisits{1,i} = JLINE.jlinematrix_to_matrix(java_sn.nodevisits.get(uint32(i-1)));
+                end
+            else
+                sn.nodevisits = {};
+            end
+
+            if ~isempty(java_sn.dropRule)
+                sn.dropid = zeros(sn.nstations, sn.nclasses);
+                for i = 1:sn.nstations
+                    for j = 1:sn.nclasses
+                        dropStrategy = java_sn.dropRule.get(java_stations.get(i-1)).get(java_classes.get(j-1));
+                        switch dropStrategy.name.toCharArray'
+                            case 'WaitingQueue'
+                                sn.dropid(i,j) = DropStrategy.ID_WAITQ;
+                            case 'Drop'
+                                sn.dropid(i,j) = DropStrategy.ID_DROP;
+                            case 'BlockingAfterService'
+                                sn.dropid(i,j) = DropStrategy.ID_BAS;
+                        end
+                    end
+                end
+            else
+                sn.dropid = [];
+            end
+
+            if ~isempty(java_sn.nodeparam) 
+                sn.nodeparam = cell(sn.nnodes, 1);
+                %Note that JLINE only support node parameters related to
+                %Fork, Join, WWROBIN and RROBIN
+                for i = 1:sn.nnodes
+                    if java_sn.nodeparam.get(java_nodes.get(i-1)).isEmpty
+                        sn.nodeparam{i} = [];
+                    else
+                        if ~isnan(java_sn.nodeparam.fanout)
+                            sn.nodeparam{i}.fanout = java_sn.nodeparam.fanout;
+                        end
+                        
+                        if ~isempty(java_sn.nodeparam.joinStrategy)
+                            sn.nodeparam{i}.joinStrategy = cell(1, sn.nclasses);
+                            sn.nodeparam{i}.fanIn = cell(1, sn.nclasses);
+                            for r = 1:sn.nclasses
+                                joinStrategy = java_sn.nodeparam.joinStrategy.get(java_classes.get(r-1));
+                                switch joinStrategy.name.toCharArray'
+                                    case 'STD'
+                                        sn.nodeparam{i}.joinStrategy{r} = JoinStrategy.STD;
+                                    case 'PARTIAL'
+                                        sn.nodeparam{i}.joinStrategy{r} = JoinStrategy.PARTIAL;
+                                end
+                                sn.nodeparam{i}.fanIn{r} = java_sn.nodeparam.fanIn.get(java_classes.get(r-1));
+                            end
+                        end
+
+                        if ~isempty(java_sn.nodeparam.weights)
+                            for r = 1:sn.nclasses
+                                sn.nodeparam{i}{r}.weights = JLINE.jlinematrix_to_matrix(java_sn.nodeparam.weights.get(java_classes.get(r-1)));
+                            end
+                        end
+
+                        if ~isempty(java_sn.nodeparam.outlinks)
+                            for r = 1:sn.nclasses
+                                sn.nodeparam{i}{r}.outlinks = JLINE.jlinematrix_to_matrix(java_sn.nodeparam.outlinks.get(java_classes.get(r-1)));
+                            end
+                        end
+                    end
+                end
+            else
+                sn.nodeparam = {};
+            end
+
+            if ~isempty(java_sn.sync) 
+                java_sync = java_sn.sync;
+                sn.sync = cell(java_sync.size, 1);
+                for i = 1:java_sync.size
+                    java_sync_i = java_sync.get(uint32(i-1));
+                    sn.sync{i,1} = struct('active',cell(1),'passive',cell(1));
+
+                    java_active = java_sync_i.active.get(uint32(0));
+                    java_passive = java_sync_i.passive.get(uint32(0));
+
+                    %Currently assume that prob would always be a value
+                    %instead of lambda function (No idea of how to convert
+                    %Java lambda function to matlab lambda function)
+                    switch java_active.getEvent.name.toCharArray'
+                        case 'INIT'
+                            sn.sync{i,1}.active{1} = Event(EventType.ID_INIT, java_active.getNodeIdx+1, java_active.getJobclassIdx+1, ...
+                                java_active.getProb, JLINE.jlinematrix_to_matrix(java_active.getState), ...
+                                java_active.getT, java_active.getJob);
+                        case 'LOCAL'
+                            sn.sync{i,1}.active{1} = Event(EventType.ID_LOCAL, java_active.getNodeIdx+1, java_active.getJobclassIdx+1, ...
+                                java_active.getProb, JLINE.jlinematrix_to_matrix(java_active.getState), ...
+                                java_active.getT, java_active.getJob);
+                        case 'ARV'
+                             sn.sync{i,1}.active{1} = Event(EventType.ID_ARV, java_active.getNodeIdx+1, java_active.getJobclassIdx+1, ...
+                                java_active.getProb, JLINE.jlinematrix_to_matrix(java_active.getState), ...
+                                java_active.getT, java_active.getJob);
+                        case 'DEP'
+                             sn.sync{i,1}.active{1} = Event(EventType.ID_DEP, java_active.getNodeIdx+1, java_active.getJobclassIdx+1, ...
+                                java_active.getProb, JLINE.jlinematrix_to_matrix(java_active.getState), ...
+                                java_active.getT, java_active.getJob);
+                        case 'PHASE'
+                             sn.sync{i,1}.active{1} = Event(EventType.ID_PHASE, java_active.getNodeIdx+1, java_active.getJobclassIdx+1, ...
+                                java_active.getProb, JLINE.jlinematrix_to_matrix(java_active.getState), ...
+                                java_active.getT, java_active.getJob);
+                        case 'READ'
+                             sn.sync{i,1}.active{1} = Event(EventType.ID_READ, java_active.getNodeIdx+1, java_active.getJobclassIdx+1, ...
+                                java_active.getProb, JLINE.jlinematrix_to_matrix(java_active.getState), ...
+                                java_active.getT, java_active.getJob);
+                        case 'STAGE'
+                             sn.sync{i,1}.active{1} = Event(EventType.ID_STAGE, java_active.getNodeIdx+1, java_active.getJobclassIdx+1, ...
+                                java_active.getProb, JLINE.jlinematrix_to_matrix(java_active.getState), ...
+                                java_active.getT, java_active.getJob);
+                    end
+
+                    switch java_passive.getEvent.name.toCharArray'
+                        case 'INIT'
+                            sn.sync{i,1}.passive{1} = Event(EventType.ID_INIT, java_passive.getNodeIdx+1, java_passive.getJobclassIdx+1, ...
+                                java_passive.getProb, JLINE.jlinematrix_to_matrix(java_passive.getState), ...
+                                java_passive.getT, java_passive.getJob);
+                        case 'LOCAL'
+                            sn.sync{i,1}.passive{1} = Event(EventType.ID_LOCAL, java_passive.getNodeIdx+1, java_passive.getJobclassIdx+1, ...
+                                java_passive.getProb, JLINE.jlinematrix_to_matrix(java_passive.getState), ...
+                                java_passive.getT, java_passive.getJob);
+                        case 'ARV'
+                             sn.sync{i,1}.passive{1} = Event(EventType.ID_ARV, java_passive.getNodeIdx+1, java_passive.getJobclassIdx+1, ...
+                                java_passive.getProb, JLINE.jlinematrix_to_matrix(java_passive.getState), ...
+                                java_passive.getT, java_passive.getJob);
+                        case 'DEP'
+                             sn.sync{i,1}.passive{1} = Event(EventType.ID_DEP, java_passive.getNodeIdx+1, java_passive.getJobclassIdx+1, ...
+                                java_passive.getProb, JLINE.jlinematrix_to_matrix(java_passive.getState), ...
+                                java_passive.getT, java_passive.getJob);
+                        case 'PHASE'
+                             sn.sync{i,1}.passive{1} = Event(EventType.ID_PHASE, java_passive.getNodeIdx+1, java_passive.getJobclassIdx+1, ...
+                                java_passive.getProb, JLINE.jlinematrix_to_matrix(java_passive.getState), ...
+                                java_passive.getT, java_passive.getJob);
+                        case 'READ'
+                             sn.sync{i,1}.passive{1} = Event(EventType.ID_READ, java_passive.getNodeIdx+1, java_passive.getJobclassIdx+1, ...
+                                java_passive.getProb, JLINE.jlinematrix_to_matrix(java_passive.getState), ...
+                                java_passive.getT, java_passive.getJob);
+                        case 'STAGE'
+                             sn.sync{i,1}.passive{1} = Event(EventType.ID_STAGE, java_passive.getNodeIdx+1, java_passive.getJobclassIdx+1, ...
+                                java_passive.getProb, JLINE.jlinematrix_to_matrix(java_passive.getState), ...
+                                java_passive.getT, java_passive.getJob);
+                    end
+                end
+            else
+                sn.sync = {};
+            end
+        end
+
+        function [QN,UN,RN,WN,TN] = arrayListToResults(alist)
+            n = alist.get(0).size;
+            QN = zeros(n,1);
+            for i=1:n
+                QN(i) = alist.get(0).get(i-1);
+            end
+            UN = zeros(n,1);
+            for i=1:n
+                UN(i) = alist.get(1).get(i-1);
+            end
+            RN = zeros(n,1);
+            for i=1:n
+                RN(i) = alist.get(2).get(i-1);
+            end
+            WN = zeros(n,1);
+            for i=1:n
+                WN(i) = alist.get(3).get(i-1);
+            end
+            TN = zeros(n,1);
+            for i=1:n
+                TN(i) = alist.get(4).get(i-1);
+            end
+        end
+
+        function featSupported = getFeatureSet()
+            % FEATSUPPORTED = GETFEATURESET()
+            
+            featSupported = SolverFeatureSet;
+            featSupported.setTrue({'Sink','Source',...
+                'ClassSwitch','DelayStation','Queue',...
+                'APH','Coxian','Erlang','Exponential','HyperExp',...
+                'StatelessClassSwitcher','InfiniteServer','SharedServer','Buffer','Dispatcher',...
+                'Server','JobSink','RandomSource','ServiceTunnel',...
+                'SchedStrategy_INF','SchedStrategy_PS',...
+                'RoutingStrategy_PROB','RoutingStrategy_RAND',...
+                'ClosedClass','OpenClass'});
+        end
+        
+        function [bool, featSupported] = supports(model)
+            % [BOOL, FEATSUPPORTED] = SUPPORTS(MODEL)
+            
+            featUsed = model.getUsedLangFeatures();
+            featSupported = JLINE.getFeatureSet();
+            bool = SolverFeatureSet.supports(featSupported, featUsed);
+        end
+        
     end
 end

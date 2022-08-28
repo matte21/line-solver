@@ -1,5 +1,5 @@
-function [Q,U,R,T,C,X,lG,runtime] = solver_ncld_analyzer(sn, options)
-% [Q,U,R,T,C,X,LG,RUNTIME] = SOLVER_NCLD_ANALYZER(QN, OPTIONS)
+function [Q,U,R,T,C,X,lG,runtime,it] = solver_ncld_analyzer(sn, options)
+% [Q,U,R,T,C,X,LG,RUNTIME,ITER] = SOLVER_NCLD_ANALYZER(QN, OPTIONS)
 
 % Copyright (c) 2012-2022, Imperial College London
 % All rights reserved.

@@ -3,6 +3,7 @@ function runtime = runAnalyzer(self, options)
 % Run the solver
 
 T0=tic;
+iter = NaN;
 if nargin<2
     options = self.getOptions;
 end
@@ -12,7 +13,7 @@ hasOpenClasses = any(sn.nodetype==NodeType.ID_SOURCE);
 switch options.method
     case {'matrix'}
         if hasOpenClasses
-            line_error(mfilename,'The matrix solver does not support open arrivals. Use options.method=''''closing'''' instead.');
+            line_error(mfilename,'The matrix solver does not support open arrivals. Use options.method=''closing'' instead.');
             options.method = 'closing';
         end
     case {'default'}
@@ -71,7 +72,12 @@ while s0_id>=0 % for all possible initial states
     end
     sn = self.model.getStruct;
     if s0prior_val > 0        
-        [Qfull, Ufull, Rfull, Tfull, Cfull, Xfull, t, Qfull_t, Ufull_t, Tfull_t, lastSol] = solver_fluid_analyzer(sn, options);
+        %useJLine = false; 
+        %if useJLine
+        %    [Qfull, Ufull, Rfull, Tfull, Cfull, Xfull, t, Qfull_t, Ufull_t, Tfull_t, lastSol] = solver_fluid_analyzer_jline(self.model, options);
+        %else
+            [Qfull, Ufull, Rfull, Tfull, Cfull, Xfull, t, Qfull_t, Ufull_t, Tfull_t, lastSol, iter] = solver_fluid_analyzer(sn, options);
+        %end
         
         [t,uniqueIdx] = unique(t);
         if isempty(lastSol) % if solution fails
@@ -142,7 +148,7 @@ while s0_id>=0 % for all possible initial states
 end
 runtime = toc(T0);
 self.result.solverSpecific = lastSol;
-self.setAvgResults(Q,U,R,T,C,X,runtime);
+self.setAvgResults(Q,U,R,T,[],[],C,X,runtime,options.method,iter);
 Rt={}; Xt={}; Ct={};
 self.setTranAvgResults(Qt,Ut,Rt,Tt,Ct,Xt,runtime);
 end

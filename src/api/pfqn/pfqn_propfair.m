@@ -25,4 +25,3 @@ Xasy = Xopt .* N ./ (N + Z.*Xopt); % add think time. If embedded in the optimiza
 lG = -sum(N.*log(Xasy));
 G = exp(lG);
 end
-

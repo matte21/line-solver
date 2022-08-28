@@ -51,7 +51,7 @@ else
             Qval((i-1)*C+c) = QNc(i,c);
             Uval((i-1)*C+c) = UNc(i,c);
             Rval((i-1)*C+c) = RNc(i,c);
-            Resval((i-1)*C+c) = RNc(i,c)/sum(sn.visits{c}(i,:));
+            Resval((i-1)*C+c) = RNc(i,c)/sum(sn.visits{c}(sn.stationToStateful(i),:));
             Tval((i-1)*C+c) = TNc(i,c);
         end
     end

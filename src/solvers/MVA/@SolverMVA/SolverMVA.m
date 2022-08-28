@@ -10,6 +10,9 @@ classdef SolverMVA < NetworkSolver
             
             self@NetworkSolver(model, mfilename);
             self.setOptions(Solver.parseOptions(varargin, self.defaultOptions));
+            if ~isempty(model.obj)
+                self.obj = JLINE.SolverMVA(model.obj);
+            end
         end
         
         function sn = getStruct(self)
@@ -42,6 +45,7 @@ classdef SolverMVA < NetworkSolver
                 'SchedStrategy_INF','SchedStrategy_PS',...
                 'SchedStrategy_DPS','SchedStrategy_FCFS','SchedStrategy_SIRO','SchedStrategy_HOL',...
                 'SchedStrategy_LCFSPR',...
+                'Fork','Forker','Join','Joiner',...
                 'RoutingStrategy_PROB','RoutingStrategy_RAND',...
                 'ClosedClass','OpenClass','Replayer'});
         end

@@ -5,8 +5,8 @@ model = Network('model');
 delay = Delay(model,'Delay');
 queue1 = Queue(model,'Queue1',SchedStrategy.PS);
 queue2 = Queue(model,'Queue2',SchedStrategy.PS);
-fork = Fork(model,'Fork');
-join = Join(model,'Join');
+fork = Fork(model, 'Fork');
+join = Join(model, 'Join', fork);
 
 jobclass1 = ClosedClass(model, 'class1', 5, delay);
 
@@ -23,9 +23,13 @@ P(queue2,join) = 1.0;
 P(join,delay) = 1.0;
 
 model.link(P);
+
 solver = {};
 solver{end+1} = SolverJMT(model,'seed',23000);
+solver{end+1} = SolverMVA(model);
 
 AvgTable = {};
-AvgTable{end+1} = solver{end}.getAvgTable;
-AvgTable{end}
+for s=1:length(solver)
+    AvgTable{end+1} = solver{s}.getAvgTable;
+    AvgTable{s}
+end

@@ -19,6 +19,7 @@ classdef Solver < handle
         name; % Solver name
         model; % Model to be solved
         result; % last result
+        obj;
     end
     
     methods (Hidden)
@@ -56,7 +57,7 @@ classdef Solver < handle
             line_error(mfilename,'Line:AbstractMethodCall','An abstract method was called. The function needs to be overridden by a subclass.');
         end
         
-        function self = setChecks(self, bool)
+        function self = setDoChecks(self, bool)
             self.enableChecks = bool;
         end
     end
@@ -231,10 +232,11 @@ classdef Solver < handle
                 'jmt.jsim','jmt.jmva','jmt.jmva.mva','jmt.jmva.amva','jmt.jmva.recal','jmt.jmva.comom','jmt.jmva.chow','jmt.jmva.bs','jmt.jmva.aql','jmt.jmva.lin','jmt.jmva.dmlin','jmt.jmva.ls',...
                 'brute','ca','comom','gm','mom','propfair','recal','kt', 'rd', 'nr.probit', 'nr.logit', 'nc.brute','nc.ca', 'nc.comom','nc.gm','nc.mom','nc.propfair','nc.recal','nc.kt', 'nc.rd', 'nc.nr.probit', 'nc.nr.logit', ...
                 'fluid','matrix','statedep','closing','fluid.statedep''fluid.closing','fluid.matrix',...
-                'nc','nc.exact','nc.imci','ls','nc.ls','nc.grm','grm','le','nc.le','nc.panacea','panacea','nc.mmint2','mmint2','mam','dec.source','dec.mmap',...
+                'nc','nc.exact','nc.imci','ls','nc.ls','nc.cub','cub','le','nc.le','nc.panacea','panacea','nc.mmint2','mmint2','mam','dec.source','dec.mmap',...
                 'mmk','gigk', 'gigk.kingman_approx', ...
                 'mm1','mg1','gm1','gig1','gim1','gig1.kingman','gig1.gelenbe','gig1.heyman','gig1.kimura','gig1.allen','gig1.kobayashi','gig1.klb','gig1.marchal','gig1.myskja','gig1.myskja.b',...
-                'aba.upper','aba.lower','gb.upper','gb.lower','sb.upper','sb.lower','bjb.upper','bjb.lower','pb.upper','pb.lower'};
+                'aba.upper','aba.lower','gb.upper','gb.lower','sb.upper','sb.lower','bjb.upper','bjb.lower','pb.upper','pb.lower',...
+                'jline.amva'};
         end
         
         function bool = isValidOption(optName)
@@ -315,7 +317,8 @@ classdef Solver < handle
                         'mm1','mmk','mg1','gm1','gig1','gim1','gig1.kingman', ...
                         'gigk', 'gigk.kingman_approx', ...
                         'gig1.gelenbe','gig1.heyman','gig1.kimura','gig1.allen','gig1.kobayashi','gig1.klb','gig1.marchal','gig1.myskja','gig1.myskja.b', ...
-                        'aba.upper', 'aba.lower', 'bjb.upper', 'bjb.lower', 'gb.upper', 'gb.lower', 'pb.upper', 'pb.lower', 'sb.upper', 'sb.lower'}
+                        'aba.upper', 'aba.lower', 'bjb.upper', 'bjb.lower', 'gb.upper', 'gb.lower', 'pb.upper', 'pb.lower', 'sb.upper', 'sb.lower', ...
+                        'jline.amva'}
                     if strcmp(options.method,'mva'), options.method='default'; end
                     options.method = erase(options.method,'mva.');
                     solver = SolverMVA(model, options);
@@ -332,7 +335,7 @@ classdef Solver < handle
                     if strcmp(options.method,'fluid'), options.method='default'; end
                     options.method = erase(options.method,'fluid.');
                     solver = SolverFluid(model, options);
-                case {'nc','nc.exact','nc.imci','nc.ls','nc.grm','grm','ls','nc.le','le','mmint2','nc.panacea','nc.pana','nc.mmint2','nc.kt','nc.deterministic','nc.sampling','nc.propfair','nc.comom','nc.mom','nc.gm','nc.brute','nc.rd', 'nc.nr.probit', 'nc.nr.logit'}
+                case {'nc','nc.exact','nc.imci','nc.ls','cub','ls','nc.le','le','mmint2','nc.panacea','nc.pana','nc.mmint2','nc.kt','nc.deterministic','nc.sampling','nc.propfair','nc.comom','nc.mom','nc.cub','nc.brute','nc.rd', 'nc.nr.probit', 'nc.nr.logit'}
                     if strcmp(options.method,'nc'), options.method='default'; end
                     options.method = erase(options.method,'nc.');
                     solver = SolverNC(model, options);

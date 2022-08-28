@@ -1,5 +1,5 @@
-function [Gn,lGn]=pfqn_gm(L,N,Z,order)
-% [GN,LGN]=PFQN_GM(L,N,Z,ORDER)
+function [Gn,lGn]=pfqn_cub(L,N,Z,order)
+% [GN,LGN]=PFQN_CUB(L,N,Z,ORDER)
 
 % PFQN_GM Exact and approximate solution of closed product-form queueing
 % networks by Grundmann-Moeller cubature rules

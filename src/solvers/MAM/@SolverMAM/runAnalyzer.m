@@ -21,5 +21,5 @@ sn = getStruct(self);
 [Q,U,R,T,C,X] = solver_mam_analyzer(sn, options);
 
 runtime=toc(T0);
-self.setAvgResults(Q,U,R,T,C,X,runtime);
+self.setAvgResults(Q,U,R,T,[],[],C,X,runtime);
 end

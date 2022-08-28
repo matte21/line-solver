@@ -1,8 +1,12 @@
-function lG=pfqn_comom_doubleprec(L,N,Z)
+function lG=pfqn_comom(L,N,Z)
+if nargin<3
+    Z=0*N;
+end
 [M,R]=size(L);
 % rescale demands
 Lmax = L; % use L
 Lmax(Lmax<Distrib.Tol)=Z(Lmax<Distrib.Tol); % unless zero
+Lmax = max(Lmax,[],1);
 L = L./repmat(Lmax,M,1);
 Z = Z./repmat(Lmax,M,1);
 % sort from smallest to largest

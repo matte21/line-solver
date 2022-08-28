@@ -1,10 +1,11 @@
-function [QN,UN,RN,TN,CN,XN,lG,runtime] = solver_mva_bound_analyzer(sn, options)
-% [Q,U,R,T,C,X,LG,RUNTIME] = SOLVER_MVA_BOUND_ANALYZER(QN, OPTIONS)
+function [QN,UN,RN,TN,CN,XN,lG,runtime,iter] = solver_mva_bound_analyzer(sn, options)
+% [Q,U,R,T,C,X,LG,RUNTIME,ITER] = SOLVER_MVA_BOUND_ANALYZER(QN, OPTIONS)
 
 % Copyright (c) 2012-2022, Imperial College London
 % All rights reserved.
 
 T0=tic;
+iter = 1;
 QN = []; UN = [];
 RN = []; TN = [];
 CN = []; XN = [];

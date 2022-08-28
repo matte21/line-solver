@@ -129,7 +129,7 @@ for p = 1:length(self.hosts)
             end
             actElement.setAttribute('call-order', curAct.callOrder);
             actElement.setAttribute('name', nodeHashMap(curAct.name));
-            
+
             for sc=1:length(curAct.syncCallDests)
                 syncCallElement = doc.createElement('synch-call');
                 actElement.appendChild(syncCallElement);
@@ -147,10 +147,10 @@ for p = 1:length(self.hosts)
             curActPrec = curTask.precedences(ap);
             actPrecElement = doc.createElement('precedence');
             taskActsElement.appendChild(actPrecElement);
-            
+
             preElement = doc.createElement(curActPrec.preType);
             actPrecElement.appendChild(preElement);
-            if strcmp(curActPrec.preType, ActivityPrecedence.PRE_AND) && ~isempty(curActPrec.preParams)
+            if strcmp(curActPrec.preType, ActivityPrecedenceType.PRE_AND) && ~isempty(curActPrec.preParams)
                 preElement.setAttribute('quorum', num2str(curActPrec.preParams(1)));
             end
             for pra = 1:length(curActPrec.preActs)
@@ -158,17 +158,17 @@ for p = 1:length(self.hosts)
                 preElement.appendChild(preActElement);
                 preActElement.setAttribute('name', nodeHashMap(curActPrec.preActs{pra}));
             end
-            
+
             postElement = doc.createElement(curActPrec.postType);
             actPrecElement.appendChild(postElement);
-            if strcmp(curActPrec.postType, ActivityPrecedence.POST_OR)
+            if strcmp(curActPrec.postType, ActivityPrecedenceType.POST_OR)
                 for poa = 1:length(curActPrec.postActs)
                     postActElement = doc.createElement('activity');
                     postElement.appendChild(postActElement);
                     postActElement.setAttribute('name', nodeHashMap(curActPrec.postActs{poa}));
                     postActElement.setAttribute('prob', num2str(curActPrec.postParams(poa)));
                 end
-            elseif strcmp(curActPrec.postType, ActivityPrecedence.POST_LOOP)
+            elseif strcmp(curActPrec.postType, ActivityPrecedenceType.POST_LOOP)
                 for poa = 1:length(curActPrec.postActs)-1
                     postActElement = doc.createElement('activity');
                     postElement.appendChild(postActElement);
@@ -184,16 +184,18 @@ for p = 1:length(self.hosts)
                 end
             end
         end
-        for e=1:length(curTask.entries)
-            curEntry = curTask.entries(e);
-            if ~isempty(curEntry.replyActivity)
-                entryReplyElement = doc.createElement('reply-entry');
-                taskActsElement.appendChild(entryReplyElement);
-                entryReplyElement.setAttribute('name', nodeHashMap(curEntry.name));
-                for r=1:length(curEntry.replyActivity)
-                    entryReplyActElement = doc.createElement('reply-activity');
-                    entryReplyElement.appendChild(entryReplyActElement);
-                    entryReplyActElement.setAttribute('name', nodeHashMap(curEntry.replyActivity{r}));
+        if ~strcmpi(curTask.scheduling, SchedStrategy.REF)
+            for e=1:length(curTask.entries)
+                curEntry = curTask.entries(e);
+                if ~isempty(curEntry.replyActivity)
+                    entryReplyElement = doc.createElement('reply-entry');
+                    taskActsElement.appendChild(entryReplyElement);
+                    entryReplyElement.setAttribute('name', nodeHashMap(curEntry.name));
+                    for r=1:length(curEntry.replyActivity)
+                        entryReplyActElement = doc.createElement('reply-activity');
+                        entryReplyElement.appendChild(entryReplyActElement);
+                        entryReplyActElement.setAttribute('name', nodeHashMap(curEntry.replyActivity{r}));
+                    end
                 end
             end
         end

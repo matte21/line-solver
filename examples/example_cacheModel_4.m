@@ -1,15 +1,16 @@
 % Example of Layered Network with a multi-level cache
 
-model = LayeredNetwork(str);
-
+model = LayeredNetwork('LQNwithCaching');
+nusers = 1;
+ntokens = 1;
 %% client
 P1 = Processor(model, 'P1', 1, SchedStrategy.PS);
 T1 = Task(model, 'T1', nusers, SchedStrategy.REF).on(P1);
 E1 = Entry(model, 'E1').on(T1);
 
 %% cachetask
-totalitems = 10;
-cachecapacity = [3 3];
+totalitems = 4;
+cachecapacity = [1 1];
 pAccess = DiscreteSampler((1/totalitems)*ones(1,totalitems));
 PC = Processor(model, 'Pc', 1, SchedStrategy.PS);
 C2 = CacheTask(model, 'CT', totalitems, cachecapacity, ReplacementStrategy.RR, ntokens).on(PC);
@@ -31,9 +32,12 @@ C2.addPrecedence(ActivityPrecedence.CacheAccess(AC2, {AC2h, AC2m}));
 lnoptions = SolverLN.defaultOptions;
 lnoptions.verbose = 1;
 options = SolverNC.defaultOptions;
-solver = SolverLN(model, @(model) SolverNC(model, options), lnoptions);
-AvgTable = solver.getAvgTable
+options.verbose = 0;
+solver{1} = SolverLN(model, @(model) SolverNC(model, options), lnoptions);
+AvgTable{1} = solver{1}.getAvgTable
 
 options2 = SolverMVA.defaultOptions;
-solver2 = SolverLN(model, @(model) SolverMVA(model, options2), lnoptions);
-AvgTable2 = solver2.getAvgTable
+options2.verbose = 0;
+solver{2} = SolverLN(model, @(model) SolverMVA(model, options2), lnoptions);
+AvgTable{2} = solver{2}.getAvgTable
+

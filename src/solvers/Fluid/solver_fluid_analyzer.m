@@ -1,5 +1,5 @@
-function [QN, UN, RN, TN, CN, XN, t, QNt, UNt, TNt, xvec] = solver_fluid_analyzer(sn, options)
-% [QN, UN, RN, TN, CN, XN, T, QNT, UNT, TNT, XVEC] = SOLVER_FLUID_ANALYZER(QN, OPTIONS)
+function [QN, UN, RN, TN, CN, XN, t, QNt, UNt, TNt, xvec, iter] = solver_fluid_analyzer(sn, options)
+% [QN, UN, RN, TN, CN, XN, T, QNT, UNT, TNT, XVEC, iter] = SOLVER_FLUID_ANALYZER(QN, OPTIONS)
 
 % Copyright (c) 2012-2022, Imperial College London
 % All rights reserved.
@@ -83,6 +83,8 @@ switch options.method
                                     sn.mu{i}{k} = muik;
                                     sn.phi{i}{k} = phiik;
                                     sn.phases = phases;
+                                    sn.phasessz = max(sn.phases,ones(size(sn.phases)));
+                                    sn.phaseshift = [zeros(size(phases,1),1),cumsum(sn.phasessz,2)];                                    
                                     if phases(i,k) ~= phases_last(i,k)
                                         isf = sn.stationToStateful(i);
                                         % we now initialize the new service process
@@ -207,4 +209,5 @@ for k=1:K
 end
 xvec.odeStateVec = xvec_iter{end};
 xvec.sn = sn;
+iter = outer_iters;
 end

@@ -18,7 +18,7 @@ for c=1:sn.nchains
     for i=1:sn.nstations
         for k=inchain % for all classes within the chain ( a class belongs to a single chain, the reference station must be identical
             %                        for all classes within a chain )
-            alpha(i,k) = alpha(i,k) + sn.visits{c}(i,k)/sum(sn.visits{c}(sn.refstat(k),inchain));
+            alpha(i,k) = alpha(i,k) + sn.visits{c}(i,k)/sum(sn.visits{c}(sn.stationToStateful(sn.refstat(k)),inchain));
         end
     end
 end

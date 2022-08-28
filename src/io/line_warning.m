@@ -26,6 +26,8 @@ switch w(1).state
                 suppressedWarningsTic = tic;                
             else
                 if ~suppressedWarnings && ~suppressedAnnouncement
+                    line_printf(finalmsg);
+                    finalmsg = sprintf('Warning [%s]: %s',caller,errmsg);
                     line_printf(sprintf('Warning [%s]: %s',caller,'Warning message casted more than once, repetitions will not be printed on screen for 60 seconds.'));
                     suppressedAnnouncement = true;
                     suppressedWarnings = true;

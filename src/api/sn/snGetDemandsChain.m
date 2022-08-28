@@ -18,16 +18,16 @@ for c=1:sn.nchains
     inchain = sn.inchain{c};    
     if sn.refclass(c)>0 % if the model has a ref class
         for i=1:sn.nstations
-            Vchain(i,c) = sum(sn.visits{c}(i,inchain)) / sum(sn.visits{c}(sn.refstat(inchain(1)),sn.refclass(c)));
+            Vchain(i,c) = sum(sn.visits{c}(sn.stationToStateful(i),inchain)) / sum(sn.visits{c}(sn.stationToStateful(sn.refstat(inchain(1))),sn.refclass(c)));
             for k=inchain
-                alpha(i,k) = alpha(i,k) + sn.visits{c}(i,k) / sum(sn.visits{c}(i,inchain));
+                alpha(i,k) = alpha(i,k) + sn.visits{c}(sn.stationToStateful(i),k) / sum(sn.visits{c}(sn.stationToStateful(i),inchain));
             end
         end
     else
         for i=1:sn.nstations
-            Vchain(i,c) = sum(sn.visits{c}(i,inchain)) / sum(sn.visits{c}(sn.refstat(inchain(1)),inchain));
+            Vchain(i,c) = sum(sn.visits{c}(sn.stationToStateful(i),inchain)) / sum(sn.visits{c}(sn.stationToStateful(sn.refstat(inchain(1))),inchain));
             for k=inchain
-                alpha(i,k) = alpha(i,k) + sn.visits{c}(i,k) / sum(sn.visits{c}(i,inchain));
+                alpha(i,k) = alpha(i,k) + sn.visits{c}(sn.stationToStateful(i),k) / sum(sn.visits{c}(sn.stationToStateful(i),inchain));
             end
         end
     end

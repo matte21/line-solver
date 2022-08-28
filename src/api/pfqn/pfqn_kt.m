@@ -1,7 +1,11 @@
 function [G,lG,X,Q]=pfqn_kt(L,N,Z)
+% Knessl-Tier asymptotic expansion
 if isempty(L) || isempty(N) || sum(N)==0
     G=1;
     return;
+end
+if nargin<3
+    Z=N*0;
 end
 [M,R]=size(L);
 Ntot=sum(N);

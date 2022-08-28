@@ -6,18 +6,18 @@ sn = model.getStruct;
 PH = Host(lqn, model.getName(), Inf, SchedStrategy.INF); % pseudo host
 for c=1:sn.nchains
     inchain = sn.inchain{c};
-    RT{c} = Task(lqn,['RefTask:',num2str(c)], sum(sn.njobs(inchain)), SchedStrategy.REF).on(PH); % reference task for chain c
-    RE{c} = Entry(lqn,['Chain:',num2str(c)]).on(RT{c}); % reference task for chain c
+    RT{c} = Task(lqn,['RefTask_',num2str(c)], sum(sn.njobs(inchain)), SchedStrategy.REF).on(PH); % reference task for chain c
+    RE{c} = Entry(lqn,['Chain_',num2str(c)]).on(RT{c}); % entry on reference task for chain c
 end
 
 for i=1:sn.nnodes
     switch sn.nodetype(i)
         case {NodeType.ID_QUEUE, NodeType.ID_DELAY}
             P{i} = Host(lqn, sn.nodenames{i}, sn.nservers(sn.nodeToStation(i)), SchedStrategy.fromId(sn.schedid(sn.nodeToStation(i))));
-            T{i} = Task(lqn,['T:',sn.nodenames{i}], sn.nservers(sn.nodeToStation(i)), SchedStrategy.INF).on(P{i});
+            T{i} = Task(lqn,['T_',sn.nodenames{i}], sn.nservers(sn.nodeToStation(i)), SchedStrategy.INF).on(P{i});
             for r=1:sn.nclasses
                 E{i,r} = Entry(lqn, ['E',num2str(i),'_',num2str(r)]).on(T{i});
-                A{i,r} = Activity(lqn,  ['Q',num2str(i),'_',num2str(r)], model.nodes{i}.getServiceProcess(model.classes{r})).on(T{i}).boundTo(E{i,r});
+                A{i,r} = Activity(lqn,  ['Q',num2str(i),'_',num2str(r)], model.nodes{i}.getServiceProcess(model.classes{r})).on(T{i}).boundTo(E{i,r}).repliesTo(E{i,r});
             end
         case NodeType.ClassSwitch
             % no-op
@@ -73,7 +73,7 @@ for c=1:sn.nchains
                                     if pr>0 && any(sn.rtnodes(:, ((i-1)*sn.nclasses + r))>0)
                                         if boundToRE{c}(1)==j && boundToRE{c}(2)==s
                                             if ~isempty(PA{c,i,r})
-                                                orfork_prec{end+1} = Activity(lqn,  ['End:',num2str(c),'_',num2str(i),'_',num2str(r)], Immediate()).on(RT{c});
+                                                orfork_prec{end+1} = Activity(lqn,  ['End_',num2str(c),'_',num2str(i),'_',num2str(r)], Immediate()).on(RT{c});
                                                 orfork_prob(end+1)= pr;
                                             end
                                         else

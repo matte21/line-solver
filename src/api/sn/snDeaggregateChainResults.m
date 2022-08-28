@@ -12,6 +12,8 @@ if ~isempty(Cchain)
     error('Cchain input to snDeaggregateChainResults not yet supported');
 end
 
+Vsink = cellsum(sn.nodevisits);
+Vsink = Vsink(sn.nodetype==NodeType.ID_SINK,:);
 
 S = sn.nservers;
 %mu = sn.lldscaling; 
@@ -20,7 +22,12 @@ S = sn.nservers;
 for c=1:sn.nchains
     inchain = sn.inchain{c};
     for k=inchain(:)'
-        X(k) = Xchain(c) * alpha(sn.refstat(k),k);
+        if isinf(sum(sn.njobs(inchain)))
+            % open chain
+            X(k) = Xchain(c) * Vsink(k); 
+        else
+            X(k) = Xchain(c) * alpha(sn.refstat(k),k);
+        end
         for i=1:sn.nstations
             if isempty(Uchain)
                 if isinf(S(i))
@@ -66,4 +73,5 @@ Q(~isfinite(Q))=0;
 R(~isfinite(R))=0;
 X(~isfinite(X))=0;
 C(~isfinite(C))=0;
+
 end

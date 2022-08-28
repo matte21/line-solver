@@ -1,5 +1,5 @@
-function [Q,U,R,T,C,X,lG] = solver_amva(sn,options)
-% [Q,U,R,T,C,X,lG] = SOLVER_AMVA(SN, OPTIONS)
+function [Q,U,R,T,C,X,lG,totiter] = solver_amva(sn,options)
+% [Q,U,R,T,C,X,lG,ITER] = SOLVER_AMVA(SN, OPTIONS)
 %
 % Copyright (c) 2012-2022, Imperial College London
 % All rights reserved.
@@ -7,6 +7,7 @@ if nargin < 2
     options = SolverMVA.defaultOptions;
 end
 
+totiter = 0;
 [Lchain,STchain,Vchain,alpha,Nchain,SCVchain,refstatchain] = snGetDemandsChain(sn);
 
 M = sn.nstations;
@@ -29,7 +30,9 @@ if isempty(Qchain)
     Qchain = ones(M,K);
     Qchain = Qchain ./ repmat(sum(Qchain,1),size(Qchain,1),1) .* repmat(Nchain,size(Qchain,1),1);
     Qchain(isinf(Qchain))=0; % open classes
-    Qchain(refstatchain(isinf(Nchain)))=0;
+    for r=find(isinf(Nchain)) % open classes
+        Qchain(refstatchain(r),r)=0;
+    end
 end
 
 nnzclasses = find(Nchain>0);
@@ -81,11 +84,11 @@ end
 outer_iter = 0;
 while (outer_iter < 2 || max(max(abs(Qchain-QchainOuter_1))) > tol) && outer_iter <= options.iter_max
     outer_iter = outer_iter + 1;
-    
+
     QchainOuter_1 = Qchain;
     XchainOuter_1 = Xchain;
     UchainOuter_1 = Uchain;
-    
+
     if isfinite(Nt) && Nt>0
         switch options.method
             case {'default','aql','qdaql','lin','qdlin'}
@@ -99,13 +102,14 @@ while (outer_iter < 2 || max(max(abs(Qchain-QchainOuter_1))) > tol) && outer_ite
                         Uchain_s = Uchain * (Nt-1)/Nt;
                         while (iter_s < 2 || max(max(abs(Qchain_s-Qchain_s_1))) > tol) && iter_s <= options.iter_max
                             iter_s = iter_s + 1;
-                            
+
                             Qchain_s_1 = Qchain_s;
                             Xchain_s_1 = Xchain_s;
                             Uchain_s_1 = Uchain_s;
-                            
+
                             [Wchain_s, STeff_s] = solver_amva_iter(sn, gamma, tau, Qchain_s_1, Xchain_s_1, Uchain_s_1, STchain, Vchain, Nchain_s, SCVchain, options);
-                            
+                            totiter = totiter + 1;
+
                             %% update other metrics
                             for r=nnzclasses
                                 if sum(Wchain_s(:,r)) == 0
@@ -130,7 +134,7 @@ while (outer_iter < 2 || max(max(abs(Qchain-QchainOuter_1))) > tol) && outer_ite
                                 end
                             end
                         end
-                        
+
                         switch options.method
                             case {'default', 'lin'}
                                 for k=1:M
@@ -145,7 +149,7 @@ while (outer_iter < 2 || max(max(abs(Qchain-QchainOuter_1))) > tol) && outer_ite
                                     gamma(s,k) = sum(Qchain_s_1(k,:),2)/(Nt-1) - sum(QchainOuter_1(k,:),2)/Nt;
                                 end
                         end
-                        
+
                         for r=nnzclasses
                             tau(s,r) = Xchain_s_1(r) - XchainOuter_1(r); % save throughput for priority AMVA
                         end
@@ -153,18 +157,19 @@ while (outer_iter < 2 || max(max(abs(Qchain-QchainOuter_1))) > tol) && outer_ite
                 end
         end
     end
-    
+
     iter = 0;
     % iteration at population N
     while (iter < 2 || max(max(abs(Qchain-Qchain_1))) > tol) && iter <= options.iter_max
         iter = iter + 1;
-        
+
         Qchain_1 = Qchain;
         Xchain_1 = Xchain;
         Uchain_1 = Uchain;
-        
+
         [Wchain, STeff] = solver_amva_iter(sn, gamma, tau, Qchain_1, Xchain_1, Uchain_1, STchain, Vchain, Nchain, SCVchain, options);
-        
+        totiter = totiter + 1;
+
         %% update other metrics
         for r=nnzclasses
             if sum(Wchain(:,r)) == 0
@@ -190,6 +195,7 @@ while (outer_iter < 2 || max(max(abs(Qchain-QchainOuter_1))) > tol) && outer_ite
         end
     end
 end
+
 
 % the next block is a coarse approximation for LD and CD, would need
 % cdterm and qterm in it but these are hidden within the iteration calls

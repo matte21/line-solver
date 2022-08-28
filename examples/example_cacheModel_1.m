@@ -41,9 +41,9 @@ model.reset;
 solver{3} = SolverMVA(model,'seed',1);
 AvgTable{3} = solver{3}.getAvgNodeTable; AvgTable{3}
 
-% model.reset;
-% solver{3} = SolverNC(model,'seed',1);
-% AvgTable{3} = solver{3}.getAvgNodeTable; AvgTable{3}
+model.reset;
+solver{4} = SolverNC(model,'seed',1);
+AvgTable{4} = solver{4}.getAvgNodeTable; AvgTable{4}
 
 hitRatio=cacheNode.getHitRatio
 missRatio=cacheNode.getMissRatio

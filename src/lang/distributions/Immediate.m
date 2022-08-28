@@ -11,6 +11,7 @@ classdef Immediate < Distrib
 
             self@Distrib('Immediate', 0,[0,0]);
             self.immediate = true;
+            self.obj = jline.lang.distributions.Immediate();            
         end
     end
 
@@ -97,12 +98,13 @@ classdef Immediate < Distrib
     end
 
     methods (Static)
-        function singleton = getInstance
+        function [singleton, javasingleton] = getInstance
             persistent staticImmediate
             if isempty(staticImmediate)
                 staticImmediate = Immediate();
             end
             singleton = staticImmediate;
+            javasingleton = staticImmediate.obj;
         end
     end
 end

@@ -4,26 +4,6 @@ classdef ActivityPrecedence
     % Copyright (c) 2012-2022, Imperial College London
     % All rights reserved.
 
-    properties (Constant)
-        PRE_SEQ  = 'pre';
-        PRE_AND = 'pre-AND';
-        PRE_OR = 'pre-OR';
-        POST_SEQ = 'post';
-        POST_AND = 'post-AND';
-        POST_OR = 'post-OR';
-        POST_LOOP = 'post-LOOP';
-        POST_CACHE = 'post-CACHE';
-
-        ID_PRE_SEQ  = 1;
-        ID_PRE_AND = 2;
-        ID_PRE_OR = 3;
-        ID_POST_SEQ = 11;
-        ID_POST_AND = 12;
-        ID_POST_OR = 13;
-        ID_POST_LOOP = 14;
-        ID_POST_CACHE = 15;
-    end
-
     properties
         preActs;        %string array
         postActs;       %string array
@@ -45,10 +25,10 @@ classdef ActivityPrecedence
             end
 
             if nargin<3 %~exist('preType','var')
-                preType = ActivityPrecedence.PRE_SEQ;
+                preType = ActivityPrecedenceType.PRE_SEQ;
             end
             if nargin<4 %~exist('postType','var')
-                postType = ActivityPrecedence.POST_SEQ;
+                postType = ActivityPrecedenceType.POST_SEQ;
             end
             if nargin<5 %~exist('preParams','var')
                 preParams = [];
@@ -56,8 +36,17 @@ classdef ActivityPrecedence
             if nargin<6 %~exist('postParams','var')
                 postParams = [];
             end
-
+            for a=1:length(preActs)
+                if isa(preActs{a},'Activity')
+                   preActs{a} = preActs{a}.getName;
+                end
+            end
             obj.preActs = preActs;
+            for a=1:length(postActs)
+                if isa(postActs{a},'Activity')
+                    postActs{a} = postActs{a}.getName;
+                end
+            end
             obj.postActs = postActs;
             obj.preType = preType;
             obj.postType = postType;
@@ -74,31 +63,6 @@ classdef ActivityPrecedence
             ap = cell(nargin-1,1);
             for m = 1:nargin-1
                 ap{m} = ActivityPrecedence.Sequence(varargin{m},varargin{m+1});
-            end
-        end
-
-        function typeId = getPrecedenceId(precedence)
-            % TYPEID = GETPRECEDENCEID(PRECEDENCE)
-            % Classifies the activity precedence
-            switch precedence
-                case ActivityPrecedence.PRE_SEQ
-                    typeId = ActivityPrecedence.ID_PRE_SEQ;
-                case ActivityPrecedence.PRE_AND
-                    typeId = ActivityPrecedence.ID_PRE_AND;
-                case ActivityPrecedence.PRE_OR
-                    typeId = ActivityPrecedence.ID_PRE_OR;
-                case ActivityPrecedence.POST_SEQ
-                    typeId = ActivityPrecedence.ID_POST_SEQ;
-                case ActivityPrecedence.POST_AND
-                    typeId = ActivityPrecedence.ID_POST_AND;
-                case ActivityPrecedence.POST_OR
-                    typeId = ActivityPrecedence.ID_POST_OR;
-                case ActivityPrecedence.POST_LOOP
-                    typeId = ActivityPrecedence.ID_POST_LOOP;
-                case ActivityPrecedence.POST_CACHE
-                    typeId = ActivityPrecedence.ID_POST_CACHE;
-                otherwise
-                    line_error(mfilename,'Unrecognized precedence type.');
             end
         end
 
@@ -128,7 +92,7 @@ classdef ActivityPrecedence
             if nargin<3 %~exist('quorum','var')
                 quorum = [];
             end
-            ap = ActivityPrecedence(preActs,{postAct},ActivityPrecedence.PRE_AND,ActivityPrecedence.POST_SEQ,quorum,[]);
+            ap = ActivityPrecedence(preActs,{postAct},ActivityPrecedenceType.PRE_AND,ActivityPrecedenceType.POST_SEQ,quorum,[]);
         end
 
         function ap = OrJoin(preActs, postAct)
@@ -142,7 +106,7 @@ classdef ActivityPrecedence
             if isa(postAct,'Activity')
                 postAct = postAct.name;
             end
-            ap = ActivityPrecedence(preActs,{postAct},ActivityPrecedence.PRE_OR,ActivityPrecedence.POST_SEQ);
+            ap = ActivityPrecedence(preActs,{postAct},ActivityPrecedenceType.PRE_OR,ActivityPrecedenceType.POST_SEQ);
         end
 
         function ap = AndFork(preAct, postActs)
@@ -156,7 +120,7 @@ classdef ActivityPrecedence
                     postActs{a} = postActs{a}.name;
                 end
             end
-            ap = ActivityPrecedence({preAct},postActs,ActivityPrecedence.PRE_SEQ,ActivityPrecedence.POST_AND);
+            ap = ActivityPrecedence({preAct},postActs,ActivityPrecedenceType.PRE_SEQ,ActivityPrecedenceType.POST_AND);
         end
 
         function ap = Xor(preAct, postActs, probs)
@@ -180,7 +144,7 @@ classdef ActivityPrecedence
                     postActs{a} = postActs{a}.name;
                 end
             end
-            ap = ActivityPrecedence({preAct},postActs,ActivityPrecedence.PRE_SEQ,ActivityPrecedence.POST_OR,[],probs);
+            ap = ActivityPrecedence({preAct},postActs,ActivityPrecedenceType.PRE_SEQ,ActivityPrecedenceType.POST_OR,[],probs);
         end
 
         function ap = Loop(preAct, postActs, counts)
@@ -194,7 +158,7 @@ classdef ActivityPrecedence
                     postActs{a} = postActs{a}.name;
                 end
             end
-            ap = ActivityPrecedence({preAct},postActs,ActivityPrecedence.PRE_SEQ,ActivityPrecedence.POST_LOOP,[],counts);
+            ap = ActivityPrecedence({preAct},postActs,ActivityPrecedenceType.PRE_SEQ,ActivityPrecedenceType.POST_LOOP,[],counts);
         end
 
         function ap = CacheAccess(preAct, postActs)
@@ -208,7 +172,7 @@ classdef ActivityPrecedence
                     postActs{a} = postActs{a}.name;
                 end
             end
-            ap = ActivityPrecedence({preAct},postActs,ActivityPrecedence.PRE_SEQ,ActivityPrecedence.POST_CACHE);
+            ap = ActivityPrecedence({preAct},postActs,ActivityPrecedenceType.PRE_SEQ,ActivityPrecedenceType.POST_CACHE);
         end
     end
 

@@ -1,16 +1,72 @@
-function [AvgTable,QT,UT,RT,WT,TT] = getAvgTable(self,Q,U,R,T,keepDisabled)
-% [AVGTABLE,QT,UT,RT,WT,TT] = GETAVGTABLE(SELF,Q,U,R,T,KEEPDISABLED)
+function [AvgTable,QT,UT,RT,WT,TT,AT] = getAvgTable(self,Q,U,R,T,A,W,keepDisabled)
+% [AVGTABLE,QT,UT,RT,WT,TT,AT] = GETAVGTABLE(SELF,Q,U,R,T,A,W,KEEPDISABLED)
 % Return table of average station metrics
 %
 % Copyright (c) 2012-2022, Imperial College London
 % All rights reserved.
 
+if ~isempty(self.model.obj)
+    sn = self.model.getStruct;
+    M = sn.nstations;
+    R = sn.nclasses;
+    V = cellsum(sn.visits);        
+    [QN,UN,RN,TN,AN,WN] = self.getAvg([],[],[],[],[],[]);
+    Qval = []; Uval = [];
+    Rval = []; Tval = [];
+    Wval = []; Aval = [];
+    Residval =[];
+    JobClass = {};
+    Station = {};
+    for i=1:M
+        for k=1:R
+            if any(sum([QN(i,k),UN(i,k),RN(i,k),TN(i,k),AN(i,k),WN(i,k)])>0)
+                c = find(sn.chains(:,k));
+                inchain = sn.inchain{c};
+                JobClass{end+1,1} = sn.classnames{k};
+                Station{end+1,1} = sn.nodenames{sn.stationToNode(i)};
+                Qval(end+1) = QN(i,k);
+                Uval(end+1) = UN(i,k);
+                Rval(end+1) = RN(i,k);
+                if RN(i,k)<Distrib.Zero
+                    Residval(end+1) = RN(i,k);
+                else
+                    if sn.refclass(c)>0
+                        Residval(end+1) = RN(i,k)*V(i,k)/sum(V(sn.refstat(k),sn.refclass(c)));
+                    else
+                        Residval(end+1) = RN(i,k)*V(i,k)/sum(V(sn.refstat(k),sn.chains(c,:)));
+                    end
+                end
+                Tval(end+1) = TN(i,k);
+                Wval(end+1) = WN(i,k);
+                Aval(end+1) = AN(i,k);
+            end
+        end
+    end
+    Station = label(Station);
+    JobClass = label(JobClass);
+    QLen = Qval(:); % we need to save first in a variable named like the column
+    QT = Table(Station,JobClass,QLen);
+    Util = Uval(:); % we need to save first in a variable named like the column
+    UT = Table(Station,JobClass,Util);
+    RespT = Rval(:); % we need to save first in a variable named like the column
+    RT = Table(Station,JobClass,RespT);
+    ResidT = Residval(:); % we need to save first in a variable named like the column
+    WT = Table(Station,JobClass,ResidT);
+    Tput = Tval(:); % we need to save first in a variable named like the column
+    TT = Table(Station,JobClass,Tput);
+    ArvR = Aval(:); % we need to save first in a variable named like the column
+    AT = Table(Station,JobClass,ArvR);
+    %AvgTable = Table(Station,JobClass,QLen,Util,RespT,Tput);
+    AvgTable = Table(Station, JobClass, QLen, Util, RespT, ResidT, ArvR, Tput);
+    return
+end
+
 sn = getStruct(self);
 
-if nargin<6
+if nargin<8
     keepDisabled = false;
-elseif isempty(Q) && isempty(U) && isempty(R) && isempty(T)
-    [Q,U,R,T,~] = getAvgHandles(self);
+elseif isempty(Q) && isempty(U) && isempty(R) && isempty(T) && isempty(A) && isempty(W)
+    [Q,U,R,T,A,W] = getAvgHandles(self);
 end
 
 M = sn.nstations;
@@ -24,12 +80,14 @@ if nargin == 2
         U = param{2};
         R = param{3};
         T = param{4};
+        A = param{5};
+        W = param{6};
         keepDisabled = param{5};
         % case where varargin is passed as input
     end
-    [Q,U,R,T,~] = getAvgHandles(self);
+    [Q,U,R,T,A,W] = getAvgHandles(self);
 elseif nargin == 1
-    [Q,U,R,T,~] = getAvgHandles(self);
+    [Q,U,R,T,A,W] = getAvgHandles(self);
 end
 if isfinite(self.getOptions.timespan(2))
     [Qt,Ut,Tt] = getTranHandles(self);
@@ -39,8 +97,9 @@ if isfinite(self.getOptions.timespan(2))
     TN = cellfun(@(c) c.metric(end),TNt);
     RN = zeros(size(QN));
     WN = zeros(size(QN));
+    AN = zeros(size(QN));
 else
-    [QN,UN,RN,TN] = self.getAvg(Q,U,R,T);
+    [QN,UN,RN,TN,AN,WN] = self.getAvg(Q,U,R,T,A,W);
 end
 
 if isempty(QN)
@@ -49,8 +108,8 @@ if isempty(QN)
     UT = Table();
     RT = Table();
     TT = Table();
-    WT = Table();
     AT = Table();
+    WT = Table();
 elseif ~keepDisabled
     V = cellsum(sn.visits);
     if isempty(V) % SSA
@@ -68,12 +127,13 @@ elseif ~keepDisabled
 
     Qval = []; Uval = [];
     Rval = []; Tval = [];
+    Wval = []; Aval = [];
     Residval =[];
     JobClass = {};
     Station = {};
     for i=1:M
         for k=1:K
-            if any(sum([QN(i,k),UN(i,k),RN(i,k),TN(i,k)])>0)
+            if any(sum([QN(i,k),UN(i,k),RN(i,k),TN(i,k),AN(i,k),WN(i,k)])>0)
                 c = find(sn.chains(:,k));
                 inchain = sn.inchain{c};
                 JobClass{end+1,1} = Q{i,k}.class.name;
@@ -91,6 +151,8 @@ elseif ~keepDisabled
                     end
                 end
                 Tval(end+1) = TN(i,k);
+                Wval(end+1) = WN(i,k);
+                Aval(end+1) = AN(i,k);
             end
         end
     end
@@ -106,8 +168,10 @@ elseif ~keepDisabled
     WT = Table(Station,JobClass,ResidT);
     Tput = Tval(:); % we need to save first in a variable named like the column
     TT = Table(Station,JobClass,Tput);
+    ArvR = Aval(:); % we need to save first in a variable named like the column
+    AT = Table(Station,JobClass,ArvR);
     %AvgTable = Table(Station,JobClass,QLen,Util,RespT,Tput);
-    AvgTable = Table(Station, JobClass, QLen, Util, RespT, ResidT, Tput);
+    AvgTable = Table(Station, JobClass, QLen, Util, RespT, ResidT, ArvR, Tput);
 else
     V = cellsum(sn.visits);
     if isempty(V) % SSA
@@ -146,6 +210,7 @@ else
                 end
             end
             Tval((i-1)*K+k) = TN(i,k);
+            Aval((i-1)*K+k) = AN(i,k);
         end
     end
     Station = label(Station);
@@ -160,7 +225,9 @@ else
     WT = Table(Station,JobClass,ResidT);
     Tput = Tval(:); % we need to save first in a variable named like the column
     TT = Table(Station,JobClass,Tput);
+    ArvR = Aval(:); % we need to save first in a variable named like the column
+    AT = Table(Station,JobClass,ArvR);
     %AvgTable = Table(Station,JobClass,QLen,Util,RespT,Tput);
-    AvgTable = Table(Station, JobClass, QLen, Util, RespT, ResidT, Tput);
+    AvgTable = Table(Station, JobClass, QLen, Util, RespT, ResidT, ArvR, Tput);
 end
 end

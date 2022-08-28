@@ -19,9 +19,8 @@ classdef InfiniteServer < ServiceSection
     methods (Access = 'private')
         function initServers(self, customerClasses)
             % INITSERVERS(CUSTOMERCLASSES)
-            
             for i = 1 : length(customerClasses)
-                self.serviceProcess{1, i} = {customerClasses{1, i}.name, ServiceStrategy.ID_LI, Exp(0.0)};
+                self.serviceProcess{1, i} = {customerClasses{i}.name, ServiceStrategy.ID_LI, Exp(0.0)};
             end
         end
     end

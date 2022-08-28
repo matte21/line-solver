@@ -138,10 +138,10 @@ RNt = cell(M,K);
 TNt = cell(M,K);
 for i=1:M
     for r=1:K
-        QNt{i,r} = QNtmp(:,(i-1)*K+r);
-        UNt{i,r} = UNtmp(:,(i-1)*K+r);
-        RNt{i,r} = RNtmp(:,(i-1)*K+r);
-        TNt{i,r} = TNtmp(:,(i-1)*K+r);
+        QNt{i,r} = QNtmp(:,(r-1)*M+i);
+        UNt{i,r} = UNtmp(:,(r-1)*M+i);
+        RNt{i,r} = RNtmp(:,(r-1)*M+i);
+        TNt{i,r} = TNtmp(:,(r-1)*M+i);
     end
 end
 QN = reshape(QNtmp(end,:),M,K);

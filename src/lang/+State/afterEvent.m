@@ -672,6 +672,28 @@ if sn.isstation(ind)
     end
 elseif sn.isstateful(ind)
     switch sn.nodetype(ind)
+        case NodeType.Router
+            switch event
+                case EventType.ID_ARV
+                    space_srv(:,class) = space_srv(:,class) + 1;
+                    outspace = [space_srv, space_var]; % buf is empty
+                    outrate = -1*ones(size(outspace,1)); % passive action, rate is unspecified
+                case EventType.ID_DEP
+                    if space_srv(class)>0
+                        space_srv(:,class) = space_srv(:,class) - 1;
+                        switch sn.routing(ind,class)
+                            case RoutingStrategy.ID_RROBIN
+                                idx = find(space_var(sum(sn.nvars(ind,1:(R+class)))) == sn.nodeparam{ind}{class}.outlinks);
+                                if idx < length(sn.nodeparam{ind}{class}.outlinks)
+                                    space_var(sum(sn.nvars(ind,1:(R+class)))) = sn.nodeparam{ind}{class}.outlinks(idx+1);
+                                else
+                                    space_var(sum(sn.nvars(ind,1:(R+class)))) = sn.nodeparam{ind}{class}.outlinks(1);
+                                end
+                        end
+                        outspace = [space_srv, space_var]; % buf is empty
+                        outrate = Distrib.InfRate*ones(size(outspace,1)); % immediate action
+                    end
+            end            
         case NodeType.Cache
             % job arrives in class, then reads and moves into hit or miss
             % class, then departs
@@ -683,8 +705,17 @@ elseif sn.isstateful(ind)
                 case EventType.ID_DEP
                     if space_srv(class)>0
                         space_srv(:,class) = space_srv(:,class) - 1;
+                        switch sn.routing(ind,class)
+                            case RoutingStrategy.ID_RROBIN
+                                idx = find(space_var(sum(sn.nvars(ind,1:(R+class)))) == sn.nodeparam{ind}{class}.outlinks);
+                                if idx < length(sn.nodeparam{ind}{class}.outlinks)
+                                    space_var(sum(sn.nvars(ind,1:(R+class)))) = sn.nodeparam{ind}{class}.outlinks(idx+1);
+                                else
+                                    space_var(sum(sn.nvars(ind,1:(R+class)))) = sn.nodeparam{ind}{class}.outlinks(1);
+                                end
+                        end
                         outspace = [space_srv, space_var]; % buf is empty
-                        outrate = Distrib.InfRate*ones(size(outspace,1)); % passive action, rate is unspecified
+                        outrate = Distrib.InfRate*ones(size(outspace,1)); % immediate action
                     end
                 case EventType.ID_READ
                     n = sn.nodeparam{ind}.nitems; % n items

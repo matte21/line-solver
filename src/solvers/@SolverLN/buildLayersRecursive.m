@@ -1,13 +1,17 @@
 function  buildLayersRecursive(self, idx, callers, ishostlayer)
 lqn = self.lqn;
-jobPoskey = zeros(lqn.nidx,1);
-curClasskey = cell(lqn.nidx,1);
+jobPosKey = zeros(lqn.nidx,1);
+curClassKey = cell(lqn.nidx,1);
 nreplicas = lqn.repl(idx);
-callresptproc = self.callresptproc;
-model = Network(lqn.hashnames{idx});
-model.setChecks(false); % fast mode
+callresidtproc = self.callresidtproc;
+switch self.options.method
+    case {'java','jline'}
+        model = JNetwork(lqn.hashnames{idx});
+    otherwise
+        model = Network(lqn.hashnames{idx});
+end
+model.setDoChecks(false); % fast mode
 model.attribute = struct('hosts',[],'tasks',[],'entries',[],'activities',[],'calls',[],'serverIdx',0);
-iscachelayer = all(lqn.iscache(callers)) && ishostlayer;
 if ishostlayer | any(any(lqn.issynccaller(callers, lqn.entriesof{idx}))) %#ok<OR2>
     clientDelay = Delay(model, 'Clients');
     model.attribute.clientIdx = 1;
@@ -29,16 +33,43 @@ for m=1:nreplicas
     serverStation{m}.attribute.ishost = ishostlayer;
     serverStation{m}.attribute.idx = idx;
 end
+iscachelayer = all(lqn.iscache(callers)) && ishostlayer;
 if iscachelayer
     cacheNode = Cache(model, lqn.hashnames{callers}, lqn.nitems{callers}, lqn.itemlevelcap{callers}, lqn.replacementpolicy{callers});
-    model.attribute.cacheIdx = 3;
 end
+
+actsInCaller = lqn.actsof{callers};
+isPostAndAct = full(lqn.actposttype)==ActivityPrecedenceType.ID_POST_AND;
+isPreAndAct = full(lqn.actpretype)==ActivityPrecedenceType.ID_PRE_AND;
+hasfork = any(intersect(find(isPostAndAct),actsInCaller));
+
+maxfanout = 1; % maximum output parallelism level of fork nodes
+for aidx = actsInCaller(:)'
+    successors = find(lqn.graph(aidx,:));
+    if all(isPostAndAct(successors))
+        maxfanout = max(maxfanout, length(successors));
+    end
+end
+
+if hasfork
+    forkNode = Fork(model, 'Fork_PostAnd');
+    for f=1:maxfanout
+        forkOutputRouter{f} = Router(model, ['Fork_PostAnd_',num2str(f)]);
+    end
+end
+
+isPreAndAct = full(lqn.actpretype)==ActivityPrecedenceType.ID_PRE_AND;
+hasjoin = any(isPreAndAct(actsInCaller));
+if hasjoin
+    joinNode = Join(model, 'Join_PreAnd', forkNode);
+end
+
 aidxClass = cell(1,lqn.nentries+lqn.nacts);
 cidxClass = cell(1,0);
 cidxAuxClass = cell(1,0);
 
 self.svctmap{idx} = zeros(0,4); % [modelidx, actidx, node, class] % classes to record in svct results at all iterations
-self.callresptmap{idx} = zeros(0,4); % [modelidx, callidx, node, class] % call classes to record in respt results at all iterations
+self.callresidtmap{idx} = zeros(0,4); % [modelidx, callidx, node, class] % call classes to record in respt results at all iterations
 self.svcupdmap{idx} = zeros(0,4); % [modelidx, actidx, node, class] % classes to update in the next iteration
 self.arvupdmap{idx} = zeros(0,4); % [modelidx, actidx, node, class] % classes to update in the next iteration
 self.callupdmap{idx} = zeros(0,4); % [modelidx, callidx, node, class] % calls classes to update in the next iteration
@@ -83,7 +114,12 @@ for tidx_caller = callers
             aidxClass{eidx}.completes = false;
             aidxClass{eidx}.attribute = [LayeredNetworkElement.ENTRY, eidx];
             model.attribute.entries(end+1,:) = [aidxClass{eidx}.index, eidx];
-            clientDelay.setService(aidxClass{eidx}, Immediate.getInstance());
+            [singleton, javasingleton] = Immediate.getInstance(); 
+            if isempty(model.obj)
+                clientDelay.setService(aidxClass{eidx}, singleton);
+            else
+                clientDelay.setService(aidxClass{eidx}, javasingleton);
+            end
         end
     end
 
@@ -178,16 +214,21 @@ if hasSource
             end
             P{model.classes{oidx}, model.classes{oidx}}(serverStation{m},sinkStation) = p;
         end
-        cidx = openClasses(o,3);
-        self.arvupdmap{idx}(end+1,:) = [idx, cidx, model.getNodeIndex(sourceStation), oidx]; % % 3 = source
+        cidx = openClasses(o,3); % 3 = source
+        self.arvupdmap{idx}(end+1,:) = [idx, cidx, model.getNodeIndex(sourceStation), oidx]; 
         for m=1:nreplicas
             self.callupdmap{idx}(end+1,:) = [idx, cidx, model.getNodeIndex(serverStation{m}), oidx];
-            self.callresptmap{idx}(end+1,:) = [idx, cidx, model.getNodeIndex(serverStation{m}), oidx];
+            self.callresidtmap{idx}(end+1,:) = [idx, cidx, model.getNodeIndex(serverStation{m}), oidx];
         end
     end
 end
 
-atClient = 1; % start at client
+%% job positions are encoded as follows: 1=client, 2=any of the nreplicas server stations, 3=cache node, 4=fork node, 5=join node
+atClient = 1;
+atServer = 2;
+atCache = 3;
+
+jobPos = atClient; % start at client
 % second pass: setup the routing out of entries
 for tidx_caller = callers
     if lqn.issynccaller(tidx_caller, idx) | ishostlayer % if it is only an asynch caller the closed classes are not needed
@@ -203,7 +244,7 @@ for tidx_caller = callers
                 self.routeupdmap{idx}(end+1,:) = [idx, tidx_caller, eidx, 1, 1, aidxClass_tidx_caller.index, aidxClass_eidx.index];
             end
 
-            P = recurActGraph(P, tidx_caller, eidx, aidxClass_eidx, atClient);
+            P = recurActGraph(P, tidx_caller, eidx, aidxClass_eidx, jobPos);
         end
     end
 end
@@ -211,157 +252,59 @@ model.link(P);
 self.ensemble{idx} = model;
 
     function [P, curClass, jobPos] = recurActGraph(P, tidx_caller, aidx, curClass, jobPos)
-        jobPoskey(aidx) = jobPos;
-        curClasskey{aidx} = curClass;
+        jobPosKey(aidx) = jobPos;
+        curClassKey{aidx} = curClass;
         nextaidxs = find(lqn.graph(aidx,:)); % these include the called entries
-        for nextaidx = nextaidxs
+        if ~isempty(nextaidxs)
+            isNextPrecFork(aidx) = all(isPostAndAct(nextaidxs)); % indexed on aidx to avoid losing it during the recursion
+        end
+
+        for nextaidx = nextaidxs % for all successor activities
             if ~isempty(nextaidx)
-                if ~(lqn.parent(aidx) == lqn.parent(nextaidx))
+                if ~(lqn.parent(aidx) == lqn.parent(nextaidx)) % if different parent task
                     % if the successor activity is an entry of another task, this is a call
                     cidx = matchrow(lqn.callpair,[aidx,nextaidx]); % find the call index
                     switch lqn.calltype(cidx)
                         case CallType.ID_ASYNC
-                            % nop
+                            % nop, not done yet
                         case CallType.ID_SYNC
-                            if jobPos == 1
-                                if lqn.parent(lqn.callpair(cidx,2)) == idx
-                                    % if it is a call to an entry of the server
-                                    %P{curClass, curClass}(clientDelay,clientDelay) = full(lqn.graph(lqn.callpair(cidx,1), lqn.callpair(cidx,2))) * (1-pcall);
-                                    if callmean(cidx) < nreplicas
-                                        P{curClass, cidxAuxClass{cidx}}(clientDelay,clientDelay) = 1 - callmean(cidx);
-                                        for m=1:nreplicas
-                                            P{curClass, cidxClass{cidx}}(clientDelay,serverStation{m}) = callmean(cidx) / nreplicas;
-                                            P{cidxClass{cidx}, cidxClass{cidx}}(serverStation{m},clientDelay) = 1; % not needed, just to avoid leaving the Aux class disconnected
-                                        end
-                                        P{cidxAuxClass{cidx}, cidxClass{cidx}}(clientDelay,clientDelay) = 1; % not needed, just to avoid leaving the Aux class disconnected
-                                    elseif callmean(cidx) == nreplicas
-                                        for m=1:nreplicas
-                                            P{curClass, cidxClass{cidx}}(clientDelay,serverStation{m}) = 1 / nreplicas;
-                                            P{cidxClass{cidx}, cidxClass{cidx}}(serverStation{m},clientDelay) = 1;
-                                        end
-                                    else % callmean(cidx) > nreplicas
-                                        for m=1:nreplicas
-                                            P{curClass, cidxClass{cidx}}(clientDelay,serverStation{m}) = 1 / nreplicas;
-                                            P{cidxClass{cidx}, cidxAuxClass{cidx}}(serverStation{m},clientDelay) = 1;
-                                            P{cidxAuxClass{cidx}, cidxClass{cidx}}(clientDelay,serverStation{m}) = 1 - 1 / (callmean(cidx) / nreplicas);
-                                        end
-                                        P{cidxAuxClass{cidx}, cidxClass{cidx}}(clientDelay,clientDelay) = 1 / (callmean(cidx));
-                                    end
-                                    jobPos = 1;
-                                    clientDelay.setService(cidxClass{cidx}, Immediate.getInstance());
-                                    for m=1:nreplicas
-                                        serverStation{m}.setService(cidxClass{cidx}, callresptproc{cidx});
-                                        self.callupdmap{idx}(end+1,:) = [idx, cidx, model.getNodeIndex(serverStation{m}), cidxClass{cidx}.index];
-                                        self.callresptmap{idx}(end+1,:) = [idx, cidx, model.getNodeIndex(serverStation{m}), cidxClass{cidx}.index];
-                                    end
-                                    curClass = cidxClass{cidx};
-                                else
-                                    % if it is not a call to an entry of the server
-                                    if callmean(cidx) < nreplicas
-                                        P{curClass, cidxClass{cidx}}(clientDelay,clientDelay) = callmean(cidx)/nreplicas; % the mean number of calls is now embedded in the demand
-                                        P{cidxClass{cidx}, cidxAuxClass{cidx}}(clientDelay,clientDelay) = 1; % the mean number of calls is now embedded in the demand
-                                        P{curClass, cidxAuxClass{cidx}}(clientDelay,clientDelay) = 1 - callmean(cidx)/nreplicas; % the mean number of calls is now embedded in the demand
-                                        curClass = cidxAuxClass{cidx};
-                                    elseif callmean(cidx) == nreplicas
-                                        P{curClass, cidxClass{cidx}}(clientDelay,clientDelay) = 1;
-                                        curClass = cidxClass{cidx};
-                                    else % callmean(cidx) > 1
-                                        P{curClass, cidxClass{cidx}}(clientDelay,clientDelay) = 1; % the mean number of calls is now embedded in the demand
-                                        P{cidxClass{cidx}, cidxClass{cidx}}(clientDelay,clientDelay) = 1 - 1 / (callmean(cidx)/nreplicas); % the mean number of calls is now embedded in the demand
-                                        P{cidxClass{cidx}, cidxAuxClass{cidx}}(clientDelay,clientDelay) = 1 / (callmean(cidx)/nreplicas); % the mean number of calls is now embedded in the demand
-                                        curClass = cidxAuxClass{cidx};
-                                    end
-                                    jobPos = 1;
-                                    clientDelay.setService(cidxClass{cidx}, callresptproc{cidx});
-                                    self.callupdmap{idx}(end+1,:) = [idx, cidx, 1, cidxClass{cidx}.index];
-                                    %self.callresptmap{idx}(end+1,:) = [idx, cidx, 1, cidxClass{cidx}.index];
-                                end
-                            else % job at server
-                                if lqn.parent(lqn.callpair(cidx,2)) == idx
-                                    % if it is a call to an entry of the server
-                                    if callmean(cidx) < nreplicas
-                                        for m=1:nreplicas
-                                            P{curClass, cidxClass{cidx}}(serverStation{m},clientDelay) = 1 - callmean(cidx);
-                                            P{curClass, cidxClass{cidx}}(serverStation{m},serverStation{m}) = callmean(cidx);
-                                            serverStation{m}.setService(cidxClass{cidx}, callresptproc{cidx});
-                                        end
-                                        jobPos = 1;
-                                        curClass = cidxAuxClass{cidx};
-                                    elseif callmean(cidx) == nreplicas
-                                        for m=1:nreplicas
-                                            P{curClass, cidxClass{cidx}}(serverStation{m},serverStation{m}) = 1;
-                                        end
-                                        jobPos = 2;
-                                        curClass = cidxClass{cidx};
-                                    else % callmean(cidx) > nreplicas
-                                        for m=1:nreplicas
-                                            P{curClass, cidxClass{cidx}}(serverStation{m},serverStation{m}) = 1;
-                                            P{cidxClass{cidx}, cidxClass{cidx}}(serverStation{m},serverStation{m}) = 1 - 1 / (callmean(cidx));
-                                            P{cidxClass{cidx}, cidxAuxClass{cidx}}(serverStation{m},clientDelay) = 1 / (callmean(cidx));
-                                        end
-                                        jobPos = 1;
-                                        curClass = cidxAuxClass{cidx};
-                                    end
-                                    for m=1:nreplicas
-                                        serverStation{m}.setService(cidxClass{cidx}, callresptproc{cidx});
-                                        self.callupdmap{idx}(end+1,:) = [idx, cidx, model.getNodeIndex(serverStation{m}), cidxClass{cidx}.index];
-                                        self.callresptmap{idx}(end+1,:) = [idx, cidx, model.getNodeIndex(serverStation{m}), cidxClass{cidx}.index];
-                                    end
-                                else
-                                    % if it is not a call to an entry of the server
-                                    % callmean not needed since we switched
-                                    % to ResidT to model service time at
-                                    % client
-                                    if callmean(cidx) < nreplicas                                        
-                                        for m=1:nreplicas
-                                            %P{curClass, cidxClass{cidx}}(serverStation{m},clientDelay) = callmean(cidx);
-                                            P{curClass, cidxClass{cidx}}(serverStation{m},clientDelay) = 1;% - callmean(cidx);
-                                        end
-                                        P{cidxClass{cidx}, cidxAuxClass{cidx}}(clientDelay,clientDelay) = 1;
-                                        curClass = cidxAuxClass{cidx};
-                                    elseif callmean(cidx) == nreplicas
-                                        for m=1:nreplicas
-                                            P{curClass, cidxClass{cidx}}(serverStation{m},clientDelay) = 1;
-                                        end
-                                        curClass = cidxClass{cidx};
-                                    else % callmean(cidx) > nreplicas
-                                        for m=1:nreplicas
-                                            P{curClass, cidxClass{cidx}}(serverStation{m},clientDelay) = 1;
-                                        end
-                                        %P{cidxClass{cidx}, cidxClass{cidx}}(clientDelay,clientDelay) = 1 - 1 / (callmean(cidx));
-                                        P{cidxClass{cidx}, cidxAuxClass{cidx}}(clientDelay,clientDelay) = 1;% / (callmean(cidx));
-                                        curClass = cidxAuxClass{cidx};
-                                    end
-                                    jobPos = 1;
-                                    clientDelay.setService(cidxClass{cidx}, callresptproc{cidx});
-                                    self.callupdmap{idx}(end+1,:) = [idx, cidx, 1, cidxClass{cidx}.index];
-                                    %self.callresptmap{idx}(end+1,:) = [idx, cidx, 1, cidxClass{cidx}.index];
-                                end
-                            end
+                            [P, jobPos, curClass] = routeSynchCall(P, jobPos, curClass);
                     end
-                end
-                % here we have processed all calls, let us do the
-                % activities now
-                %% if the successor activity is not a call
-                if (lqn.parent(aidx) == lqn.parent(nextaidx))
-                    if isempty(intersect(lqn.entryidx,nextaidxs))
-                        jobPos = jobPoskey(aidx);
-                        curClass = curClasskey{aidx};
+                else
+                    % at this point, we have processed all calls, let us do the
+                    % activities local to the task next
+                    if isempty(intersect(lqn.entryidx, nextaidxs))
+                        % if next activity is not an entry
+                        jobPos = jobPosKey(aidx);
+                        curClass = curClassKey{aidx};
                     else
-                        if ismember(nextaidxs(find(nextaidxs==nextaidx)-1),lqn.entryidx)
+                        if ismember(nextaidxs(find(nextaidxs==nextaidx)-1), lqn.entryidx)
                             curClassC = curClass;
                         end
-                        jobPos = 1;
+                        jobPos = atClient;
                         curClass = curClassC;
                     end
-                    if jobPos == 1 % at node 1
+                    if jobPos == atClient % at client node
                         if ishostlayer
                             if ~iscachelayer
                                 for m=1:nreplicas
-                                    P{curClass, aidxClass{nextaidx}}(clientDelay,serverStation{m}) = full(lqn.graph(aidx,nextaidx));
+                                    if isNextPrecFork(aidx)
+                                        % if next activity is a post-and
+                                        P{curClass, curClass}(clientDelay, forkNode) = 1.0;
+                                        f = find(nextaidx == nextaidxs);
+                                        P{curClass, curClass}(forkNode, forkOutputRouter{f}) = 1.0;
+                                        P{curClass, aidxClass{nextaidx}}(forkOutputRouter{f}, serverStation{m}) = 1.0;
+                                    else
+                                        if isPreAndAct(aidx)
+                                            P{curClass, curClass}(clientDelay,joinNode) = 1.0;
+                                            P{curClass, aidxClass{nextaidx}}(joinNode,serverStation{m}) = 1.0;
+                                        else
+                                            P{curClass, aidxClass{nextaidx}}(clientDelay,serverStation{m}) = full(lqn.graph(aidx,nextaidx));
+                                        end
+                                    end
                                     serverStation{m}.setService(aidxClass{nextaidx}, lqn.hostdem{nextaidx});
                                 end
-                                jobPos = 2;
+                                jobPos = atServer;
                                 curClass = aidxClass{nextaidx};
                                 self.svctmap{idx}(end+1,:) = [idx, nextaidx, 2, aidxClass{nextaidx}.index];
                             else
@@ -375,42 +318,93 @@ self.ensemble{idx} = model;
                                 cacheNode.setHitClass(aidxClass{nextaidx},aidxClass{lqn.hitaidx});
                                 cacheNode.setMissClass(aidxClass{nextaidx},aidxClass{lqn.missaidx});
 
-                                jobPos = 3;
+                                jobPos = atCache; % cache
                                 curClass = aidxClass{nextaidx};
                                 %self.routeupdmap{idx}(end+1,:) = [idx, nextaidx, lqn.hitaidx, 3, 3, aidxClass{nextaidx}.index, aidxClass{lqn.hitaidx}.index];
                                 %self.routeupdmap{idx}(end+1,:) = [idx, nextaidx, lqn.missaidx, 3, 3, aidxClass{nextaidx}.index, aidxClass{lqn.missaidx}.index];
-
                             end
-                        else
-                            P{curClass, aidxClass{nextaidx}}(clientDelay,clientDelay) = full(lqn.graph(aidx,nextaidx));
-                            jobPos = 1;
+                        else % not ishostlayer
+                            if isNextPrecFork(aidx)
+                                % if next activity is a post-and
+                                P{curClass, curClass}(clientDelay, forkNode) = 1.0;
+                                f = find(nextaidx == nextaidxs);
+                                P{curClass, curClass}(forkNode, forkOutputRouter{f}) = 1.0;
+                                P{curClass, aidxClass{nextaidx}}(forkOutputRouter{f}, clientDelay) = 1.0;
+                            else
+                                if isPreAndAct(aidx)
+                                    P{curClass, curClass}(clientDelay,joinNode) = 1.0;
+                                    P{curClass, aidxClass{nextaidx}}(joinNode,clientDelay) = 1.0;
+                                else
+                                    P{curClass, aidxClass{nextaidx}}(clientDelay,clientDelay) = full(lqn.graph(aidx,nextaidx));
+                                end
+                            end
+                            jobPos = atClient;
                             curClass = aidxClass{nextaidx};
                             clientDelay.setService(aidxClass{nextaidx}, self.svctproc{nextaidx});
                             self.svcupdmap{idx}(end+1,:) = [idx, nextaidx, 1, aidxClass{nextaidx}.index];
                         end
-                    else % at node 2
+                    elseif jobPos == atServer || jobPos == atCache % at server station
                         if ishostlayer
                             if iscachelayer
                                 curClass = aidxClass{nextaidx};
                                 for m=1:nreplicas
-                                    P{curClass, aidxClass{nextaidx}}(cacheNode,serverStation{m}) = full(lqn.graph(aidx,nextaidx));
+                                    if isNextPrecFork(aidx)
+                                        % if next activity is a post-and
+                                        P{curClass, curClass}(cacheNode, forkNode) = 1.0;
+                                        f = find(nextaidx == nextaidxs);
+                                        P{curClass, curClass}(forkNode, forkOutputRouter{f}) = 1.0;
+                                        P{curClass, aidxClass{nextaidx}}(forkOutputRouter{f}, serverStation{m}) = 1.0;
+                                    else
+                                        if isPreAndAct(aidx)
+                                            P{curClass, curClass}(cacheNode,joinNode) = 1.0;
+                                            P{curClass, aidxClass{nextaidx}}(joinNode,serverStation{m}) = 1.0;
+                                        else
+                                            P{curClass, aidxClass{nextaidx}}(cacheNode,serverStation{m}) = full(lqn.graph(aidx,nextaidx));
+                                        end
+                                    end
                                     serverStation{m}.setService(aidxClass{nextaidx}, lqn.hostdem{nextaidx});
                                     %self.routeupdmap{idx}(end+1,:) = [idx, nextaidx, nextaidx, 3, 2, aidxClass{nextaidx}.index, aidxClass{nextaidx}.index];
                                 end
                             else
                                 for m=1:nreplicas
-                                    P{curClass, aidxClass{nextaidx}}(serverStation{m},serverStation{m}) = full(lqn.graph(aidx,nextaidx));
+                                    if isNextPrecFork(aidx)
+                                        % if next activity is a post-and
+                                        P{curClass, curClass}(serverStation{m}, forkNode) = 1.0;
+                                        f = find(nextaidx == nextaidxs);
+                                        P{curClass, curClass}(forkNode, forkOutputRouter{f}) = 1.0;
+                                        P{curClass, aidxClass{nextaidx}}(forkOutputRouter{f}, serverStation{m}) = 1.0;
+                                    else
+                                        if isPreAndAct(aidx)
+                                            P{curClass, curClass}(serverStation{m},joinNode) = 1.0;
+                                            P{curClass, aidxClass{nextaidx}}(joinNode,serverStation{m}) = 1.0;
+                                        else
+                                            P{curClass, aidxClass{nextaidx}}(serverStation{m},serverStation{m}) = full(lqn.graph(aidx,nextaidx));
+                                        end
+                                    end
                                     serverStation{m}.setService(aidxClass{nextaidx}, lqn.hostdem{nextaidx});
                                 end
                             end
-                            jobPos = 2;
+                            jobPos = atServer;
                             curClass = aidxClass{nextaidx};
                             self.svctmap{idx}(end+1,:) = [idx, nextaidx, 2, aidxClass{nextaidx}.index];
                         else
                             for m=1:nreplicas
-                                P{curClass, aidxClass{nextaidx}}(serverStation{m},clientDelay) = full(lqn.graph(aidx,nextaidx));
+                                if isNextPrecFork(aidx)
+                                    % if next activity is a post-and
+                                    P{curClass, curClass}(serverStation{m}, forkNode) = 1.0;
+                                    f = find(nextaidx == nextaidxs);
+                                    P{curClass, curClass}(forkNode, forkOutputRouter{f}) = 1.0;
+                                    P{curClass, aidxClass{nextaidx}}(forkOutputRouter{f}, clientDelay) = 1.0;
+                                else
+                                    if isPreAndAct(aidx)
+                                        P{curClass, curClass}(serverStation{m},joinNode) = 1.0;
+                                        P{curClass, aidxClass{nextaidx}}(joinNode,clientDelay) = 1.0;
+                                    else
+                                        P{curClass, aidxClass{nextaidx}}(serverStation{m},clientDelay) = full(lqn.graph(aidx,nextaidx));
+                                    end
+                                end
                             end
-                            jobPos = 1;
+                            jobPos = atClient;
                             curClass = aidxClass{nextaidx};
                             clientDelay.setService(aidxClass{nextaidx}, self.svctproc{nextaidx});
                             self.svcupdmap{idx}(end+1,:) = [idx, nextaidx, 1, aidxClass{nextaidx}.index];
@@ -422,7 +416,7 @@ self.ensemble{idx} = model;
 
                         % At this point curClassRec is the last class in the
                         % recursive branch, which we now close with a reply
-                        if jobPos == 1
+                        if jobPos == atClient
                             P{curClass, aidxClass{tidx_caller}}(clientDelay,clientDelay) = 1;
                             curClass.completes = true;
                         else
@@ -435,5 +429,125 @@ self.ensemble{idx} = model;
                 end
             end
         end % nextaidx
+    end
+
+    function [P, jobPos, curClass] = routeSynchCall(P, jobPos, curClass)
+        switch jobPos
+            case atClient
+                if lqn.parent(lqn.callpair(cidx,2)) == idx
+                    % if a call to an entry of the server in this layer
+                    if callmean(cidx) < nreplicas
+                        P{curClass, cidxAuxClass{cidx}}(clientDelay,clientDelay) = 1 - callmean(cidx); % note that callmean(cidx) < nreplicas
+                        for m=1:nreplicas
+%                                if isNextPrecFork(aidx)
+%                                end
+%                                     % if next activity is a post-and
+%                                     P{curClass, curClass}(serverStation{m}, forkNode) = 1.0;
+%                                     f = find(nextaidx == nextaidxs);
+%                                     P{curClass, curClass}(forkNode, forkOutputRouter{f}) = 1.0;
+%                                     P{curClass, aidxClass{nextaidx}}(forkOutputRouter{f}, clientDelay) = 1.0;
+%                                 else
+                            P{curClass, cidxClass{cidx}}(clientDelay,serverStation{m}) = callmean(cidx) / nreplicas;
+                            P{cidxClass{cidx}, cidxClass{cidx}}(serverStation{m},clientDelay) = 1; % not needed, just to avoid leaving the Aux class disconnected
+                        end
+                        P{cidxAuxClass{cidx}, cidxClass{cidx}}(clientDelay,clientDelay) = 1; % not needed, just to avoid leaving the Aux class disconnected
+                    elseif callmean(cidx) == nreplicas
+                        for m=1:nreplicas
+                            P{curClass, cidxClass{cidx}}(clientDelay,serverStation{m}) = 1 / nreplicas;
+                            P{cidxClass{cidx}, cidxClass{cidx}}(serverStation{m},clientDelay) = 1;
+                        end
+                    else % callmean(cidx) > nreplicas
+                        for m=1:nreplicas
+                            P{curClass, cidxClass{cidx}}(clientDelay,serverStation{m}) = 1 / nreplicas;
+                            P{cidxClass{cidx}, cidxAuxClass{cidx}}(serverStation{m},clientDelay) = 1;
+                            P{cidxAuxClass{cidx}, cidxClass{cidx}}(clientDelay,serverStation{m}) = 1 - 1 / (callmean(cidx) / nreplicas);
+                        end
+                        P{cidxAuxClass{cidx}, cidxClass{cidx}}(clientDelay,clientDelay) = 1 / (callmean(cidx));
+                    end
+                    jobPos = atClient;
+                    clientDelay.setService(cidxClass{cidx}, Immediate.getInstance());
+                    for m=1:nreplicas
+                        serverStation{m}.setService(cidxClass{cidx}, callresidtproc{cidx});
+                        self.callupdmap{idx}(end+1,:) = [idx, cidx, model.getNodeIndex(serverStation{m}), cidxClass{cidx}.index];
+                        self.callresidtmap{idx}(end+1,:) = [idx, cidx, model.getNodeIndex(serverStation{m}), cidxClass{cidx}.index];
+                    end
+                    curClass = cidxClass{cidx};
+                else
+                    % if it is not a call to an entry of the server
+                    if callmean(cidx) < nreplicas
+                        P{curClass, cidxClass{cidx}}(clientDelay,clientDelay) = callmean(cidx)/nreplicas; % the mean number of calls is now embedded in the demand
+                        P{cidxClass{cidx}, cidxAuxClass{cidx}}(clientDelay,clientDelay) = 1; % the mean number of calls is now embedded in the demand
+                        P{curClass, cidxAuxClass{cidx}}(clientDelay,clientDelay) = 1 - callmean(cidx)/nreplicas; % the mean number of calls is now embedded in the demand
+                        curClass = cidxAuxClass{cidx};
+                    elseif callmean(cidx) == nreplicas
+                        P{curClass, cidxClass{cidx}}(clientDelay,clientDelay) = 1;
+                        curClass = cidxClass{cidx};
+                    else % callmean(cidx) > 1
+                        P{curClass, cidxClass{cidx}}(clientDelay,clientDelay) = 1; % the mean number of calls is now embedded in the demand
+                        P{cidxClass{cidx}, cidxAuxClass{cidx}}(clientDelay,clientDelay) = 1;% / (callmean(cidx)/nreplicas); % the mean number of calls is now embedded in the demand
+                        curClass = cidxAuxClass{cidx};
+                    end
+                    jobPos = atClient;
+                    clientDelay.setService(cidxClass{cidx}, callresidtproc{cidx});
+                    self.callupdmap{idx}(end+1,:) = [idx, cidx, 1, cidxClass{cidx}.index];
+                end
+            case atServer % job at server
+                if lqn.parent(lqn.callpair(cidx,2)) == idx
+                    % if it is a call to an entry of the server
+                    if callmean(cidx) < nreplicas
+                        for m=1:nreplicas
+                            P{curClass, cidxClass{cidx}}(serverStation{m},clientDelay) = 1 - callmean(cidx);
+                            P{curClass, cidxClass{cidx}}(serverStation{m},serverStation{m}) = callmean(cidx);
+                            serverStation{m}.setService(cidxClass{cidx}, callresidtproc{cidx});
+                        end
+                        jobPos = atClient;
+                        curClass = cidxAuxClass{cidx};
+                    elseif callmean(cidx) == nreplicas
+                        for m=1:nreplicas
+                            P{curClass, cidxClass{cidx}}(serverStation{m},serverStation{m}) = 1;
+                        end
+                        jobPos = atServer;
+                        curClass = cidxClass{cidx};
+                    else % callmean(cidx) > nreplicas
+                        for m=1:nreplicas
+                            P{curClass, cidxClass{cidx}}(serverStation{m},serverStation{m}) = 1;
+                            P{cidxClass{cidx}, cidxClass{cidx}}(serverStation{m},serverStation{m}) = 1 - 1 / (callmean(cidx));
+                            P{cidxClass{cidx}, cidxAuxClass{cidx}}(serverStation{m},clientDelay) = 1 / (callmean(cidx));
+                        end
+                        jobPos = atClient;
+                        curClass = cidxAuxClass{cidx};
+                    end
+                    for m=1:nreplicas
+                        serverStation{m}.setService(cidxClass{cidx}, callresidtproc{cidx});
+                        self.callupdmap{idx}(end+1,:) = [idx, cidx, model.getNodeIndex(serverStation{m}), cidxClass{cidx}.index];
+                        self.callresidtmap{idx}(end+1,:) = [idx, cidx, model.getNodeIndex(serverStation{m}), cidxClass{cidx}.index];
+                    end
+                else
+                    % if it is not a call to an entry of the server
+                    % callmean not needed since we switched
+                    % to ResidT to model service time at client
+                    if callmean(cidx) < nreplicas
+                        for m=1:nreplicas
+                            P{curClass, cidxClass{cidx}}(serverStation{m},clientDelay) = 1;
+                        end
+                        P{cidxClass{cidx}, cidxAuxClass{cidx}}(clientDelay,clientDelay) = 1;
+                        curClass = cidxAuxClass{cidx};
+                    elseif callmean(cidx) == nreplicas
+                        for m=1:nreplicas
+                            P{curClass, cidxClass{cidx}}(serverStation{m},clientDelay) = 1;
+                        end
+                        curClass = cidxClass{cidx};
+                    else % callmean(cidx) > nreplicas
+                        for m=1:nreplicas
+                            P{curClass, cidxClass{cidx}}(serverStation{m},clientDelay) = 1;
+                        end
+                        P{cidxClass{cidx}, cidxAuxClass{cidx}}(clientDelay,clientDelay) = 1;
+                        curClass = cidxAuxClass{cidx};
+                    end
+                    jobPos = atClient;
+                    clientDelay.setService(cidxClass{cidx}, callresidtproc{cidx});
+                    self.callupdmap{idx}(end+1,:) = [idx, cidx, 1, cidxClass{cidx}.index];
+                end
+        end
     end
 end

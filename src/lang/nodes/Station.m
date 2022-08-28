@@ -292,7 +292,10 @@ classdef Station < StatefulNode
 
             line_printf('\nNode: <strong>%s</strong>',self.getName);            
             line_printf('Scheduling: %s',self.schedStrategy);            
-            line_printf('Number of Servers: %d',self.numberOfServers);            
+            line_printf('Number of Servers: %d',self.numberOfServers);       
+            for r=1:length(self.output.outputStrategy)
+                line_printf('Routing %s: %s',self.model.classes{r}.name,self.output.outputStrategy{r}{2});
+            end
             %            self.input.summary;
             %            self.server.summary;
             %            self.output.summary;

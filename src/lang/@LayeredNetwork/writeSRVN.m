@@ -132,27 +132,27 @@ for p=1:length(self.hosts)
                 end
             end
             switch curActPrec.preType
-                case ActivityPrecedence.PRE_SEQ
+                case ActivityPrecedenceType.PRE_SEQ
                     preActDelim = '';
-                case ActivityPrecedence.PRE_AND
+                case ActivityPrecedenceType.PRE_AND
                     preActDelim = ' & ';
-                case ActivityPrecedence.PRE_OR
+                case ActivityPrecedenceType.PRE_OR
                     preActDelim = ' + ';
                 otherwise
                     line_error(mfilename,'Unsupported activity precedence.');
             end
             postActFields = curActPrec.postActs;
             switch curActPrec.postType
-                case ActivityPrecedence.POST_SEQ
+                case ActivityPrecedenceType.POST_SEQ
                     postActDelim = '';
-                case ActivityPrecedence.POST_AND
+                case ActivityPrecedenceType.POST_AND
                     postActDelim = ' & ';
-                case ActivityPrecedence.POST_OR
+                case ActivityPrecedenceType.POST_OR
                     for a=1:length(postActFields)
                         postActFields{a} = ['(',num2str(curActPrec.postParams(a)),') ',postActFields{a}];
                     end
                     postActDelim = ' + ';
-                case ActivityPrecedence.POST_LOOP
+                case ActivityPrecedenceType.POST_LOOP
                     for a=1:length(postActFields)-1
                         postActFields{a} = [num2str(curActPrec.postParams(a)),' * ',postActFields{a}];
                     end
@@ -162,7 +162,7 @@ for p=1:length(self.hosts)
             end
             prePrecSeg = join(preActFields,preActDelim);
             prePrecSeg = prePrecSeg{1};
-            if strcmp(curActPrec.preType,ActivityPrecedence.PRE_AND) && ~isempty(curActPrec.preParams)
+            if strcmp(curActPrec.preType,ActivityPrecedenceType.PRE_AND) && ~isempty(curActPrec.preParams)
                 prePrecSeg = [prePrecSeg,' (',num2str(curActPrec.preParams(1)),')'];
             end
             postPrecSeg = join(postActFields,postActDelim);

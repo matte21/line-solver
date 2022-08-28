@@ -1,5 +1,5 @@
-function [QN,UN,RN,TN,CN,XN,lG,runtime] = solver_mva_cache_analyzer(sn, options)
-% [Q,U,R,T,C,X,LG,RUNTIME] = SOLVER_MVA_CACHE_ANALYZER(QN, OPTIONS)
+function [QN,UN,RN,TN,CN,XN,lG,runtime,iter] = solver_mva_cache_analyzer(sn, options)
+% [Q,U,R,T,C,X,LG,RUNTIME,ITER] = SOLVER_MVA_CACHE_ANALYZER(QN, OPTIONS)
 
 % Copyright (c) 2012-2022, Imperial College London
 % All rights reserved.
@@ -10,6 +10,7 @@ RN = []; TN = [];
 CN = [];
 XN = zeros(1,sn.nclasses);
 lG = NaN;
+iter = NaN;
 
 source_ist = sn.nodeToStation(sn.nodetype == NodeType.Source);
 sourceRate = sn.rates(source_ist,:);

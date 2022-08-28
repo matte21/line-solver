@@ -1,5 +1,5 @@
-function [QNn,UNn,RNn,TNn,ANn] = getAvgNode(self, Q, U, R, T, A)
-% [QNN,UNN,RNN,TNN] = GETNODEAVG(Q, U, R, T, A)
+function [QNn,UNn,RNn,TNn,ANn,WNn] = getAvgNode(self, Q, U, R, T, A, W)
+% [QNN,UNN,RNN,TNN,ANn,WNn] = GETNODEAVG(Q, U, R, T, A, W)
 
 % Compute average utilizations at steady-state for all nodes
 if nargin == 1 % no parameter
@@ -13,14 +13,17 @@ elseif nargin == 2
     U=handlers{2};
     R=handlers{3};
     T=handlers{4};
+    A=handlers{5};
+    W=handlers{6};
 end
-[QN,UN,RN,TN] = self.getAvg(Q,U,R,T);
+[QN,UN,RN,TN,AN,WN] = self.getAvg(Q,U,R,T,A,W);
 if isempty(QN)
     QNn=[];
     UNn=[];
     RNn=[];
     TNn=[];
     ANn=[];
+    WNn=[];
     return
 end
 
@@ -35,6 +38,7 @@ UNn = zeros(I,R);
 RNn = zeros(I,R);
 TNn = zeros(I,R);
 ANn = zeros(I,R);
+WNn = zeros(I,R);
 
 for ist=1:M
     ind = sn.stationToNode(ist);
@@ -66,14 +70,14 @@ for ind=1:I
                 switch sn.nodetype(ind)
                     case NodeType.Cache
                         if any(find(r==sn.nodeparam{ind}.hitclass))
-                        TNn(ind, r) =  (sn.nodevisits{c}(ind,r) / sum(sn.visits{c}(refstat,inchain))) * sum(TN(refstat,inchain));
+                        TNn(ind, r) =  (sn.nodevisits{c}(ind,r) / sum(sn.visits{c}(sn.stationToStateful(refstat),inchain))) * sum(TN(refstat,inchain));
                         elseif any(find(r==sn.nodeparam{ind}.missclass))
-                        TNn(ind, r) =  (sn.nodevisits{c}(ind,r) / sum(sn.visits{c}(refstat,inchain))) * sum(TN(refstat,inchain));
+                        TNn(ind, r) =  (sn.nodevisits{c}(ind,r) / sum(sn.visits{c}(sn.stationToStateful(refstat),inchain))) * sum(TN(refstat,inchain));
                         else
-                        ANn(ind, r) =  (sn.nodevisits{c}(ind,r) / sum(sn.visits{c}(refstat,inchain))) * sum(TN(refstat,inchain));
+                        ANn(ind, r) =  (sn.nodevisits{c}(ind,r) / sum(sn.visits{c}(sn.stationToStateful(refstat),inchain))) * sum(TN(refstat,inchain));
                         end
                     otherwise
-                        ANn(ind, r) =  (sn.nodevisits{c}(ind,r) / sum(sn.visits{c}(refstat,inchain))) * sum(TN(refstat,inchain));
+                        ANn(ind, r) =  (sn.nodevisits{c}(ind,r) / sum(sn.visits{c}(sn.stationToStateful(refstat),inchain))) * sum(TN(refstat,inchain));
                 end
                 %end
             end
@@ -86,8 +90,8 @@ for ind=1:I
     for c = 1:C
         inchain = sn.inchain{c};
         for r = inchain
-            anystat = find(sn.visits{c}(:,r));
-            if ~isempty(anystat)
+            anystateful = find(sn.visits{c}(:,r));
+            if ~isempty(anystateful)
                 if sn.nodetype(ind) ~= NodeType.Sink && sn.nodetype(ind) ~= NodeType.Join
                     for s = inchain
                         for jnd=1:I
@@ -123,5 +127,4 @@ end
 
 ANn(isnan(ANn)) = 0;
 TNn(isnan(TNn)) = 0;
-
 end

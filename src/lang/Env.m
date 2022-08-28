@@ -24,6 +24,12 @@ classdef Env < Ensemble
             self.envGraph = digraph();
             self.envGraph.Nodes.Model = cell(0);
             self.envGraph.Nodes.Type = cell(0);
+            try
+                jline.lang.distributions.Immediate();
+            catch
+                javaaddpath(which('linesolver.jar'));
+                import jline.*;
+            end
         end
         
         function name = addStage(self, name, type, model)            

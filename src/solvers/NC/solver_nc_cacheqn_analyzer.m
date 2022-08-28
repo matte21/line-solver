@@ -1,5 +1,5 @@
-function [QN,UN,RN,TN,CN,XN,lG,hitprob,missprob,runtime] = solver_nc_cacheqn_analyzer(self, options)
-% [Q,U,R,T,C,X,LG,RUNTIME] = SOLVER_NC_CACHEQN_ANALYZER(SELF, OPTIONS)
+function [QN,UN,RN,TN,CN,XN,lG,hitprob,missprob,runtime,it] = solver_nc_cacheqn_analyzer(self, options)
+% [Q,U,R,T,C,X,LG,RUNTIME,ITER] = SOLVER_NC_CACHEQN_ANALYZER(SELF, OPTIONS)
 
 % Copyright (c) 2012-2022, Imperial College London
 % All rights reserved.
@@ -98,9 +98,14 @@ for it=1:options.iter_max
 
     nodevisits = cellsum(nodevisits);
     for ind=caches
-        for r=inputClass
+        for r=inputClass            
             c = find(sn.chains(:,r));
-            lambda(r) = XN(c) * nodevisits(ind,r) / nodevisits(sn.refstat(r),sn.refclass(c));
+            inchain = find(sn.chains(c,:));
+            if sn.refclass(c)>0
+                lambda(r) = sum(XN(inchain)) * nodevisits(ind,r) / nodevisits(sn.stationToNode(sn.refstat(r)),sn.refclass(c));
+            else
+                lambda(r) = sum(XN(inchain)) * nodevisits(ind,r) / nodevisits(sn.stationToNode(sn.refstat(r)),r);
+            end
         end
     end
     if norm(lambda-lambda_1,1) < options.iter_tol

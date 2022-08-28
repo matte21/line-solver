@@ -6,8 +6,8 @@ fork1 = Fork(model,'Fork1');
 fork1.setTasksPerLink(1);
 fork11 = Fork(model,'Fork1_1');
 fork11.setTasksPerLink(2);
-join1 = Join(model,'Join1');
-join11 = Join(model,'Join1_1');
+join1 = Join(model,'Join1',fork1);
+join11 = Join(model,'Join1_1',fork11);
 queue1 = Queue(model,'Queue1',SchedStrategy.PS);
 queue2 = Queue(model,'Queue2',SchedStrategy.PS);
 
@@ -43,12 +43,17 @@ P{jobclass2,jobclass2}(join1,join11) = 1.0;
 P{jobclass2,jobclass2}(join11,delay) = 1.0;
 
 model.link(P);
+
+
 solver = {};
 solver{end+1} = SolverJMT(model,'seed',23000);
+solver{end+1} = SolverMVA(model);
 
 AvgTable = {};
-AvgTable{end+1} = solver{end}.getAvgTable;
-AvgTable{end}
+for s=1:length(solver)
+    AvgTable{end+1} = solver{s}.getAvgTable;
+    AvgTable{end}
+end
 
 %% Corresponding open model
 % model = Network('model');

@@ -49,7 +49,7 @@ for c=1:nchains
             visits{c}(i,inchain{c}(k)) = alpha((i-1)*length(inchain{c})+k);
         end
     end
-    visits{c} = visits{c} / sum(visits{c}(refstat(inchain{c}(1)),inchain{c}));
+    visits{c} = visits{c} / sum(visits{c}(sn.stationToStateful(refstat(inchain{c}(1))),inchain{c}));
     visits{c} = abs(visits{c});
 end
 
@@ -74,7 +74,7 @@ for c=1:nchains
             nodevisits{c}(i,inchain{c}(k)) = nodes_alpha((i-1)*length(inchain{c})+k);
         end
     end
-    nodevisits{c} = nodevisits{c} / sum(nodevisits{c}(refstat(inchain{c}(1)),inchain{c}));
+    nodevisits{c} = nodevisits{c} / sum(nodevisits{c}(sn.statefulToNode(refstat(inchain{c}(1))),inchain{c}));
     nodevisits{c}(nodevisits{c}<0) = 0; % remove small numerical perturbations
 end
 

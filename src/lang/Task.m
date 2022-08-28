@@ -42,6 +42,13 @@ classdef Task < LayeredNetworkElement
             end
             self.replication = 1;
             self.multiplicity = multiplicity;
+            switch scheduling
+                case SchedStrategy.INF
+                if isfinite(multiplicity)
+                    line_warning(mfilename,'Finite multiplicity is not allowed with INF scheduling. Setting it to INF.');
+                    self.multiplicity = Inf;
+                end
+            end
             self.scheduling = scheduling;
             self.setThinkTime(thinkTime);
             self.parent = [];

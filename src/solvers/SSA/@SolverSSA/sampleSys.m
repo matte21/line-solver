@@ -1,4 +1,4 @@
-function tranSysState = sampleSys(self, numSamples)
+function tranSysState = sampleSys(self, numSamples, markActivePassive)
 % TRANSYSSTATE = SAMPLESYS(NUMSAMPLES)
 options = self.getOptions;
 
@@ -7,6 +7,11 @@ if nargin>=2 %exist('numSamples','var')
 else
     numSamples = options.samples;
 end
+
+if nargin<3
+    markActivePassive = false;
+end
+
 switch options.method
     case {'default','serial'}
         [~, tranSystemState, tranSync] = self.runAnalyzer(options);
@@ -41,5 +46,23 @@ switch options.method
         line_error(mfilename,'sampleSys is not available in SolverSSA with the chosen method.');
 end
 
+if markActivePassive
+    apevent = cell(1,length(tranSysState.t)-1);
+    for ti = 1:length(apevent)
+        apevent{ti} = struct('active',[],'passive',[]);
+    end
+    for e=1:length(tranSysState.event)
+        ti = find(tranSysState.event{e}.t == tranSysState.t);
+        if ~isempty(ti) && ti<length(tranSysState.t)
+            switch tranSysState.event{e}.event
+                case EventType.ID_ARV
+                    apevent{ti}.passive = tranSysState.event{e};
+                otherwise
+                    apevent{ti}.active = tranSysState.event{e};
+            end
+        end
+    end
+    tranSysState.event = apevent';
+end
 
 end

@@ -11,7 +11,7 @@ if nargin < 3
     R = self.getAvgRespTHandles;
     T = self.getAvgTputHandles;
 end
-[~,~,RN,TN] = self.getAvg([],[],R,T);
+[~,~,RN,TN] = self.getAvg([],[],R,T,[],[]);
 
 if self.model.hasFork
     if self.model.hasOpenClasses
@@ -47,7 +47,7 @@ if ~(self.model.hasFork && self.model.hasJoin)
             CNclass(r)=0;
             for i=1:sn.nstations
                 if ~isempty(RN) && ~(isinf(sn.njobs(r)) && i==sn.refstat(r)) % not empty and not source
-                    CNclass(r) = CNclass(r) + sn.visits{c}(i,r)*RN(i,r)/sn.visits{c}(sn.refstat(r),r);
+                    CNclass(r) = CNclass(r) + sn.visits{c}(sn.stationToStateful(i),r)*RN(i,r)/sn.visits{c}(sn.stationToStateful(sn.refstat(r)),r);
                 end
             end
         end
@@ -60,11 +60,11 @@ for c=1:sn.nchains
     for i=1:sn.nstations
         if sn.refclass(c)>0
             for k=intersect(find(sn.refclass), inchain) % for all classes within the chain (a class belongs to a single chain, the reference station must be identical for all classes within a chain )
-                alpha(i,k) = alpha(i,k) + sn.visits{c}(i,k)/sum(sn.visits{c}(sn.refstat(k),completingclasses));
+                alpha(i,k) = alpha(i,k) + sn.visits{c}(sn.stationToStateful(i),k)/sum(sn.visits{c}(sn.stationToStateful(sn.refstat(k)),completingclasses));
             end
         else
             for k=inchain % for all classes within the chain (a class belongs to a single chain, the reference station must be identical for all classes within a chain )
-                alpha(i,k) = alpha(i,k) + sn.visits{c}(i,k)/sum(sn.visits{c}(sn.refstat(k),completingclasses));
+                alpha(i,k) = alpha(i,k) + sn.visits{c}(i,k)/sum(sn.visits{c}(sn.stationToStateful(sn.refstat(k)),completingclasses));
             end
         end
     end

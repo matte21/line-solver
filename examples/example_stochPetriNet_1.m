@@ -2,125 +2,145 @@ if ~isoctave(), clearvars -except exampleName; end
 model = Network('model');
 
 %% Nodes
-node{1} = Source(model,'Source');
-node{2} = Sink(model,'Sink');
-node{3} = Place(model, 'P1');
-node{4} = Place(model, 'P2');
-node{5} = Place(model, 'P3');
-node{6} = Place(model, 'P4');
-node{7} = Place(model, 'P5');
-node{8} = Place(model, 'P6');
-node{9} = Place(model, 'P7');
+source = Source(model,'Source');
+sink = Sink(model,'Sink');
 
-node{10} = Transition(model, 'T1');
-node{11} = Transition(model, 'T2');
-node{12} = Transition(model, 'T3');
-node{13} = Transition(model, 'T4');
-node{14} = Transition(model, 'T5');
-node{15} = Transition(model, 'T6');
-node{16} = Transition(model, 'T7');
+P{1} = Place(model, 'P1');
+P{2} = Place(model, 'P2');
+P{3} = Place(model, 'P3');
+P{4} = Place(model, 'P4');
+P{5} = Place(model, 'P5');
+P{6} = Place(model, 'P6');
+P{7} = Place(model, 'P7');
+
+T{1} = Transition(model, 'T1');
+T{2} = Transition(model, 'T2');
+T{3} = Transition(model, 'T3');
+T{4} = Transition(model, 'T4');
+T{5} = Transition(model, 'T5');
+T{6} = Transition(model, 'T6');
+T{7} = Transition(model, 'T7');
+
+T{8} = Transition(model, 'T8');
 
 % Source
 jobclass{1} = OpenClass(model, 'Class1', 0);
-node{1}.setArrival(jobclass{1}, Exp(1));
+source.setArrival(jobclass{1}, Exp.fitMean(1));
 
-%% Routing 
+% Routing 
 M = model.getNumberOfStations();
 K = model.getNumberOfClasses();
 
-P = cell(K,K);
+R = model.initRoutingMatrix(); % initialize routing matrix 
 
-P{1,1} = [0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0;
-          0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0;
-          0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0;
-          0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0;
-          0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0;
-          0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0;
-          0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0;
-          0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0;
-          0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1;
-          0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0;
-          0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0;
-          0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0;
-          0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0;
-          0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0;
-          0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0;
-          0,1,1,0,0,0,1,0,0,0,0,0,0,0,0,0;];
-model.link(P);
+R{1,1}(source,P{1}) = 1; % (Source,Class1) -> (P1,Class1)
+
+R{1,1}(P{1},T{1}) = 1; % (P1,Class1) -> (T1,Class1)
+R{1,1}(P{2},T{2}) = 1; % (P2,Class1) -> (T2,Class1)
+R{1,1}(P{2},T{3}) = 1; % (P2,Class1) -> (T3,Class1)
+R{1,1}(P{3},T{4}) = 1; % (P3,Class1) -> (T4,Class1)
+R{1,1}(P{4},T{5}) = 1; % (P4,Class1) -> (T5,Class1)
+R{1,1}(P{5},T{4}) = 1; % (P5,Class1) -> (T4,Class1)
+R{1,1}(P{5},T{5}) = 1; % (P5,Class1) -> (T5,Class1)
+R{1,1}(P{6},T{5}) = 1; % (P6,Class1) -> (T5,Class1)
+R{1,1}(P{6},T{6}) = 1; % (P6,Class1) -> (T6,Class1)
+R{1,1}(P{7},T{7}) = 1; % (P7,Class1) -> (T7,Class1)
+
+R{1,1}(T{1},P{2}) = 1; % (T1,Class1) -> (P2,Class1)
+R{1,1}(T{2},P{3}) = 1; % (T2,Class1) -> (P3,Class1)
+R{1,1}(T{3},P{4}) = 1; % (T3,Class1) -> (P4,Class1)
+R{1,1}(T{4},P{5}) = 1; % (T4,Class1) -> (P5,Class1)
+R{1,1}(T{4},P{6}) = 1; % (T4,Class1) -> (P6,Class1)
+R{1,1}(T{5},P{7}) = 1; % (T5,Class1) -> (P7,Class1)
+R{1,1}(T{6},P{1}) = 1; % (T6,Class1) -> (P1,Class1)
+R{1,1}(T{7},sink) = 1; % (T7,Class1) -> (Sink,Class1)
+R{1,1}(T{7},P{1}) = 1; % (T7,Class1) -> (P1,Class1)
+R{1,1}(T{7},P{5}) = 1; % (T7,Class1) -> (P5,Class1)
+
+R{1,1}(P{4},T{8}) = 1; % (P4,Class1) -> (T5,Class1)
+R{1,1}(T{8},sink) = 1; % (T8,Class1) -> (Sink,Class1)
+
+model.link(R);
 
 %% Parameterisation 
 
-
 % T1
-node{10}.addMode('Mode1');
-node{10}.init();
-node{10}.setDistribution(1,Exp(4));
-node{10}.setEnablingConditions(1,jobclass{1},node{3},1);
-node{10}.setFiringOutcome(1,jobclass{1},node{4},1);
+T{1}.addMode('Mode1');
+T{1}.init();
+T{1}.setDistribution(1,Exp(4));
+T{1}.setEnablingConditions(1,jobclass{1},P{1},1);
+T{1}.setFiringOutcome(1,jobclass{1},P{2},1);
 
 % T2
-node{11}.addMode('Mode1');
-node{11}.init();
-node{11}.setEnablingConditions(1,jobclass{1},node{4},1);
-node{11}.setFiringOutcome(1,jobclass{1},node{5},1);
-node{11}.setTimingStrategy(1,TimingStrategy.IMMEDIATE);
-node{11}.setFiringPriorities(1,1);
-node{11}.setFiringWeights(1,1);
+T{2}.addMode('Mode1');
+T{2}.init();
+T{2}.setEnablingConditions(1,jobclass{1},P{2},1);
+T{2}.setFiringOutcome(1,jobclass{1},P{3},1);
+T{2}.setTimingStrategy(1,TimingStrategy.IMMEDIATE);
+T{2}.setFiringPriorities(1,1);
+T{2}.setFiringWeights(1,1);
 
 % T3
-node{12}.addMode('Mode1');
-node{12}.init();
-node{12}.setEnablingConditions(1,jobclass{1},node{4},1);
-node{12}.setFiringOutcome(1,jobclass{1},node{6},1);
-node{12}.setTimingStrategy(1,TimingStrategy.IMMEDIATE);
-node{12}.setFiringPriorities(1,1);
-% node{12}.setFiringWeights(1,0.6);
-node{12}.setFiringPriorities(1,1);
+T{3}.addMode('Mode1');
+T{3}.init();
+T{3}.setEnablingConditions(1,jobclass{1},P{2},1);
+T{3}.setFiringOutcome(1,jobclass{1},P{4},1);
+T{3}.setTimingStrategy(1,TimingStrategy.IMMEDIATE);
+T{3}.setFiringPriorities(1,1);
+% T{3}.setFiringWeights(1,0.6);
+T{3}.setFiringPriorities(1,1);
 
 % T4
-node{13}.addMode('Mode1');
-node{13}.init();
-node{13}.setEnablingConditions(1,jobclass{1},node{5},1);
-node{13}.setEnablingConditions(1,jobclass{1},node{7},1);
-node{13}.setFiringOutcome(1,jobclass{1},node{7},1);
-node{13}.setFiringOutcome(1,jobclass{1},node{8},1);
-node{13}.setTimingStrategy(1,TimingStrategy.IMMEDIATE);
-node{13}.setFiringPriorities(1,1);
+T{4}.addMode('Mode1');
+T{4}.init();
+T{4}.setEnablingConditions(1,jobclass{1},P{3},1);
+T{4}.setEnablingConditions(1,jobclass{1},P{5},1);
+T{4}.setFiringOutcome(1,jobclass{1},P{5},1);
+T{4}.setFiringOutcome(1,jobclass{1},P{6},1);
+T{4}.setTimingStrategy(1,TimingStrategy.IMMEDIATE);
+T{4}.setFiringPriorities(1,1);
 
 % T5
-node{14}.addMode('Mode1');
-node{14}.init();
-node{14}.setEnablingConditions(1,jobclass{1},node{6},1);
-node{14}.setEnablingConditions(1,jobclass{1},node{7},1);
-node{14}.setFiringOutcome(1,jobclass{1},node{9},1);
-node{14}.setInhibitingConditions(1,jobclass{1},node{8},1);
-node{14}.setTimingStrategy(1,TimingStrategy.IMMEDIATE);
-node{14}.setFiringPriorities(1,1);
+T{5}.addMode('Mode1');
+T{5}.init();
+T{5}.setEnablingConditions(1,jobclass{1},P{4},1);
+T{5}.setEnablingConditions(1,jobclass{1},P{5},1);
+T{5}.setFiringOutcome(1,jobclass{1},P{7},1);
+T{5}.setInhibitingConditions(1,jobclass{1},P{6},1);
+T{5}.setTimingStrategy(1,TimingStrategy.IMMEDIATE);
+T{5}.setFiringPriorities(1,1);
 
 % T6
-node{15}.addMode('Mode1');
-node{15}.init();
-node{15}.setDistribution(1,Erlang(2,2));
-node{15}.setEnablingConditions(1,jobclass{1},node{8},1);
-node{15}.setFiringOutcome(1,jobclass{1},node{3},1);
+T{6}.addMode('Mode1');
+T{6}.init();
+T{6}.setDistribution(1,Erlang(2,2));
+T{6}.setEnablingConditions(1,jobclass{1},P{6},1);
+T{6}.setFiringOutcome(1,jobclass{1},P{1},1);
 
 % T7
-node{16}.addMode('Mode1');
-node{16}.init();
-node{16}.setDistribution(1,Exp(2));
-node{16}.setEnablingConditions(1,jobclass{1},node{9},1);
-node{16}.setFiringOutcome(1,jobclass{1},node{3},1);
-node{16}.setFiringOutcome(1,jobclass{1},node{7},1);
+T{7}.addMode('Mode1');
+T{7}.init();
+T{7}.setDistribution(1,Exp(2));
+T{7}.setEnablingConditions(1,jobclass{1},P{7},1);
+T{7}.setFiringOutcome(1,jobclass{1},P{1},1);
+T{7}.setFiringOutcome(1,jobclass{1},P{5},1);
+
+% T8
+T{8}.addMode('Mode1');
+T{8}.init();
+T{8}.setDistribution(1,Exp(2));
+T{8}.setEnablingConditions(1,jobclass{1},P{4},1);
+T{8}.setFiringOutcome(1,jobclass{1},sink,1);
 
 %% Set Initial State    
-node{1}.setState(0);
-node{3}.setState(2);
-node{4}.setState(0);
-node{5}.setState(0);
-node{6}.setState(0);
-node{7}.setState(1);
-node{8}.setState(0);
-node{9}.setState(0);
+source.setState(0);
+P{1}.setState(2);
+P{2}.setState(0);
+P{3}.setState(0);
+P{4}.setState(0);
+P{5}.setState(1);
+P{6}.setState(0);
+P{7}.setState(0);
 
 state = model.getState;
 
@@ -130,6 +150,7 @@ options.keep=2;
 options.verbose=1;
 options.cutoff = 10;
 options.seed = 23000;
+%options.samples = 100;
 
 % options.hide_immediate=1;
 % options.is_pn=1;
@@ -141,6 +162,7 @@ options.seed = 23000;
 % solver = SolverCTMC(model, options);
 % solver.getAvgTable();
 
-solver = SolverJMT(model,options);
-AvgTable{1}=solver.getAvgTable();
+solver = {};
+solver{1} = SolverJMT(model,options);
+AvgTable{1} = solver{1}.getAvgTable();
 AvgTable{1}

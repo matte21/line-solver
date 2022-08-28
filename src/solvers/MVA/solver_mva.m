@@ -115,6 +115,12 @@ for k=1:M
     end
 end
 
+Vsink = cellsum(sn.nodevisits);
+Vsink = Vsink(find(sn.nodetype==NodeType.ID_SINK),:);
+for r=find(isinf(Nchain)) % open classes
+    Xchain(r) = Vsink(r) ./ STchain(refstatchain(r),r);
+end
+
 Rchain = Qchain./Tchain;
 Xchain(~isfinite(Xchain))=0;
 Uchain(~isfinite(Uchain))=0;

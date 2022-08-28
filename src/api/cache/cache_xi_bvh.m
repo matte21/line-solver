@@ -17,13 +17,13 @@ z_old=zeros(1,h+1);
 z=ones(1,h+1);
 
 T=tic;
-while (max(abs(z-z_old)>10^(-12)*max(abs(z_old))))
+while (max(abs(z-z_old)>10^(-12)*max(abs(z_old))))    
     if toc(T)>tmax
         break
     end
     z_old=z;
     temp=n*z*pp;
-    for i=1:h % update z(i+1)
+    for i=1:h % update z(i+1)        
         a=temp-n*z(i+1)*pp(i+1,:);
         Fi=sum(pp(i+1,:)./(n*pp(i+1,:)+a)); %Fi(1)
         if (Fi > f(i))

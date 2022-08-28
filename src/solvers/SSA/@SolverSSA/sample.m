@@ -1,7 +1,12 @@
-function sampleNodeState = sample(self, node, numSamples)
+function sampleNodeState = sample(self, node, numSamples, markActivePassive)
 % TRANNODESTATE = SAMPLE(NODE)
 
 options = self.getOptions;
+
+if nargin<4
+    markActivePassive = false;
+end
+
 if nargin>=3 %exist('numSamples','var')
     options.samples = numSamples;
 else
@@ -11,6 +16,7 @@ switch options.method
     case {'default','serial'}
         [~, tranSystemState, tranSync] = self.runAnalyzer(options);
         event = tranSync;
+        sn = self.getStruct;
         isf = sn.nodeToStateful(node.index);
         sampleNodeState = struct();
         sampleNodeState.handle = node;
@@ -34,5 +40,25 @@ switch options.method
     otherwise
         line_error(mfilename,'sample is not available in SolverSSA with the chosen method.');
 end
-sampleNodeState.t = [0; sampleNodeState.t(2:end)];
+%sampleNodeState.t = [0; sampleNodeState.t(2:end)];
+
+if markActivePassive
+    apevent = cell(1,length(sampleNodeState.t)-1);
+    for ti = 1:length(apevent)
+        apevent{ti} = struct('active',[],'passive',[]);
+    end
+    for e=1:length(sampleNodeState.event)
+        ti = find(sampleNodeState.event{e}.t == sampleNodeState.t);
+        if ~isempty(ti) && ti<length(sampleNodeState.t)
+        switch sampleNodeState.event{e}.event
+            case EventType.ID_ARV
+                apevent{ti}.passive = sampleNodeState.event{e};
+            otherwise
+                apevent{ti}.active = sampleNodeState.event{e};
+        end
+        end
+    end
+    sampleNodeState.event = apevent';
+end
+
 end

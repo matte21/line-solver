@@ -80,10 +80,10 @@ fprintf(1,'\n\nExample: <strong>example_mixedModel_2</strong>\n');
 clear; example_mixedModel_2; fprintf(1,'Pausing...'); pause(3.0);
 
 %%
-fprintf(1,'\n<strong>RUNNING: example_sdRouting_*</strong>');
+fprintf(1,'\n<strong>RUNNING: example_stateDependentRouting_*</strong>');
 fprintf(1,'This example analyzes round-robin scheduling.\n');
 fprintf(1,'\n\nExample: <strong>example_sdRouting_1</strong>\n');
-clear; example_sdRouting_1; fprintf(1,'Pausing...'); pause(3.0);
+clear; example_stateDependentRouting_1; fprintf(1,'Pausing...'); pause(3.0);
 
 %%
 fprintf(1,'\n<strong>RUNNING: example_stateProbabilities</strong>');

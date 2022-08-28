@@ -2,12 +2,12 @@ if ~isoctave(), clearvars -except exampleName; end
 model = LayeredNetwork('LQN1');
 
 % definition of processors, tasks and entries
-P1 = Processor(model, 'P1', 1, SchedStrategy.INF);
+P1 = Processor(model, 'P1', Inf, SchedStrategy.INF);
 T1 = Task(model, 'T1', 1, SchedStrategy.REF).on(P1);
 E1 = Entry(model, 'E1').on(T1);
 
-P2 = Processor(model, 'P2', 1, SchedStrategy.INF);
-T2 = Task(model, 'T2', 1, SchedStrategy.INF).on(P2);
+P2 = Processor(model, 'P2', Inf, SchedStrategy.INF);
+T2 = Task(model, 'T2', Inf, SchedStrategy.INF).on(P2);
 E2 = Entry(model, 'E2').on(T2);
 
 % definition of activities

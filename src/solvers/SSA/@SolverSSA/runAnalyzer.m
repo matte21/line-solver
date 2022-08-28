@@ -17,11 +17,11 @@ switch options.method
     case 'taussa'
         [X,U,Q,R,T,C, tranSysState, tranSync] = solver_ssa_analyzer_taussa(self.model, options, 0, 0.0);
         runtime = toc(T0);
-        self.setAvgResults(Q,U,R,T,C,X,runtime);
+        self.setAvgResults(Q,U,R,T,[],[],C,X,runtime);
     case 'tauleap'
         [X,U,Q,R,T,C, tranSysState, tranSync] = solver_ssa_analyzer_taussa(self.model, options, 1, 0.0);
         runtime = toc(T0);
-        self.setAvgResults(Q,U,R,T,C,X,runtime);
+        self.setAvgResults(Q,U,R,T,[],[],C,X,runtime);
     otherwise
         sn = getStruct(self);
 
@@ -39,7 +39,7 @@ switch options.method
             end
         end
         runtime = toc(T0);
-        self.setAvgResults(Q,U,R,T,C,X,runtime);
+        self.setAvgResults(Q,U,R,T,[],[],C,X,runtime);
         self.result.space = sn.space;
 end
 end

@@ -34,5 +34,5 @@ model.reset;
 solver{2} = SolverSSA(model,'samples',1e4,'verbose',true,'method','serial','seed',1);
 AvgTable{2} = solver{2}.getAvgNodeTable; AvgTable{2}
 
-%solver{3} = SolverMVA(model,'seed',1);
-%AvgTable{3} = solver{3}.getAvgNodeTable; AvgTable{3}
+solver{3} = SolverMVA(model,'seed',1);
+AvgTable{3} = solver{3}.getAvgNodeTable; AvgTable{3}

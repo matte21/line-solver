@@ -32,6 +32,15 @@ classdef Fork < Node
             
             self.output.tasksPerLink = nTasks;
         end
+        
+        function summary(self)
+            % SUMMARY()
+
+            line_printf('\nNode: <strong>%s</strong>',self.getName);            
+            for r=1:length(self.output.outputStrategy)
+                line_printf('Routing %s: %s',self.model.classes{r}.name,self.output.outputStrategy{r}{2});
+            end
+        end
     end
     
 end

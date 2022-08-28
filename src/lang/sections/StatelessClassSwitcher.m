@@ -3,6 +3,10 @@ classdef StatelessClassSwitcher < ClassSwitcher
     %
     % Copyright (c) 2012-2022, Imperial College London
     % All rights reserved.
+
+    properties 
+        csMatrix;
+    end
     
     methods
         %Constructor
@@ -10,6 +14,7 @@ classdef StatelessClassSwitcher < ClassSwitcher
             % SELF = STATELESSCLASSSWITCHER(CLASSES, CSMATRIX)
             
             self@ClassSwitcher(classes, 'StatelessClassSwitcher');
+            self.csMatrix = csMatrix;
             % this is slower than indexing the matrix, but it is a small
             % matrix anyway
             self.csFun = @(r,s,state,statep) csMatrix(r,s); % state parameter if present is ignored

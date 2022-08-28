@@ -9,11 +9,12 @@ classdef Join < Station
     
     properties
         joinStrategy;
+        joinOf;
     end
     
     methods
         %Constructor
-        function self = Join(model, name)
+        function self = Join(model, name, fork)
             % SELF = JOIN(MODEL, NAME)
             
             self@Station(name);
@@ -24,6 +25,7 @@ classdef Join < Station
                 self.server = ServiceTunnel();
                 self.numberOfServers = Inf;
                 self.setModel(model);
+                self.joinOf = fork;
                 addNode(model, self);
             end
             %             if ~exist('joinstrategy','var')
@@ -54,6 +56,15 @@ classdef Join < Station
             % SELF = SETPROBROUTING(CLASS, DESTINATION, PROBABILITY)
             
             setRouting(self, class, RoutingStrategy.PROB, destination, probability);
+        end
+
+        function summary(self)
+            % SUMMARY()
+
+            line_printf('\nNode: <strong>%s</strong>',self.getName);            
+            for r=1:length(self.output.outputStrategy)
+                line_printf('Routing %s: %s\n', self.model.classes{r}.name, self.output.outputStrategy{r}{2});
+            end
         end
         
     end

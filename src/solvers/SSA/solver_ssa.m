@@ -226,6 +226,7 @@ while samples_collected < options.samples && cur_time <= options.timespan(2)
     SSq(:,samples_collected) = cell2mat(nir');
     
     samples_collected = samples_collected + 1;
+    stateCell_1 = stateCell;
     stateCell = newStateCell{enabled_sync{firing_ctr}};
     if options.verbose
         if samples_collected == 1e2
@@ -247,8 +248,9 @@ end
 %output = output((transient+1):end,:);
 tranState = tranState';
 
+
 [u,ui,uj] = unique(tranState(:,2:end),'rows');
-statesz = cellfun(@length, stateCell)';
+statesz = cellfun(@length, stateCell_1)';
 tranSysState = cell(1,length(stateCell)+1);
 tranSysState{1} = cumsum(tranState(:,1));
 for j=1:length(statesz)

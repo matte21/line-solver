@@ -12,6 +12,7 @@ classdef Exp < MarkovianDistribution
             self@MarkovianDistribution('Exponential', 1);
             setParam(self, 1, 'lambda', lambda);
             self.immediate = (1/lambda) < Distrib.Zero;
+            self.obj = jline.lang.distributions.Exp(lambda);
         end
             
         function X = sample(self, n)
@@ -89,6 +90,7 @@ classdef Exp < MarkovianDistribution
             % UPDATERATE(SELF,RATE)            
             % Update rate parameter
             self.params{1}.paramValue = RATE;
+            self.mean = 1/RATE;
             self.immediate = 1/RATE <  Distrib.Zero;
         end
         
@@ -99,6 +101,7 @@ classdef Exp < MarkovianDistribution
                 line_warning(mfilename,'Warning: the exponential distribution cannot fit SCV != 1, changing SCV to 1.');
             end
             self.params{1}.paramValue = 1 / MEAN;
+            self.mean = MEAN;
             self.immediate = NaN;
         end
         

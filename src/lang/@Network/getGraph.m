@@ -10,7 +10,11 @@ name = {}; sched = {}; type = {}; nservers = [];
 for i=1:M
     name{end+1} = self.nodes{i}.name;
     type{end+1} = class(self.nodes{i});
-    sched{end+1} = self.nodes{i}.schedStrategy;
+    if ~isa(self.nodes{i},'Join')
+        sched{end+1} = self.nodes{i}.schedStrategy;
+    else
+        sched{end+1} = '';
+    end
     if isa(self.nodes{i},'Station')
         nservers(end+1) = self.nodes{i}.getNumberOfServers;
     else
@@ -37,7 +41,11 @@ name = {}; sched = {}; type = {}; jobs = zeros(I,1); nservers = [];
 for i=1:I
     name{end+1} = self.stations{i}.name;
     type{end+1} = class(self.stations{i});
-    sched{end+1} = self.stations{i}.schedStrategy;
+    if ~isa(self.stations{i},'Join')
+        sched{end+1} = self.stations{i}.schedStrategy;
+    else
+        sched{end+1} = '';
+    end
     for k=1:K
         if sn.refstat(k)==i
             jobs(i) = jobs(i) + sn.njobs(k);

@@ -1,5 +1,5 @@
-function [Q,U,R,T,C,X,lG] = solver_mvald(sn,options)
-% [Q,U,R,T,C,X,LG] = SOLVER_MVALD(SN, OPTIONS)
+function [Q,U,R,T,C,X,lG,iter] = solver_mvald(sn,options)
+% [Q,U,R,T,C,X,LG,iter] = SOLVER_MVALD(SN, OPTIONS)
 
 % Copyright (c) 2012-2022, Imperial College London
 % All rights reserved.
@@ -47,4 +47,5 @@ lG = NaN;
 
 %% This is likely wrong as it uses Little's law for the utilization computation
 [Q,U,R,T,C,X] = snDeaggregateChainResults(sn, Lchain, [], STchain, Vchain, alpha, [], Uchain, Rchain, Tchain, [], Xchain);
+iter = 1;
 end

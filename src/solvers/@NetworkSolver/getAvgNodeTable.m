@@ -1,22 +1,22 @@
-function [AvgTable,QT,UT,RT,WT,TT,AT] = getAvgNodeTable(self,Q,U,R,T,A,keepDisabled)
-% [AVGTABLE,QT,UT,RT,WT,TT] = GETNODEAVGTABLE(SELF,Q,U,R,T,KEEPDISABLED)
+function [AvgTable,QT,UT,RT,WT,TT,AT] = getAvgNodeTable(self,Q,U,R,T,A,W,keepDisabled)
+% [AVGTABLE,QT,UT,RT,WT,TT] = GETNODEAVGTABLE(SELF,Q,U,R,T,A,W,KEEPDISABLED)
 % Return table of average node metrics
 %
 % Copyright (c) 2012-2022, Imperial College London
 % All rights reserved.
-if nargin<7 %~exist('keepDisabled','var')
+if nargin<8 %~exist('keepDisabled','var')
     keepDisabled = false;
 end
 sn = self.model.getStruct;
 I = sn.nnodes;
 K = sn.nclasses;
 if nargin == 1
-    [Q,U,R,T,A] = getAvgHandles(self);
-elseif isempty(Q) && isempty(U) && isempty(R) && isempty(T) && isempty(A)
-    [Q,U,R,T,A] = getAvgHandles(self);
+    [Q,U,R,T,A,W] = getAvgHandles(self);
+elseif isempty(Q) && isempty(U) && isempty(R) && isempty(T) && isempty(A) && isempty(W)
+    [Q,U,R,T,A,W] = getAvgHandles(self);
 end
 
-[QN,UN,RN,TN,AN] = self.getAvgNode(Q,U,R,T,A);
+[QN,UN,RN,TN,AN,WN] = self.getAvgNode(Q,U,R,T,A,W);
 
 if isempty(QN)
     AvgTable = Table();

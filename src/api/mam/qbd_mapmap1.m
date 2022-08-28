@@ -20,7 +20,9 @@ alpha = max(-diag(A0));
 A0dt = A0/alpha+eye(size(A0));
 A_1dt = A_1/alpha;
 A1dt = A1/alpha;
-[eta] = QBD_Caudal(A_1dt,A0dt,A1dt);
+if nargout>5
+    [eta] = QBD_Caudal(A_1dt,A0dt,A1dt);
+end
 %%warning off;
 pqueue = QBD_pi(A_1,A0bar,R);%,'MaxNumComp',1e5);
 if sum(sum(pqueue(2:end,:)))<util*0.99

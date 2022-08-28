@@ -1,5 +1,5 @@
-function [Q,U,R,T,A] = getAvgHandles(self)
-% [Q,U,R,T,A] = GETAVGHANDLES()
+function [Q,U,R,T,A,W] = getAvgHandles(self)
+% [Q,U,R,T,A,W] = GETAVGHANDLES()
 % Get handles for mean performance metrics.
 %
 % Q(i,r): mean queue-length of class r at node i
@@ -7,6 +7,7 @@ function [Q,U,R,T,A] = getAvgHandles(self)
 % R(i,r): mean response time of class r at node i (summed across visits)
 % T(i,r): mean throughput of class r at node i
 % A(i,r): mean arrival rate of class r at node i
+% W(i,r): mean residence time of class r at node i
 
 % Copyright (c) 2012-2022, Imperial College London
 % All rights reserved.
@@ -15,6 +16,7 @@ function [Q,U,R,T,A] = getAvgHandles(self)
 % R = self.getAvgRespTHandles;
 % T = self.getAvgTputHandles;
 % A = self.getAvgArvRHandles;
+% W = self.getAvgResidTHandles;
 
 M = getNumberOfStations(self);
 K = getNumberOfClasses(self);
@@ -118,6 +120,34 @@ if isempty(self.handles) || ~isfield(self.handles,'R')
 else
     R = self.handles.R;
 end
+
+if isempty(self.handles) || ~isfield(self.handles,'W')
+    M = getNumberOfStations(self);
+    K = getNumberOfClasses(self);
+    
+    W = cell(M,K); % response times
+    for i=1:M
+        for r=1:K
+            Wir = Metric(MetricType.ResidT, classes{r}, stations{i});
+            if isSource(i)
+                Wir.disabled = true;
+            end
+            if isSink(i)
+                Wir.disabled = true;
+            end
+            if ~hasServiceTunnel(i)
+                if ~isServiceDefined(i,r)
+                    Wir.disabled = true;
+                end
+            end
+            W{i,r} = Wir;
+        end
+    end
+    self.handles.W = W;
+else
+    W = self.handles.W;
+end
+
 
 if isempty(self.handles) || ~isfield(self.handles,'T')
     M = getNumberOfStations(self);

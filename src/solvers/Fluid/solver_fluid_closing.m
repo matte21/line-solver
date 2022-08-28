@@ -12,7 +12,7 @@ chains = sn.chains;
 delayNodes = zeros(1,sn.nstations);
 delayrefstat = zeros(1,sn.nstations); % delay nodes that are also reference nodes
 for i = 1:sn.nstations
-    if strcmp(sn.schedid(i),SchedStrategy.ID_INF)
+    if sn.schedid(i) == SchedStrategy.ID_INF
         delayNodes(i) = 1;
     end
 end

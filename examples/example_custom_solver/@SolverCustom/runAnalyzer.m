@@ -33,7 +33,7 @@ if nargout > 1
     analyzer = @(sn) solver_customer_anlyzer(sn, options);
 end
 
-self.setAvgResults(QN,UN,RN,TN,CN,XN,runtime,method);
+self.setAvgResults(QN,UN,RN,TN,[],[],CN,XN,runtime,method);
 
 runtime = toc(T0);
 end

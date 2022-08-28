@@ -3,13 +3,13 @@ classdef SolverLN < LayeredNetworkSolver & EnsembleSolver
     %
     % Copyright (c) 2012-2022, Imperial College London
     % All rights reserved.
-    
+
     properties
         initNodeAvgTable = {};
         initCallAvgTable = {};
         insist = true;
     end
-    
+
     properties (Hidden)
         successors = {};
         lqn; % lqn data structure
@@ -19,7 +19,7 @@ classdef SolverLN < LayeredNetworkSolver & EnsembleSolver
         svcreset; % models that require hard reset of service process
         maxIterErr;
     end
-    
+
     properties (Hidden) % performance metrics and related processes
         svcreset_classes;
         util;
@@ -29,51 +29,51 @@ classdef SolverLN < LayeredNetworkSolver & EnsembleSolver
         svctcdf;
         idlet;
         idletproc;
-        callrespt;
+        callresidt;
         tputproc;
         thinkproc;
-        callresptproc;
+        callresidtproc;
         entryproc
-        getEntryCdfRespT;
-        callresptcdf;
+        entryCdfRespT;
+        callresidtcdf;
         cdf
         hasConverged;
     end
-    
+
     properties (Hidden) % registries of quantities to update at every iteration
         arvupdmap; % [modelidx, actidx, node, class]
         svcupdmap; % [modelidx, actidx, node, class]
         svctmap; % [modelidx, actidx, node, class]
         callupdmap;  % [modelidx, callidx, node, class]
-        callresptmap;  % [modelidx, callidx, node, class]
+        callresidtmap;  % [modelidx, callidx, node, class]
         routeupdmap; % [modelidx, actidxfrom, actidxto, nodefrom, nodeto, classfrom, classto]
         unique_routeupdmap;
     end
-    
+
     methods
-        
-        
+
+
         function self = reset(self)
             self.initNodeAvgTable = {};
             self.initCallAvgTable = {};
         end
-        
+
         function self = SolverLN(lqnmodel, solverFactory, varargin)
             % SELF = SOLVERLN(MODEL,SOLVERFACTORY,VARARGIN)
-            
+
             self@LayeredNetworkSolver(lqnmodel, mfilename);
             self@EnsembleSolver(lqnmodel, mfilename);
-            
+
             if nargin>1 && isstruct(solverFactory)
                 options = solverFactory;
                 self.setOptions(options);
-                solverFactory = @(m) SolverNC(m,'verbose',false);
+                solverFactory = @(m) ifthenelse(m.hasFork(), SolverMVA(m,'verbose',false), SolverNC(m,'verbose',false));
             else
                 self.setOptions(SolverLN.defaultOptions);
                 if nargin>2
                     if ischar(solverFactory)
                         inputvar = {solverFactory,varargin{:}};
-                        solverFactory = @(m) SolverNC(m,'verbose',false);
+                        solverFactory = @(m) ifthenelse(m.hasFork(), SolverMVA(m,'verbose',false), SolverNC(m,'verbose',false));
                     else
                         inputvar = varargin;
                     end
@@ -81,47 +81,47 @@ classdef SolverLN < LayeredNetworkSolver & EnsembleSolver
                     self.setOptions(Solver.parseOptions(inputvar, self.defaultOptions));
                 end
             end
-                        
+
             lqn = lqnmodel.getStruct;
             self.lqn = lqn;
-            
+
             % initialize call response times
-            self.getEntryCdfRespT = cell(length(lqn.nentries),1);
+            self.entryCdfRespT = cell(length(lqn.nentries),1);
             self.hasConverged = 0;
             self.svctproc = lqn.hostdem;
             self.thinkproc = lqn.think;
-            self.callresptproc = cell(lqn.ncalls,1);
+            self.callresidtproc = cell(lqn.ncalls,1);
             for cidx = 1:lqn.ncalls
-                self.callresptproc{cidx} = lqn.hostdem{lqn.callpair(cidx,2)};
+                self.callresidtproc{cidx} = lqn.hostdem{lqn.callpair(cidx,2)};
             end
-            
+
             % build layering
             buildLayers(self);
-            
+
             self.routereset = unique(self.idxhash(self.routeupdmap(:,1)))';
             self.svcreset = unique(self.idxhash(self.svcupdmap(:,1)))';
             self.svcreset = union(self.svcreset,unique(self.idxhash(self.callupdmap(:,1)))');
-            
+
             for e=1:self.getNumberOfModels
                 if nargin == 1
-                    solverFactory = @(m) SolverNC(m,'method','adaptive','verbose',false);
+                    solverFactory = @(m) ifthenelse(m.hasFork(), SolverMVA(m,'verbose',false), SolverNC(m,'verbose',false,'method','adaptive'));
                 end
                 self.setSolver(solverFactory(self.ensemble{e}),e);
             end
         end
-        
+
         function initFromRawAvgTables(self, NodeAvgTable, CallAvgTable)
             line_error(mfilename,'initFromRawAvgTables not yet available');
         end
-        
+
         function paramFromRawAvgTables(self, NodeAvgTable, CallAvgTable)
             line_error(mfilename,'paramFromRawAvgTables not yet available');
         end
-        
+
         function bool = converged(self, it) % convergence test at iteration it
             % BOOL = CONVERGED(IT) % CONVERGENCE TEST AT ITERATION IT
             bool = false;
-            
+
             if it>=30 % assume steady-state
                 for e=1:length(self.ensemble)
                     kmax = 5; % number of previous solutions to avg
@@ -142,7 +142,7 @@ classdef SolverLN < LayeredNetworkSolver & EnsembleSolver
                     end
                 end
             end
-            
+
             if it>1
                 self.maxIterErr(it) = 0;
                 E = size(self.results,2);
@@ -191,7 +191,7 @@ classdef SolverLN < LayeredNetworkSolver & EnsembleSolver
                 end
             end
         end
-        
+
         function init(self) % operations before starting to iterate
             % INIT() % OPERATIONS BEFORE STARTING TO ITERATE
             self.unique_routeupdmap = unique(self.routeupdmap(:,1))';
@@ -200,14 +200,14 @@ classdef SolverLN < LayeredNetworkSolver & EnsembleSolver
             self.svct = zeros(self.lqn.nidx,1);
             self.svctmatrix = getServiceMatrix(self);
         end
-        
-        
+
+
         function pre(self, it) % operations before an iteration
             % PRE(IT) % OPERATIONS BEFORE AN ITERATION
-            
+
             %nop
         end
-        
+
         function [result, runtime] = analyze(self, it, e)
             % [RESULT, RUNTIME] = ANALYZE(IT, E)
             T0 = tic;
@@ -215,28 +215,28 @@ classdef SolverLN < LayeredNetworkSolver & EnsembleSolver
             [result.QN, result.UN, result.RN, result.TN, result.AN, result.WN] = self.solvers{e}.getAvg();
             runtime = toc(T0);
         end
-        
+
         function post(self, it) % operations after an iteration
             % POST(IT) % OPERATIONS AFTER AN ITERATION
-            
+
             % store the results
             self.updateMetrics(it); % recalculate service and response times
-            
+
             % recompute think times
             self.updateThinkTimes(it);
-            
+
             % update the model parameters
             self.updateLayers(it);
-            
+
             % update entry routing probabilities
             self.updateRoutingProbabilities(it);
-            
+
             % reset all non-pure layers
             for e= self.routereset
                 self.ensemble{e}.refreshChains();
                 self.solvers{e}.reset();
             end
-            
+
             for e= self.svcreset
                 %if it==1
                 %    self.svcreset_classes{e}=unique(union(self.svcupdmap(self.idxhash(self.svcupdmap(:,1))==e,3),self.callupdmap(self.idxhash(self.callupdmap(:,1))==e,4)));
@@ -247,22 +247,22 @@ classdef SolverLN < LayeredNetworkSolver & EnsembleSolver
                         refreshRates(self.ensemble{e}); % note: this does not refresh the sn.proc field, only sn.rates and sn.scv
                     otherwise
                         refreshService(self.ensemble{e});
-                end                
+                end
                 self.solvers{e}.reset(); % commenting this out des not seem to produce a problem, but it goes faster with it
             end
-            
+
             if it==1
                 % now disable all solver support checks for future iterations
                 for e=1:length(self.ensemble)
-                    self.solvers{e}.setChecks(false);
+                    self.solvers{e}.setDoChecks(false);
                 end
             end
         end
-        
+
         updateThinkTimes(self, it);
         updateMetrics(self, it);
         updateRoutingProbabilities(self, it);
-        
+
         function finish(self) % operations after iterations are completed
             % FINISH() % OPERATIONS AFTER INTERATIONS ARE COMPLETED
             if self.options.verbose
@@ -276,21 +276,21 @@ classdef SolverLN < LayeredNetworkSolver & EnsembleSolver
             end
             self.model.ensemble = self.ensemble;
         end
-        
-        
+
+
         function varargout = getAvg(varargin)
             % [QN,UN,RN,TN,AN,WN] = GETAVG(SELF,~,~,~,~,USELQNSNAMING)
             [varargout{1:nargout}] = getEnsembleAvg( varargin{:} );
         end
 
-        
+
         function [QN,UN,RN,TN,AN,WN] = getEnsembleAvg(self,~,~,~,~, useLQNSnaming)
             % [QN,UN,RN,TN,AN,WN] = GETENSEMBLEAVG(SELF,~,~,~,~,USELQNSNAMING)
-            
+
             if nargin < 5
                 useLQNSnaming = false;
             end
-            
+
             iterate(self); % run iterations
             QN  = nan(self.lqn.nidx,1);
             UN  = nan(self.lqn.nidx,1);
@@ -335,7 +335,7 @@ classdef SolverLN < LayeredNetworkSolver & EnsembleSolver
                         end
                     end
                 end
-                
+
                 % determine remaining metrics
                 for c=1:self.ensemble{e}.getNumberOfClasses
                     type = self.ensemble{e}.classes{c}.attribute(1);
@@ -370,7 +370,7 @@ classdef SolverLN < LayeredNetworkSolver & EnsembleSolver
                             SN(aidx) = SN(aidx) + self.results{end,e}.RN(serverIdx,c) * self.lqn.callproc{cidx}.getMean();
                             if isnan(QN(aidx)), QN(aidx)=0; end
                             QN(aidx) = QN(aidx) + self.results{end,e}.QN(serverIdx,c);
-                        case LayeredNetworkElement.ACTIVITY                            
+                        case LayeredNetworkElement.ACTIVITY
                             aidx = self.ensemble{e}.classes{c}.attribute(2);
                             tidx = self.lqn.parent(aidx);
                             QN(tidx) = QN(tidx) + self.results{end,e}.QN(serverIdx,c);
@@ -382,7 +382,7 @@ classdef SolverLN < LayeredNetworkSolver & EnsembleSolver
                                 case JobClassType.OPEN
                                     TN(aidx) = TN(aidx) + self.results{end,e}.TN(sourceIdx,c);
                             end
-%                            SN(aidx) = self.svct(aidx);                            
+                            %                            SN(aidx) = self.svct(aidx);
                             if isnan(SN(aidx)), SN(aidx)=0; end
                             SN(aidx) = SN(aidx) + self.results{end,e}.RN(serverIdx,c);
                             if isnan(RN(aidx)), RN(aidx)=0; end
@@ -392,11 +392,11 @@ classdef SolverLN < LayeredNetworkSolver & EnsembleSolver
                             WN(aidx) = WN(aidx) + self.results{end,e}.WN(serverIdx,c);
                             WN(tidx) = WN(tidx) + self.results{end,e}.WN(serverIdx,c);
                             if isnan(QN(aidx)), QN(aidx)=0; end
-                            QN(aidx) = QN(aidx) + self.results{end,e}.QN(serverIdx,c);                            
+                            QN(aidx) = QN(aidx) + self.results{end,e}.QN(serverIdx,c);
                     end
                 end
             end
-            
+
             for e=1:self.lqn.nentries
                 eidx = self.lqn.eshift + e;
                 tidx = self.lqn.parent(eidx);
@@ -407,14 +407,14 @@ classdef SolverLN < LayeredNetworkSolver & EnsembleSolver
                 end
                 UN(tidx) = UN(tidx) + UN(eidx);
             end
-            
+
             if ~useLQNSnaming % if LN
                 QN = UN;
                 UN = PN;
                 RN = SN;
             end
         end
-        
+
         %         function [QN,UN,RN,TN] = getStageAvg(self,~,~,~,~)
         %             % [QN,UN,RN,TN] = GETSTAGEAVG(SELF,~,~,~,~)
         %
@@ -510,30 +510,41 @@ classdef SolverLN < LayeredNetworkSolver & EnsembleSolver
         %                 end
         %             end
         %         end
-        
+
         %        function [NodeAvgTable, CallAvgTable] = getRawAvgTables(self)
         %            line_error(mfilename,'paramFromRawAvgTables not yet available');
         %        end
-        
+
+        function [cdfRespT] = getCdfRespT(self)
+            if isempty(self.entryCdfRespT{1}) 
+                curMethod = self.getOptions.method;
+                self.options.method = 'moment3';
+                self.getAvgTable;
+                self.options.method = curMethod;
+            end
+            cdfRespT = self.entryCdfRespT;
+        end
+
     end
-    
+
     methods (Hidden)
-        buildLayers(self, lqn, resptproc, callresptproc);
+        buildLayers(self, lqn, resptproc, callresidtproc);
         buildLayersRecursive(self, idx, callers, ishostlayer);
         updateLayers(self, it);
         U = getServiceMatrixRecursion(self, lqn, aidx, eidx, U);
         U = getServiceMatrix(self)
     end
-    
+
     methods (Static)
         function [bool, featSupported] = supports(model)
             % [BOOL, FEATSUPPORTED] = SUPPORTS(MODEL)
-            
+
             featUsed = model.getUsedLangFeatures();
             featSupported = SolverFeatureSet;
             featSupported.setTrue({'Sink','Source','Queue',...
                 'Coxian','Erlang','Exponential','HyperExp',...
                 'Buffer','Server','JobSink','RandomSource','ServiceTunnel',...
+                'Fork','Forker','Join','Joiner',...
                 'SchedStrategy_PS','SchedStrategy_FCFS','ClosedClass','OpenClass'});
             bool = true;
             for e = 1:model.getNumberOfLayers()
@@ -541,7 +552,7 @@ classdef SolverLN < LayeredNetworkSolver & EnsembleSolver
             end
         end
     end
-    
+
     methods (Static)
         function options = defaultOptions()
             % OPTIONS = DEFAULTOPTIONS()

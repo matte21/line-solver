@@ -18,7 +18,7 @@ N=N(:)';
 if nargin<4
     mi=ones(1,M);
 end
-if isempty(Z)
+if nargin<3 || isempty(Z)
     Z = zeros(1,R);
 end
 if (~any(N))

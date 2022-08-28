@@ -1,5 +1,5 @@
-function [Q,U,R,T,C,X,lG,runtime] = solver_mvald_analyzer(sn, options)
-% [Q,U,R,T,C,X,RUNTIME] = SOLVER_MVALD_ANALYZER(SN, OPTIONS)
+function [Q,U,R,T,C,X,lG,runtime,iter] = solver_mvald_analyzer(sn, options)
+% [Q,U,R,T,C,X,RUNTIME,ITER] = SOLVER_MVALD_ANALYZER(SN, OPTIONS)
 
 % Copyright (c) 2012-2022, Imperial College London
 % All rights reserved.
@@ -10,9 +10,9 @@ switch options.method
         if ~isempty(sn.cdscaling)
             line_error(mfilename,'Exact class-dependent solver not available in MVA.');
         end        
-        [Q,U,R,T,C,X,lG] = solver_mvald(sn, options);
-    case {'default','amva','qd','aql','qdaql'}
-        [Q,U,R,T,C,X,lG] = solver_amva(sn, options);
+        [Q,U,R,T,C,X,lG,iter] = solver_mvald(sn, options);
+    case {'default','amva','qd','aql','qdaql', 'lin', 'qdlin'}
+        [Q,U,R,T,C,X,lG,iter] = solver_amva(sn, options);
     otherwise
         line_error(mfilename,sprintf('The %s method is not supported by the load-dependent MVA solver.',options.method));
 end

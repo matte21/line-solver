@@ -14,9 +14,17 @@ switch options.method
         [XN,UN,QN,RN,TN,CN,tranSysState,tranSync,sn] = solver_ssa_analyzer_serial(sn, options, true);
     case {'para','parallel','para.hash','parallel.hash'}
         if isoctave
-            line_error(mfilename,'parallel SSA is available only under MATLAB.');
+            line_error(mfilename,'Parallel SSA is available only under MATLAB.');
         end
+        try
         [XN,UN,QN,RN,TN,CN,tranSysState,tranSync,sn] = solver_ssa_analyzer_spmd(sn, options);        
+        catch e
+            switch e.identifier
+                case 'MATLAB:spmd:NoPCT'
+                    line_printf('The ssa.%s method requires the Parallel Computing Toolbox that is unavailable on this machine, switching to ssa.serial.',options.method);
+                    [XN,UN,QN,RN,TN,CN,tranSysState,tranSync,sn] = solver_ssa_analyzer_serial(sn, options, true);                    
+            end
+        end
 end
 
 runtime = toc(Tstart);

@@ -3,7 +3,7 @@ classdef HyperExp < MarkovianDistribution
     %
     % Copyright (c) 2012-2022, Imperial College London
     % All rights reserved.
-    
+
     methods
         function self = HyperExp(varargin)
             % SELF = HYPEREXP(VARARGIN)
@@ -16,6 +16,7 @@ classdef HyperExp < MarkovianDistribution
                 setParam(self, 1, 'p', p);
                 setParam(self, 2, 'lambda1', lambda);
                 setParam(self, 3, 'lambda2', lambda);
+                self.obj = jline.lang.distributions.HyperExp(p, lambda, lambda);
             elseif length(varargin)==3
                 p1 = varargin{1};
                 lambda1 = varargin{2};
@@ -23,9 +24,10 @@ classdef HyperExp < MarkovianDistribution
                 setParam(self, 1, 'p', p1);
                 setParam(self, 2, 'lambda1', lambda1);
                 setParam(self, 3, 'lambda2', lambda2);
+                self.obj = jline.lang.distributions.HyperExp(p1, lambda1, lambda2);
             end
         end
-        
+
         function ex = getMean(self)
             % EX = GETMEAN()
             % Get distribution mean
@@ -38,7 +40,7 @@ classdef HyperExp < MarkovianDistribution
                 MarkovianDistribution.getMean(self);
             end
         end
-        
+
         function SCV = getSCV(self)
             % SCV = GETSCV()
             % Get the squared coefficient of variation of the distribution (SCV = variance / mean^2)
@@ -51,12 +53,12 @@ classdef HyperExp < MarkovianDistribution
                 MarkovianDistribution.getSCV(self);
             end
         end
-        
+
         function Ft = evalCDF(self,t)
             % FT = EVALCDF(SELF,T)
             % Evaluate the cumulative distribution function at t
             % AT T
-            
+
             if self.getNumberOfPhases == 2
                 p = self.getParam(1).paramValue;
                 mu1 = self.getParam(2).paramValue;
@@ -66,7 +68,7 @@ classdef HyperExp < MarkovianDistribution
                 MarkovianDistribution.evalCDF(self,t);
             end
         end
-        
+
         function PH = getPH(self)
             % PH = GETREPRESENTATION()
             % Return the renewal process associated to the distribution
@@ -84,7 +86,7 @@ classdef HyperExp < MarkovianDistribution
             end
         end
     end
-    
+
     methods(Static)
         function he = fit(MEAN, SCV, SKEW)
             % HE = FIT(MEAN, SCV, SKEW)
@@ -104,21 +106,21 @@ classdef HyperExp < MarkovianDistribution
             he = HyperExp.fitMeanAndSCV(MEAN,SCV);
             he.immediate = MEAN < Distrib.Tol;
         end
-        
+
         function he = fitRate(RATE)
             % HE = FITRATE(RATE)
             % Fit distribution with given rate
             he = HyperExp(p, RATE, RATE);
             he.immediate = 1/RATE < Distrib.Tol;
         end
-        
+
         function he = fitMean(MEAN)
             % HE = FITMEAN(MEAN)
             % Fit distribution with given mean
             he = HyperExp(p, 1/MEAN, 1/MEAN);
             he.immediate = MEAN < Distrib.Tol;
         end
-        
+
         function he = fitMeanAndSCV(MEAN, SCV)
             % HE = FITMEANANDSCV(MEAN, SCV)
             % Fit distribution with given mean and squared coefficient of variation (SCV=variance/mean^2)
@@ -126,7 +128,7 @@ classdef HyperExp < MarkovianDistribution
             he = HyperExp(p, mu1, mu2);
             he.immediate = MEAN < Distrib.Tol;
         end
-        
+
         function he = fitMeanAndSCVBalanced(MEAN, SCV)
             % HE = FITMEANANDSCV(MEAN, SCV)
             % Fit distribution with given mean and squared coefficient of
@@ -142,10 +144,10 @@ classdef HyperExp < MarkovianDistribution
             p = real(p);
             mu1 = real(mu1);
             mu2 = real(mu2);
-            he = HyperExp(p, mu1, mu2);           
+            he = HyperExp(p, mu1, mu2);
             he.immediate = MEAN < Distrib.Tol;
         end
     end
-    
+
 end
 

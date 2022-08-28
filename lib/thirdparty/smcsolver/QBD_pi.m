@@ -98,6 +98,7 @@ if (isempty(options.Boundary))
     pi=pi/(pi*temp*ones(m,1)); % normalize pi_0
     sumpi=sum(pi);
     numit=1;
+    pi(2:options.MaxNumComp,:)=0;
     while (sumpi < 1-10^(-10) && numit < 1+options.MaxNumComp)
         pvec = pi(numit,:)*R;
         pi(numit+1,1:m)=pvec; % compute pi_(numit+1)

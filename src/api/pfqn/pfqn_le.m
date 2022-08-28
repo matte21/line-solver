@@ -29,13 +29,19 @@ if isempty(L) || isempty(N) || sum(N)==0 || sum(L(:))<1e-4
 elseif nargin<3%~exist('Z','var')
     umax=pfqn_le_fpi(L,N);
     A=pfqn_le_hessian(L,N,umax'); % slightly faster than pfqn_le_hessianZ
-    S=0; for r=1:R S=S+N(r)*log(umax'*L(:,r)); end
+    S=0; 
+	for r=1:R 
+		S=S+N(r)*log(umax'*L(:,r)); 
+	end
     lGn = multinomialln([N,M-1]) + factln(M-1) + (M-1)*log(sqrt(2*pi)) - log(sqrt(det(A))) + sum(log(umax)) + S;
     Gn=exp(lGn);
 else % Z>0
     [umax,vmax]=pfqn_le_fpiZ(L,N,Z);
     A=pfqn_le_hessianZ(L,N,Z,umax',vmax);
-    S=0; for r=1:R S=S+N(r)*log(Z(r)+vmax*umax'*L(:,r)); end
+    S=0; 
+	for r=1:R 
+		S=S+N(r)*log(Z(r)+vmax*umax'*L(:,r)); 
+	end
     lGn = -sum(factln(N)) -vmax + M*log(vmax) + M*log(sqrt(2*pi)) - log(sqrt(det(A))) + sum(log(umax)) + S;
     Gn=exp(lGn);
 end

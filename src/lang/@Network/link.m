@@ -222,7 +222,7 @@ end
 for i=1:I
     % this is to ensure that also stateful cs like caches
     % are accounted
-    if isa(self.nodes{i},'Cache') || isa(self.nodes{i},'ClassSwitch')
+    if isa(self.nodes{i},'Cache')
         for r=find(self.nodes{i}.server.hitClass)
             csmatrix(r,self.nodes{i}.server.hitClass(r)) = 1.0;
         end
@@ -294,7 +294,7 @@ for i=1:I
     end
 end
 
-self.csmatrix;
+%self.csmatrix;
 
 if isReset
     self.refreshChains; % without this exception with linkAndLog

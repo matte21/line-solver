@@ -80,7 +80,7 @@ if isinf(options.timespan(1))
     self.result.eventFilt = Dfilt;
     runtime = toc(T0);
     sn.space = {};
-    self.setAvgResults(QN,UN,RN,TN,CN,XN,runtime,options.method);
+    self.setAvgResults(QN,UN,RN,TN,[],[],CN,XN,runtime,options.method);
 else
     lastSol= [];
     s0 = sn.state;

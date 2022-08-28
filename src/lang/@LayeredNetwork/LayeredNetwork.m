@@ -103,6 +103,12 @@ classdef LayeredNetwork < Model & Ensemble
                 self = LayeredNetwork.parseXML(filename, false);
                 self.init;
             end
+            try
+                jline.lang.distributions.Immediate();
+            catch
+                javaaddpath(which('linesolver.jar'));
+                import jline.*;
+            end
         end
 
         function self = init(self)
@@ -117,10 +123,6 @@ classdef LayeredNetwork < Model & Ensemble
             self.param.Edges.Tput = [];
             self.param.Edges.QLen = [];
         end
-
-        ensemble = updateEnsemble(self, isBuild)
-        ensemble = buildEnsemble(self)
-        ensemble = refreshEnsemble(self)
 
         self = generateGraph(self);
         [lqnGraph,taskGraph] = getGraph(self)
@@ -137,7 +139,7 @@ classdef LayeredNetwork < Model & Ensemble
         self = update(self)
         self = updateParam(self, AvgTable, netSortAscending)
         self = initDefault(self)
-        plot(self, useNodes, useProcs)
+        plot(self, useNodes, showProcs, showTaskGraph)
     end
 
     methods
@@ -233,6 +235,9 @@ classdef LayeredNetwork < Model & Ensemble
     end
 
     methods (Static)
+        function myLN = readXML(filename, verbose)
+		        myLN = LayeredNetwork.parseXML(filename, verbose);
+		end
         myLN = parseXML(filename, verbose)
     end
 end

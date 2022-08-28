@@ -5,6 +5,7 @@ function runtime = runAnalyzer(self, options)
 sn = getStruct(self); % doesn't need initial state
 
 T0=tic;
+iter = NaN;
 if nargin<2
     options = self.getOptions;
 end
@@ -54,7 +55,7 @@ if sn.nclosedjobs == 0 && length(sn.nodetype)==3 && all(sort(sn.nodetype)' == so
     self.model.refreshChains;
 else % queueing network
     if any(sn.nodetype == NodeType.Cache) % if integrated caching-queueing
-        [QN,UN,RN,TN,CN,XN,lG,hitprob,missprob,runtime] = solver_nc_cacheqn_analyzer(self, options);
+        [QN,UN,RN,TN,CN,XN,lG,hitprob,missprob,runtime,iter] = solver_nc_cacheqn_analyzer(self, options);
         for ind = 1:sn.nnodes
             if sn.nodetype(ind) == NodeType.Cache
                 self.model.nodes{ind}.setResultHitProb(hitprob(ind,:));
@@ -64,11 +65,12 @@ else % queueing network
         self.model.refreshChains();
     else % ordinary queueing network
         if ~isempty(sn.lldscaling) || ~isempty(sn.cdscaling)
-            [QN,UN,RN,TN,CN,XN,lG,runtime] = solver_ncld_analyzer(sn, options);
+            [QN,UN,RN,TN,CN,XN,lG,runtime,iter] = solver_ncld_analyzer(sn, options);
         else
-            [QN,UN,RN,TN,CN,XN,lG,runtime] = solver_nc_analyzer(sn, options);
+            [QN,UN,RN,TN,CN,XN,lG,runtime,iter] = solver_nc_analyzer(sn, options);
         end
     end
-    self.setAvgResults(QN,UN,RN,TN,CN,XN,runtime);
-    self.result.Prob.logNormConstAggr = real(lG);
+end
+self.setAvgResults(QN,UN,RN,TN,[],[],CN,XN,runtime,options.method,iter);
+self.result.Prob.logNormConstAggr = real(lG);
 end

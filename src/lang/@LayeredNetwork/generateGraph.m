@@ -136,8 +136,8 @@ PreType = [];
 for p=1:length(proc)
     tasks_p = proc{p}.tasks;
     for t=1:length(tasks_p)
-        EndNodes(end+1,1) = findstring(self.lqnGraph.Nodes.Node,proc{p}.tasks(t).name);
-        EndNodes(end,2) = findstring(self.lqnGraph.Nodes.Node,proc{p}.name);
+        EndNodes(end+1,1) = findstring(self.lqnGraph.Nodes.Node, proc{p}.tasks(t).name);
+        EndNodes(end,2) = findstring(self.lqnGraph.Nodes.Node, proc{p}.name);
         Weight(end+1,1) = 1.0;
         EdgeType(end+1,1) = 0; % within task
         PreType(end+1,1) = 0; % pre
@@ -187,16 +187,16 @@ for p=1:length(proc)
         
         act_prec_tp = tasks_p(t).precedences;
         for ap=1:length(act_prec_tp)
-            if strcmpi(act_prec_tp(ap).postType,ActivityPrecedence.POST_SEQ)
+            if strcmpi(act_prec_tp(ap).postType,ActivityPrecedenceType.POST_SEQ)
                 switch act_prec_tp(ap).preType
-                    case ActivityPrecedence.PRE_SEQ
+                    case ActivityPrecedenceType.PRE_SEQ
                         EndNodes(end+1,1) = findstring(self.lqnGraph.Nodes.Node, act_prec_tp(ap).preActs{1});
                         EndNodes(end,2) = findstring(self.lqnGraph.Nodes.Node, act_prec_tp(ap).postActs{1});
                         Weight(end+1,1) = 1.0;
                         EdgeType(end+1,1) = 0; % within task
                         PreType(end+1,1) = 0; % pre
                         PostType(end+1,1) = 0; % post
-                    case ActivityPrecedence.PRE_AND
+                    case ActivityPrecedenceType.PRE_AND
                         for pra=1:length(act_prec_tp(ap).preActs)
                             EndNodes(end+1,1) = findstring(self.lqnGraph.Nodes.Node, act_prec_tp(ap).preActs{pra});
                             EndNodes(end,2) = findstring(self.lqnGraph.Nodes.Node, act_prec_tp(ap).postActs{1});
@@ -209,7 +209,7 @@ for p=1:length(proc)
                             PreType(end+1,1) = 1; % pre-AND
                             PostType(end+1,1) = 0; % post
                         end
-                    case ActivityPrecedence.PRE_OR
+                    case ActivityPrecedenceType.PRE_OR
                         for pra=1:length(act_prec_tp(ap).preActs)
                             EndNodes(end+1,1) = findstring(self.lqnGraph.Nodes.Node, act_prec_tp(ap).preActs{pra});
                             EndNodes(end,2) = findstring(self.lqnGraph.Nodes.Node, act_prec_tp(ap).postActs{1});
@@ -221,9 +221,9 @@ for p=1:length(proc)
                     otherwise
                         line_error(mfilename,'Precedence is not supported yet.');
                 end
-            elseif strcmpi(act_prec_tp(ap).preType,ActivityPrecedence.PRE_SEQ)
+            elseif strcmpi(act_prec_tp(ap).preType,ActivityPrecedenceType.PRE_SEQ)
                 switch act_prec_tp(ap).postType
-                    case ActivityPrecedence.POST_AND
+                    case ActivityPrecedenceType.POST_AND
                         for poa=1:length(act_prec_tp(ap).postActs)
                             EndNodes(end+1,1) = findstring(self.lqnGraph.Nodes.Node, act_prec_tp(ap).preActs{1});
                             EndNodes(end,2) = findstring(self.lqnGraph.Nodes.Node, act_prec_tp(ap).postActs{poa});
@@ -232,7 +232,7 @@ for p=1:length(proc)
                             PreType(end+1,1) = 0; % pre
                             PostType(end+1,1) = 1; % post-AND
                         end
-                    case ActivityPrecedence.POST_OR
+                    case ActivityPrecedenceType.POST_OR
                         for poa=1:length(act_prec_tp(ap).postActs)
                             EndNodes(end+1,1) = findstring(self.lqnGraph.Nodes.Node, act_prec_tp(ap).preActs{1});
                             EndNodes(end,2) = findstring(self.lqnGraph.Nodes.Node, act_prec_tp(ap).postActs{poa});
@@ -241,7 +241,7 @@ for p=1:length(proc)
                             PreType(end+1,1) = 0; % pre
                             PostType(end+1,1) = 2; % post-OR
                         end
-                    case ActivityPrecedence.POST_CACHE
+                    case ActivityPrecedenceType.POST_CACHE
                         for poa=1:length(act_prec_tp(ap).postActs)
                             EndNodes(end+1,1) = findstring(self.lqnGraph.Nodes.Node, act_prec_tp(ap).preActs{1});
                             EndNodes(end,2) = findstring(self.lqnGraph.Nodes.Node, act_prec_tp(ap).postActs{poa});
@@ -250,7 +250,7 @@ for p=1:length(proc)
                             PreType(end+1,1) = 0; % pre
                             PostType(end+1,1) = 2; % post-OR
                         end                        
-                    case ActivityPrecedence.POST_LOOP
+                    case ActivityPrecedenceType.POST_LOOP
                         for poa=1:length(act_prec_tp(ap).postActs)
                             EndNodes(end+1,1) = findstring(self.lqnGraph.Nodes.Node, act_prec_tp(ap).preActs{1});
                             EndNodes(end,2) = findstring(self.lqnGraph.Nodes.Node, act_prec_tp(ap).postActs{poa});

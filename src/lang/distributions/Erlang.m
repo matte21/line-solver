@@ -13,6 +13,7 @@ classdef Erlang < MarkovianDistribution
             self@MarkovianDistribution('Erlang',2);
             setParam(self, 1, 'alpha', phaseRate); % rate in each state
             setParam(self, 2, 'r', round(nphases)); % number of phases
+            self.obj = jline.lang.distributions.Erlang(phaseRate, nphases);
         end
         
         function phases = getNumberOfPhases(self)

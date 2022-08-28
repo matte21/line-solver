@@ -1,4 +1,4 @@
-function [Q,U,R,T,C,X,lG,STeff] = solver_nc(sn, options)
+function [Q,U,R,T,C,X,lG,STeff,it] = solver_nc(sn, options)
 M = sn.nstations;    %number of stations
 nservers = sn.nservers;
 NK = sn.njobs';  % initial population per class

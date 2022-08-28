@@ -3,6 +3,7 @@ function [capacity, classcap, dropid] = refreshCapacity(self)
 
 % Copyright (c) 2012-2022, Imperial College London
 % All rights reserved.
+%I = getNumberOfStatefulNodes(self);
 M = getNumberOfStations(self);
 K = getNumberOfClasses(self);
 C = self.sn.nchains;
@@ -10,9 +11,8 @@ C = self.sn.nchains;
 classcap = Inf*ones(M,K);
 chaincap = Inf*ones(M,K);
 capacity = zeros(M,1);
-dropid = -ones(M,C); %DropStrategy.WaitingBuffer
+dropid = -ones(M,K); %DropStrategy.WaitingBuffer
 sn = self.sn;
-C = sn.nchains;
 njobs = sn.njobs;
 rates = sn.rates;
 for c = 1:C
@@ -21,10 +21,11 @@ for c = 1:C
         chainCap = sum(njobs(inchain));
         for i=1:M
             station = self.getStationByIndex(i);
+            
             if sn.nodetype(sn.stationToNode(i)) ~= NodeType.ID_SOURCE     
                 dropid(i,r) = station.dropRule(r);
             end 
-            if isnan(rates(i,r))
+            if isnan(rates(i,r)) && sn.nodetype(sn.stationToNode(i)) ~= NodeType.ID_PLACE
                 classcap(i,r) = 0;
                 chaincap(i,c) = 0;
             else

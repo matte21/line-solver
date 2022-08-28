@@ -277,7 +277,7 @@ for i = 0:procList.getLength()-1
                 precElement = precList.item(l);
                 
                 %pre
-                preTypes = {ActivityPrecedence.PRE_SEQ,ActivityPrecedence.PRE_AND,ActivityPrecedence.PRE_OR};
+                preTypes = {ActivityPrecedenceType.PRE_SEQ,ActivityPrecedenceType.PRE_AND,ActivityPrecedenceType.PRE_OR};
                 for m = 1:length(preTypes)
                     preType = preTypes{m};
                     preList = precElement.getElementsByTagName(preType);
@@ -288,7 +288,7 @@ for i = 0:procList.getLength()-1
                 preElement = preList.item(0);
                 preParams = [];
                 preActList = preElement.getElementsByTagName('activity');
-                if strcmp(preType,ActivityPrecedence.PRE_OR)
+                if strcmp(preType,ActivityPrecedenceType.PRE_OR)
                     preActs = cell(preActList.getLength(),1);
                     preParams = zeros(postActList.getLength(),1);
                     for m = 0:preActList.getLength()-1
@@ -296,7 +296,7 @@ for i = 0:procList.getLength()-1
                         preActs{m+1} = char(preActElement.getAttribute('name'));
                         preParams(m+1) = str2double(char(preActElement.getAttribute('prob')));
                     end
-                elseif strcmp(preType,ActivityPrecedence.PRE_AND)
+                elseif strcmp(preType,ActivityPrecedenceType.PRE_AND)
                     preActs = cell(preActList.getLength(),1);
                     for m = 0:preActList.getLength()-1
                         preActElement = preActList.item(m);
@@ -313,7 +313,7 @@ for i = 0:procList.getLength()-1
                 end
                 
                 %post
-                postTypes = {ActivityPrecedence.POST_SEQ,ActivityPrecedence.POST_AND,ActivityPrecedence.POST_OR,ActivityPrecedence.POST_LOOP};
+                postTypes = {ActivityPrecedenceType.POST_SEQ,ActivityPrecedenceType.POST_AND,ActivityPrecedenceType.POST_OR,ActivityPrecedenceType.POST_LOOP};
                 for m = 1:length(postTypes)
                     postType = postTypes{m};
                     postList = precElement.getElementsByTagName(postType);
@@ -323,7 +323,7 @@ for i = 0:procList.getLength()-1
                 end
                 postElement = postList.item(0);
                 postActList = postElement.getElementsByTagName('activity');
-                if strcmp(postType,ActivityPrecedence.POST_OR)
+                if strcmp(postType,ActivityPrecedenceType.POST_OR)
                     postActs = cell(postActList.getLength(),1);
                     postParams = zeros(postActList.getLength(),1);
                     for m = 0:postActList.getLength()-1
@@ -331,7 +331,7 @@ for i = 0:procList.getLength()-1
                         postActs{m+1} = char(postActElement.getAttribute('name'));
                         postParams(m+1) = str2double(char(postActElement.getAttribute('prob')));
                     end
-                elseif strcmp(postType,ActivityPrecedence.POST_LOOP)
+                elseif strcmp(postType,ActivityPrecedenceType.POST_LOOP)
                     postActs = cell(postActList.getLength()+1,1);
                     postParams = zeros(postActList.getLength(),1);
                     for m = 0:postActList.getLength()-1

@@ -4,6 +4,15 @@ function [XN,UN,QN,RN,TN,CN,tranSysState,tranSync,sn]=solver_ssa_analyzer_serial
 M = sn.nstations;    %number of stations
 K = sn.nclasses;    %number of classes
 
+% istSpaceShift = zeros(1,M);
+% for i=1:M
+%     if i==1
+%         istSpaceShift(i) = 0;
+%     else
+%         istSpaceShift(i) = istSpaceShift(i-1) + size(sn.space{i-1},2);
+%     end
+% end
+
 S = sn.nservers;
 NK = sn.njobs';  % initial population per class
 schedid = sn.schedid;
@@ -50,15 +59,16 @@ for i=1:M
                 end
             else % lld/cd cases
                 ind = sn.stationToNode(i);
-                UN(i,1:K) = 0;
-                for st = wset
-                    [ni,nir] = State.toMarginal(sn, ind, StateSpace(st,(istSpaceShift(i)+1):(istSpaceShift(i)+size(sn.space{i},2))));
-                    if ni>0
-                        for k=1:K
-                            UN(i,k) = UN(i,k) + probSysState(st)*nir(k)*sn.schedparam(i,k)/(nir*sn.schedparam(i,:)');
-                        end
-                    end
-                end
+                UN(i,1:K) = NaN;
+%               UN(i,1:K) = 0;
+%                 for st = wset
+%                     [ni,nir] = State.toMarginal(sn, ind, StateSpace(st,(istSpaceShift(i)+1):(istSpaceShift(i)+size(sn.space{i},2))));
+%                     if ni>0
+%                         for k=1:K
+%                             UN(i,k) = UN(i,k) + probSysState(st)*nir(k)*sn.schedparam(i,k)/(nir*sn.schedparam(i,:)');
+%                         end
+%                     end
+%                 end
             end
         otherwise
             if isempty(sn.lldscaling) && isempty(sn.cdscaling)
@@ -69,15 +79,16 @@ for i=1:M
                 end
             else % lld/cd cases
                 ind = sn.stationToNode(i);
-                UN(i,1:K) = 0;
-                for st = wset
-                    [ni,~,sir] = State.toMarginal(sn, ind, StateSpace(st,(istSpaceShift(i)+1):(istSpaceShift(i)+size(sn.space{i},2))));
-                    if ni>0
-                        for k=1:K
-                            UN(i,k) = UN(i,k) + probSysState(st)*sir(k)/S(i);
-                        end
-                    end
-                end
+                UN(i,1:K) = NaN;
+%               UN(i,1:K) = 0;                
+%                 for st = wset
+%                     [ni,~,sir] = State.toMarginal(sn, ind, StateSpace(st,(istSpaceShift(i)+1):(istSpaceShift(i)+size(sn.space{i},2))));
+%                     if ni>0
+%                         for k=1:K
+%                             UN(i,k) = UN(i,k) + probSysState(st)*sir(k)/S(i);
+%                         end
+%                     end
+%                 end
             end
     end
 end

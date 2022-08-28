@@ -1,4 +1,4 @@
-function stationStateAggr = sampleAggr(self, node, numSamples)
+function stationStateAggr = sampleAggr(self, node, numSamples, markActivePassive)
 % SAMPLE = SAMPLEAGGR(NODE, NUMSAMPLES)
 
 if nargin<2 %~exist('node','var')
@@ -38,5 +38,23 @@ switch options.method
     otherwise
         line_error(mfilename,'sampleAggr is not available in SolverSSA with the chosen method.');
 end
-stationStateAggr.t = [0; stationStateAggr.t(2:end)];
+%stationStateAggr.t = [0; stationStateAggr.t(2:end)];
+if markActivePassive
+    apevent = cell(1,length(stationStateAggr.t)-1);
+    for ti = 1:length(apevent)
+        apevent{ti} = struct('active',[],'passive',[]);
+    end
+    for e=1:length(stationStateAggr.event)
+        ti = find(stationStateAggr.event{e}.t == stationStateAggr.t);
+        if ~isempty(ti) && ti<length(stationStateAggr.t)
+        switch stationStateAggr.event{e}.event
+            case EventType.ID_ARV
+                apevent{ti}.passive = stationStateAggr.event{e};
+            otherwise
+                apevent{ti}.active = stationStateAggr.event{e};
+        end
+        end
+    end
+    stationStateAggr.event = apevent';
+end
 end

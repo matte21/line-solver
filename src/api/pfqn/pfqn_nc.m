@@ -181,7 +181,7 @@ switch options.method
         end
     case {'sampling'}
         if M==1
-            [~,lG] = pfqn_grm(L,N,sum(Z,1),options.samples);
+            [~,lG] = pfqn_mmsample2(L,N,sum(Z,1),options.samples);
         elseif M>R
             [~,lG] = pfqn_mci(L,N,sum(Z,1),options.samples,'imci');
         else
@@ -192,22 +192,12 @@ switch options.method
             line_error(mfilename,sprintf('The %s method requires a model with a delay and a single queueing station.',options.method));
         end
         [~,lG] = pfqn_mmint2_gausslegendre(L,N,sum(Z,1));
-    case {'grm'}
-        if size(L,1)>1
-            line_error(mfilename,sprintf('The %s method requires a model with a delay and a single queueing station.',options.method));
-        end
-        [~,lG] = pfqn_grm(L,N,sum(Z,1),options.samples);
-    case {'pana','panacea','pnc'}
-        [~,lG] = pfqn_panacea(L,N,sum(Z,1));
-        if isnan(lG)
-            line_warning(mfilename,'Model is not in normal usage, panacea cannot continue.');
-        end
-    case 'gm'
-        [~,lG] = pfqn_gm(L,N,sum(Z,1));
-    case 'le'
-        [~,lG] = pfqn_le(L,N,sum(Z,1));
+    case 'cub'
+        [~,lG] = pfqn_cub(L,N,sum(Z,1));
     case 'kt'
         [~,lG] = pfqn_kt(L,N,sum(Z,1));
+    case 'le'
+        [~,lG] = pfqn_le(L,N,sum(Z,1));
     case 'ls'
         [~,lG] = pfqn_ls(L,N,sum(Z,1),options.samples);
     case {'mci','imci'}
@@ -250,6 +240,11 @@ switch options.method
         else
             [X,Q,~,~,lG] = pfqn_mva(L,N,Z);
         end
+    case {'pana','panacea','pnc'}
+        [~,lG] = pfqn_panacea(L,N,sum(Z,1));
+        if isnan(lG)
+            line_warning(mfilename,'Model is not in normal usage, panacea cannot continue.');
+        end        
     case 'propfair'
         [~,lG] = pfqn_propfair(L,N,sum(Z,1));
     case {'recal'}

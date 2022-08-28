@@ -5,16 +5,16 @@ source = Source(model,'Source');
 queue1 = Queue(model,'Queue1',SchedStrategy.FCFS);
 queue2 = Queue(model,'Queue2',SchedStrategy.FCFS);
 fork1 = Fork(model,'Fork1');
-join1 = Join(model,'Join1');
+join1 = Join(model,'Join1',fork1);
 queue3 = Queue(model,'Queue3',SchedStrategy.FCFS);
 queue4 = Queue(model,'Queue4',SchedStrategy.FCFS);
 fork2 = Fork(model,'Fork2');
-join2 = Join(model,'Join2');
+join2 = Join(model,'Join2',fork2);
 sink = Sink(model,'Sink');
 
 jobclass1 = OpenClass(model, 'class1');
 
-source.setArrival(jobclass1, Exp(1.0));
+source.setArrival(jobclass1, Exp(0.4));
 queue1.setService(jobclass1, Exp(1.0));
 queue2.setService(jobclass1, Exp(1.0));
 queue3.setService(jobclass1, Exp(1.0));
@@ -37,8 +37,10 @@ model.link(P);
 
 solver = {};
 solver{end+1} = SolverJMT(model,'seed',23000);
+solver{end+1} = SolverMVA(model);
 
 AvgTable = {};
-AvgTable{end+1} = solver{end}.getAvgTable;
-AvgTable{end}
-
+for s=1:length(solver)
+    AvgTable{end+1} = solver{s}.getAvgTable;
+    AvgTable{s}
+end

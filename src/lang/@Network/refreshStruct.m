@@ -45,7 +45,11 @@ sn.nclasses = length(classnames);
 routing = zeros(sn.nnodes, sn.nclasses);
 for ind=1:sn.nnodes
     for r=1:sn.nclasses
-        routing(ind,r) = RoutingStrategy.toId(self.nodes{ind}.output.outputStrategy{r}{2});
+        if isempty(self.nodes{ind}.output.outputStrategy{r})
+            routing(ind,r) = RoutingStrategy.ID_DISABLED;
+        else
+            routing(ind,r) = RoutingStrategy.toId(self.nodes{ind}.output.outputStrategy{r}{2});
+        end
     end
 end
 
@@ -55,7 +59,6 @@ sn.isstation = NodeType.isStation(nodetypes);
 sn.nstations = sum(sn.isstation);
 sn.nodetype = -1*ones(sn.nstations,1);
 sn.scv = ones(sn.nstations,sn.nclasses);
-%sn.forks = zeros(M,K);
 sn.njobs = njobs(:)';
 sn.refstat = refstat;
 sn.space = cell(sn.nstations,1);
@@ -123,7 +126,7 @@ end
 for isf=1:sn.nstateful
     sn.statefulToNode(isf) = sf2nd(sn,isf);
 end
-
+sn.fj = self.getForkJoins();
 self.sn = sn;
 refreshPriorities(self);
 refreshService(self);
@@ -148,7 +151,6 @@ refreshLocalVars(self); % depends on chains (rtnodes)
 refreshSync(self); % this assumes that refreshChain is called before
 refreshPetriNetNodes(self);
 self.hasStruct = true;
-%sn.forks = self.getForks(sn.rt);
 end
 
 function stat_idx = nd2st(sn, node_idx)

@@ -5,9 +5,17 @@ function model = LINE2SCRIPT(model, filename)
 % All rights reserved.
 if nargin>=2 %exist('filename','var')
     fid = fopen(filename,'w'); % discard
-    QN2SCRIPT(model, model.getName(), fid);
+    if isa(model,'Network')
+        QN2SCRIPT(model, model.getName(), fid);
+    elseif isa(model,'LayeredNetwork')
+        LQN2SCRIPT(model, model.getName(), fid);
+    end
     fclose(fid);
 else
-    QN2SCRIPT(model, model.getName(), 1);
+    if isa(model,'Network')
+        QN2SCRIPT(model, model.getName(), 1);
+    elseif isa(model,'LayeredNetwork')
+        LQN2SCRIPT(model, model.getName(), 1);
+    end
 end
 end

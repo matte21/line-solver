@@ -8,7 +8,7 @@ svcupdmap = self.svcupdmap;
 arvupdmap = self.arvupdmap;
 tputproc = self.tputproc;
 callupdmap = self.callupdmap;
-callresptproc = self.callresptproc;
+callresidtproc = self.callresidtproc;
 
 % reassign service times
 for r=1:size(svcupdmap,1)
@@ -99,7 +99,7 @@ for c=1:size(callupdmap,1)
     node = ensemble{idxhash(idx)}.nodes{nodeidx};
     switch nodeidx
         case ensemble{idxhash(idx)}.attribute.clientIdx % client
-            node.setService(class, callresptproc{cidx});
+            node.setService(class, callresidtproc{cidx});
         case ensemble{idxhash(idx)}.attribute.serverIdx % the call is processed by the server, then replace with the svc time
             eidx = lqn.callpair(cidx,2);
             %tidx = lqn.parent(eidx);
@@ -132,5 +132,5 @@ end
 %self.arvupdmap = arvupdmap;
 %self.tputproc = tputproc;
 %self.callupdmap = callupdmap;
-%self.callresptproc = callresptproc;
+%self.callresidtproc = callresidtproc;
 end

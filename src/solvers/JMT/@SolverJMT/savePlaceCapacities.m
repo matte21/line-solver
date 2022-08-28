@@ -11,6 +11,7 @@ placeCapacityNode.setAttribute('classPath', 'java.lang.Integer');
 placeCapacityNode.setAttribute('name', 'capacities');
 sn = self.getStruct;
 numOfClasses = sn.nclasses;
+
 i = sn.nodeToStation(ind);
 for r=1:numOfClasses
     refClassNode = simDoc.createElement('refClass');

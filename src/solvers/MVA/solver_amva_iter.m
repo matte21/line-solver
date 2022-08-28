@@ -62,9 +62,28 @@
         if isempty(lldscaling)
             lldscaling = ones(M,Nt);
         end
+        switch options.method
+            case {'default', 'amva.lin', 'lin', 'amva.qdlin','qdlin'}
+                for r=nnzclasses
+                    lldterm(:,r) = pfqn_lldfun(1 + interpTotArvlQlen + Nchain_in(ccl)*permute(gamma(r,k,ccl),3:-1:1) - gamma(r,k,r), lldscaling);
+                end
+            otherwise
         lldterm = pfqn_lldfun(1 + interpTotArvlQlen, lldscaling);
+        end
 
         cdterm = ones(M,K);
+        switch options.method
+            case {'default', 'amva.lin', 'lin', 'amva.qdlin', 'qdlin'}
+                for r=nnzclasses
+                    if ~isempty(cdscaling)
+                        if isfinite(Nchain_in(r))
+                            cdterm(:,r) = pfqn_cdfun(1 + selfArvlQlenSeenByClosed + (Nchain_in(r) - 1)*gamma(r,k,r), cdscaling); % qd-amva class-dependence term
+                        else
+                            cdterm(:,r) = pfqn_cdfun(1 + stationaryQlen + (Nchain_in(r) - 1)*gamma(r,k,r), cdscaling); % qd-amva class-dependence term
+                        end
+                    end
+                end
+            otherwise
         for r=nnzclasses
             if ~isempty(cdscaling)
                 if isfinite(Nchain_in(r))
@@ -74,6 +93,7 @@
                 end
             end
         end
+        end
 
         switch options.config.multiserver
             case 'softmin'
@@ -81,11 +101,11 @@
                     case {'default','amva.lin','lin', 'amva.qdlin','qdlin'} % Linearizer
                         g = 0;
                         for r=ccl
-                            g = g + ((Nt-1)/Nt) * Nchain_in(r) * gamma(ccl,k,r);
+                            g = g + ((Nt-1)/Nt) * Nchain_in(r) * gamma(ccl,:,r);
                         end
-                        msterm = pfqn_lldfun(1 + interpTotArvlQlen + mean(g), [], nservers); % if native qd then account for multiserver in the correciton terms
+                        msterm = pfqn_lldfun(1 + interpTotArvlQlen + mean(g, 1)', [], nservers); % if native qd then account for multiserver in the correciton terms
                     otherwise
-                        msterm = pfqn_lldfun(1 + interpTotArvlQlen + (Nt-1)*mean(gamma(ccl,k)), [], nservers); % if native qd then account for multiserver in the correciton terms
+                        msterm = pfqn_lldfun(1 + interpTotArvlQlen + (Nt-1)*mean(gamma(ccl,:), 1)', [], nservers); % if native qd then account for multiserver in the correciton terms
                 end
             case 'seidmann'
                 msterm = ones(M,1) ./ nservers(:);
@@ -95,13 +115,13 @@
                     case {'default','amva.lin','lin','amva.qdlin','qdlin'} % Linearizer
                         g = 0;
                         for r=ccl
-                            g = g + ((Nt-1)/Nt) * Nchain_in(r) * gamma(ccl,k,r);
+                            g = g + ((Nt-1)/Nt) * Nchain_in(r) * gamma(ccl,:,r);
                         end
-                        msterm = pfqn_lldfun(1 + interpTotArvlQlen + mean(g), [], nservers); % if native qd then account for multiserver in the correciton terms
+                        msterm = pfqn_lldfun(1 + interpTotArvlQlen + mean(g,1)', [], nservers); % if native qd then account for multiserver in the correciton terms
                     otherwise
                         g = 0;
                         for r=ccl
-                            g = g + (Nt-1)*gamma(r,k);
+                            g = g + (Nt-1)*gamma(r,:);
                         end
                         msterm = pfqn_lldfun(1 + interpTotArvlQlen + mean(g), [], nservers); % if native qd then account for multiserver in the correciton terms
                 end
@@ -114,9 +134,10 @@
         Wchain = zeros(M,K);
 
         STeff = zeros(size(STchain_in)); % effective service time
+        lldterm = repmat(lldterm, 1, K);
         for r=nnzclasses
             for k=1:M
-                STeff(k,r) = STchain_in(k,r) * lldterm(k) * msterm(k) * cdterm(k,r);
+                    STeff(k,r) = STchain_in(k,r) * lldterm(k,r) * msterm(k) * cdterm(k,r);
             end
         end
 
@@ -310,6 +331,9 @@
                                     switch options.method
                                         %case {'default', 'amva.lin', 'lin', 'amva.qdlin','qdlin'} % Linearizer
                                         %    Wchain(k,r) = Wchain(k,r) + (STeff(k,r) * selfArvlQlenSeenByClosed(k,r) + STeff(k,sd)*stationaryQlen(k,sd)') + (STeff(k,ccl).*Nchain(ccl)*permute(gamma(r,k,ccl),3:-1:1) - STeff(k,r)*gamma(r,k,r));
+                                        %case {'default', 'amva.lin', 'lin', 'amva.qdlin', 'qdlin'} 
+                                        %    fraction = Qchain_in ./ repmat(Nchain_in, size(Qchain_in, 1), 1);
+                                        %    Wchain(k, r) = Wchain(k, r) + STeff(k, r) * (Nchain_in(ccl) * fraction(k, ccl)' - fraction(k, r)) + STeff(k, r) * (Nchain_in(ccl)*permute(gamma(r,k,ccl),3:-1:1) - gamma(r,k,r));
                                         otherwise
                                             Wchain(k,r) = Wchain(k,r) + (STeff(k,r) * selfArvlQlenSeenByClosed(k,r) + STeff(k,sd)*stationaryQlen(k,sd)');
                                     end
@@ -351,6 +375,7 @@
 
                     case {SchedStrategy.ID_HOL} % non-preemptive priority
                         if STeff(k,r) > 0
+                            Uchain_r = Uchain_in ./ repmat(Xchain_in,M,1) .* (repmat(Xchain_in,M,1) + repmat(tau(r,:),M,1));
 
                             switch options.config.np_priority
                                 case {'default','cl'} % Chandy-Lakshmi

@@ -66,7 +66,7 @@ for ind=nodes
                 state_i = [state_i, 1:sum(self.nodes{ind}.itemLevelCap)];
                 self.nodes{ind}.setState(state_i);
             case 'Router'
-                self.nodes{ind}.setState([1]);
+                self.nodes{ind}.setState([0,1]);
             otherwise
                 self.nodes{ind}.setState([]);
         end

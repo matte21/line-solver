@@ -1,13 +1,12 @@
 function [XN,QN,UN,RN,numIters,AN]=pfqn_aql(L,N,Z,TOL,QN0)
 [K,C]=size(L);
 if nargin<3
-    Z=zeros(1,K);
+    Z=zeros(1,C);
 end
 MAXITER=1e3;
 if nargin<4
     TOL = 1e-7;
 end
-
 Q=cell(1,C+1);
 R=cell(1,C+1);
 X=cell(1,C+1);

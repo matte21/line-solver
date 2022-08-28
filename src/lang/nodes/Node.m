@@ -15,7 +15,7 @@ classdef Node < NetworkElement
     methods(Hidden)
         %Constructor
         function self = Node(name)
-            % SELF = NODE(NAME)              
+            % SELF = NODE(NAME)
 
             self@NetworkElement(char(name));
             self.index = NaN;
@@ -29,13 +29,13 @@ classdef Node < NetworkElement
             self.model = model;
         end
 
-         function self = link(self, nodeTo)
-             % SELF = LINK(NODETO)
-             %
-             %
- 
-             self.model.addLink(self,nodeTo);
-         end
+        function self = link(self, nodeTo)
+            % SELF = LINK(NODETO)
+            %
+            %
+
+            self.model.addLink(self,nodeTo);
+        end
 
         function self = reset(self)
             % SELF = RESET()
@@ -70,6 +70,12 @@ classdef Node < NetworkElement
             % SETROUTING(CLASS, STRATEGY, PARAM)
             % SETROUTING(CLASS, STRATEGY, DESTINATION, PROBABILITY)
 
+            if isa(self,'Cache')
+                switch strategy
+                    case {RoutingStrategy.KCHOICES, RoutingStrategy.WRROBIN, RoutingStrategy.RROBIN}
+                        line_error(mfilename,'State-dependent routing not supported with caches. Add instead a Router node after the cache.');
+                end
+            end
             switch strategy
                 case RoutingStrategy.KCHOICES
                     if nargin < 4
@@ -149,8 +155,11 @@ classdef Node < NetworkElement
     methods (Access = public)
         function ind = subsindex(self)
             % IND = SUBSINDEX()
-
-            ind = double(self.model.getNodeIndex(self.name))-1; % 0 based
+            if isempty(self.model.obj)
+                ind = double(self.model.getNodeIndex(self.name))-1; % 0 based
+            else
+                ind = self.model.obj.getNodeIndex(self.obj);
+            end
         end
 
         function V = horzcat(self, varargin)

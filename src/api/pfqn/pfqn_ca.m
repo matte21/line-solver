@@ -8,8 +8,8 @@ if M==0
 end
 
 if sum(N)==0
-    Gn=0;
-    lGn=-Inf;
+    Gn=1;
+    lGn=0;
     return;
 end
 
@@ -102,9 +102,10 @@ if sum(n)==0
     f=1;
     return
 end
-f=1;
+f=0;
 for r=1:R
-    f=f*Z(r)^n(r);
-    f=f/factorial(n(r));
+    f=f+log(Z(r))*n(r);
+    f=f-gammaln(1+n(r));
 end
+f=exp(f);
 end

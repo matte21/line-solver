@@ -9,15 +9,34 @@ function [QN,UN,RN,TN,CN,XN] = solver_qna(sn, options)
 config = options.config;
 config.space_max = 1;
 
+K = sn.nclasses;
 rt = sn.rt;
+S = 1./sn.rates;
+scv = sn.scv; scv(isnan(scv))=0;
+
+%% immediate feedback elimination
+% this is adapted for class-switching, an alternative implementation would
+% rescale by sum(rt((i-1)*K+r,(i-1)*K+1:R)) rather than rt((i-1)*K+r,(i-1)*K+r)
+for i=1:size(rt,1)
+    for r=1:K
+        for j=1:size(rt,2)
+            for s=1:K
+                if i~=j
+                    rt((i-1)*K+r, (j-1)*K+s) = rt((i-1)*K+r, (j-1)*K+s) / (1-rt((i-1)*K+r,(i-1)*K+r));
+                end
+            end
+        end
+        S(i,r) = S(i,r) / (1-rt((i-1)*K+r,(i-1)*K+r));
+        scv(i,r) = rt((i-1)*K+r,(i-1)*K+r) + (1-rt((i-1)*K+r,(i-1)*K+r))*scv(i,r);
+        rt((i-1)*K+r,(i-1)*K+r) = 0;
+    end
+end
+
 %% generate local state spaces
 I = sn.nnodes;
 M = sn.nstations;
-K = sn.nclasses;
 C = sn.nchains;
 V = cellsum(sn.visits);
-S = 1./sn.rates;
-scv = sn.scv; scv(isnan(scv))=0;
 QN = zeros(M,K);
 QN_1 = QN+Inf;
 

@@ -1,3 +1,6 @@
+2.0.10-2.0.x: 
+- See release notes at https://github.com/imperial-qore/line-solver/releases
+
 2.0.8
 - LN solver completely re-engineered, includes support for asynchronous calls.
 - Several new methods for normalizing constant computations

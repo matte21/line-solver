@@ -190,6 +190,7 @@ Q = ctmc_makeinfgen(Q);
 %% now remove immediate transitions
 % we first determine states in stateful nodes where there is an immediate
 % job in the node
+
 if options.hide_immediate % if want to remove immediate transitions
     statefuls = find(sn.isstateful-sn.isstation);
     imm=[];
@@ -201,11 +202,33 @@ if options.hide_immediate % if want to remove immediate transitions
     nonimm = setdiff(1:size(Q,1),imm);
     stateSpace(imm,:) = [];
     stateSpaceAggr(imm,:) = [];
-    arvRates(imm,:,:) = [];
-    depRates(imm,:,:) = [];
-    [Q,~,~,~,~,T] = ctmc_stochcomp(Q, nonimm);
+    [Q,~,Q12,~,Q22] = ctmc_stochcomp(Q, nonimm);
     for a=1:A
-        Dfilt{a} = Dfilt{a}(nonimm,nonimm)+T;
+        % stochastic complement for action a
+        Q21a = Dfilt{a}(imm,nonimm);
+        Ta = (-Q22) \ Q21a;
+        Ta = Q12*Ta;
+        Dfilt{a} = Dfilt{a}(nonimm,nonimm)+Ta;
+    end
+    % recompute arvRates and depRates
+    arvRates = zeros(size(stateSpace,1),nstateful,nclasses);
+    depRates = zeros(size(stateSpace,1),nstateful,nclasses);
+    for a=1:A
+        % active
+        node_a = sync{a}.active{1}.node;
+        class_a = sync{a}.active{1}.class;
+        event_a = sync{a}.active{1}.event;
+        % passive
+        node_p = sync{a}.passive{1}.node;
+        class_p = sync{a}.passive{1}.class;
+        if event_a == EventType.ID_DEP
+            node_a_sf = sn.nodeToStateful(node_a);
+            node_p_sf = sn.nodeToStateful(node_p);
+            for s=1:size(stateSpace,1)
+                depRates(s,node_a_sf,class_a) = depRates(s,node_a_sf,class_a) + sum(Dfilt{a}(s,:));
+                arvRates(s,node_p_sf,class_p) = arvRates(s,node_p_sf,class_p) + sum(Dfilt{a}(s,:));
+            end
+        end
     end
 end
 %SolverCTMC.printInfGen(Q,SS)

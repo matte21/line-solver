@@ -10,6 +10,7 @@ classdef Distrib < Copyable
     end
     
     properties
+        obj 
         name
         params
         support; % support interval

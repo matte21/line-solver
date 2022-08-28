@@ -14,7 +14,7 @@ classdef Forker < OutputSection
             % SELF = FORKER(CUSTOMERCLASSES)
             
             self@OutputSection('Forker');
-            self.tasksPerLink=1.0;
+            self.tasksPerLink = 1.0;
             initDispatcherJobClasses(self, customerClasses);
         end
     end

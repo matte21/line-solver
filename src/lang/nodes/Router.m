@@ -30,9 +30,10 @@ classdef Router < StatefulNode
             self.server = ServiceTunnel();
             self.numberOfServers = 1;
             self.setModel(model);
-            self.model.addNode(self);
-            for r=1:length(classes)
-                self.setRouting(RoutingStrategy.RAND,classes{r});
+            if ~self.model.addNode(self) % if not a replacement
+                for r=1:length(classes)
+                    self.setRouting(RoutingStrategy.RAND,classes{r});
+                end
             end
         end
         

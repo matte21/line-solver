@@ -60,6 +60,11 @@ else
     sn.csmask = self.csmatrix;
 end
 
+if isfield(sn,'refclass') && length(sn.refclass)<sn.nchains
+    % if the number of chains changed dynamically, extend refclass
+    sn.refclass(end+1:sn.nchains) = 0; 
+end
+
 self.sn = sn;
 
 %% compute visits
@@ -73,4 +78,5 @@ self.sn = sn;
 if propagate
     refreshCapacity(self); % capacity depends on chains and rates
 end
+
 end

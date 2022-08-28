@@ -25,9 +25,13 @@ P(queue2,sink) = 1.0;
 P(queue3,sink) = 1.0;
 
 model.link(P);
+
 solver = {};
 solver{end+1} = SolverJMT(model,'seed',23000);
+solver{end+1} = SolverMVA(model);
 
 AvgTable = {};
-AvgTable{end+1} = solver{end}.getAvgTable;
-AvgTable{end}
+for s=1:length(solver)
+    AvgTable{end+1} = solver{s}.getAvgTable;
+    AvgTable{s}
+end

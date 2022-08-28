@@ -1,5 +1,5 @@
-function plot(self,useNodes, showHostProcs)
-% PLOT(SELF,USENODES, SHOWPROCS)
+function plot(self, useNodes, showHostProcs, showTaskGraph)
+% PLOT(SELF, USENODES, SHOWPROCS, SHOWTASKGRAPH)
 
 % Copyright (c) 2012-2022, Imperial College London
 % All rights reserved.
@@ -10,12 +10,17 @@ end
 if nargin<3 %~exist('showProcs','var')
     showHostProcs = true;
 end
+if nargin<4 %~exist('showTaskGraph','var')
+    showTaskGraph = false;
+end
 
 [lqnGraph,taskGraph] = getGraph(self);
 
-%figure;
-%plot(taskGraph,'Layout','layered','NodeLabel',taskGraph.Nodes.Node);
-%title('Task graph');
+if showTaskGraph
+    figure;
+    plot(taskGraph,'Layout','layered','NodeLabel',taskGraph.Nodes.Node);
+    title('Task graph');
+end
 figure;
 if useNodes
     h = plot(lqnGraph,'Layout','layered','EdgeLabel',lqnGraph.Edges.Weight,'NodeLabel',strrep(lqnGraph.Nodes.Node, '_', '\_'),'MarkerSize',6);
@@ -29,6 +34,13 @@ h.DataTipTemplate.DataTipRows(3) = row;
 row = dataTipTextRow('scheduling',cellfun(@(c) c.scheduling,lqnGraph.Nodes.Object,'UniformOutput',false));
 h.DataTipTemplate.DataTipRows(end+1) = row;
 title(['Model: ',self.name]);
+
+for r=find(lqnGraph.Edges.Pre==1)' %AndFork
+    highlight(h,lqnGraph.Edges.EndNodes(r,:),'EdgeColor','m')
+end
+for r=find(lqnGraph.Edges.Post==1)' % AndJoin
+    highlight(h,lqnGraph.Edges.EndNodes(r,:),'EdgeColor','m')
+end
 
 if showHostProcs
     for r=findstring(lqnGraph.Nodes.Type,'P')

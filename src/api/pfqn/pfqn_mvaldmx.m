@@ -1,6 +1,10 @@
 function [XN,QN,UN,CN,lGN] = pfqn_mvaldmx(lambda,D,N,Z,mu,S)
 % [XN,QN,UN,CN] = PFQN_MVALDMX(LAMBDA,D,N,Z,MU,S)
 
+if nargin<5
+    mu=ones(size(D,1),sum(N(isfinite(N))));
+    S=ones(size(D,1),1);
+end
 if size(mu,2) < sum(N(isfinite(N)))
     line_error(mfilename,'MVALDMX requires to specify the load-dependent rates with one job more than the maximum closed population.');
 end

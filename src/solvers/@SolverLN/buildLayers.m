@@ -9,7 +9,7 @@ lqn = self.lqn;
 
 %% build one subnetwork for every processor
 self.svctmap = cell(lqn.nhosts+lqn.ntasks,1);
-self.callresptmap = cell(lqn.nhosts+lqn.ntasks,1);
+self.callresidtmap = cell(lqn.nhosts+lqn.ntasks,1);
 self.arvupdmap = cell(lqn.nhosts+lqn.ntasks,1);
 self.svcupdmap = cell(lqn.nhosts+lqn.ntasks,1);
 self.callupdmap = cell(lqn.nhosts+lqn.ntasks,1);
@@ -40,7 +40,7 @@ self.svcupdmap = cell2mat(self.svcupdmap);
 self.callupdmap = cell2mat(self.callupdmap);
 self.svctmap = cell2mat(self.svctmap);
 self.arvupdmap = cell2mat(self.arvupdmap);
-self.callresptmap = cell2mat(self.callresptmap);
+self.callresidtmap = cell2mat(self.callresidtmap);
 self.routeupdmap = cell2mat(self.routeupdmap);
 
 % we now calculate the new index of the models after removing the empty
@@ -53,7 +53,7 @@ self.idxhash(emptymodels) = NaN;
 %svcupdmap(:,1) = idxmap(svcupdmap(:,1));
 %callupdmap(:,1) = idxmap(callupdmap(:,1));
 %svctmap(:,1) = idxmap(svctmap(:,1));
-%callresptmap(:,1) = idxmap(callresptmap(:,1));
+%callresidtmap(:,1) = idxmap(callresidtmap(:,1));
 %routupdmap(:,1) = idxmap(routupdmap(:,1));
 
 self.model.ensemble = self.ensemble;

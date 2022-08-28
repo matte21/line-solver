@@ -1,3 +1,5 @@
+if ~isoctave(), clearvars -except exampleName; end
+
 model = LayeredNetwork('cacheInLayeredNetwork');
 
 %% client
@@ -23,8 +25,9 @@ C2.addPrecedence(ActivityPrecedence.CacheAccess(AC2, {AC2h, AC2m}));
 
 lnoptions = SolverLN.defaultOptions;
 %lnoptions.iter_max = 1;
-lnoptions.verbose = 1;
+lnoptions.verbose = true;
 options = SolverMVA.defaultOptions;
+options.verbose = false;
 solver{1} = SolverLN(model, @(model) SolverMVA(model, options), lnoptions);
 AvgTable = {};
 AvgTable{1} = solver{1}.getAvgTable;

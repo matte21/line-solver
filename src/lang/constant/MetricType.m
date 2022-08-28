@@ -6,7 +6,7 @@ classdef (Sealed) MetricType
     
     properties (Constant)
         ResidT = 'Residence Time'; % Response Time * Visits
-        RespT = 'Response Time'; % Response Time for one Visit
+        RespT = 'Response Time'; % Response Time for a single Visit
         DropRate = 'Drop Rate';
         QLen = 'Number of Customers';
         QueueT = 'Queue Time';
