@@ -10,7 +10,10 @@ if ~isempty(self.model.obj)
     sn = self.model.getStruct;
     M = sn.nstations;
     R = sn.nclasses;
-    AvgTable = self.obj.getAvgTable;
+    if isempty(self.obj)
+       self.obj = JLINE.SolverMVA(self.model.obj);
+    end
+    AvgTable = self.obj.getAvgTable();
     [QN,UN,RN,~,TN] = JLINE.arrayListToResults(AvgTable);
     AN = 0*TN;
     WN = 0*RN;

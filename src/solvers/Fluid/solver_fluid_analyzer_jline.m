@@ -11,12 +11,13 @@ jsolver = JLINE.SolverFluid(jmodel);
 import jline.solvers.fluid.*;
 
 jsolver.options.method = options.method;
-result = jsolver.runMethodSpecificAnalyzerViaLine();
+jsolver.options.stiff = options.stiff;
+result = jsolver.runMethodSpecificAnalyzerViaLINE();
 
 %%%% Migrating Result from JLINE SolverResult to native MatLab data structures %%%%
 
 M = jmodel.getNumberOfStatefulNodes; %number of stations
-K = jmodel.getNumberOfClasses;    %number of classes
+K = jmodel.getNumberOfClasses;       %number of classes
 
 QN = NaN*zeros(M,K);
 UN = NaN*zeros(M,K);
@@ -29,11 +30,8 @@ QNt = cell(M,K);
 UNt = cell(M,K);
 TNt = cell(M,K);
 
-rows = 0;
-for i=1:result.t.size()
-    rows = rows + result.t.get(i-1).getNumRows();
-end
-t = NaN*zeros(rows, 1); 
+Tmax = result.t.length();
+t = NaN*zeros(Tmax, 1); 
 
 for i=1:M 
     for j=1:K
@@ -49,7 +47,6 @@ for j=1:K
     XN(1,j) = result.XN.get(0, j-1);
 end
 
-Tmax = result.QNt(i,j).getNumRows();
 for i=1:M 
     for j=1:K
         for p=1:Tmax
@@ -60,22 +57,11 @@ for i=1:M
     end
 end
 
-nextrow = 1;
-for i=1:result.t.size()
-    rows = result.t.get(i-1).getNumRows();
-    cols = result.t.get(i-1).getNumCols();
-    for j=1:rows
-        for k = 1:cols
-            t(nextrow, 1) = result.t.get(i-1).get(j-1, k-1);
-            nextrow = nextrow + 1;
-        end
-    end
+for p=1:Tmax
+    t(p,1) = result.t.get(p-1, 0);
 end
 
-iter = result.xvec_it.size();
-phases = result.xvec_it.get(iter - 1).getNumCols();
-for j=1:phases
-    xvec.odeStateVec(1,j) = result.xvec_it.get(iter - 1).get(0, j-1);
-end
+% NOTE: JLINE designed such that odeStateVec is not returned to LINE
+xvec.odeStateVec = [];
 xvec.sn = network;
 end

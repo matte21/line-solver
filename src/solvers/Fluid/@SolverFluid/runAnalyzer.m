@@ -22,7 +22,7 @@ switch options.method
         else
             options.method = 'matrix';
         end
-    case {'closing','statedep'}
+    case {'closing','statedep','softmin'}
         % do nothing
     otherwise
         line_warning(mfilename,'This solver does not support the specified method. Setting to default.');

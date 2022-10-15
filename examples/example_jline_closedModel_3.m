@@ -1,4 +1,3 @@
-if ~isoctave(), clearvars -except exampleName; end
 model = JNetwork('model');
 
 node{1} = Delay(model, 'Delay');

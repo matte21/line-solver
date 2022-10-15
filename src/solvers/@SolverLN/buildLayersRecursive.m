@@ -114,7 +114,7 @@ for tidx_caller = callers
             aidxClass{eidx}.completes = false;
             aidxClass{eidx}.attribute = [LayeredNetworkElement.ENTRY, eidx];
             model.attribute.entries(end+1,:) = [aidxClass{eidx}.index, eidx];
-            [singleton, javasingleton] = Immediate.getInstance(); 
+            [singleton, javasingleton] = Immediate.getInstance();
             if isempty(model.obj)
                 clientDelay.setService(aidxClass{eidx}, singleton);
             else
@@ -215,7 +215,7 @@ if hasSource
             P{model.classes{oidx}, model.classes{oidx}}(serverStation{m},sinkStation) = p;
         end
         cidx = openClasses(o,3); % 3 = source
-        self.arvupdmap{idx}(end+1,:) = [idx, cidx, model.getNodeIndex(sourceStation), oidx]; 
+        self.arvupdmap{idx}(end+1,:) = [idx, cidx, model.getNodeIndex(sourceStation), oidx];
         for m=1:nreplicas
             self.callupdmap{idx}(end+1,:) = [idx, cidx, model.getNodeIndex(serverStation{m}), oidx];
             self.callresidtmap{idx}(end+1,:) = [idx, cidx, model.getNodeIndex(serverStation{m}), oidx];
@@ -439,14 +439,14 @@ self.ensemble{idx} = model;
                     if callmean(cidx) < nreplicas
                         P{curClass, cidxAuxClass{cidx}}(clientDelay,clientDelay) = 1 - callmean(cidx); % note that callmean(cidx) < nreplicas
                         for m=1:nreplicas
-%                                if isNextPrecFork(aidx)
-%                                end
-%                                     % if next activity is a post-and
-%                                     P{curClass, curClass}(serverStation{m}, forkNode) = 1.0;
-%                                     f = find(nextaidx == nextaidxs);
-%                                     P{curClass, curClass}(forkNode, forkOutputRouter{f}) = 1.0;
-%                                     P{curClass, aidxClass{nextaidx}}(forkOutputRouter{f}, clientDelay) = 1.0;
-%                                 else
+                            %                                if isNextPrecFork(aidx)
+                            %                                end
+                            %                                     % if next activity is a post-and
+                            %                                     P{curClass, curClass}(serverStation{m}, forkNode) = 1.0;
+                            %                                     f = find(nextaidx == nextaidxs);
+                            %                                     P{curClass, curClass}(forkNode, forkOutputRouter{f}) = 1.0;
+                            %                                     P{curClass, aidxClass{nextaidx}}(forkOutputRouter{f}, clientDelay) = 1.0;
+                            %                                 else
                             P{curClass, cidxClass{cidx}}(clientDelay,serverStation{m}) = callmean(cidx) / nreplicas;
                             P{cidxClass{cidx}, cidxClass{cidx}}(serverStation{m},clientDelay) = 1; % not needed, just to avoid leaving the Aux class disconnected
                         end

@@ -22,9 +22,9 @@ end
 outer_iters = 1;
 outer_runtime = tic;
 switch options.method
-    case {'matrix'}
+    case {'matrix','fluid.matrix'}
         [QN, UN, RN, TN, xvec_iter, QNt, UNt, TNt, ~, t] = solver_fluid_matrix(sn, options);
-    case {'closing','statedep'}        
+    case {'closing','statedep','softmin','fluid.closing','fluid.statedep','fluid.softmin'}        
         [QN, UN, RN, TN, xvec_iter, QNt, UNt, TNt, ~, t] = solver_fluid_closing(sn, options);
     otherwise
         line_error(mfilename,'Unsupported method');

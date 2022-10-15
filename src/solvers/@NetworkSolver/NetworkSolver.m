@@ -23,7 +23,7 @@ classdef NetworkSolver < Solver
                 self.setOptions(options);
             end
             self.result = [];
-
+            
             if isempty(model.obj)
 
                 [Q,U,R,T,A,W] = model.getAvgHandles;
@@ -286,9 +286,11 @@ classdef NetworkSolver < Solver
                     solvername = self.result.solver(7:end);
                 end
                 if isnan(iter)
-                    line_printf('\n%s analysis (method: %s) completed. Runtime: %f seconds.\n',solvername,self.result.Avg.method,runtime);
+                    line_printf('%s analysis (method: %s) completed. Runtime: %f seconds.',solvername,self.result.Avg.method,runtime);
+                    fprintf('\n');
                 else
-                    line_printf('\n%s analysis (method: %s) completed. Runtime: %f seconds. Iterations: %d.\n',solvername,self.result.Avg.method,runtime,iter);
+                    line_printf('%s analysis (method: %s) completed. Runtime: %f seconds. Iterations: %d.',solvername,self.result.Avg.method,runtime,iter);
+                    fprintf('\n');
                 end
             end
         end

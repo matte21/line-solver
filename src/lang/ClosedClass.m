@@ -24,7 +24,7 @@ classdef ClosedClass < JobClass
                 self.type = JobClassType.CLOSED;
                 self.population = njobs;
                 if abs(njobs-round(njobs))>Distrib.Tol
-                    line_error(mfilename,sprintf('The number of jobs in class %s must be an integer.\n', name));
+                    line_warning(mfilename,sprintf('The number of jobs in class %s should be an integer, some solvers might fail.', name));
                 end
                 self.priority = 0;
                 if nargin>=5 %exist('prio','var')

@@ -37,7 +37,7 @@ for ind=1:sn.nnodes
                             new_sync = struct('active',cell(1),'passive',cell(1));
                             new_sync.active{1} = Event(EventType.ID_DEP, ind, r);
                             switch sn.routing(ind,s)
-                                case {RoutingStrategy.ID_RROBIN, RoutingStrategy.ID_WRROBIN, RoutingStrategy.ID_JSQ}
+                                case {RoutingStrategy.ID_RROBIN, RoutingStrategy.ID_WRROBIN, RoutingStrategy.ID_JSQ, RoutingStrategy.ID_RL}
                                     new_sync.passive{1} = Event(EventType.ID_ARV, jnd, s, @(state_before, state_after) at(self.sn.rtfun(state_before, state_after), (isf-1)*nclasses+r, (jsf-1)*nclasses+s));
                                 otherwise
                                     new_sync.passive{1} = Event(EventType.ID_ARV, jnd, s, sn.rt((isf-1)*nclasses+r, (jsf-1)*nclasses+s));

@@ -30,6 +30,24 @@ classdef Coxian < MarkovianDistribution
             else
                 line_error(mfilename,'Coxian accepts at most 3 parameters.');
             end
+            jline_mu = java.util.ArrayList();
+            jline_phi = java.util.ArrayList();
+            if length(self.params) == 3
+                jline_mu.add(self.getParam(1).paramValue);
+                jline_mu.add(self.getParam(2).paramValue);
+                jline_phi.add(self.getParam(3).paramValue);
+            else
+                mu = self.getParam(1).paramValue;
+                phi = self.getParam(2).paramValue;
+                for i = 1:length(mu)
+                    jline_mu.add(mu(i));
+                end
+
+                for i = 1:length(phi)
+                    jline_phi.add(phi(i));
+                end
+            end
+            self.obj = jline.lang.distributions.Coxian(jline_mu, jline_phi);
         end
     end
 
@@ -160,7 +178,7 @@ classdef Coxian < MarkovianDistribution
             cx = Coxian(mu,phi);
             cx.immediate = MEAN < Distrib.Tol;
         end
-        
+
     end
 
 end

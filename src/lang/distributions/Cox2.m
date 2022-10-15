@@ -9,6 +9,25 @@ classdef (Sealed)  Cox2 < MarkovianDistribution
             % CX = FIT(MEAN,SCV,SKEW)
             
             cx = Cox2.fitCentral(MEAN,SCV*MEAN^2,SKEW);
+
+            jline_mu = java.util.ArrayList();
+            jline_phi = java.util.ArrayList();
+            if length(line_dist.params) == 3
+                jline_mu.add(cx.getParam(1).paramValue);
+                jline_mu.add(cx.getParam(2).paramValue);
+                jline_phi.add(cx.getParam(3).paramValue);
+            else
+                mu = line_dist.getParam(1).paramValue;
+                phi = line_dist.getParam(2).paramValue;
+                for i = 1:length(mu)
+                    jline_mu.add(mu(i));
+                end
+
+                for i = 1:length(phi)
+                    jline_phi.add(phi(i));
+                end
+            end
+            cx.obj = jline.lang.distributions.Coxian(jline_mu, jline_phi);
         end
         
         function cx = fitCentral(MEAN,VAR,SKEW)

@@ -11,7 +11,13 @@ classdef Immediate < Distrib
 
             self@Distrib('Immediate', 0,[0,0]);
             self.immediate = true;
-            self.obj = jline.lang.distributions.Immediate();            
+            try
+                self.obj = jline.lang.distributions.Immediate();            
+            catch
+                javaaddpath(which('linesolver.jar'));
+                import jline.*; %#ok<SIMPT>
+                self.obj = jline.lang.distributions.Immediate();            
+            end
         end
     end
 

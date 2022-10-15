@@ -3,63 +3,69 @@ classdef Exp < MarkovianDistribution
     %
     % Copyright (c) 2012-2022, Imperial College London
     % All rights reserved.
-    
+
     methods
         function self = Exp(lambda)
-            % SELF = EXP(LAMBDA)            
+            % SELF = EXP(LAMBDA)
             % Constructs an exponential distribution from the rate
             % parameter
             self@MarkovianDistribution('Exponential', 1);
             setParam(self, 1, 'lambda', lambda);
             self.immediate = (1/lambda) < Distrib.Zero;
-            self.obj = jline.lang.distributions.Exp(lambda);
+            try
+                self.obj = jline.lang.distributions.Exp(lambda);
+            catch
+                javaaddpath(which('linesolver.jar'));
+                import jline.*; %#ok<SIMPT>
+                self.obj = jline.lang.distributions.Exp(lambda);
+            end
         end
-            
+
         function X = sample(self, n)
-            % X = SAMPLE(N)            
+            % X = SAMPLE(N)
             % Get n samples from the distribution
             lambda = self.getParam(1).paramValue;
             X = exprnd(1/lambda,n,1);
         end
-        
+
         function phases = getNumberOfPhases(self)
-            % PHASES = GETNUMBEROFPHASES()            
+            % PHASES = GETNUMBEROFPHASES()
             % Get number of phases in the underpinnning phase-type
             % representation
             phases  = 1;
         end
-        
+
         function Ft = evalCDF(self,t)
-            % FT = EVALCDF(SELF,T)            
+            % FT = EVALCDF(SELF,T)
             % Evaluate the cumulative distribution function at t
             % AT T
-            
+
             lambda = self.getParam(1).paramValue;
             Ft = 1-exp(-lambda*t);
         end
-        
+
         function PH = getPH(self)
-            % PH = GETREPRESENTATION()            
+            % PH = GETREPRESENTATION()
             % Return the renewal process associated to the distribution
             lambda = self.getParam(1).paramValue;
             PH = {[-lambda],[lambda]};
         end
-        
+
         function L = evalLST(self, s)
-            % L = EVALST(S)            
+            % L = EVALST(S)
             % Evaluate the Laplace-Stieltjes transform of the distribution function at t
             % AT T
-            
+
             lambda = self.getParam(1).paramValue;
             L = lambda / (lambda + s);
         end
-        
+
         function scv = getSCV(self)
-            scv = 1.0; 
+            scv = 1.0;
         end
-        
+
         function update(self,varargin)
-            % UPDATE(SELF,VARARGIN)            
+            % UPDATE(SELF,VARARGIN)
             % Update parameters to match the first n central moments
             % (n<=4)
             MEAN = varargin{1};
@@ -78,24 +84,24 @@ classdef Exp < MarkovianDistribution
             self.params{1}.paramValue = 1 / MEAN;
             self.immediate = NaN;
         end
-        
+
         function updateMean(self,MEAN)
-            % UPDATEMEAN(SELF,MEAN)            
+            % UPDATEMEAN(SELF,MEAN)
             % Update parameters to match the given mean
-            self.params{1}.paramValue = 1 / MEAN;          
+            self.params{1}.paramValue = 1 / MEAN;
             self.immediate = MEAN <  Distrib.Zero;
         end
-        
+
         function updateRate(self,RATE)
-            % UPDATERATE(SELF,RATE)            
+            % UPDATERATE(SELF,RATE)
             % Update rate parameter
             self.params{1}.paramValue = RATE;
             self.mean = 1/RATE;
             self.immediate = 1/RATE <  Distrib.Zero;
         end
-        
+
         function updateMeanAndSCV(self,MEAN,SCV)
-            % UPDATEMEANANDSCV(SELF,MEAN,SCV)            
+            % UPDATEMEANANDSCV(SELF,MEAN,SCV)
             % Update parameters to match the given mean and squared coefficient of variation (SCV=variance/mean^2)
             if abs(SCV-1) > Distrib.Tol
                 line_warning(mfilename,'Warning: the exponential distribution cannot fit SCV != 1, changing SCV to 1.');
@@ -104,9 +110,9 @@ classdef Exp < MarkovianDistribution
             self.mean = MEAN;
             self.immediate = NaN;
         end
-        
+
     end
-    
+
     methods (Static)
         function ex = fit(MEAN, SCV, SKEW)
             % EX = FIT(MEAN, SCV, SKEW)
@@ -115,19 +121,19 @@ classdef Exp < MarkovianDistribution
             ex = Exp(1);
             ex.update(MEAN, SCV, SKEW);
         end
-        
+
         function ex = fitMean(MEAN)
             % EX = FITMEAN(MEAN)
             % Fit exponential distribution with given mean
             ex = Exp(1/MEAN);
         end
-        
+
         function ex = fitRate(RATE)
             % EX = FITRATE(RATE)
             % Fit exponential distribution with given rate
             ex = Exp(RATE);
         end
-        
+
         function ex = fitMeanAndSCV(MEAN, SCV)
             % EX = FITMEANANDSCV(MEAN, SCV)
             % Fit exponential distribution with given mean and squared coefficient of variation (SCV=variance/mean^2)
@@ -136,7 +142,7 @@ classdef Exp < MarkovianDistribution
             end
             ex = Exp(1/MEAN);
         end
-        
+
         function Qcell = fromMatrix(Lambda)
             % QCELL = FROMMATRIX(LAMBDA)
             % Instantiates a cell array of Exp objects, each with rate
@@ -149,5 +155,5 @@ classdef Exp < MarkovianDistribution
             end
         end
     end
-    
+
 end

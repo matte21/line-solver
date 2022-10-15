@@ -38,6 +38,7 @@ P{3,3} = circul(M);
 model.link(P);
 %%
 options = SolverFluid.defaultOptions;
+options.method = 'statedep';
 options.iter_max = 100;
 solver = SolverFluid(model, options);
 AvgRespT = solver.getAvgRespT

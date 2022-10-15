@@ -102,6 +102,15 @@ classdef Node < NetworkElement
                     else
                         line_error(mfilename,'Weighted round robin weights must be integers.')
                     end
+                case RoutingStrategy.RL
+                    self.output.outputStrategy{1, class.index}{2} = RoutingStrategy.toType(strategy);
+                    if nargin < 4
+                        par1 = -1;
+                        par2 = {-1, -1};
+                    end
+                    self.output.outputStrategy{1, class.index}{3} = par1;      % part1 is value function (tabular or FA)
+                    self.output.outputStrategy{1, class.index}{4} = par2{1};      % part2{2} is nodes that need action
+                    self.output.outputStrategy{1, class.index}{5} = par2{2};      % part2{2} is state size (truncation_value + 1)
                 otherwise
                     switch nargin
                         case 3 % no destination specified

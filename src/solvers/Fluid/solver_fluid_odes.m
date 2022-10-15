@@ -55,6 +55,10 @@ end
 
 %% define ODE system to be returned
 switch options.method
+    case 'softmin'
+        alpha = 20; % softmin parameter
+        ode_sm_h = @(t,x) ode_softmin(x, phi, Mu, PH, M, K, enabled, q_indices, P, Kic, nservers, w, schedid, alpha);
+        ode_h = ode_sm_h;
     case 'statedep'
         ode_sd_h = @(t,x) ode_statedep(x, phi, Mu, PH, M, K, enabled, q_indices, P, Kic, nservers, w, schedid);
         ode_h = ode_sd_h;

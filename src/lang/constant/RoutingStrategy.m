@@ -12,6 +12,7 @@ classdef (Sealed) RoutingStrategy
         ID_JSQ = 4;
         ID_FIRING = 5;
         ID_KCHOICES = 6;
+        ID_RL = 7;
         ID_DISABLED = -1;
         RAND = 'Random';
         RROBIN = 'RoundRobin';
@@ -21,6 +22,7 @@ classdef (Sealed) RoutingStrategy
         DISABLED = 'Disabled';
         FIRING = 'Firing';
         KCHOICES = 'PowerKChoices';
+        RL = 'ReinforcementLearning';
     end
 
     methods (Static, Access = public)
@@ -42,6 +44,8 @@ classdef (Sealed) RoutingStrategy
                     type = RoutingStrategy.FIRING;
                 case 'PowerKChoices'
                     type = RoutingStrategy.KCHOICES;
+                case 'ReinforcementLearning'
+                    type = RoutingStrategy.RL;
                 case 'Disabled'
                     type = RoutingStrategy.DISABLED;
                 otherwise
@@ -65,6 +69,8 @@ classdef (Sealed) RoutingStrategy
                     id = RoutingStrategy.ID_JSQ;
                 case RoutingStrategy.KCHOICES
                     id = RoutingStrategy.ID_KCHOICES;
+                case RoutingStrategy.RL
+                    id = RoutingStrategy.ID_RL;
                 case RoutingStrategy.DISABLED
                     id = RoutingStrategy.ID_DISABLED;
                 otherwise
@@ -89,6 +95,8 @@ classdef (Sealed) RoutingStrategy
                     feature = 'RoutingStrategy_JSQ';
                 case RoutingStrategy.KCHOICES
                     feature = 'RoutingStrategy_KCHOICES';
+                case RoutingStrategy.RL
+                    feature = 'RoutingStrategy_RL';
                 case RoutingStrategy.DISABLED
                     feature = 'RoutingStrategy_DISABLED';
                 otherwise % if unassigned, set it by default to Disabled
@@ -114,6 +122,8 @@ classdef (Sealed) RoutingStrategy
                     text = 'JoinShortestQueue';
                 case RoutingStrategy.KCHOICES
                     text = 'KChoices';
+                case RoutingStrategy.RL
+                    text = 'RL';
                 case RoutingStrategy.DISABLED
                     text = 'Disabled';
                 otherwise % if unassigned, set it by default to Disabled

@@ -84,7 +84,7 @@ for ind=1:sn.nnodes
 
     for r=1:sn.nclasses
         switch sn.routing(ind,r)
-            case {RoutingStrategy.ID_RROBIN, RoutingStrategy.ID_WRROBIN, RoutingStrategy.ID_JSQ}
+            case {RoutingStrategy.ID_RROBIN, RoutingStrategy.ID_WRROBIN, RoutingStrategy.ID_JSQ, RoutingStrategy.ID_RL}
                 sn.isstatedep(ind,3) = true; % state dependent routing
         end
     end

@@ -113,12 +113,14 @@ classdef ServiceEstimator < handle
             i = self.model.getNodeIndex(node);
             r = self.model.getClassIndex(jobclass);
             nodeData = self.samples{i,r};
-            if isempty(ev)
+            if ~exist('ev', 'var')
                 for d=1:length(nodeData)
                     if strcmp(nodeData{d}.type, MetricType.QLen)
-                        data = nodeData{d};
-                        return
+                        data{end+1} = nodeData{d};
                     end
+                end
+                if length(data) == 1
+                    data = data{1};
                 end
             else
                 for d=1:length(nodeData)
@@ -137,7 +139,7 @@ classdef ServiceEstimator < handle
             data = [];
             i = self.model.getNodeIndex(node);
             nodeData = self.samplesAggr{i};
-            if isempty(ev)
+            if ~exist('ev', 'var')
                 for d=1:length(nodeData)
                     if strcmp(nodeData{d}.type, MetricType.QLen)
                         data = nodeData{d};
@@ -158,7 +160,13 @@ classdef ServiceEstimator < handle
         interpolate(self);
         estVal = estimateAt(self, node);
         estVal = estimatorUBO(self, nodes);
+        estVal = estimatorUBO2(self, node);
+        estVal = estimatorUB03(self, nodes);
         estVal = estimatorUBR(self, node);
+        estVal = estimatorEKF(self, node);
+        estVal = estimatorMCMC(self, node);
+        estVal = estimatorMLE(self, node);
+        estVal = estimatorRNN(self, nodes);
     end
     
     methods (Static)
@@ -168,6 +176,7 @@ classdef ServiceEstimator < handle
             options = struct();
             options.verbose = 1;
             options.method = 'ubr';
+            options.variant = 'default';
             options.iter_max = 1000;
         end
     end

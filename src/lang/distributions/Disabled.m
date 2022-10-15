@@ -12,6 +12,8 @@ classdef Disabled < ContinuousDistrib & DiscreteDistrib
             self@ContinuousDistrib('Disabled',1,[NaN,NaN]);
             self@DiscreteDistrib('Disabled',1,[NaN,NaN]);
             setParam(self, 1, 'value', NaN);
+            % not implemented yet
+            self.obj = jline.lang.distributions.Disabled();
         end
     end
     
