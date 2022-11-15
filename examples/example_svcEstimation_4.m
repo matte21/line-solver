@@ -21,7 +21,6 @@ model.link(P);
 n = 1000;
 ts = 1:n;
 ts2 = 1:1:n;
-arvr1_samples = ones(n,1)-rand(n,1)*0.15; 
 arvr2_samples = ones(n,1)-rand(n,1)*0.15; 
 arvr1_samples = 2*ones(n,1)-rand(n,1)*0.15; 
 util_samples = 0.1 * arvr1_samples + 0.3 * arvr2_samples; 

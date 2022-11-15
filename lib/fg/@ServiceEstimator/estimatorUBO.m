@@ -170,9 +170,9 @@ for n=1:N
         b(n, :) = nb;
     else
         if isempty(XN)
-            [x, fObjFun]=fmincon(@nestedInitialObj, zeros(M * R + M + R, 1), [],[], nA, nb, zeros(M * R + M + R, 1), []);
+            [x, fObjFun]=fmincon(@nestedInitialObj, zeros(M * R + M + R, 1), [],[], nA, nb, zeros(M * R + M + R, 1), [],[], options);
         else
-            [x, fObjFun]=fmincon(@nestedObj, zeros(M * R + M + R, 1), [],[], nA, nb, zeros(M * R + M + R, 1), []);
+            [x, fObjFun]=fmincon(@nestedObj, zeros(M * R + M + R, 1), [],[], nA, nb, zeros(M * R + M + R, 1), [], [], options);
         end
         if fObjFun <= 100
             HN{end + 1} = nH;
@@ -185,10 +185,10 @@ end
 if TYPE == "BUNDLE"
     A = reshape(A, size(A,1)*size(nA,1), size(nA, 2));
     b = reshape(b, size(b,1)*size(nb,1), size(nb, 2));
-    [x, fObjFun]=fmincon(@bundleObj, zeros(M * R + M + R, 1), [], [], A, b, XLB, XUB);
+    [x, fObjFun]=fmincon(@bundleObj, zeros(M * R + M + R, 1), [], [], A, b, XLB, XUB, options);
 end
 
-demEst = (reshape(x(1:M*R), M, R))';
+demEst = (reshape(x(1:M*R), M, R));
 
     function f = nestedInitialObj(x)
          f = 0.5 * x' * nH * x;

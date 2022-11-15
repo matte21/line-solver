@@ -77,14 +77,23 @@ classdef CTMC < Process
         end
 
         function plot(self)
+            if issym(self.infGen)
+                line_error('CTMC.plot does not support symbolic CTMCs.');
+            end
             G = digraph(self.infGen-diag(diag(self.infGen)));
             nodeLbl = {};
             if ~isempty(self.stateSpace)
-                for s=1:size(self.stateSpace,1)
-                    if size(self.stateSpace,2)>1
-                        nodeLbl{s} = sprintf('%s%d', sprintf('%d,', self.stateSpace(s,1:end-1)), self.stateSpace(s,end));
-                    else
-                        nodeLbl{s} = sprintf('%d', self.stateSpace(s,end));
+                if iscell(self.stateSpace)
+                    for s=1:size(self.stateSpace,1)
+                        nodeLbl{s} = self.stateSpace{s};
+                    end
+                else
+                    for s=1:size(self.stateSpace,1)
+                        if size(self.stateSpace,2)>1
+                            nodeLbl{s} = sprintf('%s%d', sprintf('%d,', self.stateSpace(s,1:end-1)), self.stateSpace(s,end));
+                        else
+                            nodeLbl{s} = sprintf('%d', self.stateSpace(s,end));
+                        end
                     end
                 end
             end
