@@ -10,7 +10,7 @@ Docker binary release (MCR): https://hub.docker.com/r/linemcr/cli
 [![Hits](https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https%3A%2F%2Fgithub.com%2Fimperial-qore%2Fline-solver&count_bg=%23FFC401&title_bg=%23555555&icon=&icon_color=%23E7E7E7&title=hits&edge_flat=false)](https://hits.seeyoufarm.com)
 [![View LINE on File Exchange](https://www.mathworks.com/matlabcentral/images/matlab-file-exchange.svg)](https://www.mathworks.com/matlabcentral/fileexchange/71486-line)
 
-LINE is a MATLAB toolbox offering computational algorithms for queueing theory. LINE supports the solution of open queueing systems (e.g., M/M/1, M/M/k, M/G/1, ...), open and closed queueing networks, and layered queueing networks. Analysis techniques include analytical approximations, exact formulas and discrete-event simulation.
+LINE is a MATLAB toolbox offering computational algorithms for queueing theory. LINE supports the solution of open queueing systems (e.g., M/M/1, M/M/k, M/G/1, ...), open and closed queueing networks, and layered queueing networks. Analysis techniques include analytical approximations, exact formulas and discrete-event simulation. Detailed information is available in the [LINE wiki][https://github.com/imperial-qore/line-solver/wiki].
 
 The engine offers a language to specify queueing networks that decouples model description from the choice of solver used for its solution. Model-to-model transformations enable the use of either native or external solvers, such as [JMT](http://jmt.sourceforge.net/) and [LQNS](http://www.sce.carleton.ca/rads/lqns/). Native solvers are based on continuous-time Markov chains (CTMC), fluid ordinary differential equations, matrix analytic methods (MAM), normalizing constant analysis, and mean-value analysis (MVA).
 
