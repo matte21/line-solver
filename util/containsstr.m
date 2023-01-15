@@ -5,13 +5,9 @@ function retval = containsstr(varargin)
 % Copyright (c) 2012-2022, Imperial College London
 % All rights reserved.
 
-if isoctave 
-    retval = strfind(varargin{1},varargin{2});
+if length(varargin) == 2
+    retval = builtin('contains',varargin{1},varargin{2});
 else
-    if length(varargin) == 2
-        retval = builtin('contains',varargin{1},varargin{2});
-    else
-        retval = builtin('contains',varargin{1},varargin{2},varargin{3},varargin{4});
-    end
+    retval = builtin('contains',varargin{1},varargin{2},varargin{3},varargin{4});
 end
 end

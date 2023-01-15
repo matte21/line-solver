@@ -1,7 +1,7 @@
 function [outspace, outrate, outprob] =  afterEvent(sn, ind, inspace, event, class, isSimulation)
 % [OUTSPACE, OUTRATE, OUTPROB] =  AFTEREVENT(QN, IND, INSPACE, EVENT, CLASS, ISSIMULATION)
 
-% Copyright (c) 2012-2022, Imperial College London
+% Copyright (c) 2012-2023, Imperial College London
 % All rights reserved.
 
 % outprob: event probability if the action is passive
@@ -9,6 +9,8 @@ function [outspace, outrate, outprob] =  afterEvent(sn, ind, inspace, event, cla
 %if ~exist('isSimulation','var')
 %    isSimulation = false;
 %end
+%global GlobalConstants.Inf
+
 M = sn.nstations;
 R = sn.nclasses;
 S = sn.nservers;
@@ -691,7 +693,7 @@ elseif sn.isstateful(ind)
                                 end
                         end
                         outspace = [space_srv, space_var]; % buf is empty
-                        outrate = Distrib.InfRate*ones(size(outspace,1)); % immediate action
+                        outrate = GlobalConstants.Inf*ones(size(outspace,1)); % immediate action
                     end
             end            
         case NodeType.Cache
@@ -715,7 +717,7 @@ elseif sn.isstateful(ind)
                                 end
                         end
                         outspace = [space_srv, space_var]; % buf is empty
-                        outrate = Distrib.InfRate*ones(size(outspace,1)); % immediate action
+                        outrate = GlobalConstants.Inf*ones(size(outspace,1)); % immediate action
                     end
                 case EventType.ID_READ
                     n = sn.nodeparam{ind}.nitems; % n items
@@ -724,7 +726,7 @@ elseif sn.isstateful(ind)
                     hitclass = sn.nodeparam{ind}.hitclass;
                     missclass = sn.nodeparam{ind}.missclass;
                     h = length(m);
-                    rpolicy_id = sn.nodeparam{ind}.rpolicy;
+                    replacement_id = sn.nodeparam{ind}.replacement;
                     if space_srv(class)>0 && sum(space_srv)==1 % is a job of class is in
                         p = sn.nodeparam{ind}.pread{class};
                         en =  space_srv(:,class) > 0;
@@ -750,7 +752,7 @@ elseif sn.isstateful(ind)
 
                                     if isempty(posk) % CACHE MISS, add to list 1
                                         space_srv_e(missclass(class)) = space_srv_e(missclass(class)) + 1;
-                                        switch rpolicy_id
+                                        switch replacement_id
                                             case {ReplacementStrategy.ID_FIFO, ReplacementStrategy.ID_LRU, ReplacementStrategy.ID_SFIFO}
                                                 varp = var;
                                                 varp(2:m(1)) = var(1:(m(1)-1));
@@ -759,10 +761,10 @@ elseif sn.isstateful(ind)
                                                 space_var_k = [space_var_k; varp];
                                                 if isSimulation
                                                     %% no p(k) weighting since that goes in the outprob vec
-                                                    outrate(end+1,1) = Distrib.InfRate;
+                                                    outrate(end+1,1) = GlobalConstants.Inf;
                                                 else
                                                     for l=2
-                                                        outrate(end+1,1) = ac{class,k}(1,l) * p(k) * Distrib.InfRate;
+                                                        outrate(end+1,1) = ac{class,k}(1,l) * p(k) * GlobalConstants.Inf;
                                                     end
                                                 end
                                             case ReplacementStrategy.ID_RR
@@ -772,7 +774,7 @@ elseif sn.isstateful(ind)
                                                     varp(r) = k;
                                                     space_srv_k = [space_srv_k; space_srv_e];
                                                     space_var_k = [space_var_k; (varp)];
-                                                    outrate(end+1,1) = Distrib.InfRate;
+                                                    outrate(end+1,1) = GlobalConstants.Inf;
                                                 else
                                                     for r=1:m(1) % random position in list 1
                                                         varp = var;
@@ -780,7 +782,7 @@ elseif sn.isstateful(ind)
                                                         space_srv_k = [space_srv_k; space_srv_e];
                                                         space_var_k = [space_var_k; (varp)];
                                                         for l=2
-                                                            outrate(end+1,1) = ac{class,k}(1,l) * p(k)/m(1) * Distrib.InfRate;
+                                                            outrate(end+1,1) = ac{class,k}(1,l) * p(k)/m(1) * GlobalConstants.Inf;
                                                         end
                                                     end
                                                 end
@@ -790,7 +792,7 @@ elseif sn.isstateful(ind)
                                         i = min(find(posk <= cumsum(m)));
                                         j = posk - sum(m(1:i-1));
 
-                                        switch rpolicy_id
+                                        switch replacement_id
                                             case ReplacementStrategy.ID_FIFO
                                                 if isSimulation
                                                     varp = var;
@@ -806,7 +808,7 @@ elseif sn.isstateful(ind)
 
                                                     space_srv_k = [space_srv_k; space_srv_e];
                                                     space_var_k = [space_var_k; varp];
-                                                    outrate(end+1,1) = Distrib.InfRate;
+                                                    outrate(end+1,1) = GlobalConstants.Inf;
                                                 else
                                                     for inew = i:h
                                                         varp = var;
@@ -815,7 +817,7 @@ elseif sn.isstateful(ind)
                                                         varp(cpos(inew,1)) = k;
                                                         space_srv_k = [space_srv_k; space_srv_e];
                                                         space_var_k = [space_var_k; varp];
-                                                        outrate(end+1,1) = ac{class,k}(1+i,1+inew) * p(k) * Distrib.InfRate;
+                                                        outrate(end+1,1) = ac{class,k}(1+i,1+inew) * p(k) * GlobalConstants.Inf;
                                                     end
                                                 end
                                             case ReplacementStrategy.ID_RR
@@ -828,7 +830,7 @@ elseif sn.isstateful(ind)
                                                     outprob = outprob * ac{class,k}(1+i,1+inew);
                                                     space_srv_k = [space_srv_k; space_srv_e];
                                                     space_var_k = [space_var_k; varp];
-                                                    outrate(end+1,1) = Distrib.InfRate;
+                                                    outrate(end+1,1) = GlobalConstants.Inf;
                                                 else
                                                     for inew = i:h
                                                         for r=1:m(inew) % random position in new list
@@ -837,7 +839,7 @@ elseif sn.isstateful(ind)
                                                             varp(cpos(inew,r)) = k;
                                                             space_srv_k = [space_srv_k; space_srv_e];
                                                             space_var_k = [space_var_k; varp];
-                                                            outrate(end+1,1) = ac{class,k}(1+i,1+inew) * p(k)/m(inew) * Distrib.InfRate;
+                                                            outrate(end+1,1) = ac{class,k}(1+i,1+inew) * p(k)/m(inew) * GlobalConstants.Inf;
                                                         end
                                                     end
                                                 end
@@ -851,7 +853,7 @@ elseif sn.isstateful(ind)
                                                     varp(cpos(inew,1)) = k;
                                                     space_srv_k = [space_srv_k; space_srv_e];
                                                     space_var_k = [space_var_k; varp];
-                                                    outrate(end+1,1) = Distrib.InfRate;
+                                                    outrate(end+1,1) = GlobalConstants.Inf;
                                                 else
                                                     for inew = i:h
                                                         varp = var;
@@ -861,7 +863,7 @@ elseif sn.isstateful(ind)
                                                         varp(cpos(inew,1)) = k;
                                                         space_srv_k = [space_srv_k; space_srv_e];
                                                         space_var_k = [space_var_k; varp];
-                                                        outrate(end+1,1) = ac{class,k}(1+i,1+inew) * p(k) * Distrib.InfRate;
+                                                        outrate(end+1,1) = ac{class,k}(1+i,1+inew) * p(k) * GlobalConstants.Inf;
                                                     end
                                                 end
                                         end
@@ -869,22 +871,22 @@ elseif sn.isstateful(ind)
                                         space_srv_e(hitclass(class)) = space_srv_e(hitclass(class)) + 1;
                                         i=h;
                                         j = posk - sum(m(1:i-1));
-                                        switch rpolicy_id
+                                        switch replacement_id
                                             case ReplacementStrategy.ID_RR
                                                 space_srv_k = [space_srv_k; space_srv_e];
                                                 space_var_k = [space_var_k; (var)];
                                                 if isSimulation
-                                                    outrate(end+1,1) = Distrib.InfRate;
+                                                    outrate(end+1,1) = GlobalConstants.Inf;
                                                 else
-                                                    outrate(end+1,1) = ac{class,k}(1+h,1+h) * p(k) * Distrib.InfRate;
+                                                    outrate(end+1,1) = ac{class,k}(1+h,1+h) * p(k) * GlobalConstants.Inf;
                                                 end
                                             case {ReplacementStrategy.ID_FIFO, ReplacementStrategy.ID_SFIFO}
                                                 space_srv_k = [space_srv_k; space_srv_e];
                                                 space_var_k = [space_var_k; var];
                                                 if isSimulation
-                                                    outrate(end+1,1) = Distrib.InfRate;
+                                                    outrate(end+1,1) = GlobalConstants.Inf;
                                                 else
-                                                    outrate(end+1,1) = ac{class,k}(1+h,1+h) * p(k) * Distrib.InfRate;
+                                                    outrate(end+1,1) = ac{class,k}(1+h,1+h) * p(k) * GlobalConstants.Inf;
                                                 end
                                             case ReplacementStrategy.ID_LRU
                                                 varp = var;
@@ -893,9 +895,9 @@ elseif sn.isstateful(ind)
                                                 space_srv_k = [space_srv_k; space_srv_e];
                                                 space_var_k = [space_var_k; varp];
                                                 if isSimulation
-                                                    outrate(end+1,1) = Distrib.InfRate;
+                                                    outrate(end+1,1) = GlobalConstants.Inf;
                                                 else
-                                                    outrate(end+1,1) = ac{class,k}(1+h,1+h) * p(k) * Distrib.InfRate;
+                                                    outrate(end+1,1) = ac{class,k}(1+h,1+h) * p(k) * GlobalConstants.Inf;
                                                 end
                                         end
                                     end

@@ -1,4 +1,4 @@
-if ~isoctave(), clearvars -except exampleName; end 
+clearvars -except exampleName; 
 %% a basic M/M/1 with explicit definition of a classswitch node
 
 model = Network('mm1cs');

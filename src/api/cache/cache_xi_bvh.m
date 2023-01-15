@@ -50,4 +50,3 @@ end
 
 z=z(2:end);
 end
-    

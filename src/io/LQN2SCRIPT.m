@@ -1,7 +1,7 @@
 function LQN2SCRIPT(lqnmodel, modelName, fid)
 % myLQN2SCRIPT(MODEL, MODELNAME, FID)
 
-% Copyright (c) 2012-2022, Imperial College London
+% Copyright (c) 2012-2023, Imperial College London
 % All rights reserved.
 
 if nargin<2%~exist('modelName','var')
@@ -66,7 +66,7 @@ for a=1:sn.nacts
     end
     if sn.sched{tidx} ~= SchedStrategy.ID_REF % ref tasks don't reply
         repliesToStr = '';
-        repliesTo = find(sn.replygraph(aidx,(sn.eshift+1):(sn.eshift+sn.nentries)));
+        repliesTo = find(sn.replygraph(a,:)); % index of entry
         if ~isempty(repliesTo)
             if ~sn.isref(sn.parent(sn.eshift+repliesTo))
                 repliesToStr = sprintf('.repliesTo(E{%d})',repliesTo);

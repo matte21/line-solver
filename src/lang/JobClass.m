@@ -1,7 +1,7 @@
 classdef JobClass < NetworkElement
     % An abstract class for a collection of indistinguishable jobs
     %
-    % Copyright (c) 2012-2022, Imperial College London
+    % Copyright (c) 2012-2023, Imperial College London
     % All rights reserved.
     
     properties
@@ -65,6 +65,11 @@ classdef JobClass < NetworkElement
             % IND = SUBSINDEX()
             
             ind = double(self.index)-1; % 0 based
+        end
+        
+        function summary(self)
+            % SUMMARY()
+            line_printf('Class (%s): <strong>%s</strong>',self.type,self.getName);
         end
     end
     

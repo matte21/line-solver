@@ -1,7 +1,7 @@
 classdef EmpiricalCDF < Distrib
     % Empirical Cdf for a distribution
     %
-    % Copyright (c) 2012-2022, Imperial College London
+    % Copyright (c) 2012-2023, Imperial College London
     % All rights reserved.
 
     properties

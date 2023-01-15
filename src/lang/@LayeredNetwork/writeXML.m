@@ -1,17 +1,20 @@
-function writeXML(self,filename,abstractNames)
-% WRITEXML(SELF,FILENAME)
-% Copyright (c) 2012-2022, Imperial College London
+function writeXML(self,filename,useAbstractNames)
+% WRITEXML(SELF,FILENAME,USEAN)
+%
+% USEAN: if true replaces node names with abstract names eg E1, T1, ... 
+%
+% Copyright (c) 2012-2023, Imperial College London
 % All rights reserved.
 
 if nargin<3
-    abstractNames=false;
+    useAbstractNames=false;
 end
 nodeHashMap = containers.Map;
 
 tctr = 0;
 ectr = 0;
 actr = 0;
-if abstractNames
+if useAbstractNames
     for p = 1:length(self.hosts)
         curProc = self.hosts{p};
         nodeHashMap(curProc.name)=sprintf('P%d',p);
@@ -210,7 +213,10 @@ source = DOMSource(doc);
 if isempty(fileparts(filename))
     filename=[lineRootFolder,filesep,'workspace',filesep,filename];
 end
-fprintf(1,'LQN model: %s\n', filename);
+
+%if self.options.verbose
+%    line_printf('\nLQN model: %s\n', filename);
+%end
 result = StreamResult(File(filename));
 transformer.transform(source, result);
 end

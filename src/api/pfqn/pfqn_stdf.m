@@ -12,10 +12,10 @@ for k=1:M
 end
 
 % when t==0 the hkc function is not well defined
-tset(tset == 0) = Distrib.Zero;
+tset(tset == 0) = GlobalConstants.FineTol;
 
 for k=fcfsNodes(:)'
-    if range(rates(k,:))>Distrib.Zero
+    if range(rates(k,:))>GlobalConstants.FineTol
         line_error(mfilename,'The FCFS stations has distinct service rates, the model is invalid.');
     end
     hMAP = cell(1,1+sum(N));
@@ -29,7 +29,7 @@ for k=fcfsNodes(:)'
     end
     
     for r=1:R
-        if L(k,r) > Distrib.Zero
+        if L(k,r) > GlobalConstants.FineTol
             Nr = oner(N,r);
             [~,~,~,~,lGr,isNumStable]  = pfqn_mvald(L,Nr,Z,mu);
             lGr = lGr(end);
@@ -84,13 +84,13 @@ for k=fcfsNodes(:)'
                         %lYks_t = pfqn_nrp(L,oner(Nr,s),Z,gammak);
                         [~,~,~,~,lYks_t]  = pfqn_mvald(L,oner(Nr,s),Z,gammak); lYks_t = lYks_t(end);
                         %if t==10
-                        %    keyboard
+                        %    %keyboard
                         %end
                         Hkrt(t) = Hkrt(t) + (L(k,s) * hkc(t,1+0) / gammat(k,1)) * exp(lYks_t); % nvec = 0
                     end
                 end
             end
-            Hkrt(isnan(Hkrt)) = Distrib.Zero;
+            Hkrt(isnan(Hkrt)) = GlobalConstants.FineTol;
             lHkrt = log(Hkrt);
             
             RD{k,r}(1:T,1) = min(1,exp(lHkrt - lGr));

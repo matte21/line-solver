@@ -1,6 +1,7 @@
 function initFromMarginal(self, n, options) % n(i,r) : number of jobs of class r in node i
 % INITFROMMARGINAL(N, OPTIONS) % N(I,R) : NUMBER OF JOBS OF CLASS R IN NODE I
 
+%global GlobalConstants.CoarseTol
 
 if nargin<3 %~exist('options','var')
     options = Solver.defaultOptions;
@@ -28,7 +29,11 @@ for ind=1:sn.nnodes
             case NodeType.Place
                 self.nodes{ind}.setState(sum(n(ist,:))); % must be single class token
             otherwise
-                self.nodes{ind}.setState(State.fromMarginal(sn,ind,n(ist,:)));
+                if max(abs(n(ist,:) - round(n(ist,:)))) < GlobalConstants.CoarseTol
+                    self.nodes{ind}.setState(State.fromMarginal(sn,ind,round(n(ist,:))));
+                else % the state argument is purposedly given fractional, e.g. for Fluid solver initialization
+                    self.nodes{ind}.setState(n(ist,:));
+                end
         end
         if isempty(self.nodes{ind}.getState)
             line_error(mfilename,sprintf('Invalid state assignment for station %d.',ind));

@@ -1,7 +1,7 @@
 classdef Network < Model
     % An extended queueing network model.
     %
-    % Copyright (c) 2012-2022, Imperial College London
+    % Copyright (c) 2012-2023, Imperial College London
     % All rights reserved.
 
     properties (Access=private)
@@ -352,15 +352,18 @@ classdef Network < Model
 
         function summary(self)
             % SUMMARY()
+            for i=1:self.getNumberOfClasses
+                self.classes{i}.summary();
+            end
             for i=1:self.getNumberOfNodes
                 self.nodes{i}.summary();
             end
             line_printf('\n<strong>Routing matrix</strong>:');
             self.printRoutingMatrix
             line_printf('\n<strong>Product-form parameters</strong>:');
-            [arvRates,svcDemands,nJobs,thinkTimes,ldScalings,nServers]= getProductFormParameters(self);
+            [arvRates,servDemands,nJobs,thinkTimes,ldScalings,nServers]= getProductFormParameters(self);
             line_printf('\nArrival rates: %s',mat2str(arvRates,6));
-            line_printf('\nService demands: %s',mat2str(svcDemands,6));
+            line_printf('\nService demands: %s',mat2str(servDemands,6));
             line_printf('\nNumber of jobs: %s',mat2str(nJobs));
             line_printf('\nThink times: %s',mat2str(thinkTimes,6));
             line_printf('\nLoad-dependent scalings: %s',mat2str(ldScalings,6));
@@ -369,12 +372,24 @@ classdef Network < Model
 
         function [D,Z] = getDemands(self)
             % [D,Z]= GETDEMANDS()
+            %
+            % Outputs:
+            % D: service demands
+            % Z: think times
 
             [~,D,~,Z,~,~] = snGetProductFormParams(self.getStruct);
         end
 
         function [lambda,D,N,Z,mu,S]= getProductFormParameters(self)
             % [LAMBDA,D,N,Z,MU,S]= GETPRODUCTFORMPARAMETERS()
+            %
+            % Outputs:
+            % LAMBDA: arrival rates for open classes
+            % D: service demands
+            % N: population vector for closed classes
+            % Z: think times
+            % mu: load-dependent rates
+            % S: number of servers
 
             % mu also returns max(S) elements after population |N| as this is
             % required by MVALDMX
@@ -384,6 +399,15 @@ classdef Network < Model
 
         function [lambda,D,N,Z,mu,S]= getProductFormChainParameters(self)
             % [LAMBDA,D,N,Z,MU,S]= GETPRODUCTFORMCHAINPARAMETERS()
+            %
+                        % Outputs:
+            % LAMBDA: arrival rates for open classes
+            % D: service demands
+            % N: population vector for closed classes
+            % Z: think times
+            % mu: load-dependent rates
+            % S: number of servers
+
 
             % mu also returns max(S) elements after population |N| as this is
             % required by MVALDMX
@@ -474,7 +498,7 @@ classdef Network < Model
         %% Add the components to the model
         addJobClass(self, customerClass);
         bool = addNode(self, node);
-        addRegion(self, nodes);
+        fcr = addRegion(self, nodes);
         addLink(self, nodeA, nodeB);
         addLinks(self, nodeList);
         addItemSet(self, itemSet);

@@ -1,7 +1,7 @@
 classdef SolverNC < NetworkSolver
     % A solver based on normalizing constant methods.
     %
-    % Copyright (c) 2012-2022, Imperial College London
+    % Copyright (c) 2012-2023, Imperial College London
     % All rights reserved.
     
     methods
@@ -64,8 +64,8 @@ classdef SolverNC < NetworkSolver
         function checkOptions(options)
             % CHECKOPTIONS(OPTIONS)
             solverName = mfilename;
-            if isfield(options,'timespan') && isfinite(options.timespan(2))
-                line_error(mfilename,sprintf('Finite timespan not supported in %s',solverName));
+            if isfield(options,'timespan') && isfinite(options.timespan(2)) && options.verbose
+                line_warning(mfilename,sprintf('Finite timespan not supported in %s',solverName));
             end
         end
         

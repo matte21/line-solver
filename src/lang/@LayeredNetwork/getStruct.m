@@ -2,37 +2,27 @@ function lqn = getStruct(self)
 % LQN = GETSTRUCT(SELF)
 %
 %
-% Copyright 2012-2022, Imperial College London
+% Copyright 2012-2023, Imperial College London
 
 lqn = LayeredNetworkStruct();
 lqn.nidx = 0;  % total number of hosts, tasks, entries, and activities, except the reference tasks
+lqn.hshift = 0;
+lqn.cshift = 0;
 lqn.nhosts = length(self.hosts);
 lqn.ntasks = length(self.tasks);
-lqn.nreftasks = length(self.reftasks);
-lqn.nacts = length(self.activities);
 lqn.nentries = length(self.entries);
-lqn.ntasksof = [];  % number of tasks on the ith host
-lqn.nentriesof = [];
-lqn.nactsof = [];
+lqn.nacts = length(self.activities);
 lqn.tshift = lqn.nhosts;
 lqn.eshift = lqn.nhosts + lqn.ntasks;
 lqn.ashift = lqn.nhosts + lqn.ntasks + lqn.nentries;
 
-for p=1:lqn.nhosts
-    lqn.ntasksof(p) = length(self.hosts{p}.tasks);
-end
-
 %% analyze static properties
 lqn.nidx = lqn.nhosts + lqn.ntasks + lqn.nentries + lqn.nacts;
 idx = 1;
-lqn.hostidx = [];
-lqn.taskidx = [];
-lqn.entryidx = [];
-lqn.actidx = [];
 lqn.tasksof = cell(lqn.nhosts,1);
 lqn.entriesof = cell(lqn.nhosts+lqn.ntasks,1);
 lqn.actsof = cell(lqn.nhosts+lqn.ntasks,1);
-lqn.callsof = cell(lqn.nhosts+lqn.ntasks,1);
+lqn.callsof = cell(lqn.nacts,1);
 lqn.hostdem = {};
 lqn.think = {};
 lqn.sched = {};
@@ -43,15 +33,13 @@ lqn.hashnames = {};
 lqn.mult = zeros(lqn.nhosts+lqn.ntasks,1);
 lqn.repl = zeros(lqn.nhosts+lqn.ntasks,1);
 lqn.type = zeros(lqn.nidx,1);
-lqn.graph = sparse([]);
-lqn.replies = [];
-lqn.replygraph = sparse([]);
+lqn.graph = zeros(lqn.nidx,lqn.nidx);
+%lqn.replies = [];
+lqn.replygraph = false(lqn.nacts,lqn.nentries);
 
-lqn.nitems = cell(lqn.nhosts+lqn.ntasks,1);
-lqn.itemlevelcap  = {};
-lqn.replacementpolicy  = {};
-lqn.nitemsof = {};
-lqn.itemsdistribution = {};
+lqn.nitems = zeros(lqn.nhosts+lqn.ntasks,1);
+lqn.itemcap  = {};
+lqn.itemproc = {};
 lqn.iscache = zeros(lqn.nhosts+lqn.ntasks,1);
 tshift = lqn.nhosts;
 eshift = lqn.nhosts + lqn.ntasks;
@@ -59,7 +47,6 @@ ashift = lqn.nhosts + lqn.ntasks + lqn.nentries;
 
 lqn.parent = [];
 for p=1:lqn.nhosts  % for every processor, scheduling, multiplicity, replication, names, type
-    lqn.hostidx(end+1) = idx;
     lqn.sched{idx,1} = SchedStrategy.fromText(self.hosts{p}.scheduling);
     lqn.schedid(idx,1) = SchedStrategy.toId(lqn.sched{idx,1});
     lqn.mult(idx,1) = self.hosts{p}.multiplicity;
@@ -72,7 +59,6 @@ for p=1:lqn.nhosts  % for every processor, scheduling, multiplicity, replication
 end
 
 for t=1:lqn.ntasks
-    lqn.taskidx(end+1) = idx;
     lqn.sched{idx,1} = SchedStrategy.fromText(self.tasks{t}.scheduling);
     lqn.schedid(idx,1) = SchedStrategy.toId(lqn.sched{idx,1});
     lqn.hostdem{idx,1} = Immediate.getInstance();
@@ -90,17 +76,15 @@ for t=1:lqn.ntasks
     end
     switch class(self.tasks{t})
         case 'CacheTask'
-            lqn.nitems{idx,1} = self.tasks{t}.items;
-            lqn.itemlevelcap{idx,1} = self.tasks{t}.itemLevelCap;
-            lqn.replacementpolicy{idx,1} = self.tasks{t}.replacementPolicy;
+            lqn.nitems(idx,1) = self.tasks{t}.items;
+            lqn.itemcap{idx,1} = self.tasks{t}.itemLevelCap;
+            lqn.replacement(idx,1) = self.tasks{t}.replacementPolicy;
             lqn.hashnames{idx,1} = ['C:',lqn.names{idx,1}];
             %lqn.shortnames{idx,1} = ['C',num2str(idx-tshift)];
     end
     pidx = find(cellfun(@(x) strcmp(x.name, self.tasks{t}.parent.name), self.hosts));
     lqn.parent(idx) = pidx;
     lqn.graph(idx, pidx) = 1;
-    lqn.nentriesof(idx) = length(self.tasks{t}.entries);
-    lqn.nactsof(idx) = length(self.tasks{t}.activities);
     lqn.type(idx) = LayeredNetworkElement.TASK; % task
     idx = idx + 1;
 end
@@ -111,7 +95,6 @@ for p=1:lqn.nhosts  % for every processor
 end
 
 for e=1:lqn.nentries
-    lqn.entryidx(end+1) = idx;
     lqn.names{idx,1} = self.entries{e}.name;
     switch class(self.entries{e})
         case 'Entry'
@@ -120,8 +103,8 @@ for e=1:lqn.nentries
         case 'ItemEntry'
             lqn.hashnames{idx,1} = ['I:',lqn.names{idx,1}];
             %lqn.shortnames{idx,1} = ['I',num2str(idx-eshift)];
-            lqn.nitemsof{idx,1} = self.entries{e}.cardinality;
-            lqn.itemsdistribution{idx,1} = self.entries{e}.popularity;
+            lqn.nitems(idx,1) = self.entries{e}.cardinality;            
+            lqn.itemproc{idx,1} = self.entries{e}.popularity;
     end
     lqn.hostdem{idx,1} = Immediate.getInstance();
     tidx = lqn.nhosts + find(cellfun(@(x) strcmp(x.name, self.entries{e}.parent.name), self.tasks));
@@ -133,7 +116,6 @@ for e=1:lqn.nentries
 end
 
 for a=1:lqn.nacts
-    lqn.actidx(end+1) = idx;
     lqn.names{idx,1} = self.activities{a}.name;
     lqn.hashnames{idx,1} = ['A:',lqn.names{idx,1}];
     %lqn.shortnames{idx,1} = ['A',num2str(idx - ashift)];
@@ -144,13 +126,13 @@ for a=1:lqn.nacts
     lqn.type(idx) = LayeredNetworkElement.ACTIVITY; % activities
     idx = idx + 1;
 end
+
 nidx = idx - 1; % number of indices
 lqn.graph(nidx,nidx) = 0;
 
 tasks = self.tasks;
 %% now analyze calls
 cidx = 0;
-lqn.callidx = sparse(lqn.nidx,lqn.nidx);
 lqn.calltype = sparse([],lqn.nidx,1);
 lqn.iscaller = sparse(lqn.nidx,lqn.nidx);
 lqn.issynccaller = sparse(lqn.nidx,lqn.nidx);
@@ -160,14 +142,14 @@ lqn.callproc = {};
 lqn.callnames = {};
 lqn.callhashnames = {};
 %lqn.callshortnames = {};
-lqn.taskgraph = sparse([],lqn.ntasks, lqn.ntasks);
+lqn.taskgraph = sparse(lqn.tshift+lqn.ntasks, lqn.tshift+lqn.ntasks);
 lqn.actpretype = sparse(lqn.nidx,1);
 lqn.actposttype = sparse(lqn.nidx,1);
 
 for t = 1:lqn.ntasks
-    tidx = lqn.taskidx(t);
-    lqn.actsof{tidx} = zeros(1,lqn.nactsof(tidx));
-    for a=1:lqn.nactsof(tidx)
+    tidx = lqn.tshift+t;
+    lqn.actsof{tidx} = zeros(1,length(self.tasks{t}.activities));
+    for a=1:length(self.tasks{t}.activities)
         aidx = findstring(lqn.hashnames, ['A:',tasks{t}.activities(a).name]);
         lqn.callsof{aidx} = [];
         lqn.actsof{tidx}(a) = aidx;
@@ -189,7 +171,6 @@ for t = 1:lqn.ntasks
             end
             target_tidx = lqn.parent(target_eidx);
             cidx = cidx + 1;
-            lqn.callidx(aidx, target_eidx) = cidx;
             lqn.calltype(cidx,1) = CallType.ID_SYNC;
             lqn.callpair(cidx,1:2) = [aidx,target_eidx];
             lqn.callnames{cidx,1} = [lqn.names{aidx},'=>',lqn.names{target_eidx}];
@@ -198,9 +179,11 @@ for t = 1:lqn.ntasks
             lqn.callproc{cidx,1} = Geometric(1/tasks{t}.activities(a).syncCallMeans(s)); % synch
             lqn.callsof{aidx}(end+1) = cidx;
             lqn.iscaller(tidx, target_tidx) = true;
+            lqn.iscaller(aidx, target_tidx) = true;
             lqn.iscaller(tidx, target_eidx) = true;
             lqn.iscaller(aidx, target_eidx) = true;
             lqn.issynccaller(tidx, target_tidx) = true;
+            lqn.issynccaller(aidx, target_tidx) = true;
             lqn.issynccaller(tidx, target_eidx) = true;
             lqn.issynccaller(aidx, target_eidx) = true;
             lqn.taskgraph(tidx, target_tidx) = 1;
@@ -211,7 +194,6 @@ for t = 1:lqn.ntasks
             target_eidx = findstring(lqn.hashnames,['E:',tasks{t}.activities(a).asyncCallDests{s}]);
             target_tidx = lqn.parent(target_eidx);
             cidx = cidx + 1;
-            lqn.callidx(aidx, target_eidx) = cidx;
             lqn.callpair(cidx,1:2) = [aidx,target_eidx];
             lqn.calltype(cidx,1) = CallType.ID_ASYNC; % async
             lqn.callnames{cidx,1} = [lqn.names{aidx},'->',lqn.names{target_eidx}];
@@ -220,9 +202,11 @@ for t = 1:lqn.ntasks
             lqn.callproc{cidx,1} = Geometric(1/tasks{t}.activities(a).asyncCallMeans(s)); % asynch
             lqn.callsof{aidx}(end+1) = cidx;
             lqn.iscaller(tidx, target_tidx) = true;
+            lqn.iscaller(aidx, target_tidx) = true;
             lqn.iscaller(tidx, target_eidx) = true;
             lqn.isasynccaller(tidx, target_tidx) = true;
             lqn.isasynccaller(tidx, target_eidx) = true;
+            lqn.isasynccaller(aidx, target_tidx) = true;
             lqn.isasynccaller(aidx, target_eidx) = true;
             lqn.taskgraph(tidx, target_tidx) = 1;
             lqn.graph(aidx, target_eidx) = 1;
@@ -266,7 +250,7 @@ for t = 1:lqn.ntasks
                     end
                 case ActivityPrecedenceType.POST_LOOP
                     counts = tasks{t}.precedences(ap).postParams;
-                    % add the end activity 
+                    % add the end activity
                     enda = length(postacts);
                     endaidx = findstring(lqn.hashnames, ['A:',tasks{t}.precedences(ap).postActs{enda}]);
                     % add the activities inside the loop in parallel with equal probability and connected to end activity
@@ -292,10 +276,10 @@ for t = 1:lqn.ntasks
     end
 end
 
-lqn.replies = false(1,lqn.nidx);
-lqn.replygraph = 0*lqn.graph;
+%lqn.replies = false(1,lqn.nacts);
+%lqn.replygraph = 0*lqn.graph;
 for t = 1:lqn.ntasks
-    tidx = lqn.taskidx(t);
+    tidx = lqn.tshift+t;
     for aidx = lqn.actsof{tidx}
         postaidxs = find(lqn.graph(aidx, :));
         isreply = true;
@@ -308,14 +292,14 @@ for t = 1:lqn.ntasks
         if isreply
             % this is a leaf node, search backward for the parent entry,
             % which is assumed to be unique
-            lqn.replies(aidx) = true;
+            %lqn.replies(aidx-lqn.nacts) = true;
             parentidx = aidx;
             while lqn.type(parentidx) ~= LayeredNetworkElement.ENTRY
                 ancestors = find(lqn.graph(:,parentidx));
                 parentidx = at(ancestors,1); % only choose first ancestor
             end
             if lqn.type(parentidx) == LayeredNetworkElement.ENTRY
-                lqn.replygraph(aidx, parentidx) = 1;
+                lqn.replygraph(aidx, parentidx) = true;
             end
         end
     end
@@ -339,5 +323,5 @@ for tidx = find(lqn.schedid== SchedStrategy.ID_INF)
 end
 
 lqn.isref = lqn.schedid==SchedStrategy.ID_REF;
-lqn.iscache = ~cellfun(@isempty,lqn.nitems);
+lqn.iscache(1:(lqn.tshift+lqn.ntasks)) = lqn.nitems(1:(lqn.tshift+lqn.ntasks))>0;
 end

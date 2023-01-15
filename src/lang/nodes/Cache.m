@@ -1,7 +1,7 @@
 classdef Cache < StatefulNode
     % A class switch node based on cache hits or misses
     %
-    % Copyright (c) 2012-2022, Imperial College London
+    % Copyright (c) 2012-2023, Imperial College London
     % All rights reserved.
     
     properties
@@ -14,11 +14,12 @@ classdef Cache < StatefulNode
         itemLevelCap;
         items;
         accessProb;
+        graph;
     end
     
     methods
         %Constructor
-        function self = Cache(model, name, nitems, itemLevelCap, replPolicy)
+        function self = Cache(model, name, nitems, itemLevelCap, replPolicy, graph)
             % SELF = CACHE(MODEL, NAME, NITEMS, ITEMLEVELCAP, REPLPOLICY)
             
             self@StatefulNode(name);
@@ -50,6 +51,11 @@ classdef Cache < StatefulNode
             self.popularity = {};
             self.setModel(model);
             self.model.addNode(self);
+            if nargin<6
+                self.graph = [];
+            else
+                self.graph = graph;
+            end            
         end
         
         %         function setMissTime(self, distribution)

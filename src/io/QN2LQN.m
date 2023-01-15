@@ -16,8 +16,10 @@ for i=1:sn.nnodes
             P{i} = Host(lqn, sn.nodenames{i}, sn.nservers(sn.nodeToStation(i)), SchedStrategy.fromId(sn.schedid(sn.nodeToStation(i))));
             T{i} = Task(lqn,['T_',sn.nodenames{i}], sn.nservers(sn.nodeToStation(i)), SchedStrategy.INF).on(P{i});
             for r=1:sn.nclasses
-                E{i,r} = Entry(lqn, ['E',num2str(i),'_',num2str(r)]).on(T{i});
-                A{i,r} = Activity(lqn,  ['Q',num2str(i),'_',num2str(r)], model.nodes{i}.getServiceProcess(model.classes{r})).on(T{i}).boundTo(E{i,r}).repliesTo(E{i,r});
+                if sn.visits{r}(i,r)>0
+                    E{i,r} = Entry(lqn, ['E',num2str(i),'_',num2str(r)]).on(T{i});
+                    A{i,r} = Activity(lqn,  ['Q',num2str(i),'_',num2str(r)], model.nodes{i}.getServiceProcess(model.classes{r})).on(T{i}).boundTo(E{i,r}).repliesTo(E{i,r});
+                end
             end
         case NodeType.ClassSwitch
             % no-op
@@ -38,15 +40,17 @@ for i=1:sn.nnodes
             end
         case {NodeType.ID_QUEUE, NodeType.ID_DELAY}
             for r=1:sn.nclasses
+                if sn.visits{r}(i,r)>0
                 c = find(sn.chains(:,r)); % chain of class r
                 inchain = sn.inchain{c};
                 if i == sn.refstat(inchain(1)) && r == inchain(1)
-                    PA{c,i,r} = Activity(lqn,  ['A',num2str(i),'_',num2str(r)], model.nodes{i}.getServiceProcess(model.classes{r})).on(RT{c}).boundTo(RE{c}).synchCall(E{i,r}); % pseudo-activity in ref task
+                    PA{c,i,r} = Activity(lqn,  ['A',num2str(i),'_',num2str(r)], Immediate()).on(RT{c}).boundTo(RE{c}).synchCall(E{i,r}); % pseudo-activity in ref task
                     boundToRE{c} = [i,r];
-                else
-                    PA{c,i,r} = Activity(lqn,  ['A',num2str(i),'_',num2str(r)], model.nodes{i}.getServiceProcess(model.classes{r})).on(RT{c}).synchCall(E{i,r}); % pseudo-activity in ref task
+                else                    
+                    PA{c,i,r} = Activity(lqn,  ['A',num2str(i),'_',num2str(r)], Immediate()).on(RT{c}).synchCall(E{i,r}); % pseudo-activity in ref task
                 end
                 %RT{c}.addPrecedence(ActivityPrecedence.Serial(PN{c,i},PA{i,r}));
+                end
             end
         case NodeType.ClassSwitch
             % no-op

@@ -1,7 +1,7 @@
 function [QN,UN,RN,TN,CN,XN,runtime,tranSysState,tranSync,sn] = solver_ssa_analyzer(sn, options)
 % [QN,UN,RN,TN,CN,XN,RUNTIME,TRANSYSSTATE] = SOLVER_SSA_ANALYZER(QN, OPTIONS)
 
-% Copyright (c) 2012-2022, Imperial College London
+% Copyright (c) 2012-2023, Imperial College London
 % All rights reserved.
 
 Tstart = tic;
@@ -13,9 +13,6 @@ switch options.method
     case {'serial.hash','serial.hashed','hashed'}
         [XN,UN,QN,RN,TN,CN,tranSysState,tranSync,sn] = solver_ssa_analyzer_serial(sn, options, true);
     case {'para','parallel','para.hash','parallel.hash'}
-        if isoctave
-            line_error(mfilename,'Parallel SSA is available only under MATLAB.');
-        end
         try
         [XN,UN,QN,RN,TN,CN,tranSysState,tranSync,sn] = solver_ssa_analyzer_spmd(sn, options);        
         catch e

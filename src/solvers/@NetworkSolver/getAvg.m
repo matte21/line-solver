@@ -3,15 +3,22 @@ function [QNclass,UNclass,RNclass,TNclass,ANclass,WNclass] = getAvg(self,Q,U,R,T
 
 % Return average station metrics at steady-state
 %
-% Copyright (c) 2012-2022, Imperial College London
+% Copyright (c) 2012-2023, Imperial College London
 % All rights reserved.
 
+%global GlobalConstants.FineTol 
+sn = self.model.getStruct;
+
 if ~isempty(self.model.obj)
-    sn = self.model.getStruct;
     M = sn.nstations;
     R = sn.nclasses;
     if isempty(self.obj)
-       self.obj = JLINE.SolverMVA(self.model.obj);
+        switch self.name
+            case 'SolverMVA'
+                self.obj = JLINE.SolverMVA(self.model.obj);
+            case 'SolverSSA'
+                self.obj = JLINE.SolverSSA(self.model.obj);
+        end
     end
     AvgTable = self.obj.getAvgTable();
     [QN,UN,RN,~,TN] = JLINE.arrayListToResults(AvgTable);
@@ -52,6 +59,9 @@ end
 if ~self.hasAvgResults || ~self.options.cache
     try
         runAnalyzer(self);
+        % the next line is required because getAvg can alter the chain
+        % structure in the presence of caches so we need to reload sn
+        sn = self.model.getStruct;
     catch ME
         switch ME.identifier
             case {'Line:FeatureNotSupportedBySolver', 'Line:ModelTooLargeToSolve', 'Line:UnspecifiedOption'}
@@ -74,7 +84,7 @@ if ~self.hasAvgResults || ~self.options.cache
     end
 end % else return cached value
 
-sn = self.getStruct();
+
 M = sn.nstations;
 K = sn.nclasses;
 V = cellsum(sn.visits);
@@ -84,7 +94,6 @@ UNclass = [];
 RNclass = [];
 TNclass = [];
 ANclass = [];
-WNclass = [];
 
 if ~isempty(Q)
     QNclass = zeros(M,K);
@@ -97,6 +106,24 @@ if ~isempty(Q)
             end
         end
     end
+    % nan values indicate that a metric is disabled
+    QNclass(isnan(QNclass))=0;
+    % set to zero entries associated to immediate transitions
+    QNclass(RNclass < 10*GlobalConstants.FineTol)=0;
+    % round to zero numerical perturbations
+    QNclass(QNclass < GlobalConstants.FineTol)=0;
+    % set to zero metrics for classes that are unreachable
+    for k=1:K
+        c = find(sn.chains(:,k));
+        for i=1:M
+            if sn.visits{c}(i,k)==0
+                if ~isempty(QNclass)
+                    QNclass(i,k) = 0;
+                end
+            end
+        end
+    end
+
 end
 
 if ~isempty(U)
@@ -107,6 +134,23 @@ if ~isempty(U)
                 UNclass(i,k) = self.result.Avg.U(i,k);
             else
                 UNclass(i,k) = NaN;
+            end
+        end
+    end
+    % nan values indicate that a metric is disabled
+    UNclass(isnan(UNclass))=0;
+    % set to zero entries associated to immediate transitions
+    UNclass(RNclass < 10*GlobalConstants.FineTol)=0;
+    % round to zero numerical perturbations
+    UNclass(UNclass < GlobalConstants.FineTol)=0;
+    % set to zero metrics for classes that are unreachable
+    for k=1:K
+        c = find(sn.chains(:,k));
+        for i=1:M
+            if sn.visits{c}(i,k)==0
+                if ~isempty(UNclass)
+                    UNclass(i,k) = 0;
+                end
             end
         end
     end
@@ -123,6 +167,24 @@ if ~isempty(R)
             end
         end
     end
+    % nan values indicate that a metric is disabled
+    RNclass(isnan(RNclass))=0;
+    % set to zero entries associated to immediate transitions
+    RNclass(RNclass < 10*GlobalConstants.FineTol)=0;
+    % round to zero numerical perturbations
+    RNclass(RNclass < GlobalConstants.FineTol)=0;
+    % set to zero metrics for classes that are unreachable
+    for k=1:K
+        c = find(sn.chains(:,k));
+        for i=1:M
+            if sn.visits{c}(i,k)==0
+                if ~isempty(RNclass)
+                    RNclass(i,k) = 0;
+                end
+            end
+        end
+    end
+
 end
 
 if ~isempty(T)
@@ -134,8 +196,28 @@ if ~isempty(T)
             else
                 TNclass(i,k) = NaN;
             end
+            %if sn.nodetype(sn.stationToNode(i))~=NodeType.ID_SOURCE && RNclass(i,k) < 10*GlobalConstants.FineTol
+            %    TNclass(i,k)=0;
+            %end
         end
     end
+    % nan values indicate that a metric is disabled
+    TNclass(isnan(TNclass))=0;
+    
+    % round to zero numerical perturbations
+    TNclass(TNclass < GlobalConstants.FineTol)=0;
+    % set to zero metrics for classes that are unreachable
+    for k=1:K
+        c = find(sn.chains(:,k));
+        for i=1:M
+            if sn.visits{c}(i,k)==0
+                if ~isempty(TNclass)
+                    TNclass(i,k) = 0;
+                end
+            end
+        end
+    end
+
 end
 
 if ~isempty(A)
@@ -149,30 +231,29 @@ if ~isempty(A)
             end
         end
     end
+    % nan values indicate that a metric is disabled
+    ANclass(isnan(ANclass))=0;
+    % set to zero entries associated to immediate transitions
+    ANclass(RNclass < 10*GlobalConstants.FineTol)=0;
+    % round to zero numerical perturbations
+    ANclass(ANclass < GlobalConstants.FineTol)=0;
+    % set to zero metrics for classes that are unreachable
+    for k=1:K
+        c = find(sn.chains(:,k));
+        for i=1:M
+            if sn.visits{c}(i,k)==0
+                if ~isempty(ANclass)
+                    ANclass(i,k) = 0;
+                end
+            end
+        end
+    end
+
 end
 
-%% nan values indicate that a metric is disabled
-QNclass(isnan(QNclass))=0;
-UNclass(isnan(UNclass))=0;
-RNclass(isnan(RNclass))=0;
-TNclass(isnan(TNclass))=0;
-ANclass(isnan(ANclass))=0;
-WNclass(isnan(WNclass))=0;
-
-%% set to zero entries associated to immediate transitions
-QNclass(RNclass < 10/Distrib.InfRate)=0;
-UNclass(RNclass < 10/Distrib.InfRate)=0;
-RNclass(RNclass < 10/Distrib.InfRate)=0;
-WNclass(RNclass < 10/Distrib.InfRate)=0;
-
-%% round to zero numerical perturbations
-QNclass(QNclass < Distrib.Zero)=0;
-UNclass(UNclass < Distrib.Zero)=0;
-RNclass(RNclass < Distrib.Zero)=0;
-ANclass(ANclass < Distrib.Zero)=0;
-TNclass(TNclass < Distrib.Zero)=0;
-
+%% compute residence times
 WNclass = 0*RNclass;
+
 for i=1:M
     for k=1:K
         if isempty(W) || W{i,k}.disabled
@@ -180,7 +261,7 @@ for i=1:M
         else
             if ~isempty(RNclass) && RNclass(i,k)>0
                 c = find(sn.chains(:,k));
-                if RNclass(i,k) < Distrib.Zero
+                if RNclass(i,k) < GlobalConstants.FineTol
                     WNclass(i,k) = RNclass(i,k);
                 else
                     refclass = sn.refclass(c);
@@ -197,8 +278,8 @@ for i=1:M
 end
 
 WNclass(isnan(WNclass))=0;
-WNclass(WNclass < 10/Distrib.InfRate)=0;
-WNclass(WNclass < Distrib.Zero)=0;
+WNclass(WNclass < 10*GlobalConstants.FineTol)=0;
+WNclass(WNclass < GlobalConstants.FineTol)=0;
 
 if ~isempty(UNclass)
     unstableQueues = find(sum(UNclass,2)>0.99 * sn.nservers);

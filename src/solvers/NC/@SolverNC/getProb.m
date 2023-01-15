@@ -16,7 +16,7 @@ sn.state{ist} = state;
 options = self.getOptions;
 Solver.resetRandomGeneratorSeed(options.seed);
 
-if isfield(self.result.Prob,'logNormConstAggr') && isfinite(self.result.Prob.logNormConstAggr)
+if ~isempty(self.result) && ~isempty(self.result.Prob) && isfield(self.result.Prob,'logNormConstAggr') && isfinite(self.result.Prob.logNormConstAggr)
     [Pnir,lG] = solver_nc_marg(sn, self.options, self.result.Prob.logNormConstAggr);
 else
     [Pnir,lG] = solver_nc_marg(sn, self.options);

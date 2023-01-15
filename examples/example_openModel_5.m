@@ -1,4 +1,4 @@
-if ~isoctave(), clearvars -except exampleName; end
+clearvars -except exampleName;
 % This model examplifies how to specify models with multiple sinks (virtual
 % sink)
 model = Network('model');

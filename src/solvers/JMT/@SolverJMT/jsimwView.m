@@ -1,7 +1,7 @@
 function jsimwView(self, options)
 % JSIMWVIEW(OPTIONS)
 
-% Copyright (c) 2012-2022, Imperial College London
+% Copyright (c) 2012-2023, Imperial College London
 % All rights reserved.
 
 if self.enableChecks && ~self.supports(self.model)
@@ -21,7 +21,7 @@ self.maxSamples = options.samples;
 sn = self.getStruct;
 writeJSIM(self, sn);
 %            if options.verbose
-fileName = [getFilePath(self),'jsim',filesep, getFileName(self), '.jsim'];
+fileName = [getFilePath(self),filesep, getFileName(self), '.jsim'];
 line_printf('\nJMT Model: %s',fileName);
 jsimwView(fileName);
 end

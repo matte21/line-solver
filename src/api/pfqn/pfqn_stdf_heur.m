@@ -12,11 +12,11 @@ for k=1:M
 end
 
 % when t==0 the hkc function is not well defined
-tset(tset == 0) = Distrib.Zero;
+tset(tset == 0) = GlobalConstants.FineTol;
 hkc = cell(1,R);
 for k=fcfsNodes(:)'
     for r=1:R
-        if L(k,r) > Distrib.Zero
+        if L(k,r) > GlobalConstants.FineTol
             Nr = oner(N,r);
             [X1,Q1,~,~,lGr,isNumStable]  = pfqn_mvald(L,Nr,Z,mu);
             
@@ -88,7 +88,7 @@ for k=fcfsNodes(:)'
                     end
                 end
             end
-            Hkrt(isnan(Hkrt)) = Distrib.Zero;
+            Hkrt(isnan(Hkrt)) = GlobalConstants.FineTol;
             lHkrt = log(Hkrt);
             
             RD{k,r}(1:T,1) = exp(lHkrt - lGr);

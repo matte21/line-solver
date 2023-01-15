@@ -1,7 +1,7 @@
 function [QN,UN,RN,TN,CN,XN,lG,runtime,iter] = solver_mva_cache_analyzer(sn, options)
 % [Q,U,R,T,C,X,LG,RUNTIME,ITER] = SOLVER_MVA_CACHE_ANALYZER(QN, OPTIONS)
 
-% Copyright (c) 2012-2022, Imperial College London
+% Copyright (c) 2012-2023, Imperial College London
 % All rights reserved.
 
 T0=tic;
@@ -46,6 +46,24 @@ switch options.method
         for v=1:u
             missRate(v) = lambda(v,:,1)*pij(:,1);
         end
+    case 'ttl.lrum'
+        pij = cache_ttl_lrum(lambda, m);  % without considering different graph of different items  linear
+        missRate = zeros(1,u);
+        for v=1:u
+            missRate(v) = lambda(v,:,1)*pij(:,1);
+        end        
+    case 'ttl.hlru'
+        pij = cache_ttl_hlru(lambda, m);  % without considering different graph of different items linear
+        missRate = zeros(1,u);
+        for v=1:u
+            missRate(v) = lambda(v,:,1)*pij(:,1);
+        end          
+    case 'ttl.tree'
+        pij = cache_ttl_tree(lambda, R, m);  % considering different graphs of different items
+        missRate = zeros(1,u);
+        for v=1:u
+            missRate(v) = lambda(v,:,1)*pij(:,1);
+        end         
     otherwise
         pij = cache_prob_asy(gamma,m); % FPI method
         missRate = zeros(1,u);

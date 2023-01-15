@@ -1,4 +1,4 @@
-if ~isoctave(), clearvars -except exampleName; end 
+clearvars -except exampleName; 
 N = 30;
 M = 3;
 E = 4;
@@ -21,7 +21,7 @@ envRates = [0,1,0,0; 0,0,1,1; 1,0,0,1; 1,1,0,0]/2;
 for e=1:E
     for h=1:E
         if envRates(e,h)>0
-            envModel.addTransition(envName{e}, envName{h}, Cox2.fitMeanAndSCV(1/envRates(e,h),0.5));
+            envModel.addTransition(envName{e}, envName{h}, APH.fitMeanAndSCV(1/envRates(e,h),0.5));
         end
     end
 end

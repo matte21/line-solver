@@ -1,5 +1,4 @@
-function [lambda,L,N,Z,lGremaind] = pfqn_nc_sanitize(lambda,L,N,Z)
-Tol = 1e-14;
+function [lambda,L,N,Z,lGremaind] = pfqn_nc_sanitize(lambda,L,N,Z,atol)
 % erase empty classes
 nnzclasses=find(N);
 L=L(:,nnzclasses);
@@ -7,7 +6,7 @@ N=N(:,nnzclasses);
 Z=Z(:,nnzclasses);
 lambda=lambda(:,nnzclasses);
 % erase ill-defined classes
-zeroclasses=find((L(:,nnzclasses)+Z(:,nnzclasses))<Distrib.Tol);
+zeroclasses=find((L(:,nnzclasses)+Z(:,nnzclasses))<atol);
 L(:,zeroclasses)=[];
 N(:,zeroclasses)=[];
 Z(:,zeroclasses)=[];
@@ -15,7 +14,7 @@ lambda(:,zeroclasses)=[];
 % 
 lGremaind= 0;
 % find zero demand classes
-zerodemands=find(L<Tol);
+zerodemands=find(L<atol);
 if ~isempty(zerodemands)
     lGremaind = lGremaind + N(zerodemands) * log(Z(zerodemands))' - sum(log(N(zerodemands)));
     L(:,zerodemands)=[];
@@ -30,7 +29,7 @@ lGremaind = lGremaind + N*log(Lmax)';
 % sort from smallest to largest think time
 [~,rsort] = sort(Z,'ascend'); L=L(:,rsort); N=N(:,rsort); Z=Z(:,rsort);
 % ensure zero think time classes are anyway frist
-zerothinktimes=find(Z<Tol);
+zerothinktimes=find(Z<atol);
 nonzerothinktimes = setdiff(1:size(L,2),zerothinktimes);
 L=L(:,[zerothinktimes,nonzerothinktimes]);
 N=N(:,[zerothinktimes,nonzerothinktimes]);

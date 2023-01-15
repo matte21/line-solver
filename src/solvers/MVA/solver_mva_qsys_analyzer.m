@@ -1,7 +1,7 @@
 function [QN,UN,RN,TN,CN,XN,lG,runtime,it] = solver_mva_qsys_analyzer(sn, options)
 % [Q,U,R,T,C,X,LG,RUNTIME,ITER] = SOLVER_MVA_QSYS_ANALYZER(QN, OPTIONS)
 
-% Copyright (c) 2012-2022, Imperial College London
+% Copyright (c) 2012-2023, Imperial College London
 % All rights reserved.
 
 T0=tic;

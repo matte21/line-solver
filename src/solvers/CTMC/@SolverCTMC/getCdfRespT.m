@@ -1,5 +1,6 @@
 function RD = getCdfRespT(self, R)
 % RD = GETCDFRESPT(R)
+%global GlobalConstantsGlobalConstants.FineTol
 
 if nargin<2 %~exist('R','var')
     R = getAvgRespTHandles(self);
@@ -50,7 +51,7 @@ for c=1:sn.nchains
             D = map_normalize({Q-D1, D1});
 
             nonZeroRates = abs(Q(Q~=0));
-            nonZeroRates = nonZeroRates( nonZeroRates >Distrib.Tol );
+            nonZeroRates = nonZeroRates( nonZeroRates > GlobalConstantsGlobalConstants.FineTol );
             T = abs(100/min(nonZeroRates)); % solve ode until T = 100 events with the slowest rate
             dT = T/100000; % solve ode until T = 100 events with the slowest rate
             tset = 0:dT:T;
@@ -60,7 +61,7 @@ for c=1:sn.nchains
             for t=1:length(tset)
                 RD{i,rorig}(t,2) = tset(t);
                 RD{i,rorig}(t,1) = 1-pie_arv * expm(D{1}*tset(t)) * ones(length(D{1}),1);
-                if RD{i,rorig}(t,1)>1-Distrib.Tol
+                if RD{i,rorig}(t,1)>1-GlobalConstants.CoarseTol
                     RD{i,rorig}(t+1:end,:)=[];
                     break
                 end

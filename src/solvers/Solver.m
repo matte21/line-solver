@@ -1,19 +1,19 @@
 classdef Solver < handle
     % Abstract class for model solution algorithms and tools
     %
-    % Copyright (c) 2012-2022, Imperial College London
+    % Copyright (c) 2012-2023, Imperial College London
     % All rights reserved.
-    
+
     properties (Constant)
         VERBOSE_SILENT = 0;
         VERBOSE_STD = 1;
         VERBOSE_DEBUG = 2;
     end
-    
+
     properties (Hidden, Access = public)
         enableChecks;
     end
-    
+
     properties (Access = public)
         options; % Data structure with solver options
         name; % Solver name
@@ -21,7 +21,7 @@ classdef Solver < handle
         result; % last result
         obj;
     end
-    
+
     methods (Hidden)
         %Constructor
         function self = Solver(model, name, options)
@@ -35,50 +35,50 @@ classdef Solver < handle
             self.enableChecks = true;
         end
     end
-    
+
     methods %(Abstract) % implemented with errors for Octave compatibility
-        
+
         function model = getModel(self)
             model = self.model;
         end
-        
+
         sn = getStruct(self);
-        
+
         function bool = supports(self,model)
             % BOOL = SUPPORTS(SELF,MODEL)
             % True if the input model is supported by the solver
             line_error(mfilename,'Line:AbstractMethodCall','An abstract method was called. The function needs to be overridden by a subclass.');
         end
-        
+
         function runtime = runAnalyzer(self, options) % generic method to run the solver
             % RUNTIME = RUN()
             % Run the solver % GENERIC METHOD TO RUN THE SOLVER
             % Solve the model
             line_error(mfilename,'Line:AbstractMethodCall','An abstract method was called. The function needs to be overridden by a subclass.');
         end
-        
+
         function self = setDoChecks(self, bool)
             self.enableChecks = bool;
         end
     end
-    
+
     methods
         function out = getName(self)
             % OUT = GETNAME()
             % Get solver name
             out = self.name;
         end
-        
+
         function options = getDefaultOptions(self)
             % OPTIONS = GETDEFAULTOPTIONS()
             % Get option data structure with default values
             options = Solver.defaultOptions;
         end
-        
+
     end
-    
+
     methods
-        
+
         function checkOptions(self, ~)
             % CHECKOPTIONS(~)
             % Check if input option data structure is valid for the given model
@@ -88,37 +88,37 @@ classdef Solver < handle
                 end
             end
         end
-        
+
         function results = getResults(self)
             % RESULTS = GETRESULTS()
             % Return results data structure
             results = self.result;
         end
-        
+
         function bool = hasResults(self)
             % BOOL = HASRESULTS()
             % Check if the model has been solved
             bool = ~isempty(self.result);
         end
-        
+
         function options = getOptions(self)
             % OPTIONS = GETOPTIONS()
             % Return options data structure
             options = self.options;
         end
-        
+
         function reset(self)
             % RESET()
             % Dispose previously stored results
             resetResults(self);
         end
-        
+
         function resetResults(self)
             % RESET()
             % Dispose previously stored results
             self.result = [];
         end
-        
+
         function self = setOptions(self, options)
             % SELF = SETOPTIONS(OPTIONS)
             % Set a new options data structure
@@ -131,31 +131,25 @@ classdef Solver < handle
             end
             self.options = options;
         end
-        
+
     end
-    
+
     methods (Static)
-        
+
         function resetRandomGeneratorSeed(seed)
             % RESETRANDOMGENERATORSEED(SEED)
             % Assign a new seed to the random number generator
-            if ~isoctave
-                warning('off','MATLAB:RandStream:ActivatingLegacyGenerators');
-                warning('off','MATLAB:RandStream:ReadingInactiveLegacyGeneratorState');
-            end
-            if isoctave
-                rand('seed',seed);
-            else
-                rng(seed,'twister');
-            end
+            warning('off','MATLAB:RandStream:ActivatingLegacyGenerators');
+            warning('off','MATLAB:RandStream:ReadingInactiveLegacyGeneratorState');
+            rng(seed,'twister');
         end
-        
+
         function bool = isAvailable()
             % BOOL = ISAVAILABLE()
             % Check if external dependencies are available for the solver
             bool = true;
         end
-        
+
         function bool = isJavaAvailable()
             % BOOL = ISJAVAAVAILABLE()
             % Check if Java dependencies are available for the solver
@@ -172,51 +166,31 @@ classdef Solver < handle
                 end
             end
         end
-        
+
         function fun = accurateStiffOdeSolver()
             % FUN = ACCURATESTIFFODESOLVER()
             % Return default high-accuracy stiff solver
-            if isoctave
-                %fun = @ode15s;
-                fun = @lsode;
-            else
-                fun = @ode15s;
-            end
+            fun = @ode15s;
         end
-        
+
         function fun = accurateOdeSolver()
             % FUN = ACCURATEODESOLVER()
             % Return default high-accuracy non-stiff solver
-            if isoctave
-                %fun = @ode15s;
-                fun = @lsode;
-            else
-                fun = @ode45;
-            end
+            fun = @ode45;
         end
-        
+
         function fun = fastStiffOdeSolver()
             % FUN = FASTSTIFFODESOLVER()
             % Return default low-accuracy stiff solver
-            if isoctave
-                %fun = @ode15s;
-                fun = @lsode;
-            else
-                fun = @ode23s;
-            end
+            fun = @ode23s;
         end
-        
+
         function fun = fastOdeSolver()
             % FUN = FASTODESOLVER()
             % Return default low-accuracy non-stiff solver
-            if isoctave
-                %fun = @ode15s;
-                fun = @lsode;
-            else
-                fun = @ode23s;
-            end
+            fun = @ode23s;
         end
-        
+
         function [optList, allOpt] = listValidOptions()
             % OPTLIST = LISTVALIDOPTIONS()
             % List valid fields for options data structure
@@ -238,21 +212,21 @@ classdef Solver < handle
                 'aba.upper','aba.lower','gb.upper','gb.lower','sb.upper','sb.lower','bjb.upper','bjb.lower','pb.upper','pb.lower',...
                 'jline.amva'};
         end
-        
+
         function bool = isValidOption(optName)
             % BOOL = ISVALIDOPTION(OPTNAME)
             % Check if the given option exists for the solver
             [~,allOpts] = Solver.listValidOptions();
             bool = any(cell2mat(findstring(optName, allOpts))==1);
         end
-        
+
         function options = defaultOptions()
             % OPTIONS = DEFAULTOPTIONS()
             % Return default options
             options = lineDefaults('MVA');
             options.iter_max = 100;
         end
-        
+
         function options = parseOptions(varargin, defaultOptions)
             % OPTIONS = PARSEOPTIONS(VARARGIN, DEFAULTOPTIONS)
             % Parse option parameters into options data structure
@@ -292,7 +266,7 @@ classdef Solver < handle
                 line_error(mfilename,'Invalid parameter.');
             end
         end
-        
+
         function solver = load(chosenmethod, model, varargin)
             % SOLVER = LOAD(CHOSENMETHOD, MODEL, VARARGIN)
             % Returns a solver configured to run the chosen method
@@ -335,7 +309,7 @@ classdef Solver < handle
                     if strcmp(options.method,'fluid'), options.method='default'; end
                     options.method = erase(options.method,'fluid.');
                     solver = SolverFluid(model, options);
-                case {'nc','nc.exact','nc.imci','nc.ls','cub','ls','nc.le','le','mmint2','nc.panacea','nc.pana','nc.mmint2','nc.kt','nc.deterministic','nc.sampling','nc.propfair','nc.comom','nc.mom','nc.cub','nc.brute','nc.rd', 'nc.nr.probit', 'nc.nr.logit'}
+                case {'nc','nc.exact','nc.imci','nc.ls','cub','ls','nc.le','le','mmint2','nc.panacea','nc.pana','nc.mmint2','nc.kt','nc.deterministic','nc.sampling','nc.propfair','nc.comom','nc.mom','nc.cub','nc.brute','nc.rd', 'nc.nr.probit', 'nc.nr.logit','nc.gm'}
                     if strcmp(options.method,'nc'), options.method='default'; end
                     options.method = erase(options.method,'nc.');
                     solver = SolverNC(model, options);
@@ -346,9 +320,8 @@ classdef Solver < handle
                 otherwise
                     if strcmp(options.method,'auto'), options.method='default'; end
                     solver = LINE(model, options);
-%                    solver = Library(model, options);
             end
         end
-        
+
     end
 end

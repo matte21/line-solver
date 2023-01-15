@@ -1,4 +1,4 @@
-function [lG,lGbasis]=pfqn_comomrm(L,N,Z,m)
+function [lG,lGbasis]=pfqn_comomrm(L,N,Z,m,atol)
 % comom for a finite repairment model
 if size(L,1)~=1
     line_error(mfilename,'The solver accepts at most a single queueing station.')
@@ -7,7 +7,7 @@ if nargin<4
     m=1;
 end
 lambda = 0*N;
-[~,L,N,Z,lG0] = pfqn_nc_sanitize(lambda,L,N,Z);
+[~,L,N,Z,lG0] = pfqn_nc_sanitize(lambda,L,N,Z,atol);
 zerothinktimes=find(Z<1e-6);
 [M,R]=size(L);
 % initialize

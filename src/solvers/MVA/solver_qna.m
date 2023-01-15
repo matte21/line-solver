@@ -1,7 +1,7 @@
 function [QN,UN,RN,TN,CN,XN] = solver_qna(sn, options)
 % [Q,U,R,T,C,X] = SOLVER_QNA(QN, OPTIONS)
 
-% Copyright (c) 2012-2022, Imperial College London
+% Copyright (c) 2012-2023, Imperial College London
 % All rights reserved.
 
 % Implementation as per Section 7.2.3 of N. Gautaum, Analysis of Queues, CRC Press, 2012.
@@ -17,20 +17,20 @@ scv = sn.scv; scv(isnan(scv))=0;
 %% immediate feedback elimination
 % this is adapted for class-switching, an alternative implementation would
 % rescale by sum(rt((i-1)*K+r,(i-1)*K+1:R)) rather than rt((i-1)*K+r,(i-1)*K+r)
-for i=1:size(rt,1)
-    for r=1:K
-        for j=1:size(rt,2)
-            for s=1:K
-                if i~=j
-                    rt((i-1)*K+r, (j-1)*K+s) = rt((i-1)*K+r, (j-1)*K+s) / (1-rt((i-1)*K+r,(i-1)*K+r));
-                end
-            end
-        end
-        S(i,r) = S(i,r) / (1-rt((i-1)*K+r,(i-1)*K+r));
-        scv(i,r) = rt((i-1)*K+r,(i-1)*K+r) + (1-rt((i-1)*K+r,(i-1)*K+r))*scv(i,r);
-        rt((i-1)*K+r,(i-1)*K+r) = 0;
-    end
-end
+% for i=1:size(rt,1)
+%     for r=1:K
+%         for j=1:size(rt,2)
+%             for s=1:K
+%                 if i~=j
+%                     rt((i-1)*K+r, (j-1)*K+s) = rt((i-1)*K+r, (j-1)*K+s) / (1-rt((i-1)*K+r,(i-1)*K+r));
+%                 end
+%             end
+%         end
+%         S(i,r) = S(i,r) / (1-rt((i-1)*K+r,(i-1)*K+r));
+%         scv(i,r) = rt((i-1)*K+r,(i-1)*K+r) + (1-rt((i-1)*K+r,(i-1)*K+r))*scv(i,r);
+%         rt((i-1)*K+r,(i-1)*K+r) = 0;
+%     end
+% end
 
 %% generate local state spaces
 I = sn.nnodes;
@@ -95,7 +95,7 @@ d2(sourceIdx)=d2c(sourceIdx,:)*lambda'/sum(lambda);
 
 %% main iteration
 
-while nanmax(nanmax(abs(QN-QN_1))) > Distrib.Tol && it <= options.iter_max %#ok<NANMAX>
+while nanmax(nanmax(abs(QN-QN_1))) > options.iter_tol && it <= options.iter_max %#ok<NANMAX>
     it = it + 1;
     QN_1 = QN;
 
@@ -168,7 +168,7 @@ while nanmax(nanmax(abs(QN-QN_1))) > Distrib.Tol && it <= options.iter_max %#ok<
                             %                                     UN(ist,k) = S(ist,k)*TN(ist,k);
                             %                                 end
                             %                                 %Nc = sum(sn.njobs(inchain)); % closed population
-                            %                                 Uden = min([1-Distrib.Tol,sum(UN(ist,:))]);
+                            %                                 Uden = min([1-options.tol,sum(UN(ist,:))]);
                             %                                 for k=inchain
                             %                                     %QN(ist,k) = (UN(ist,k)-UN(ist,k)^(Nc+1))/(1-Uden); % geometric bound type approximation
                             %                                     QN(ist,k) = UN(ist,k)/(1-Uden);
@@ -178,12 +178,12 @@ while nanmax(nanmax(abs(QN-QN_1))) > Distrib.Tol && it <= options.iter_max %#ok<
                         case {SchedStrategy.ID_FCFS}
                             mu_ist = sn.rates(ist,1:K);
                             mu_ist(isnan(mu_ist))=0;                            
-                            rho_ist_class = a1(ist,1:K)./(Distrib.Zero+sn.rates(ist,1:K));
+                            rho_ist_class = a1(ist,1:K)./(GlobalConstants.FineTol+sn.rates(ist,1:K));
                             rho_ist_class(isnan(rho_ist_class))=0;
                             lambda_ist = sum(a1(ist,:));
                             mi = sn.nservers(ist);
                             rho_ist = sum(rho_ist_class) / mi;
-                            if rho_ist < 1-Distrib.Tol
+                            if rho_ist < 1-options.tol
                                 for k=1:K
                                     if rho_ist > 0.7
                                         alpha_mi = (rho_ist^mi+rho_ist) / 2;

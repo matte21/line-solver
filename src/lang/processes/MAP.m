@@ -1,7 +1,7 @@
 classdef MAP < MarkovModulated
     % Markovian Arrival Process
     %
-    % Copyright (c) 2012-2022, Imperial College London
+    % Copyright (c) 2012-2023, Imperial College London
     % All rights reserved.
 
     methods
@@ -267,7 +267,7 @@ classdef MAP < MarkovModulated
             SA = T.ACFull;
             % SAlags - lags used in SA
             SAlags = T.ACLags;
-            fprintf(1,'running Andersen-Nielsen fitting method\n');
+            line_printf('running Andersen-Nielsen fitting method\n');
             D = map_anfit(ls,rho,H,n,ds,SA,SAlags,iter_max,iter_tol);
             map = MAP(D);
         end
@@ -285,7 +285,7 @@ classdef MAP < MarkovModulated
             end
 
             if nargin< 4
-                iter_tol = Distrib.Tol; % stop condition on the iterations
+                iter_tol = GlobalConstants.CoarseTol; % stop condition on the iterations
             end
 
             if nargin< 5

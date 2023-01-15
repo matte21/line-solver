@@ -1,7 +1,7 @@
 classdef Erlang < MarkovianDistribution
     % The Erlang statistical distribution
     %
-    % Copyright (c) 2012-2022, Imperial College London
+    % Copyright (c) 2012-2023, Imperial College London
     % All rights reserved.
 
     methods
@@ -96,7 +96,7 @@ classdef Erlang < MarkovianDistribution
             % Fit distribution from first three central moments (mean,
             % SCV, skewness)
             er = Erlang.fitMeanAndSCV(MEAN,SCV);
-            er.immediate = MEAN < Distrib.Tol;
+            er.immediate = MEAN < GlobalConstants.CoarseTol;
         end
 
         function er = fitRate(RATE)
@@ -105,7 +105,7 @@ classdef Erlang < MarkovianDistribution
             % Fit distribution with given rate
             line_warning(mfilename,'The Erlang distribution is underspecified by the rate, setting the number of phases to 2.');
             er = Erlang.fitMeanAndOrder(1/RATE, 2);
-            er.immediate = 1/RATE < Distrib.Tol;
+            er.immediate = 1/RATE < GlobalConstants.CoarseTol;
         end
 
         function er = fitMean(MEAN)
@@ -114,7 +114,7 @@ classdef Erlang < MarkovianDistribution
             % Fit distribution with given mean
             line_warning(mfilename,'The Erlang distribution is underspecified by the mean, setting the number of phases to 2.');
             er = Erlang.fitMeanAndOrder(MEAN, 2);
-            er.immediate = MEAN < Distrib.Tol;
+            er.immediate = MEAN < GlobalConstants.CoarseTol;
         end
 
         function er = fitMeanAndSCV(MEAN, SCV)
@@ -126,7 +126,7 @@ classdef Erlang < MarkovianDistribution
             r = ceil(1/SCV);
             alpha = r/MEAN;
             er = Erlang(alpha, r);
-            er.immediate = MEAN < Distrib.Tol;
+            er.immediate = MEAN < GlobalConstants.CoarseTol;
         end
 
         function er = fitMeanAndOrder(MEAN, n)
@@ -137,7 +137,7 @@ classdef Erlang < MarkovianDistribution
             r = ceil(1/SCV);
             alpha = r/MEAN;
             er = Erlang(alpha, r);
-            er.immediate = MEAN < Distrib.Tol;
+            er.immediate = MEAN < GlobalConstants.CoarseTol;
         end
     end
 

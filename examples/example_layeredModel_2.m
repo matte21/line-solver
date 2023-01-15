@@ -1,4 +1,4 @@
-if ~isoctave(), clearvars -except exampleName; end 
+clearvars -except exampleName; 
 model = LayeredNetwork('LQN1');
 
 % definition of processors, tasks and entries
@@ -14,7 +14,7 @@ E2 = Entry(model, 'E2').on(T2);
 T1.setThinkTime(Erlang.fitMeanAndOrder(0.0001,2));
 
 A1 = Activity(model, 'A1', Exp(1.0)).on(T1).boundTo(E1).synchCall(E2,3);
-A2 = Activity(model, 'A2', Cox2.fitMeanAndSCV(1,10)).on(T2).boundTo(E2).repliesTo(E2);
+A2 = Activity(model, 'A2', APH.fitMeanAndSCV(1,10)).on(T2).boundTo(E2).repliesTo(E2);
 
 %%
 % instantiate solvers

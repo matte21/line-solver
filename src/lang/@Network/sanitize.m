@@ -3,7 +3,7 @@ function sanitize(self)
 
 % Preprocess model to ensure consistent parameterization.
 %
-% Copyright (c) 2012-2022, Imperial College London
+% Copyright (c) 2012-2023, Imperial College London
 % All rights reserved.
 
 if isempty(self.sn)
@@ -22,8 +22,12 @@ if isempty(self.sn)
                     for v=1:K
                         for k=1:self.nodes{i}.items.nitems
                             % accessProb{v,k}(l,p) is the cost (probability) for a user-v request to item k in list l to access list p
-                            self.nodes{i}.accessProb{v,k} = diag(ones(1,self.nodes{i}.nLevels),1);
-                            self.nodes{i}.accessProb{v,k}(1+self.nodes{i}.nLevels,1+self.nodes{i}.nLevels) = 1;
+                            if isempty(self.nodes{i}.graph)
+                                self.nodes{i}.accessProb{v,k} = diag(ones(1,self.nodes{i}.nLevels),1);
+                                self.nodes{i}.accessProb{v,k}(1+self.nodes{i}.nLevels,1+self.nodes{i}.nLevels) = 1;
+                            else
+                                self.nodes{i}.accessProb{v,k} = self.nodes{i}.graph{k};
+                            end
                         end
                     end
                 end
@@ -51,34 +55,34 @@ if isempty(self.sn)
                 end
                 switch SchedStrategy.toId(self.nodes{i}.schedStrategy)
                     case SchedStrategy.ID_SEPT
-                        svcTime = zeros(1,K);
+                        servTime = zeros(1,K);
                         for k=1:K
-                            svcTime(k) = self.nodes{i}.serviceProcess{k}.getMean;
+                            servTime(k) = self.nodes{i}.serviceProcess{k}.getMean;
                         end
-                        if length(unique(svcTime)) ~= K
+                        if length(unique(servTime)) ~= K
                             line_error(mfilename,'SEPT does not support identical service time means.');
                         end
-                        [svcTimeSorted] = sort(unique(svcTime));
+                        [servTimeSorted] = sort(unique(servTime));
                         self.nodes{i}.schedStrategyPar = zeros(1,K);
                         for k=1:K
-                            if ~isnan(svcTime(k))
-                                self.nodes{i}.schedStrategyPar(k) = find(svcTimeSorted == svcTime(k));
+                            if ~isnan(servTime(k))
+                                self.nodes{i}.schedStrategyPar(k) = find(servTimeSorted == servTime(k));
                             else
-                                self.nodes{i}.schedStrategyPar(k) = find(isnan(svcTimeSorted));
+                                self.nodes{i}.schedStrategyPar(k) = find(isnan(servTimeSorted));
                             end
                         end
                     case SchedStrategy.ID_LEPT
-                        svcTime = zeros(1,K);
+                        servTime = zeros(1,K);
                         for k=1:K
-                            svcTime(k) = self.nodes{i}.serviceProcess{k}.getMean;
+                            servTime(k) = self.nodes{i}.serviceProcess{k}.getMean;
                         end
-                        if length(unique(svcTime)) ~= K
+                        if length(unique(servTime)) ~= K
                             line_error(mfilename,'LEPT does not support identical service time means.');
                         end
-                        [svcTimeSorted] = sort(unique(svcTime),'descend');
+                        [servTimeSorted] = sort(unique(servTime),'descend');
                         self.nodes{i}.schedStrategyPar = zeros(1,K);
                         for k=1:K
-                            self.nodes{i}.schedStrategyPar(k) = find(svcTimeSorted == svcTime(k));
+                            self.nodes{i}.schedStrategyPar(k) = find(servTimeSorted == servTime(k));
                         end
                 end
             case 'Delay'
@@ -94,11 +98,11 @@ if isempty(self.sn)
                 end
                 switch SchedStrategy.toId(self.nodes{i}.schedStrategy)
                     case SchedStrategy.ID_SEPT
-                        svcTime = zeros(1,K);
+                        servTime = zeros(1,K);
                         for k=1:K
-                            svcTime(k) = self.nodes{i}.serviceProcess{k}.getMean;
+                            servTime(k) = self.nodes{i}.serviceProcess{k}.getMean;
                         end
-                        [~,self.nodes{i}.schedStrategyPar] = sort(svcTime);
+                        [~,self.nodes{i}.schedStrategyPar] = sort(servTime);
                 end
             case 'Sink'
                 % no-op

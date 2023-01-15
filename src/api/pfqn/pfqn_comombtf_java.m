@@ -9,7 +9,7 @@ import QueueingNet.*; %#ok<SIMPT>
 import DataStructures.*; %#ok<SIMPT>
 import Utilities.*; %#ok<SIMPT>
 
-%Din=Din(sum(Din,2)>Distrib.Zero,:);
+%Din=Din(sum(Din,2)>GlobalConstants.FineTol,:);
 
 % rescale
 numdigits = ceil(max(abs(log10(abs([Din(:);Zin(:)])))));

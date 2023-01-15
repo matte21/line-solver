@@ -1,4 +1,4 @@
-if ~isoctave(), clearvars -except exampleName; end
+clearvars -except exampleName;
 N = 1;
 M = 2;
 
@@ -42,11 +42,11 @@ sfoptions.verbose = false;
 envSolver = SolverEnv(envModel,@(model) SolverFluid(model, sfoptions),options);
 [QN,UN,TN] = envSolver.getAvg();
 AvgTable = envSolver.getAvgTable()
-
-% scoptions = SolverJMT.defaultOptions;
-% scoptions.timespan = [0,1e3];
-% scoptions.verbose = false;
-% envSolver = SolverEnv(envModel,@(model) SolverJMT(model, scoptions),options);
-% [QNc,UNc,TNc] = envSolver.getAvg();
-% AvgTableC = envSolver.getAvgTable()
+%%
+%scoptions = SolverCTMC.defaultOptions;
+%scoptions.timespan = [0,1e3];
+%scoptions.verbose = false;
+%envSolver = SolverEnv(envModel,@(model) SolverCTMC(model, scoptions),options);
+%[QNc,UNc,TNc] = envSolver.getAvg();
+%AvgTableC = envSolver.getAvgTable()
 

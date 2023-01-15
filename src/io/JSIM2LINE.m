@@ -1,7 +1,7 @@
 function model = JSIM2LINE(filename,modelName)
 % MODEL = JSIM2LINE(FILENAME,MODELNAME)
 
-% Copyright (c) 2012-2022, Imperial College London
+% Copyright (c) 2012-2023, Imperial College London
 % All rights reserved.
 T0=tic;
 % import model
@@ -64,7 +64,11 @@ for i=1:length(node_name)
             xrouting{i} = {xsection_i{i}(3).parameter.subParameter.ATTRIBUTE};
             nSources=1;
         case 'Join'
-            node{i} = Join(model, node_name{i});
+            forkMap=find(cellfun(@any,strfind(cellfun(@class,model.nodes,'UniformOutput',false),'Fork')));
+            if length(forkMap)>1
+                line_error(mfilename,'JSIM2LINE supports at most a single fork-join pair.');
+            end
+            node{i} = Join(model, node_name{i}, node{forkMap});
             xrouting{i} = {xsection_i{i}(3).parameter.subParameter.ATTRIBUTE};
         case 'Queue'
             switch xsection_javaClass{i}{3}.className

@@ -10,6 +10,10 @@ if nargin<2
     options = self.getOptions;
 end
 
+if strcmp(options.method,'exact') && ~self.model.hasProductFormSolution
+    line_error(mfilename,'The exact method requires the model to have a product-form solution. This model does not have one. You can use Network.hasProductFormSolution() to check before running the solver.');
+end
+
 if self.enableChecks && ~self.supports(self.model)
     ME = MException('Line:FeatureNotSupportedBySolver', 'This model contains features not supported by the solver.');
     throw(ME);

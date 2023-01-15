@@ -1,7 +1,7 @@
 classdef NetworkSolver < Solver
     % Abstract class for solvers applicable to Network models.
     %
-    % Copyright (c) 2012-2022, Imperial College London
+    % Copyright (c) 2012-2023, Imperial College London
     % All rights reserved.
 
 
@@ -203,6 +203,7 @@ classdef NetworkSolver < Solver
 
         function AN = getAvgArvR(self)
             % AN = GETAVGARVR()
+            sn = self.model.getStruct();
 
             % Compute average arrival rate at steady-state
             M = sn.nstations;
@@ -287,7 +288,7 @@ classdef NetworkSolver < Solver
                 end
                 if isnan(iter)
                     line_printf('%s analysis (method: %s) completed. Runtime: %f seconds.',solvername,self.result.Avg.method,runtime);
-                    fprintf('\n');
+                    %fprintf('\n');
                 else
                     line_printf('%s analysis (method: %s) completed. Runtime: %f seconds. Iterations: %d.',solvername,self.result.Avg.method,runtime,iter);
                     fprintf('\n');
@@ -341,15 +342,15 @@ classdef NetworkSolver < Solver
     end
 
     methods
-        function dh = diff(self, handle, parameter)
-            % dH = DIFF(H,P)
+        function dh = differentiate(self, handle, parameter)
+            % dH = DIFFERENTIATE(H,P)
             %
             % Compute derivative of metric with handle H with respect to
             % a parameter P.
             % H and P can also be cell arrays, in which case a cell array
             % is returned.
 
-            line_error(mfilename,'diff is not supported by this solver.');
+            line_error(mfilename,sprintf('differentiate is not supported by %s',class(self)));
         end
 
 
@@ -357,91 +358,91 @@ classdef NetworkSolver < Solver
             % [LNORMCONST] = GETPROBNORMCONST()
 
             % Return normalizing constant of state probabilities
-            line_error(mfilename,'getProbNormConstAggr is not supported by this solver.');
+            line_error(mfilename,sprintf('getProbNormConstAggr is not supported by %s',class(self)));
         end
 
         function Pstate = getProb(self, node, state)
             % PSTATE = GETPROBSTATE(NODE, STATE)
 
             % Return marginal state probability for station ist state
-            line_error(mfilename,'getProb is not supported by this solver.');
+            line_error(mfilename,sprintf('getProb is not supported by %s',class(self)));
         end
 
         function Psysstate = getProbSys(self)
             % PSYSSTATE = GETPROBSYSSTATE()
 
             % Return joint state probability
-            line_error(mfilename,'getProbSys is not supported by this solver.');
+            line_error(mfilename,sprintf('getProbSys is not supported by %s',class(self)));
         end
 
         function Pnir = getProbAggr(self, node, state_a)
             % PNIR = GETPROBSTATEAGGR(NODE, STATE_A)
 
             % Return marginal state probability for station ist state
-            line_error(mfilename,'getProbAggr is not supported by this solver.');
+            line_error(mfilename,sprintf('getProbAggr is not supported by %s',class(self)));
         end
 
         function Pnjoint = getProbSysAggr(self)
             % PNJOINT = GETPROBSYSSTATEAGGR()
 
             % Return joint state probability
-            line_error(mfilename,'getProbSysAggr is not supported by this solver.');
+            line_error(mfilename,sprintf('getProbSysAggr is not supported by %s',class(self)));
         end
 
         function tstate = sample(self, node, numEvents)
             % TSTATE = SAMPLE(NODE, numEvents)
 
             % Return marginal state probability for station ist state
-            line_error(mfilename,'sample is not supported by this solver.');
+            line_error(mfilename,sprintf('sample is not supported by %s',class(self)));
         end
 
         function tstate = sampleAggr(self, node, numEvents)
             % TSTATE = SAMPLEAGGR(NODE, numEvents)
 
             % Return marginal state probability for station ist state
-            line_error(mfilename,'sampleAggr is not supported by this solver.');
+            line_error(mfilename,sprintf('sampleAggr is not supported by %s',class(self)));
         end
 
         function tstate = sampleSys(self, numEvents)
             % TSTATE = SAMPLESYS(numEvents)
 
             % Return joint state probability
-            line_error(mfilename,'sampleSys is not supported by this solver.');
+            line_error(mfilename,sprintf('sampleSys is not supported by %s',class(self)));
         end
 
         function tstate = sampleSysAggr(self, numEvents)
             % TSTATE = SAMPLESYSAGGR(numEvents)
 
             % Return joint state probability
-            line_error(mfilename,'sampleSysAggr is not supported by this solver.');
+            line_error(mfilename,sprintf('sampleSysAggr is not supported by %s',class(self)));
         end
 
         function RD = getCdfRespT(self, R)
             % RD = GETCDFRESPT(R)
 
             % Return cumulative distribution of response times at steady-state
-            line_error(mfilename,'getCdfRespT is not supported by this solver.');
+            line_error(mfilename,sprintf('getCdfRespT is not supported by %s',class(self)));
         end
 
         function RD = getTranCdfRespT(self, R)
             % RD = GETTRANCDFRESPT(R)
 
             % Return cumulative distribution of response times during transient
-            line_error(mfilename,'getTranCdfRespT is not supported by this solver.');
+            line_error(mfilename,sprintf('getTranCdfRespT is not supported by %s',class(self)));
         end
 
         function RD = getCdfPassT(self, R)
             % RD = GETCDFPASST(R)
 
             % Return cumulative distribution of passage times at steady-state
-            line_error(mfilename,'getCdfPassT is not supported by this solver.');
+            line_error(mfilename,sprintf('getCdfPassT is not supported by %s',class(self)));
         end
 
         function RD = getTranCdfPassT(self, R)
             % RD = GETTRANCDFPASST(R)
 
             % Return cumulative distribution of passage times during transient
-            line_error(mfilename,'getTranCdfPassT is not supported by this solver.');
+            line_error(mfilename,sprintf('getTranCdfPassT is not supported by %s',class(self)));
         end
 
     end

@@ -1,7 +1,7 @@
 classdef Activity < LayeredNetworkElement
     % A stage of service in a Task of a LayeredNetwork.
     %
-    % Copyright (c) 2012-2022, Imperial College London
+    % Copyright (c) 2012-2023, Imperial College London
     % All rights reserved.
         
     properties
@@ -32,9 +32,9 @@ classdef Activity < LayeredNetworkElement
             obj@LayeredNetworkElement(name);
             
             if nargin<3 %~exist('hostDemand','var')
-                hostDemand = Distrib.Zero;
+                hostDemand = GlobalConstants.FineTol;
             elseif isnumeric(hostDemand) && hostDemand == 0
-                hostDemand = Distrib.Zero;
+                hostDemand = GlobalConstants.FineTol;
             end
             if nargin<4 %~exist('boundToEntry','var')
                 boundToEntry = '';
@@ -73,10 +73,10 @@ classdef Activity < LayeredNetworkElement
             % OBJ = SETHOSTDEMAND(OBJ, HOSTDEMAND)
             
             if isnumeric(hostDemand)
-                if hostDemand <= Distrib.Zero
+                if hostDemand <= GlobalConstants.FineTol
                     obj.hostDemand = Immediate.getInstance();
-                    obj.hostDemandMean = Distrib.Zero;
-                    obj.hostDemandSCV = Distrib.Zero;
+                    obj.hostDemandMean = GlobalConstants.FineTol;
+                    obj.hostDemandSCV = GlobalConstants.FineTol;
                 else
                     obj.hostDemand = Exp(1/hostDemand);
                     obj.hostDemandMean = hostDemand;

@@ -17,7 +17,8 @@ for i = 1:n % for all items
             Pij =[pr_j, Pij];
             pr_j = par(Rvi, pr_j);
         end        
-        if isempty(Pij)
+        if isempty(Pij)   % debug
+        %if length(Pij) < 2
             gamma(i,j)=0;
         else
             gamma(i,j)=1;

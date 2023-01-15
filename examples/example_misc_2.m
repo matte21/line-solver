@@ -1,4 +1,4 @@
-if ~isoctave(), clearvars -except exampleName; end 
+clearvars -except exampleName; 
 % This example illustrates the automatic checks of the model features
 model = Network('model');
 

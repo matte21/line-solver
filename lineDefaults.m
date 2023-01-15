@@ -26,11 +26,7 @@ odesfun.fastStiffOdeSolver = Solver.fastStiffOdeSolver;
 odesfun.accurateStiffOdeSolver = Solver.accurateStiffOdeSolver;
 options.odesolvers = odesfun;
 
-if isoctave
-    options.samples = 5e3;
-else
-    options.samples = 1e4;
-end
+options.samples = 1e4;
 options.seed = randi([1,1e6]);
 options.stiff = true;
 options.timespan = [Inf,Inf];
@@ -57,6 +53,8 @@ switch solverName
         % use default
     case 'LN'
         options = EnsembleSolver.defaultOptions();
+        options.config.interlocking = false;
+        options.config.multiserver = 'default';
         options.timespan = [Inf,Inf];
         options.keep = false;
         options.verbose = true;
@@ -66,6 +64,8 @@ switch solverName
         options = EnsembleSolver.defaultOptions();
         options.timespan = [Inf,Inf];
         options.keep = true;
+        options.verbose = false;
+        options.config.multiserver = 'default';
     case 'MAM'
         options.iter_max = 100;
         options.timespan = [Inf,Inf];
@@ -74,6 +74,8 @@ switch solverName
         options.config.highvar = 'none';
         options.config.multiserver = 'default';
         options.config.np_priority = 'default';
+    case 'QNS'
+        options.config.multiserver = 'default'; 
     case 'NC'        
         options.samples = 1e5;
         options.timespan = [Inf,Inf];

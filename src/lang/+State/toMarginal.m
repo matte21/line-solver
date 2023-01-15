@@ -1,7 +1,7 @@
 function [ni, nir, sir, kir] = toMarginal(sn, ind, state_i, phasesz, phaseshift, space_buf, space_srv, space_var) %#ok<INUSD>
 % [NI, NIR, SIR, KIR] = TOMARGINAL(QN, IND, STATE_I, K, KS, SPACE_BUF, SPACE_SRV, SPACE_VAR) %#OK<INUSD>
 
-% Copyright (c) 2012-2022, Imperial College London
+% Copyright (c) 2012-2023, Imperial College London
 % All rights reserved.
 
 if ~isstruct(sn) % the input can be a Network object too

@@ -1,7 +1,7 @@
 classdef CacheTask < Task 
     % A software server in a LayeredNetwork.
     %
-    % Copyright (c) 2012-2022, Imperial College London
+    % Copyright (c) 2012-2023, Imperial College London
     % All rights reserved.
     
     properties
@@ -26,6 +26,7 @@ classdef CacheTask < Task
             if nargin < 6
                 multiplicity = 1;
             end
+            
             if nargin < 7
                 scheduling = SchedStrategy.FCFS;
             end    

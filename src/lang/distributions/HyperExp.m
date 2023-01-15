@@ -1,7 +1,7 @@
 classdef HyperExp < MarkovianDistribution
     % The hyper-exponential statistical distribution
     %
-    % Copyright (c) 2012-2022, Imperial College London
+    % Copyright (c) 2012-2023, Imperial College London
     % All rights reserved.
 
     methods
@@ -120,21 +120,21 @@ classdef HyperExp < MarkovianDistribution
                 end
             end
             he = HyperExp.fitMeanAndSCV(MEAN,SCV);
-            he.immediate = MEAN < Distrib.Tol;
+            he.immediate = MEAN < GlobalConstants.CoarseTol;
         end
 
         function he = fitRate(RATE)
             % HE = FITRATE(RATE)
             % Fit distribution with given rate
             he = HyperExp(p, RATE, RATE);
-            he.immediate = 1/RATE < Distrib.Tol;
+            he.immediate = 1/RATE < GlobalConstants.CoarseTol;
         end
 
         function he = fitMean(MEAN)
             % HE = FITMEAN(MEAN)
             % Fit distribution with given mean
             he = HyperExp(p, 1/MEAN, 1/MEAN);
-            he.immediate = MEAN < Distrib.Tol;
+            he.immediate = MEAN < GlobalConstants.CoarseTol;
         end
 
         function he = fitMeanAndSCV(MEAN, SCV)
@@ -142,7 +142,7 @@ classdef HyperExp < MarkovianDistribution
             % Fit distribution with given mean and squared coefficient of variation (SCV=variance/mean^2)
             [~,mu1,mu2,p] = map_hyperexp(MEAN,SCV);
             he = HyperExp(p, mu1, mu2);
-            he.immediate = MEAN < Distrib.Tol;
+            he.immediate = MEAN < GlobalConstants.CoarseTol;
         end
 
         function he = fitMeanAndSCVBalanced(MEAN, SCV)
@@ -161,7 +161,7 @@ classdef HyperExp < MarkovianDistribution
             mu1 = real(mu1);
             mu2 = real(mu2);
             he = HyperExp(p, mu1, mu2);
-            he.immediate = MEAN < Distrib.Tol;
+            he.immediate = MEAN < GlobalConstants.CoarseTol;
         end
     end
 

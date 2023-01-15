@@ -1,12 +1,11 @@
 function [Q,U,R,T,C,X,lG,totiter] = solver_amva(sn,options)
 % [Q,U,R,T,C,X,lG,ITER] = SOLVER_AMVA(SN, OPTIONS)
 %
-% Copyright (c) 2012-2022, Imperial College London
+% Copyright (c) 2012-2023, Imperial College London
 % All rights reserved.
 if nargin < 2
     options = SolverMVA.defaultOptions;
 end
-
 totiter = 0;
 [Lchain,STchain,Vchain,alpha,Nchain,SCVchain,refstatchain] = snGetDemandsChain(sn);
 
@@ -51,6 +50,7 @@ for k=1:M
     end
 end
 
+%% check options
 if ~isfield(options.config,'np_priority')
     options.config.np_priority = 'default';
 end
@@ -62,8 +62,26 @@ if ~isfield(options.config,'highvar')
 end
 
 switch options.method
+    case 'amva.qli'
+        options.method = 'qli';
+    case {'amva.qd', 'amva.qdamva', 'qdamva'}
+        options.method = 'qd';
+    case 'amva.aql'
+        options.method = 'aql';
+    case 'amva.qdaql'
+        options.method = 'qdaql';
+    case 'amva.lin'
+        options.method = 'lin';
+    case 'amva.qdlin'
+        options.method = 'qdlin';
+    case 'amva.fli'
+        options.method = 'fli';
+    case 'amva.bs'
+        options.method = 'bs';
     case 'default'
-        if Nt<=2
+        if Nt<2 && any(Nchain<1)
+            options.method = 'fli';
+        elseif Nt<=2
             options.method = 'bs';
         else
             %options.method = 'aql';
@@ -72,7 +90,7 @@ switch options.method
 end
 
 switch options.method
-    case {'default','amva.lin','lin','amva.qdlin','qdlin'}
+    case {'lin','qdlin'}
         gamma = zeros(K,M,K); % class-based customer fraction corrections
         tau = zeros(K,K); % throughput difference
     otherwise
@@ -82,7 +100,7 @@ end
 
 %% main loop
 outer_iter = 0;
-while (outer_iter < 2 || max(max(abs(Qchain-QchainOuter_1))) > tol) && outer_iter <= options.iter_max
+while (outer_iter < 2 || max(max(abs(Qchain-QchainOuter_1))) > tol) && outer_iter <= options.iter_max    
     outer_iter = outer_iter + 1;
 
     QchainOuter_1 = Qchain;
@@ -91,7 +109,9 @@ while (outer_iter < 2 || max(max(abs(Qchain-QchainOuter_1))) > tol) && outer_ite
 
     if isfinite(Nt) && Nt>0
         switch options.method
-            case {'default','aql','qdaql','lin','qdlin'}
+            case {'aql','qdaql'}
+                line_error(mfilename,'AQL is currently disabled in SolverMVA, please use the SolverJMT implementation (method jmva.aql).');
+            case {'lin','qdlin'}
                 % iteration at population N-1_s
                 for s=1:K
                     if isfinite(Nchain(s)) % don't recur on open classes
@@ -136,7 +156,7 @@ while (outer_iter < 2 || max(max(abs(Qchain-QchainOuter_1))) > tol) && outer_ite
                         end
 
                         switch options.method
-                            case {'default', 'lin'}
+                            case {'lin'}
                                 for k=1:M
                                     for r=nnzclasses
                                         if ~isinf(Nchain(r)) && Nchain_s(r)>0

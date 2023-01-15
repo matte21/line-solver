@@ -73,7 +73,7 @@ Z = Z ./ scalevec;
 % remove stations with no demand
 Lsum = sum(L,2);
 Lmax = max(L,[],2);
-demStations = find((Lmax./Lsum)>Distrib.Zero);
+demStations = find((Lmax./Lsum)>GlobalConstants.FineTol);
 noDemStations = setdiff(1:size(L,1), demStations);
 L = L(demStations,:);
 if any(N((sum(L,1) + sum(Z,1)) == 0)>0) % if there is a class with jobs but L and Z all zero
@@ -192,8 +192,9 @@ switch options.method
             line_error(mfilename,sprintf('The %s method requires a model with a delay and a single queueing station.',options.method));
         end
         [~,lG] = pfqn_mmint2_gausslegendre(L,N,sum(Z,1));
-    case 'cub'
-        [~,lG] = pfqn_cub(L,N,sum(Z,1));
+    case {'cub','gm'} % Grundmann-Mueller cubatures
+        order = ceil((sum(N)-1)/2); % exact
+        [~,lG] = pfqn_cub(L,N,sum(Z,1),order,options.tol);
     case 'kt'
         [~,lG] = pfqn_kt(L,N,sum(Z,1));
     case 'le'
@@ -230,7 +231,7 @@ switch options.method
                 if M>1
                     [~,lG,X,Q] = pfqn_comombtf_java(L,N,Z);
                 else % use double precision script for M=1
-                    [lG] = pfqn_comomrm(L,N,Z);
+                    [lG] = pfqn_comomrm(L,N,Z,1,options.tol);
                 end
             catch
                 % java exception, probably singular linear system

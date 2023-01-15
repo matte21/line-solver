@@ -1,7 +1,7 @@
 classdef SolverSSA < NetworkSolver
     % A solver based on discrete-event stochastic simulation analysis.
     %
-    % Copyright (c) 2012-2022, Imperial College London
+    % Copyright (c) 2012-2023, Imperial College London
     % All rights reserved.
     
     methods
@@ -67,8 +67,8 @@ classdef SolverSSA < NetworkSolver
             % CHECKOPTIONS(OPTIONS)
             
             solverName = mfilename;
-            if isfield(options,'timespan')  && isfinite(options.timespan(2))
-                line_error(mfilename,'Finite timespan not supported in %s',solverName);
+            if isfield(options,'timespan')  && isfinite(options.timespan(2)) && options.verbose
+                line_warning(mfilename,'Finite timespan not supported in %s',solverName);
             end
         end
                

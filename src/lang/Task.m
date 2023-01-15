@@ -1,7 +1,7 @@
 classdef Task < LayeredNetworkElement
     % A software server in a LayeredNetwork.
     %
-    % Copyright (c) 2012-2022, Imperial College London
+    % Copyright (c) 2012-2023, Imperial College London
     % All rights reserved.
     
     properties
@@ -38,7 +38,7 @@ classdef Task < LayeredNetworkElement
                 scheduling = SchedStrategy.INF;
             end
             if nargin<5%~exist('thinkTime','var')
-                thinkTime = Distrib.Zero;
+                thinkTime = GlobalConstants.FineTol;
             end
             self.replication = 1;
             self.multiplicity = multiplicity;
@@ -80,10 +80,10 @@ classdef Task < LayeredNetworkElement
             % self = SETTHINKTIME(self, THINKTIME)
             
             if isnumeric(thinkTime)
-                if thinkTime <= Distrib.Zero
+                if thinkTime <= GlobalConstants.FineTol
                     self.thinkTime = Immediate.getInstance();
-                    self.thinkTimeMean = Distrib.Zero;
-                    self.thinkTimeSCV = Distrib.Zero;
+                    self.thinkTimeMean = GlobalConstants.FineTol;
+                    self.thinkTimeSCV = GlobalConstants.FineTol;
                 else
                     self.thinkTime = Exp(1/thinkTime);
                     self.thinkTimeMean = thinkTime;

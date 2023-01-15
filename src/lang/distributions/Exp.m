@@ -1,7 +1,7 @@
 classdef Exp < MarkovianDistribution
     % The exponential distribution
     %
-    % Copyright (c) 2012-2022, Imperial College London
+    % Copyright (c) 2012-2023, Imperial College London
     % All rights reserved.
 
     methods
@@ -11,7 +11,7 @@ classdef Exp < MarkovianDistribution
             % parameter
             self@MarkovianDistribution('Exponential', 1);
             setParam(self, 1, 'lambda', lambda);
-            self.immediate = (1/lambda) < Distrib.Zero;
+            self.immediate = (1/lambda) < GlobalConstants.FineTol;
             try
                 self.obj = jline.lang.distributions.Exp(lambda);
             catch
@@ -72,13 +72,13 @@ classdef Exp < MarkovianDistribution
             SCV = varargin{2};
             SKEW = varargin{3};
             %            KURT = varargin{4};
-            if abs(SCV-1) > Distrib.Tol
+            if abs(SCV-1) > GlobalConstants.CoarseTol
                 line_warning(mfilename,'Warning: the exponential distribution cannot fit squared coefficient of variation != 1, changing squared coefficient of variation to 1.');
             end
-            if abs(SKEW-2) > Distrib.Tol
+            if abs(SKEW-2) > GlobalConstants.CoarseTol
                 line_warning(mfilename,'Warning: the exponential distribution cannot fit skewness != 2, changing skewness to 2.');
             end
-            %            if abs(KURT-9) > Distrib.Tol
+            %            if abs(KURT-9) > GlobalConstants.CoarseTol
             %                line_warning(mfilename,'Warning: the exponential distribution cannot fit kurtosis != 9, changing kurtosis to 9.');
             %            end
             self.params{1}.paramValue = 1 / MEAN;
@@ -89,7 +89,7 @@ classdef Exp < MarkovianDistribution
             % UPDATEMEAN(SELF,MEAN)
             % Update parameters to match the given mean
             self.params{1}.paramValue = 1 / MEAN;
-            self.immediate = MEAN <  Distrib.Zero;
+            self.immediate = MEAN <  GlobalConstants.FineTol;
         end
 
         function updateRate(self,RATE)
@@ -97,13 +97,13 @@ classdef Exp < MarkovianDistribution
             % Update rate parameter
             self.params{1}.paramValue = RATE;
             self.mean = 1/RATE;
-            self.immediate = 1/RATE <  Distrib.Zero;
+            self.immediate = 1/RATE <  GlobalConstants.FineTol;
         end
 
         function updateMeanAndSCV(self,MEAN,SCV)
             % UPDATEMEANANDSCV(SELF,MEAN,SCV)
             % Update parameters to match the given mean and squared coefficient of variation (SCV=variance/mean^2)
-            if abs(SCV-1) > Distrib.Tol
+            if abs(SCV-1) > GlobalConstants.CoarseTol
                 line_warning(mfilename,'Warning: the exponential distribution cannot fit SCV != 1, changing SCV to 1.');
             end
             self.params{1}.paramValue = 1 / MEAN;
@@ -137,7 +137,7 @@ classdef Exp < MarkovianDistribution
         function ex = fitMeanAndSCV(MEAN, SCV)
             % EX = FITMEANANDSCV(MEAN, SCV)
             % Fit exponential distribution with given mean and squared coefficient of variation (SCV=variance/mean^2)
-            if abs(SCV-1) > Distrib.Tol
+            if abs(SCV-1) > GlobalConstants.CoarseTol
                 line_warning(mfilename,'Warning: the exponential distribution cannot fit SCV != 1, changing SCV to 1.');
             end
             ex = Exp(1/MEAN);

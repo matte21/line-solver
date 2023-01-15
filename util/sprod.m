@@ -2,6 +2,13 @@ function [out1,out2,out3,out4]=sprod(par1,par2,par3)
 % [s,n,S,D]=SPROD(M,N) % init
 % [s,n]=SPROD(s,S,D) % next state
 % Sequence of non-negative matrices with constant row sums
+% 
+% Example: 
+% [s,n,S,D]=sprod(2,5); % m=2 elements summing to N=5
+%
+% while s>0
+% [s,n]=sprod(s,S,D) % generate next state
+% end
 %
 % Copyright (c) 2012-2022, Imperial College London
 % All rights reserved.

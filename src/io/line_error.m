@@ -1,7 +1,12 @@
 function line_error(caller,errmsg)
 % LINE_ERROR(CALLER, ERRMSG)
 
-% Copyright (c) 2012-2022, Imperial College London
+% Copyright (c) 2012-2023, Imperial College London
 % All rights reserved.
-error(sprintf('[%s] %s',caller,errmsg));
+%try
+x=dbstack;
+error('[%s.m@%d] %s',caller,x(2).line,errmsg);
+%catch ME
+%    throwAsCaller(ME)
+%end
 end

@@ -1,7 +1,7 @@
 function jmtPath = jmtGetPath
 % JMTPATH = JMTGETPATH
 
-% Copyright (c) 2012-2022, Imperial College London
+% Copyright (c) 2012-2023, Imperial College London
 % All rights reserved.
 
 jmtPath = fileparts(which('JMT.jar'));
@@ -21,13 +21,6 @@ if isempty(jmtPath)
                     outfilename = websave([jmtSolverFolder,'\JMT.jar'],'http://jmt.sourceforge.net/latest/JMT.jar');
                 else
                     outfilename = websave([jmtSolverFolder,'/JMT.jar'],'http://jmt.sourceforge.net/latest/JMT.jar');
-                end
-                line_printf('\nDownload completed. JMT jar now located at: %s',outfilename);
-            elseif isoctave
-                if ispc
-                    outfilename = urlwrite('http://jmt.sourceforge.net/latest/JMT.jar', [jmtSolverFolder,'\JMT.jar']);
-                else
-                    outfilename = urlwrite('http://jmt.sourceforge.net/latest/JMT.jar', [jmtSolverFolder,'/JMT.jar']);
                 end
                 line_printf('\nDownload completed. JMT jar now located at: %s',outfilename);
             else

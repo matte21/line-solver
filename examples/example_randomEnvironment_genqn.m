@@ -1,12 +1,12 @@
-function sn = example_randomEnvironment_gensn(rate, N)
+function qnet = example_randomEnvironment_genqn(rate, N)
 %% sn1
-sn = Network('qn1');
+qnet = Network('qn1');
 
-node{1} = Delay(sn, 'Queue1');
-node{2} = Queue(sn, 'Queue2', SchedStrategy.PS);
+node{1} = Delay(qnet, 'Queue1');
+node{2} = Queue(qnet, 'Queue2', SchedStrategy.PS);
 
 
-jobclass{1} = ClosedClass(sn, 'Class1', N, node{1}, 0);
+jobclass{1} = ClosedClass(qnet, 'Class1', N, node{1}, 0);
 
 node{1}.setService(jobclass{1}, Exp(rate(1)));
 node{2}.setService(jobclass{1}, Exp(rate(2)));
@@ -15,5 +15,5 @@ K = 1;
 P = cell(K,K);
 P{1} = circul(length(node));
 
-sn.link(P);
+qnet.link(P);
 end

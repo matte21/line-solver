@@ -2,7 +2,7 @@ function [AvgTable,QT,UT,RT,WT,TT,AT] = getAvgTable(self,Q,U,R,T,A,W,keepDisable
 % [AVGTABLE,QT,UT,RT,WT,TT,AT] = GETAVGTABLE(SELF,Q,U,R,T,A,W,KEEPDISABLED)
 % Return table of average station metrics
 %
-% Copyright (c) 2012-2022, Imperial College London
+% Copyright (c) 2012-2023, Imperial College London
 % All rights reserved.
 
 if ~isempty(self.model.obj)
@@ -27,7 +27,7 @@ if ~isempty(self.model.obj)
                 Qval(end+1) = QN(i,k);
                 Uval(end+1) = UN(i,k);
                 Rval(end+1) = RN(i,k);
-                if RN(i,k)<Distrib.Zero
+                if RN(i,k)<GlobalConstants.FineTol
                     Residval(end+1) = RN(i,k);
                 else
                     if sn.refclass(c)>0
@@ -102,6 +102,10 @@ else
     [QN,UN,RN,TN,AN,WN] = self.getAvg(Q,U,R,T,A,W);
 end
 
+% this is required because getAvg can alter the chain structure in the
+% presence of caches
+sn = self.model.getStruct;
+
 if isempty(QN)
     AvgTable = Table();
     QT = Table();
@@ -141,7 +145,7 @@ elseif ~keepDisabled
                 Qval(end+1) = QN(i,k);
                 Uval(end+1) = UN(i,k);
                 Rval(end+1) = RN(i,k);
-                if RN(i,k)<Distrib.Zero
+                if RN(i,k)<GlobalConstants.FineTol
                     Residval(end+1) = RN(i,k);
                 else
                     if sn.refclass(c)>0
@@ -200,7 +204,7 @@ else
             Qval((i-1)*K+k) = QN(i,k);
             Uval((i-1)*K+k) = UN(i,k);
             Rval((i-1)*K+k) = RN(i,k);
-            if RN(i,k)<Distrib.Zero
+            if RN(i,k)<GlobalConstants.FineTol
                 Residval((i-1)*K+k) = RN(i,k);
             else
                 if sn.refclass(c)>0

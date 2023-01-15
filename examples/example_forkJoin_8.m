@@ -1,5 +1,5 @@
 % fork-join with multiple visits within the same chain
-if ~isoctave(), clearvars -except exampleName; end
+clearvars -except exampleName;
 model = Network('model');
 
 source = Source(model,'Source');

@@ -7,8 +7,8 @@ C = sn.nchains;
 SCV = sn.scv;
 V = cellsum(sn.visits);
 ST = 1 ./ sn.rates;
-ST(isnan(ST))=0;
-ST0=ST;
+ST(isnan(ST)) = 0;
+ST0 = ST;
 
 Nchain = zeros(1,C);
 for c=1:C
@@ -71,38 +71,21 @@ while max(abs(1-eta./eta_1)) > options.iter_tol & it < options.iter_max
                 %options.method = 'default';
                 line_warning(mfilename,sprintf('%s does not support exact multiserver yet. Switching to approximate method.', 'SolverNC'));
             end
+            % Seidmann's approximation
             Lms(i,:) = Lchain(i,:) / nservers(i);
             Z(i,:) = 0;
             Zms(i,:) = Lchain(i,:) * (nservers(i)-1)/nservers(i);
         end
     end
+
     % step 1
     [lG, Xchain, Qchain] = pfqn_nc(lambda,Lms,Nchain,sum(Z,1)+sum(Zms,1), options);
 
-    if sum(Zms,1) > Distrib.Zero
+    if sum(Zms,1) > GlobalConstants.FineTol
         % in this case, we need to use the iterative approximation below
         Xchain=[];
         Qchain=[];
     end
-
-    % commented out, poor performance on bench_CQN_FCFS_rm_multiserver_hicv_midload
-    % model 7 as it does not guarantee that the closed population is
-    % constant
-    %     % step 2 - reduce the artificial think time
-    %     if any(S(isfinite(S)) > 1)
-    %         Xchain = zeros(1,C);
-    %         for r=1:C % we need the utilizations in step 2 so we determine tput
-    %             Xchain(r) = exp(pfqn_nc(Lcorr,oner(Nchain,r),sum(Z,1)+sum(Zcorr,1), options) - lG);
-    %         end
-    %         for i=1:M
-    %             if isinf(S(i)) % infinite server
-    %                 % do nothing
-    %             else
-    %                 Zcorr(i,:) = max([0,(1-(Xchain*Lchain(i,:)'/S(i))^S(i))]) * Lchain(i,:) * (S(i)-1)/S(i);
-    %             end
-    %         end
-    %         lG = pfqn_nc(Lcorr,Nchain,sum(Z,1)+sum(Zcorr,1), options); % update lG
-    %     end
 
     if isempty(Xchain)
         Xchain=lambda;
@@ -115,7 +98,7 @@ while max(abs(1-eta./eta_1)) > options.iter_tol & it < options.iter_max
                     if isinf(nservers(i)) % infinite server
                         Qchain(i,r) = Lchain(i,r) * Xchain(r);
                     else
-                        % add repliaca of station i and move job of class r
+                        % add replica of station i and move job of class r
                         % in separate class
                         lGar(i,r) = pfqn_nc([lambda,0],[Lms(setdiff(1:size(Lms,1),i),:),zeros(size(Lms,1)-1,1); Lms(i,:),1], [oner(Nchain,r),1], [sum(Z,1)+sum(Zms,1),0], options);
                         Qchain(i,r) = Zms(i,r) * Xchain(r) + Lms(i,r) * exp(lGar(i,r) - lG);
@@ -147,7 +130,7 @@ while max(abs(1-eta./eta_1)) > options.iter_tol & it < options.iter_max
     end
 
     Z = sum(Z(1:M,:),1);
-    
+
     Rchain = Qchain ./ repmat(Xchain,M,1) ./ Vchain;
     Rchain(infServers,:) = Lchain(infServers,:) ./ Vchain(infServers,:);
     Tchain = repmat(Xchain,M,1) .* Vchain;
@@ -156,7 +139,7 @@ while max(abs(1-eta./eta_1)) > options.iter_tol & it < options.iter_max
 
     [Q,U,R,T,~,X] = snDeaggregateChainResults(sn, Lchain, ST, STchain, Vchain, alpha, [], [], Rchain, Tchain, [], Xchain);
     STeff = ST;% effective service time at the last iteration
-    [ST,gamma,~,~,~,~,eta] = npfqn_nonexp_approx(options.config.highvar,sn,ST0,V,SCV,X,U,gamma,nservers);
+    [ST,gamma,~,~,~,~,eta] = npfqn_nonexp_approx(options.config.highvar,sn,ST0,V,SCV,T,U,gamma,nservers);    
 end
 
 Q=abs(Q); R=abs(R); X=abs(X); U=abs(U);

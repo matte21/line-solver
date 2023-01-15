@@ -1,14 +1,15 @@
 function [result, parsed] = getResultsJMVA(self)
 % [RESULT, PARSED] = GETRESULTSJMVA()
 
-% Copyright (c) 2012-2022, Imperial College London
+% Copyright (c) 2012-2023, Imperial College London
 % All rights reserved.
 
 try
-    fileName = strcat(getFilePath(self),'jmva',filesep,getFileName(self),'.jmva-result.jmva');
-    if exist(fileName,'file')
+    fileName = [getFileName(self),'.jmva-result.jmva'];
+    filePath = [getFilePath(self),filesep,fileName];
+    if exist(filePath,'file')
         Pref.Str2Num = 'always';
-        parsed = xml_read(fileName,Pref);
+        parsed = xml_read(filePath,Pref);
     else
         line_error(mfilename,'JMT did not output a result file, the analysis has likely failed.');
     end

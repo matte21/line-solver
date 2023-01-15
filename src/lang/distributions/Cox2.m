@@ -1,7 +1,7 @@
 classdef (Sealed)  Cox2 < MarkovianDistribution
     % Static class to fit two-phase coxian statistical distribution
     %
-    % Copyright (c) 2012-2022, Imperial College London
+    % Copyright (c) 2012-2023, Imperial College London
     % All rights reserved.
     
     methods (Static)
@@ -74,7 +74,7 @@ classdef (Sealed)  Cox2 < MarkovianDistribution
         function cx = fitMean(MEAN)
             % CX = FITMEAN(MEAN)
             
-            p = 1.0-Distrib.Tol;
+            p = 1.0-GlobalConstants.CoarseTol;
             l0 = 1/MEAN;
             l1 = 1/MEAN;
             cx = Coxian(l0,l1,p);

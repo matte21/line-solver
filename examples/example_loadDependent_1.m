@@ -1,4 +1,4 @@
-if ~isoctave(), clearvars -except exampleName; end
+clearvars -except exampleName;
 N = 16; % number of jobs
 c = 2; % number of servers
 
@@ -33,7 +33,7 @@ lldAvgTableNRP=SolverNC(ldmodel,'method','nrp').getAvgTable
 lldAvgTableNRL=SolverNC(ldmodel,'method','nrl').getAvgTable
 
 lldAvgTableMVALD=SolverMVA(ldmodel,'method','exact').getAvgTable
-lldAvgTableAMVAQD=SolverMVA(ldmodel,'method','amva').getAvgTable
+lldAvgTableAMVAQD=SolverMVA(ldmodel,'method','qd').getAvgTable
 
 %% casted with scaling function that depends on the per-class queue population
 cdmodel = Network('model');
@@ -47,4 +47,4 @@ node{2}.setClassDependence(@(ni) min(sum(ni),c)); % ni is a vector where ni(r) i
 cdmodel.link(cdmodel.serialRouting(node));
 
 cdAvgTableCTMC=SolverCTMC(cdmodel).getAvgTable
-cdAvgTableAMVACD=SolverMVA(cdmodel,'method','amva').getAvgTable
+cdAvgTableAMVACD=SolverMVA(cdmodel,'method','qd').getAvgTable

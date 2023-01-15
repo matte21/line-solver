@@ -1,7 +1,7 @@
 classdef SolverJMT < NetworkSolver
     % A solver that interfaces the Java Modelling Tools (JMT) to LINE.
     %
-    % Copyright (c) 2012-2022, Imperial College London
+    % Copyright (c) 2012-2023, Imperial College London
     % All rights reserved.
     
     %Private properties
@@ -19,7 +19,6 @@ classdef SolverJMT < NetworkSolver
     
     %Constants
     properties (Constant)
-        xmlnsXsi = 'http://www.w3.org/2001/XMLSchema-instance';
         xsiNoNamespaceSchemaLocation = 'Archive.xsd';
         fileFormat = 'jsimg';
         jsimgPath = '';
@@ -37,18 +36,13 @@ classdef SolverJMT < NetworkSolver
             if ~Solver.isJavaAvailable
                 line_error(mfilename,'SolverJMT requires the java command to be available on the system path.');
             end
-            if ~Solver.isAvailable
-                line_error(mfilename,'SolverJMT cannot located JMT.jar in the MATLAB path.');
+            if ~SolverJMT.isAvailable
+                line_warning(mfilename,'SolverJMT cannot located JMT.jar in the MATLAB path.');
             end
             self.simConfInt = 0.99;
             self.simMaxRelErr = 0.03;
             self.maxEvents = -1;
-            jarPath = jmtGetPath;
-            self.setJMTJarPath(jarPath);
-            filePath = lineTempDir;
-            self.filePath = filePath;
-            [~,fileName]=fileparts(lineTempName);
-            self.fileName = fileName;
+            self.setJMTJarPath(jmtGetPath);
         end
         
         [simDoc, section] = saveArrivalStrategy(self, simDoc, section, ind)
@@ -85,7 +79,6 @@ classdef SolverJMT < NetworkSolver
         jsimwView(self, options)
         jsimgView(self, options)
         
-        [outputFileName] = writeJMVA(self, sn, outputFileName)
         [outputFileName] = writeJSIM(self, sn, outputFileName)
         [result, parsed] = getResults(self)
         [result, parsed] = getResultsJSIM(self)
@@ -257,6 +250,8 @@ classdef SolverJMT < NetworkSolver
             % OPTIONS = DEFAULTOPTIONS()
             options = lineDefaults('JMT');
         end
+        
+        [outputFileName] = writeJMVA(sn, outputFileName, options)
     end
     
 end

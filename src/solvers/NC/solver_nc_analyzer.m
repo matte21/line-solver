@@ -1,7 +1,7 @@
 function [Q,U,R,T,C,X,lG,runtime,iter] = solver_nc_analyzer(sn, options)
 % [Q,U,R,T,C,X,LG,RUNTIME] = SOLVER_NC_ANALYZER(QN, OPTIONS)
 
-% Copyright (c) 2012-2022, Imperial College London
+% Copyright (c) 2012-2023, Imperial College London
 % All rights reserved.
 Tstart = tic;
 

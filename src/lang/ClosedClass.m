@@ -1,7 +1,7 @@
 classdef ClosedClass < JobClass
     % A class of jobs that perpetually cycle inside the model.
     %
-    % Copyright (c) 2012-2022, Imperial College London
+    % Copyright (c) 2012-2023, Imperial College London
     % All rights reserved.
 
     properties
@@ -16,6 +16,8 @@ classdef ClosedClass < JobClass
 
             self@JobClass('closed', name);
 
+            %global GlobalConstants.CoarseTol
+            
             if nargin<5
                 prio = 0;
             end
@@ -23,7 +25,7 @@ classdef ClosedClass < JobClass
             if isa(model,'Network')
                 self.type = JobClassType.CLOSED;
                 self.population = njobs;
-                if abs(njobs-round(njobs))>Distrib.Tol
+                if abs(njobs-round(njobs))>GlobalConstants.CoarseTol
                     line_warning(mfilename,sprintf('The number of jobs in class %s should be an integer, some solvers might fail.', name));
                 end
                 self.priority = 0;
@@ -63,6 +65,11 @@ classdef ClosedClass < JobClass
         function setReferenceStation(class, source)
             % SETREFERENCESTATION(CLASS, SOURCE)
             setReferenceStation@JobClass(class, source);
+        end
+
+        function summary(self)
+            % SUMMARY()
+            line_printf('Class (%s): <strong>%s</strong> [%d jobs]',self.type,self.getName,self.population);
         end
     end
 

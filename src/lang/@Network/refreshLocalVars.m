@@ -29,7 +29,7 @@ for ind=1:self.getNumberOfNodes
                     nodeparam{ind}.pread{r} = node.popularity{r}.evalPMF(1:nodeparam{ind}.nitems);
                 end
             end
-            nodeparam{ind}.rpolicy = node.replacementPolicy;
+            nodeparam{ind}.replacement = node.replacementPolicy;
             nodeparam{ind}.hitclass = round(node.server.hitClass);
             nodeparam{ind}.missclass = round(node.server.missClass);
         case 'Fork'

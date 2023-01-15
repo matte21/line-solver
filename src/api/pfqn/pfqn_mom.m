@@ -12,7 +12,7 @@ catch
     import Utilities.*; %#ok<SIMPT>
 end
 
-Din=Din(sum(Din,2)>Distrib.Zero,:);
+Din=Din(sum(Din,2)>GlobalConstants.FineTol,:);
 % rescale
 numdigits = max(arrayfun(@(e) numel(num2str(e)), [Din(:);Zin(:)]));
 scaleexp = min(numdigits,8);  % java.lang.Integer takes max 10 digits

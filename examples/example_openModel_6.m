@@ -1,4 +1,4 @@
-if ~isoctave(), clearvars -except exampleName; end 
+clearvars -except exampleName; 
 %% a large multiclass example with PS and FCFS
 
 model = Network('MyNetwork');

@@ -3,7 +3,7 @@ function [QNclass_t, UNclass_t, TNclass_t] = getTranAvg(self,Qt,Ut,Tt)
 
 % Return transient average station metrics
 %
-% Copyright (c) 2012-2022, Imperial College London
+% Copyright (c) 2012-2023, Imperial College London
 % All rights reserved.
 
 if nargin == 1
@@ -34,12 +34,15 @@ end
 sn = self.model.getStruct;
 minrate = min(sn.rates(isfinite(sn.rates)));
 if ~hasTranResults(self)
+    if length(options.timespan)<2
+        line_error(mfilename,'Timespan option requires to specify a two-dimensional vector, e.g., [0,1e3].');
+    end
     if isinf(options.timespan(1)) && isinf(options.timespan(2))
         options.timespan = [0,30/minrate];
         line_warning(mfilename,'Timespan of transient analysis unspecified, setting the timespan option to [0, %d]. Use %s(model,''timespan'',[0,T]) to customize.',options.timespan(2),class(self));
     end
     if isinf(options.timespan(1))
-        line_warning(mfilename,'Start time of transient analysis unspecified, setting the timespan option to [0,%d].',options.timespan(2));
+            line_warning(mfilename,'Start time of transient analysis unspecified, setting the timespan option to [0,%d].',options.timespan(2));
         options.timespan(1) = 0;
     end
     if isinf(options.timespan(2))

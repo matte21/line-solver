@@ -1,7 +1,7 @@
 function [Q,U,R,T,C,X,lG,runtime,it] = solver_ncld_analyzer(sn, options)
 % [Q,U,R,T,C,X,LG,RUNTIME,ITER] = SOLVER_NCLD_ANALYZER(QN, OPTIONS)
 
-% Copyright (c) 2012-2022, Imperial College London
+% Copyright (c) 2012-2023, Imperial College London
 % All rights reserved.
 M = sn.nstations;    %number of stations
 K = sn.nclasses;
@@ -112,6 +112,7 @@ while max(abs(1-eta./eta_1)) > options.iter_tol & it < options.iter_max
             Nchain_r =oner(Nchain,r);
             [lGr(r)] = pfqn_ncld(Lms,Nchain_r,0*Nchain,mu,options);
             lGr = real(lGr);
+            %Lms
             Xchain(r) = exp(lGr(r) - lG);
             for i=1:M
                 Qchain(i,r)=0;
@@ -187,7 +188,7 @@ while max(abs(1-eta./eta_1)) > options.iter_tol & it < options.iter_max
 
     [Q,U,R,T,C,X] = snDeaggregateChainResults(sn, Lchain, ST, STchain, Vchain, alpha, [], [], Rchain, Tchain, [], Xchain);
 
-    [ST,gamma,~,~,~,~,eta] = npfqn_nonexp_approx(options.config.highvar,sn,ST0,V,SCV,X,U,gamma,nservers);
+    [ST,gamma,~,~,~,~,eta] = npfqn_nonexp_approx(options.config.highvar,sn,ST0,V,SCV,T,U,gamma,nservers);
 end
 
 runtime = toc(Tstart);

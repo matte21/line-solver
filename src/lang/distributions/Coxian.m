@@ -1,7 +1,7 @@
 classdef Coxian < MarkovianDistribution
     % The coxian statistical distribution
     %
-    % Copyright (c) 2012-2022, Imperial College London
+    % Copyright (c) 2012-2023, Imperial College London
     % All rights reserved.
 
     methods
@@ -15,7 +15,7 @@ classdef Coxian < MarkovianDistribution
             if length(varargin)==2
                 mu = varargin{1};
                 phi = varargin{2};
-                if abs(phi(end)-1)>Distrib.Tol && isfinite(phi(end))
+                if abs(phi(end)-1)>GlobalConstants.CoarseTol && isfinite(phi(end))
                     line_error(mfilename,sprintf('The completion probability in the last Cox state must be 1.0 but it is %0.1f', phi(end)));
                 end
                 setParam(self, 1, 'mu', mu);
@@ -143,28 +143,28 @@ classdef Coxian < MarkovianDistribution
             if abs(1-map_scv(cx.getRepres)/SCV) > 0.01
                 cx = Coxian.fitMeanAndSCV(MEAN, SCV);
             end
-            cx.immediate = MEAN < Distrib.Tol;
+            cx.immediate = MEAN < GlobalConstants.CoarseTol;
         end
 
         function [cx,mu,phi] = fitMeanAndSCV(MEAN, SCV)
             % [CX,MU,PHI] = FITMEANANDSCV(MEAN, SCV)
             % Fit a Coxian distribution with given mean and squared coefficient of variation (SCV=variance/mean^2)
-            if SCV >= 1-Distrib.Tol && SCV <= 1+Distrib.Tol
+            if SCV >= 1-GlobalConstants.CoarseTol && SCV <= 1+GlobalConstants.CoarseTol
                 n = 1;
                 mu = 1/MEAN;
                 phi = 1;
-            elseif SCV > 0.5+Distrib.Tol && SCV<1-Distrib.Tol
+            elseif SCV > 0.5+GlobalConstants.CoarseTol && SCV<1-GlobalConstants.CoarseTol
                 phi = 0.0;
                 n = 2;
                 mu = zeros(n,1);
                 mu(1) = 2/MEAN/(1+sqrt(1+2*(SCV-1)));
                 mu(2) = 2/MEAN/(1-sqrt(1+2*(SCV-1)));
-            elseif SCV <= 0.5+Distrib.Tol
+            elseif SCV <= 0.5+GlobalConstants.CoarseTol
                 n = ceil(1/SCV);
                 lambda = n/MEAN;
                 mu = lambda*ones(n,1);
                 phi = zeros(n,1);
-            else % SCV > 1+Distrib.Tol
+            else % SCV > 1+GlobalConstants.CoarseTol
                 n = 2;
                 %transform hyperexp into coxian
                 mu = zeros(n,1);
@@ -176,7 +176,7 @@ classdef Coxian < MarkovianDistribution
             end
             phi(n) = 1;
             cx = Coxian(mu,phi);
-            cx.immediate = MEAN < Distrib.Tol;
+            cx.immediate = MEAN < GlobalConstants.CoarseTol;
         end
 
     end

@@ -1,14 +1,15 @@
 function outputFileName = writeJSIM(self, sn, outputFileName)
 % FNAME = WRITEJSIM(SN, FNAME)
 
-% Copyright (c) 2012-2022, Imperial College London
+% Copyright (c) 2012-2023, Imperial College London
 % All rights reserved.
-[simXMLElem, simXMLDoc] = saveXMLHeader(self, self.model.getLogPath);
-[simXMLElem, simXMLDoc] = saveClasses(self, simXMLElem, simXMLDoc);
 
 if nargin<3 %~exist('outFileName','var')
     outputFileName = getJSIMTempPath(self);
 end
+
+[simXMLElem, simXMLDoc] = saveXMLHeader(self, self.model.getLogPath);
+[simXMLElem, simXMLDoc] = saveClasses(self, simXMLElem, simXMLDoc);
 
 numOfClasses = sn.nclasses;
 numOfNodes = sn.nnodes;

@@ -1,11 +1,11 @@
 function [classResT, jobRespT, jobResTArvTS] = parseTranRespT(fileArv, fileDep)
 % [CLASSREST, JOBRESPT, JOBRESTARVTS] = PARSETRANRESPT(FILEARV, FILEDEP)
 
-% Copyright (c) 2012-2022, Imperial College London
+% Copyright (c) 2012-2023, Imperial College London
 % All rights reserved.
 
-load(fileArv,'jobArvID','jobArvTS','jobArvClassID','jobArvID');
-load(fileDep,'jobDepClasses','jobDepTS','jobDepClassID','jobDepID');
+load(fileArv,'jobArvTS','jobArvClassID','jobArvID');
+load(fileDep,'jobDepTS','jobDepClassID','jobDepID');
 %% compute job residence times at the station
 jobIDs = unique([jobArvID;jobDepID]);
 % We count the total number of observed visits. Jobs not departed do not

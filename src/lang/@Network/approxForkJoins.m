@@ -2,10 +2,12 @@ function [nonfjmodel, fjclassmap, fjforkmap, fanout] = approxForkJoins(self, for
 % build a model with fork-joins replaced by routers and delays and
 % parallelism simulated by artificial classes
 % forkLambda(s) is the arrival rate of artificial class s
+%global GlobalConstantsGlobalConstants.FineTol
+
 model = self;
 sn = self.getStruct;
 if nargin < 2
-    forkLambda = Distrib.Tol * ones(1,sn.nclasses);
+    forkLambda = GlobalConstantsGlobalConstants.FineTol * ones(1,sn.nclasses);
 end
 fjclassmap = []; % s = fjclassmap(r) for auxiliary class r gives the index s of the original class
 fjforkmap = []; % f = fjforkmap(r) for auxiliary class r gives the associated fork node f

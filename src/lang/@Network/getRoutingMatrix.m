@@ -1,7 +1,7 @@
 function [rt,rtnodes,conn,chains,rtNodesByClass,rtNodesByStation] = getRoutingMatrix(self, arvRates)
 % [RT,RTNODES,CONNMATRIX,CHAINS,RTNODESBYCLASS,RTNODESBYSTATION] = GETROUTINGMATRIX(ARVRATES)
 
-% Copyright (c) 2012-2022, Imperial College London
+% Copyright (c) 2012-2023, Imperial College London
 % All rights reserved.
 
 if self.hasStruct
@@ -121,7 +121,7 @@ for ind=1:I
                     otherwise
                         for jnd=1:I
                             if conn(ind,jnd)>0
-                                rtnodes((ind-1)*K+k,(jnd-1)*K+k) = Distrib.Zero;
+                                rtnodes((ind-1)*K+k,(jnd-1)*K+k) = GlobalConstants.FineTol;
                             end
                         end
                         %line_error([outputStrategy_k{2},' routing policy is not yet supported.']);

@@ -1,28 +1,24 @@
 function lqn=LayeredNetworkStruct()
 % Data structure representation for a LayeredNetwork object
 %
-% Copyright (c) 2012-2022, Imperial College London
+% Copyright (c) 2012-2023, Imperial College London
 % All rights reserved.
 
 lqn=[]; %faster than lqn=struct();
 lqn.nidx = 0;  % total number of hosts, tasks, entries, and activities, except the reference tasks
 lqn.nhosts = 0;
 lqn.ntasks = 0;
-lqn.nreftasks = 0;
-lqn.nacts = 0;
 lqn.nentries = 0;
-lqn.ntasksof = [];  % number of tasks on the ith host
-lqn.nentriesof = [];
+lqn.nacts = 0;
+lqn.ncalls = 0;
 lqn.nactsof = [];
+lqn.hshift = 0;
 lqn.tshift = 0;
 lqn.eshift = 0;
 lqn.ashift = 0;
+lqn.cshift = 0;
 lqn.ntasksof = [];
 lqn.nidx = 0;
-lqn.hostidx = [];
-lqn.taskidx = [];
-lqn.entryidx = [];
-lqn.actidx = [];
 lqn.tasksof = {};
 lqn.entriesof = {};
 lqn.actsof = {};
@@ -37,35 +33,30 @@ lqn.hashnames = {};
 lqn.mult = [];
 lqn.repl = [];
 lqn.type = [];
-lqn.graph = sparse([]);
-lqn.replies = [];
-lqn.replygraph = sparse([]);
-
-lqn.nitems = {};
-lqn.itemlevelcap  = {};
-lqn.replacementpolicy  = {};
-lqn.nitemsof = {};
-lqn.itemsdistribution = {};
-lqn.iscache = [];
+%lqn.replies = [];
 lqn.parent = [];
 
-lqn.callidx = [];
+lqn.nitems = [];
+lqn.itemcap  = {};
+lqn.replacement  = [];
+lqn.itemproc = {};
 lqn.calltype = sparse([]);
-lqn.iscaller = sparse([]);
-lqn.issynccaller = sparse([]);
-lqn.isasynccaller = sparse([]);
 lqn.callpair = [];
 lqn.callproc = {};
 lqn.callnames = {};
 lqn.callhashnames = {};
 %lqn.callshortnames = {};
-lqn.taskgraph = sparse([]);
 lqn.actpretype = sparse([]);
 lqn.actposttype = sparse([]);
 
-lqn.replies = false;
+lqn.graph = sparse([]);
+lqn.taskgraph = sparse([]);
 lqn.replygraph = [];
-lqn.ncalls = [];
-lqn.isref = false;
-lqn.iscache = false;
+
+lqn.iscache = sparse(logical([]));
+lqn.iscaller = sparse([]);
+lqn.issynccaller = sparse([]);
+lqn.isasynccaller = sparse([]);
+lqn.isref = sparse(logical([]));
+lqn.iscache = sparse(logical([]));
 end

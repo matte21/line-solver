@@ -1,7 +1,7 @@
 classdef ActivityPrecedence
     % An auxiliary class to specify precedence among Activity elements.
     %
-    % Copyright (c) 2012-2022, Imperial College London
+    % Copyright (c) 2012-2023, Imperial College London
     % All rights reserved.
 
     properties
@@ -56,18 +56,11 @@ classdef ActivityPrecedence
 
     end
 
-    methods (Static)
-        function ap = Serial(varargin)
-            % AP = SERIAL(VARARGIN)
-
-            ap = cell(nargin-1,1);
-            for m = 1:nargin-1
-                ap{m} = ActivityPrecedence.Sequence(varargin{m},varargin{m+1});
-            end
-        end
-
-        function ap = Sequence(preAct, postAct)
+    methods (Static, Hidden)
+         function ap = Sequence(preAct, postAct)
             % AP = SEQUENCE(PREACT, POSTACT)
+	    %
+            % Auxiliary method, use Serial instead.
 
             if isa(preAct,'Activity')
                 preAct = preAct.name;
@@ -77,8 +70,19 @@ classdef ActivityPrecedence
             end
             ap = ActivityPrecedence({preAct},{postAct});
         end
+    end 
 
-        function ap = AndJoin(preActs, postAct, quorum)
+    methods (Static)
+         function ap = Serial(varargin)
+            % AP = SERIAL(VARARGIN)
+
+            ap = cell(nargin-1,1);
+            for m = 1:nargin-1
+                ap{m} = ActivityPrecedence.Sequence(varargin{m},varargin{m+1});
+            end
+       end
+
+       function ap = AndJoin(preActs, postAct, quorum)
             % AP = ANDJOIN(PREACTS, POSTACT, QUORUM)
 
             for a = 1:length(preActs)

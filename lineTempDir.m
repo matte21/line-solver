@@ -3,5 +3,4 @@ function tmpdir = lineTempDir
     if ~exist(tmpdir,'dir')
         mkdir(tmpdir);
     end
-    
 end

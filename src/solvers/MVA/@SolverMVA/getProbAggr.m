@@ -14,7 +14,7 @@ Q = self.result.Avg.Q;
 sn = self.getStruct;
 N = sn.njobs;
 if all(isfinite(N))
-    switch options.method
+    switch self.options.method
         case 'exact'
             line_error(mfilename,'Exact marginal state probabilities not available yet in SolverMVA.');
         otherwise

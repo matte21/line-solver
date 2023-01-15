@@ -1,7 +1,7 @@
 function space = fromMarginal(sn, ind, n, options)
 % SPACE = FROMMARGINAL(QN, IND, N, OPTIONS)
 
-% Copyright (c) 2012-2022, Imperial College London
+% Copyright (c) 2012-2023, Imperial College London
 % All rights reserved.
 
 if nargin<4 %~exist('options','var')
@@ -20,7 +20,7 @@ state = [];
 space = [];
 
 
-if sn.isstation(ind) && any(sn.procid(sn.nodeToStation(ind),:)==ProcessType.ID_MAP | sn.procid(sn.nodeToStation(ind),:)==ProcessType.ID_MMPP2);
+if sn.isstation(ind) && any(sn.procid(sn.nodeToStation(ind),:)==ProcessType.ID_MAP | sn.procid(sn.nodeToStation(ind),:)==ProcessType.ID_MMPP2)
     if sn.nservers(ind)>1
         line_error(mfilename,'Multiserver MAP stations are not supported.')
     end

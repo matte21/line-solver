@@ -1,7 +1,7 @@
 function [RD] = solver_mam_passage_time(sn, PH, options)
 % [RD] = SOLVER_MAM_PASSAGE_TIME(QN, PH, OPTIONS)
 
-% Copyright (c) 2012-2022, Imperial College London
+% Copyright (c) 2012-2023, Imperial College London
 % All rights reserved.
 
 global BuToolsVerbose;
@@ -70,7 +70,7 @@ if M==2 && all(isinf(N))
         sigma(k) = sqrt(map_var(RDph{k}));
         mean(k) = map_mean(RDph{k});
         n = 5;
-        while map_cdf(RDph{k},mean(k)+n*sigma(k)) < 1-Distrib.Zero
+        while map_cdf(RDph{k},mean(k)+n*sigma(k)) < 1-GlobalConstants.FineTol
             n = n+1;
         end
         % generate 10000 CDF points

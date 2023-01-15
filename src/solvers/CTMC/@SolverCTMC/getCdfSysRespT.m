@@ -1,5 +1,6 @@
 function RD = getCdfSysRespT(self)
 % RD = GETCDFRESPT()
+%global GlobalConstantsGlobalConstants.FineTol
 sn = self.getStruct;
 RD = cell(1, sn.nchains);
 N = sn.njobs;
@@ -27,7 +28,7 @@ for c=1:sn.nchains
     pie_arv = map_pie(D); % state seen upon arrival of a class-r job
 
     nonZeroRates = abs(Q(Q~=0));
-    nonZeroRates = nonZeroRates( nonZeroRates >Distrib.Tol );
+    nonZeroRates = nonZeroRates( nonZeroRates > GlobalConstantsGlobalConstants.FineTol );
     T = abs(100/min(nonZeroRates)); % solve ode until T = 100 events with the slowest rate
     dT = T/10000; % solve ode until T = 100 events with the slowest rate
     tset = 0:dT:T;
@@ -36,7 +37,7 @@ for c=1:sn.nchains
     for t=1:length(tset)
         RD{1,c}(t,2) = tset(t);
         RD{1,c}(t,1) = 1-pie_arv * expm(D{1}*tset(t)) * ones(length(D{1}),1);
-        if RD{1,c}(t,1)>1-Distrib.Tol
+        if RD{1,c}(t,1)>1-GlobalConstantsGlobalConstants.FineTol
             RD{1,c}(t+1:end,:)=[];
             break
         end

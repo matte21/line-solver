@@ -1,7 +1,7 @@
 classdef MarkedMAP < MarkovModulated
     % Markov Modulated Arrival Process
     %
-    % Copyright (c) 2012-2022, Imperial College London
+    % Copyright (c) 2012-2023, Imperial College London
     % All rights reserved.
 
     methods
@@ -152,7 +152,7 @@ classdef MarkedMAP < MarkovModulated
         function id = getTypeIDC(self, t) % asymptotic index of dispersion for counts for each type
             % ID = GETTYPEIDC() % ASYMPTOTIC INDEX OF DISPERSION
             if nargin < 2
-                id = mmap_count_idc(self.getRepres, Distrib.InfTime);
+                id = mmap_count_idc(self.getRepres, GlobalConstants.Inf);
             else
                 id = mmap_count_idc(self.getRepres, t);
             end

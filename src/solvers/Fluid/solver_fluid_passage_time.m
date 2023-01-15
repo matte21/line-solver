@@ -1,7 +1,7 @@
 function RTret = solver_fluid_passage_time(sn, options)
 % RTRET = SOLVER_FLUID_PASSAGE_TIME(QN, OPTIONS)
 
-% Copyright (c) 2012-2022, Imperial College London
+% Copyright (c) 2012-2023, Imperial College London
 % All rights reserved.
 
 iter_max = options.iter_max;
@@ -51,7 +51,7 @@ for i = 1:sn.nstations
 
                     % determine max integration time
                     nonZeroRates = slowrate(:);
-                    nonZeroRates = nonZeroRates( nonZeroRates > Distrib.Tol );
+                    nonZeroRates = nonZeroRates( nonZeroRates > tol );
                     T = abs(100/min(nonZeroRates)); % solve ode until T = 100 events with slowest exit rate
 
                     % indices of new classes at station i
@@ -82,7 +82,7 @@ for i = 1:sn.nstations
                             %try
                             [t_iter, ymean_t_iter] = ode_solve(ode_h_c, trange, y0_c, odeopt, options);
                             %catch
-                            %    keyboard
+                            %    %keyboard
                             %end
                         end
                         %%%
@@ -118,8 +118,8 @@ RTret = {};
 for i=1:sn.nstations
     if sn.nodetype(sn.stationToNode(i)) ~= NodeType.Source
         for c=1:sn.nclasses
-            RTret{i,c} = [RT{i,c,2},RT{i,c,1}];
-            if RTret{i,c}(end,1) < 0.995
+            RTret{i,c} = [RT{i,c,2},RT{i,c,1}];            
+            if ~isempty(RTret{i,c}) && RTret{i,c}(end,1) < 0.995
                 line_warning(mfilename,'CDF at station %d in class %d computed only %.3f percent of the total mass.',i,c,RTret{i,c}(end,1)*100);
             end
         end

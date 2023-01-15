@@ -11,7 +11,7 @@ classdef Zipf < DiscreteDistrib
             % Construct a Zipf-like distribution on n items with given
             % shape parameter s
             if nargin<2 %~exist('n','var')
-                n = Distrib.Inf;
+                n = GlobalConstants.Inf;
             end
             self@DiscreteDistrib('Zipf',4,[1,n]);
             p = 1./((1:n).^s)/Zipf.genHarmonic(s,n);

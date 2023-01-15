@@ -1,5 +1,5 @@
-function [Gn,lGn]=pfqn_cub(L,N,Z,order)
-% [GN,LGN]=PFQN_CUB(L,N,Z,ORDER)
+function [Gn,lGn]=pfqn_cub(L,N,Z,order,atol)
+% [GN,LGN]=PFQN_CUB(L,N,Z,ORDER,TOL)
 
 % PFQN_GM Exact and approximate solution of closed product-form queueing
 % networks by Grundmann-Moeller cubature rules
@@ -10,6 +10,7 @@ function [Gn,lGn]=pfqn_cub(L,N,Z,order)
 % N : 1xR population vector. N(r) is the number of jobs in class r
 % Z : 1xR think time vector. Z(r) is the total think time of class r
 % S : degree of the cubature rule. Exact if S=ceil((sum(N)-1)/2).
+% atol: max absolute distance from zero to declare that a variable is zero
 %
 % Output:
 % Gn : estimated normalizing constat
@@ -30,13 +31,16 @@ end
 if nargin<4
     order=ceil((sum(N)-1)/2);
 end
+if nargin<5
+    atol = 1e-8;
+end
 
-if nargin<3%~exist('Z','var')
+if nargin<3 || sum(Z)<atol %~exist('Z','var')
     Nt=sum(N);
     beta=N/Nt;
     f=@(x) ([x(:);1-sum(x)]'*L);
     h=@(x) beta.*log(f(x));
-    [I,Q,ns]=simplexquad(@(x) prod(exp(Nt*h(x))),M-1,order,1e-8);
+    [I,Q,ns]=simplexquad(@(x) prod(exp(Nt*h(x))),M-1,order,atol);
     Gn=Q*exp(gammaln(1+sum(N)+M-1)-sum(gammaln(1+N)));
     Gn=Gn(end);
 else
@@ -45,15 +49,14 @@ else
     beta = N/Nt;
     Gn=0;
     vmax=Nt*10;
-    tol = 1e-10; % break infinite integration if G doesn't grow beyond tol
     dv=vmax/steps;
     for v=0:dv:vmax
         Lv=L*v+repmat(Z,M,1);
         h = @(x) beta.*log(([x(:);1-sum(x)]'*Lv));
-        [~,Q] = simplexquad(@(x) exp(sum(Nt*h(x))),M-1,order,1e-8);
+        [~,Q] = simplexquad(@(x) exp(sum(Nt*h(x))),M-1,order,atol);
         dG = exp(-v)*v^(M-1)*Q(end)*dv;
         Gn = Gn + dG;
-        if v>0 && dG/Gn<tol
+        if v>0 && dG/Gn<atol
             break
         end
     end
@@ -88,19 +91,15 @@ function [Q,nv] = grnmol( f, V, s , tol)
 [n,~] = size(V); % n is the dimension
 d = 0; % order of the polynomial
 Q = (zeros(1,s+1));
-T = zeros(1,s);
 Qv = Q;
-T0 = tic;
 Vol = 1/factorial((n));%abs(det(V(:,1:n)-V(:,np)*ones(1,n)))/prod(mp([1:n]));
 nv = 0;
-x=[];
 while 1
     m = n + 2*d + 1;
     al = (ones(n,1));
     alz = 2*d + 1;
     Qs = 0;
     while 1
-        x(end+1,:)=[V*[alz; al]/m;1-sum(V*[alz; al]/m)];
         Qs = Qs + f(V*[alz; al]/m);
         nv = nv + 1;
         for j = 1 : n
@@ -109,7 +108,8 @@ while 1
                 al(j) = al(j) + 2;
                 break
             end
-            alz = alz + al(j) + 1; al(j) = 1;
+            alz = alz + al(j) + 1; 
+			al(j) = 1;
         end
         if alz == 2*d+1
             break
@@ -127,6 +127,5 @@ while 1
         Q((d+1):end)=[];
         break,
     end
-    T(d)=toc(T0);
 end
 end

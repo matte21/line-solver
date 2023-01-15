@@ -6,7 +6,7 @@ if nargin == 1 % no parameter
     if isempty(self.model.handles) || ~isfield(self.model.handles,'Q') || ~isfield(self.model.handles,'U') || ~isfield(self.model.handles,'R') || ~isfield(self.model.handles,'T') || ~isfield(self.model.handles,'A')
         resetResults(self); % reset in case there are partial results saved
     end
-    [Q,U,R,T] = self.getAvgHandles;
+    [Q,U,R,T,A,W] = self.getAvgHandles;
 elseif nargin == 2
     handlers = Q;
     Q=handlers{1};

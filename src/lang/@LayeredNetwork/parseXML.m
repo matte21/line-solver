@@ -1,7 +1,7 @@
 function myLN = parseXML(filename, verbose)
 % MYLN = PARSEXML(FILENAME, VERBOSE)
 
-% Copyright (c) 2012-2022, Imperial College London
+% Copyright (c) 2012-2023, Imperial College London
 % All rights reserved.
 
 
@@ -25,6 +25,13 @@ end
 % init Java XML parser and load file
 dbFactory = DocumentBuilderFactory.newInstance();
 dBuilder = dbFactory.newDocumentBuilder();
+
+fid=fopen(filename,'r');
+if fid==-1
+    line_error(mfilename,'File cannot be found. Verify the current directory and the specified filename.');
+else
+    fclose(fid);
+end
 
 if isempty(fileparts(filename))
     doc = dBuilder.parse(which(filename));

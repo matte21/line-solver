@@ -1,26 +1,13 @@
 function [simElem,simDoc] = saveXMLHeader(self, logPath)
 % [SIMELEM,SIMDOC] = SAVEXMLHEADER(LOGPATH)
 
-% Copyright (c) 2012-2022, Imperial College London
+% Copyright (c) 2012-2023, Imperial College London
 % All rights reserved.
+xmlnsXsi = 'http://www.w3.org/2001/XMLSchema-instance';
 fname = [getFileName(self), ['.', 'jsimg']];
-if isoctave
-    try
-        simDoc = javaObject('org.apache.xerces.dom.DocumentImpl');
-        simElem = simDoc.createElement('sim');
-    catch
-        javaaddpath(which('xercesImpl-2.11.0.jar'));
-        javaaddpath(which('xml-apis-2.11.0.jar'));
-        pkg load io;
-        simDoc = javaObject('org.apache.xerces.dom.DocumentImpl');
-        simElem = simDoc.createElement('sim');
-        simDoc.appendChild(simElem);
-    end
-else
-    simDoc = com.mathworks.xml.XMLUtils.createDocument('sim');
-    simElem = simDoc.getDocumentElement;
-end
-simElem.setAttribute('xmlns:xsi', self.xmlnsXsi);
+simDoc = com.mathworks.xml.XMLUtils.createDocument('sim');
+simElem = simDoc.getDocumentElement;
+simElem.setAttribute('xmlns:xsi', xmlnsXsi);
 simElem.setAttribute('name', fname);
 %simElem.setAttribute('timestamp', '"Tue Jan 1 00:00:01 GMT+00:00 2000"');
 simElem.setAttribute('xsi:noNamespaceSchemaLocation', 'SIMmodeldefinition.xsd');

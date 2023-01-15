@@ -1,7 +1,7 @@
 classdef Station < StatefulNode
     % An abstract class for nodes where jobs station
     %
-    % Copyright (c) 2012-2022, Imperial College London
+    % Copyright (c) 2012-2023, Imperial College London
     % All rights reserved.
     
     properties
@@ -247,7 +247,7 @@ classdef Station < StatefulNode
         
         function [map,mu,phi] = getMarkovianServiceRates(self)
             % [PH,MU,PHI] = GETPHSERVICERATES()
-            
+            %global GlobalConstants.Inf
             nclasses = size(self.server.serviceProcess,2);
             map = cell(1,nclasses);
             mu = cell(1,nclasses);
@@ -260,8 +260,8 @@ classdef Station < StatefulNode
                     mu{r}  = NaN;
                     phi{r}  = NaN;
                 elseif serviceProcess_r{end}.isImmediate()
-                    map{r}  = {[-Distrib.InfRate],[Distrib.InfRate]};
-                    mu{r}  = [Distrib.InfRate];
+                    map{r}  = {[-GlobalConstants.Inf],[GlobalConstants.Inf]};
+                    mu{r}  = [GlobalConstants.Inf];
                     phi{r}  = [1];
                 elseif ~serviceProcess_r{end}.isDisabled()
                     switch class(serviceProcess_r{end})

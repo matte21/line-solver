@@ -1,8 +1,10 @@
 function [QN, UN, RN, TN, CN, XN, t, QNt, UNt, TNt, xvec, iter] = solver_fluid_analyzer(sn, options)
 % [QN, UN, RN, TN, CN, XN, T, QNT, UNT, TNT, XVEC, iter] = SOLVER_FLUID_ANALYZER(QN, OPTIONS)
 
-% Copyright (c) 2012-2022, Imperial College London
+% Copyright (c) 2012-2023, Imperial College London
 % All rights reserved.
+%global GlobalConstants.Inf
+%global GlobalConstants.FineTol
 
 M = sn.nstations;
 K = sn.nclasses;
@@ -49,8 +51,8 @@ switch options.method
                     UN(i,sd) = TN(i,sd) ./ rates0(i,sd);
                 end
                 ST0 = 1./rates0;
-                ST0(isinf(ST0)) = Distrib.Inf;
-                ST0(isnan(ST0)) = Distrib.Zero;
+                ST0(isinf(ST0)) = GlobalConstants.Inf;
+                ST0(isnan(ST0)) = GlobalConstants.FineTol;
 
                 XN = zeros(1,K);
                 for k=1:K
@@ -58,11 +60,11 @@ switch options.method
                         XN(k) = TN(sn.refstat(k),k);
                     end
                 end
-                [ST,gamma,~,~,~,~,eta] = npfqn_nonexp_approx(options.config.highvar,sn,ST0,V,SCV,XN,UN,gamma,S);
+                [ST,gamma,~,~,~,~,eta] = npfqn_nonexp_approx(options.config.highvar,sn,ST0,V,SCV,TN,UN,gamma,S);
 
                 rates = 1./ST;
-                rates(isinf(rates)) = Distrib.Inf;
-                rates(isnan(rates)) = Distrib.Zero; %#ok<NASGU>
+                rates(isinf(rates)) = GlobalConstants.Inf;
+                rates(isnan(rates)) = GlobalConstants.FineTol; %#ok<NASGU>
 
                 for i=1:M
                     switch sn.schedid(i)

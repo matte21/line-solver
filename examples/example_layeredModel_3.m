@@ -1,7 +1,6 @@
 %% This example is temporarily disabled
-if ~isoctave(), clearvars -except exampleName; end
-fprintf(1,'This example illustrates the initialization of SolverLN using the output\n')
-fprintf(1,'of SolverLQNS.\n')
+clearvars -except exampleName;
+fprintf(1,'This example illustrates the initialization of SolverLN using the output of SolverLQNS.\n')
 
 cwd = fileparts(which(mfilename));
 model = LayeredNetwork.parseXML([cwd,filesep,'example_layeredModel_1.xml']);

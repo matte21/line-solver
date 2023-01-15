@@ -1,67 +1,59 @@
-function [outputFileName] = writeJMVA(self, sn, outputFileName)
-% FNAME = WRITEJMVA(SN, FNAME)
+function outputFileName = writeJMVA(sn, outputFileName, options)
+% FNAME = WRITEJMVA(SN, FNAME, OPTIONS)
 
-% Copyright (c) 2012-2022, Imperial College London
+% Copyright (c) 2012-2023, Imperial College London
 % All rights reserved.
 
-if ~self.model.hasProductFormSolution
-    line_error(mfilename,'JMVA requires the model to have a product-form solution.');
-end
+%if ~self.model.hasProductFormSolution
+%    line_error(mfilename,'JMVA requires the model to have a product-form solution.');
+%end
 
-if self.model.hasClassSwitch
-    %    line_error(mfilename,'JMVA does not support class switching.');
-end
+%if self.model.hasClassSwitch
+%    line_error(mfilename,'JMVA does not support class switching.');
+%end
 
-if isoctave
-    mvaDoc = javaObject('org.apache.xerces.dom.DocumentImpl');
-    mvaElem = mvaDoc.createElement('sim');
-    mvaDoc.appendChild(mvaElem);
-else
-    mvaDoc = com.mathworks.xml.XMLUtils.createDocument('model');
-    mvaElem = mvaDoc.getDocumentElement;
-end
+mvaDoc = com.mathworks.xml.XMLUtils.createDocument('model');
+mvaElem = mvaDoc.getDocumentElement;
 
-mvaElem.setAttribute('xmlns:xsi', self.xmlnsXsi);
+xmlnsXsi = 'http://www.w3.org/2001/XMLSchema-instance';
+mvaElem.setAttribute('xmlns:xsi', xmlnsXsi);
 mvaElem.setAttribute('xsi:noNamespaceSchemaLocation', 'JMTmodel.xsd');
-if nargin<3 %~exist('outFileName','var')
-    outputFileName = getJMVATempPath(self);
-end
 
 algTypeElement = mvaDoc.createElement('algType');
-switch self.options.method
+switch options.method
     case {'jmva.recal'}
         if max(sn.nservers(isfinite(sn.nservers))) > 1
-            line_error(mfilename,sprintf('%s does not support multi-server stations.',self.options.method));
+            line_error(mfilename,sprintf('%s does not support multi-server stations.',options.method));
         end
         algTypeElement.setAttribute('name','RECAL');
     case {'jmva.comom'}
         if max(sn.nservers(isfinite(sn.nservers))) > 1
-            line_error(mfilename,sprintf('%s does not support multi-server stations.',self.options.method));
+            line_error(mfilename,sprintf('%s does not support multi-server stations.',options.method));
         end
         algTypeElement.setAttribute('name','CoMoM');
     case {'jmva.chow'}
         if max(sn.nservers(isfinite(sn.nservers))) > 1
-            line_error(mfilename,sprintf('%s does not support multi-server stations.',self.options.method));
+            line_error(mfilename,sprintf('%s does not support multi-server stations.',options.method));
         end
         algTypeElement.setAttribute('name','Chow');
     case {'jmva.bs','jmva.amva'}
         if max(sn.nservers(isfinite(sn.nservers))) > 1
-            line_error(mfilename,sprintf('%s does not support multi-server stations.',self.options.method));
+            line_error(mfilename,sprintf('%s does not support multi-server stations.',options.method));
         end
         algTypeElement.setAttribute('name','Bard-Schweitzer');
     case {'jmva.aql'}
         if max(sn.nservers(isfinite(sn.nservers))) > 1
-            line_error(mfilename,sprintf('%s does not support multi-server stations.',self.options.method));
+            line_error(mfilename,sprintf('%s does not support multi-server stations.',options.method));
         end
         algTypeElement.setAttribute('name','AQL');
     case {'jmva.lin'}
         if max(sn.nservers(isfinite(sn.nservers))) > 1
-            line_error(mfilename,sprintf('%s does not support multi-server stations.',self.options.method));
+            line_error(mfilename,sprintf('%s does not support multi-server stations.',options.method));
         end
         algTypeElement.setAttribute('name','Linearizer');
     case {'jmva.dmlin'}
         if max(sn.nservers(isfinite(sn.nservers))) > 1
-            line_error(mfilename,sprintf('%s does not support multi-server stations.',self.options.method));
+            line_error(mfilename,sprintf('%s does not support multi-server stations.',options.method));
         end
         algTypeElement.setAttribute('name','De Souza-Muntz Linearizer');
     case {'jmva.ls'}
@@ -70,7 +62,7 @@ switch self.options.method
         algTypeElement.setAttribute('name','MVA');
 end
 algTypeElement.setAttribute('tolerance','1.0E-7');
-algTypeElement.setAttribute('maxSamples',num2str(self.options.samples));
+algTypeElement.setAttribute('maxSamples',num2str(options.samples));
 
 %%%%%%%%%%
 M = sn.nstations;    %number of stations
@@ -90,12 +82,12 @@ parametersElem = mvaDoc.createElement('parameters');
 classesElem = mvaDoc.createElement('classes');
 classesElem.setAttribute('number',num2str(sn.nchains));
 stationsElem = mvaDoc.createElement('stations');
-stationsElem.setAttribute('number',num2str(sn.nstations - sum(self.getStruct.nodetype == NodeType.Source)));
+stationsElem.setAttribute('number',num2str(sn.nstations - sum(sn.nodetype == NodeType.Source)));
 refStationsElem = mvaDoc.createElement('ReferenceStation');
 refStationsElem.setAttribute('number',num2str(sn.nchains));
 algParamsElem = mvaDoc.createElement('algParams');
 
-sourceid = self.getStruct.nodetype == NodeType.Source;
+sourceid = sn.nodetype == NodeType.Source;
 for c=1:sn.nchains
     if isfinite(sum(sn.njobs(sn.chains(c,:))))
         classElem = mvaDoc.createElement('closedclass');
@@ -111,20 +103,20 @@ end
 
 isLoadDep = false(1,sn.nstations);
 for i=1:sn.nstations
-    switch self.getStruct.nodetype(self.getStruct.stationToNode(i))
+    switch sn.nodetype(sn.stationToNode(i))
         case NodeType.Delay
             statElem = mvaDoc.createElement('delaystation');
-            statElem.setAttribute('name',sn.nodenames{self.getStruct.stationToNode(i)});
+            statElem.setAttribute('name',sn.nodenames{sn.stationToNode(i)});
         case NodeType.Queue
             if sn.nservers(i) == 1
                 isLoadDep(i) = false;
                 statElem = mvaDoc.createElement('listation');
-                statElem.setAttribute('name',sn.nodenames{self.getStruct.stationToNode(i)});
+                statElem.setAttribute('name',sn.nodenames{sn.stationToNode(i)});
                 statElem.setAttribute('servers',num2str(1));
             else
                 isLoadDep(i) = true;
                 statElem = mvaDoc.createElement('ldstation');
-                statElem.setAttribute('name',sn.nodenames{self.getStruct.stationToNode(i)});
+                statElem.setAttribute('name',sn.nodenames{sn.stationToNode(i)});
                 statElem.setAttribute('servers',num2str(1));
             end
         otherwise
@@ -139,7 +131,7 @@ for i=1:sn.nstations
             if any(isinf(NK))
                 line_error(mfilename,'JMVA does not support open classes in load-dependent models;');
             end
-            
+
             for n=2:sum(NK)
                 ldSrvString = sprintf('%s;%s',ldSrvString,num2str(STchain(i,c)/min( n, sn.nservers(i) )));
             end
@@ -166,7 +158,7 @@ for i=1:sn.nstations
         visitsElem.appendChild(statVisitElem);
     end
     statElem.appendChild(visitsElem);
-    
+
     stationsElem.appendChild(statElem);
 end
 

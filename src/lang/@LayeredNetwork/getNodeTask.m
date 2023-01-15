@@ -1,13 +1,11 @@
 function task = getNodeTask(self,node)
-% TASK = GETNODETASK(SELF,NODE)
-
-% Copyright (c) 2012-2022, Imperial College London
-% All rights reserved.
-G = self.lqnGraph;
-if ischar(node)
-    nodeid = findstring(G.Nodes.Name,node);
-    task = G.Nodes.Task{nodeid};
-else
-    task = G.Nodes.Task{node};
+% PROC = GETNODETASK(SELF,NODE)
+switch class(node)
+    case 'Task'
+        task = node;
+    case {'Entry','Activity'}
+        task = node.parent;
+    otherwise
+        line_error(mfilename,'Invalid input node');
 end
 end

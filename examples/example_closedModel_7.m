@@ -1,5 +1,5 @@
 % comparison of product-form scheduling policies
-if ~isoctave(), clearvars -except exampleName; end
+clearvars -except exampleName;
 c=1;
 psmodel = Network('PS scheduling model');
 

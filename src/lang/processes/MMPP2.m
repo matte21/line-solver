@@ -1,7 +1,7 @@
 classdef MMPP2 < MarkovModulated
     % 2-phase Markov-Modulated Poisson Process - MMPP(2)
     %
-    % Copyright (c) 2012-2022, Imperial College London
+    % Copyright (c) 2012-2023, Imperial College London
     % All rights reserved.
 
     methods
@@ -204,7 +204,7 @@ classdef MMPP2 < MarkovModulated
         end
 
         function mmpp2 = fitCentralAndIDC(mean, var, skew, idc)
-            if mean <= Distrib.Zero
+            if mean <= GlobalConstants.FineTol
                 mmpp2 = Exp(Inf);
             else
                 scv = var/mean^2;
@@ -214,7 +214,7 @@ classdef MMPP2 < MarkovModulated
         end
 
         function mmpp2 = fitCentralAndACFLag1(mean, var, skew, rho1)
-            if mean <= Distrib.Zero
+            if mean <= GlobalConstants.FineTol
                 mmpp2 = Exp(Inf);
             else
                 scv = var/mean^2;
@@ -224,7 +224,7 @@ classdef MMPP2 < MarkovModulated
         end
 
         function mmpp2 = fitCentralAndACFDecay(mean, var, skew, gamma2)
-            if m1 <= Distrib.Zero
+            if m1 <= GlobalConstants.FineTol
                 mmpp2 = Exp(Inf);
             else
                 scv = var/mean^2;
@@ -234,7 +234,7 @@ classdef MMPP2 < MarkovModulated
         end
 
         function mmpp2 = fitRawMomentsAndIDC(m1, m2, m3, idc)
-            if m1 <= Distrib.Zero
+            if m1 <= GlobalConstants.FineTol
                 mmpp2 = Exp(Inf);
             else
                 scv = (m2-m1^2)/m1^2;
@@ -245,7 +245,7 @@ classdef MMPP2 < MarkovModulated
         end
         
         function mmpp2 = fitRawMomentsAndACFLag1(m1, m2, m3, rho1)
-            if m1 <= Distrib.Zero
+            if m1 <= GlobalConstants.FineTol
                 mmpp2 = Exp(Inf);
             else
                 scv = (m2-m1^2)/m1^2;
@@ -257,7 +257,7 @@ classdef MMPP2 < MarkovModulated
         end
 
         function mmpp2 = fitRawMomentsAndACFDecay(m1, m2, m3, gamma2)
-            if m1 <= Distrib.Zero
+            if m1 <= GlobalConstants.FineTol
                 mmpp2 = Exp(Inf);
             else
                 m = mmpp2_fit3(m1,m2,m3,gamma2);

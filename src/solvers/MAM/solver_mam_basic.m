@@ -5,14 +5,11 @@ function [QN,UN,RN,TN,CN,XN] = solver_mam_basic(sn, options)
 % traffic equations by using visits to rescale the flows into the queue
 % inputs.
 %
-% Copyright (c) 2012-2022, Imperial College London
+% Copyright (c) 2012-2023, Imperial College London
 % All rights reserved.
 
-global BuToolsVerbose;
-global BuToolsCheckInput;
-global BuToolsCheckPrecision;
-
 config = options.config;
+tol = options.tol;
 
 PH = sn.proc;
 %% generate local state spaces
@@ -32,9 +29,6 @@ TN = zeros(M,K);
 CN = zeros(1,K);
 XN = zeros(1,K);
 
-BuToolsVerbose = false;
-BuToolsCheckInput = false;
-BuToolsCheckPrecision = 1e-12;
 pie = {};
 D0 = {};
 
@@ -104,7 +98,7 @@ end
 
 sd = isfinite(sn.nservers);
 
-while nanmax(nanmax(abs(TN-TN_1))) > Distrib.Tol && it <= options.iter_max %#ok<NANMAX>
+while nanmax(nanmax(abs(TN-TN_1))) > tol && it <= options.iter_max %#ok<NANMAX>
     it = it + 1;
     TN_1 = TN;
     Umax = max(sum(UN(sd,:),2));
@@ -115,7 +109,7 @@ while nanmax(nanmax(abs(TN-TN_1))) > Distrib.Tol && it <= options.iter_max %#ok<
             inchain = sn.inchain{c};
             if ~isinf(sum(sn.njobs(inchain))) % if closed chain
                 Nc = sum(sn.njobs(inchain)); % closed population
-                QNc = max(Distrib.Tol, sum(nansum(QN(:,inchain),2))); %#ok<NANSUM>
+                QNc = max(tol, sum(nansum(QN(:,inchain),2))); %#ok<NANSUM>
                 TNlb = Nc./sum(Lchain(:,c));
                 if it == 1
                     lambda(c) = TNlb; % lower bound
@@ -169,7 +163,7 @@ while nanmax(nanmax(abs(TN-TN_1))) > Distrib.Tol && it <= options.iter_max %#ok<
                                     UN(ist,k) = S(ist,k)*TN(ist,k);
                                 end
                                 %Nc = sum(sn.njobs(inchain)); % closed population
-                                Uden = min([1-Distrib.Zero,sum(UN(ist,:))]);
+                                Uden = min([1-GlobalConstants.FineTol,sum(UN(ist,:))]);
                                 for k=inchain
                                     %QN(ist,k) = (UN(ist,k)-UN(ist,k)^(Nc+1))/(1-Uden); % geometric bound type approximation
                                     QN(ist,k) = UN(ist,k)/(1-Uden);
@@ -207,8 +201,8 @@ while nanmax(nanmax(abs(TN-TN_1))) > Distrib.Tol && it <= options.iter_max %#ok<
                                     line_error(mfilename,'Solver MAM requires either identical priorities or all distinct priorities');
                                 end
                             else
-                                aggrUtil = sum(mmap_lambda(aggrArrivalAtNode)./(Distrib.Zero+sn.rates(ist,1:K)));
-                                if aggrUtil < 1-Distrib.Zero
+                                aggrUtil = sum(mmap_lambda(aggrArrivalAtNode)./(GlobalConstants.FineTol+sn.rates(ist,1:K)));
+                                if aggrUtil < 1-GlobalConstants.FineTol
                                     if any(isinf(N))
                                         [Qret{1:K}] = MMAPPH1FCFS({aggrArrivalAtNode{[1,3:end]}}, {pie{ist}{:}}, {D0{ist,:}}, 'ncMoms', 1);
                                     else % all closed classes

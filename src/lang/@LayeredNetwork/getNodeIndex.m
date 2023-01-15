@@ -1,11 +1,8 @@
 function idx = getNodeIndex(self,node)
 % IDX = GETNODEINDEX(SELF,NODE)
 
-% Copyright (c) 2012-2022, Imperial College London
+% Copyright (c) 2012-2023, Imperial College London
 % All rights reserved.
 
-%G = self.lqnGraph;
-%idx = findstring(G.Nodes.Name,node);
-%idx = G.findnode(node);
-idx = findstring(self.nodeNames,node);
+idx = find(cellfun(@any,strfind(self.getNodeNames,node.name)));
 end

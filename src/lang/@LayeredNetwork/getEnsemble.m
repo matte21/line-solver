@@ -1,5 +1,7 @@
-function ensemble = getEnsemble(self)
+function ensemble = getEnsemble(self, force)
 % ENSEMBLE = GETENSEMBLE()
-SolverLN(self).buildLayers;
+if isempty(self.ensemble)
+    SolverLN(self).buildLayers;
+end
 ensemble = self.ensemble;
 end

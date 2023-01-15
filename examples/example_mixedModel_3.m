@@ -1,4 +1,4 @@
-if ~isoctave(), clearvars -except exampleName testName; end
+clearvars -except exampleName testName;
 % this is a difficult sparse LDMX model
 model = Network('model');
 

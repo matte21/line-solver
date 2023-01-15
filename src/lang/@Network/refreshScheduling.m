@@ -1,7 +1,7 @@
 function [sched, schedid, schedparam] = refreshScheduling(self)
 % [SCHED, SCHEDID, SCHEDPARAM] = REFRESHSCHEDULING()
 %
-% Copyright (c) 2012-2022, Imperial College London
+% Copyright (c) 2012-2023, Imperial College London
 % All rights reserved.
 
 % determine scheduling parameters
@@ -21,24 +21,24 @@ for i=1:M
                 else
                     switch SchedStrategy.toId(sched{i})
                         case SchedStrategy.ID_SEPT
-                            svcTime = zeros(1,K);
+                            servTime = zeros(1,K);
                             for k=1:K
-                                svcTime(k) = self.nodes{i}.serviceProcess{k}.getMean;
+                                servTime(k) = self.nodes{i}.serviceProcess{k}.getMean;
                             end
-                            [svcTimeSorted] = sort(unique(svcTime));
+                            [servTimeSorted] = sort(unique(servTime));
                             self.nodes{i}.schedStrategyPar = zeros(1,K);
                             for k=1:K
-                                self.nodes{i}.schedStrategyPar(k) = find(svcTimeSorted == svcTime(k));
+                                self.nodes{i}.schedStrategyPar(k) = find(servTimeSorted == servTime(k));
                             end
                         case SchedStrategy.ID_LEPT
-                            svcTime = zeros(1,K);
+                            servTime = zeros(1,K);
                             for k=1:K
-                                svcTime(k) = self.nodes{i}.serviceProcess{k}.getMean;
+                                servTime(k) = self.nodes{i}.serviceProcess{k}.getMean;
                             end
-                            [svcTimeSorted] = sort(unique(svcTime),'descend');
+                            [servTimeSorted] = sort(unique(servTime),'descend');
                             self.nodes{i}.schedStrategyPar = zeros(1,K);
                             for k=1:K
-                                self.nodes{i}.schedStrategyPar(k) = find(svcTimeSorted == svcTime(k));
+                                self.nodes{i}.schedStrategyPar(k) = find(servTimeSorted == servTime(k));
                             end
                     end
                 end

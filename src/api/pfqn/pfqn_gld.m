@@ -77,7 +77,7 @@ if R==1
     return
 end
 
-G=G + pfqn_gld(L(1:(M-1),:),N,mu(1:(M-1),:));
+G=G + pfqn_gld(L(1:(M-1),:),N,mu(1:(M-1),:),options);
 for r=1:R
     if N(r)>0
         if R>1
@@ -85,7 +85,7 @@ for r=1:R
         else
             N_1 = N-1;
         end
-        G = G + (L(M,r)/mu(M,1))*pfqn_gld(L,N_1,pfqn_mushift(mu,M));
+        G = G + (L(M,r)/mu(M,1))*pfqn_gld(L,N_1,pfqn_mushift(mu,M),options);
     end
 end
 lG=log(G);

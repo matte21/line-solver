@@ -1,7 +1,7 @@
 classdef MarkovianDistribution < ContinuousDistrib
     % An astract class for Markovian distributions
     %
-    % Copyright (c) 2012-2022, Imperial College London
+    % Copyright (c) 2012-2023, Imperial College London
     % All rights reserved.
 
     methods (Hidden)
@@ -92,7 +92,7 @@ classdef MarkovianDistribution < ContinuousDistrib
                 self.mean = MEAN;
             end
             if isnan(self.immediate)
-                self.immediate = MEAN < Distrib.Zero;
+                self.immediate = MEAN < GlobalConstants.FineTol;
             end
         end
 
@@ -183,7 +183,7 @@ classdef MarkovianDistribution < ContinuousDistrib
             % Check if the distribution is equivalent to an Immediate
             % distribution
             if isnan(self.immediate)
-                self.immediate = self.getMean < Distrib.Zero;
+                self.immediate = self.getMean < GlobalConstants.FineTol;
             end
             bool = self.immediate;
         end
@@ -212,7 +212,7 @@ classdef MarkovianDistribution < ContinuousDistrib
             self.initProb = md.initProb;
             self.invSubgenerator = md.invSubgenerator;
             self.mean = MEAN;
-            self.immediate = MEAN <  Distrib.Zero;
+            self.immediate = MEAN <  GlobalConstants.FineTol;
             self.params = md.params;
             self.support = md.support;
         end
@@ -227,7 +227,7 @@ classdef MarkovianDistribution < ContinuousDistrib
             self.initProb = md.initProb;
             self.invSubgenerator = md.invSubgenerator;
             self.mean = MEAN;
-            self.immediate = MEAN <  Distrib.Zero;
+            self.immediate = MEAN <  GlobalConstants.FineTol;
             self.params = md.params;
             self.support = md.support;
         end
@@ -242,7 +242,7 @@ classdef MarkovianDistribution < ContinuousDistrib
             self.initProb = md.initProb;
             self.invSubgenerator = md.invSubgenerator;
             self.mean = MEAN;
-            self.immediate = MEAN <  Distrib.Zero;
+            self.immediate = MEAN <  GlobalConstants.FineTol;
             self.params = md.params;
             self.support = md.support;
         end

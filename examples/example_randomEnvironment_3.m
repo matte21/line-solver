@@ -1,5 +1,5 @@
 % This example shows the computation of the generator
-if ~isoctave(), clearvars -except exampleName; end
+clearvars -except exampleName;
 N = 2;
 M = 2;
 E = 3;

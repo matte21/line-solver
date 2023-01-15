@@ -1,5 +1,5 @@
 %% a load-independent model represented as a load-dependent one
-if ~isoctave(), clearvars -except exampleName; end
+clearvars -except exampleName;
 N = 10; % number of jobs
 c = 5; % number of servers
 %%
@@ -29,7 +29,7 @@ node{2}.setLoadDependence(min(1:N,c)); % multi-server with c servers
 P = ldmodel.initRoutingMatrix();
 P{1,1} = ldmodel.serialRouting(node);
 ldmodel.link(P);
-
+%%
 solver = {};
 lldAvgTableCTMC=SolverCTMC(ldmodel).getAvgTable %exact
 lldAvgTableNC=SolverNC(ldmodel).getAvgTable %exact
@@ -38,4 +38,4 @@ lldAvgTableNRP=SolverNC(ldmodel,'method','nr.probit').getAvgTable
 lldAvgTableNRL=SolverNC(ldmodel,'method','nr.logit').getAvgTable
 
 lldAvgTableMVALD=SolverMVA(ldmodel,'method','exact').getAvgTable
-lldAvgTableAMVAQD=SolverMVA(ldmodel,'method','amva').getAvgTable
+lldAvgTableAMVAQD=SolverMVA(ldmodel,'method','qd').getAvgTable

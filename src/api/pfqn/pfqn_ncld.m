@@ -27,7 +27,7 @@ Z = Z ./ scalevec;
 % remove stations with no demand
 Lsum = sum(L,2);
 Lmax = max(L,[],2);
-demStations = find((Lmax./Lsum)>Distrib.Zero);
+demStations = find((Lmax./Lsum)>GlobalConstants.FineTol);
 L = L(demStations,:);
 mu = mu(demStations,:);
 
@@ -88,11 +88,11 @@ end
 function [lG] = compute_norm_const_ld(L,N,Z,mu,options)
 % LG = COMPUTE_NORM_CONST_LD(L,N,Z,OPTIONS)
 [~,R] = size(L);
-D = size(Z,1); % number of delays
-Lz = [L;Z];
-muz = [mu; repmat(1:size(mu,2),D,1)];
 switch options.method
     case {'default','exact'}
+        D = size(Z,1); % number of delays
+        Lz = [L;Z];
+        muz = [mu; repmat(1:size(mu,2),D,1)];
         if R==1
             [lG] = pfqn_gldsingle(Lz, N, muz, options);
         else

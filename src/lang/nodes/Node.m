@@ -1,7 +1,7 @@
 classdef Node < NetworkElement
     % An abstract for a node in a Network model
     %
-    % Copyright (c) 2012-2022, Imperial College London
+    % Copyright (c) 2012-2023, Imperial College London
     % All rights reserved.
 
     properties
@@ -70,6 +70,8 @@ classdef Node < NetworkElement
             % SETROUTING(CLASS, STRATEGY, PARAM)
             % SETROUTING(CLASS, STRATEGY, DESTINATION, PROBABILITY)
 
+            %global GlobalConstants.CoarseTol
+            
             if isa(self,'Cache')
                 switch strategy
                     case {RoutingStrategy.KCHOICES, RoutingStrategy.WRROBIN, RoutingStrategy.RROBIN}
@@ -89,10 +91,10 @@ classdef Node < NetworkElement
                     self.output.outputStrategy{1, class.index}{2} = RoutingStrategy.toType(strategy);
                     self.output.outputStrategy{1, class.index}{3}{1} = param_k;
                     self.output.outputStrategy{1, class.index}{3}{2} = param_memory;
-                case RoutingStrategy.WRROBIN
+                case RoutingStrategy.WRROBIN                    
                     destination = par1;
                     weight = par2;
-                    if abs(weight-round(weight)) < Distrib.Tol
+                    if abs(weight-round(weight)) < GlobalConstants.CoarseTol
                         self.output.outputStrategy{1, class.index}{2} = RoutingStrategy.toType(strategy);
                         if length(self.output.outputStrategy{1, class.index})<3
                             self.output.outputStrategy{1, class.index}{3}{1} = {destination, weight};

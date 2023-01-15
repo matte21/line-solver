@@ -2,7 +2,7 @@ classdef StatefulNode < Node
     % An abstract class for nodes that under some 
     % parametrizations can be stateful
     %
-    % Copyright (c) 2012-2022, Imperial College London
+    % Copyright (c) 2012-2023, Imperial College London
     % All rights reserved.
     
     properties

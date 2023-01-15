@@ -1,6 +1,10 @@
 function out = getJMVATempPath(self)
 % OUT = GETJMVATEMPPATH()
 
-fname = [getFileName(self), ['.', 'jmva']];
-out = [self.filePath,'jmva',filesep, fname];
+if isempty(self.filePath) || isempty(self.fileName)
+    self.filePath = lineTempName('jmva');
+    self.fileName = 'model';
+end
+fname = [self.fileName,'.jmva'];
+out = [self.filePath,filesep,fname];
 end

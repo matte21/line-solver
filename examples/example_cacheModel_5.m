@@ -1,5 +1,5 @@
 % cache with state dependent routing
-if ~isoctave(), clearvars -except exampleName; end
+clearvars -except exampleName;
 
 model = Network('model');
 
@@ -69,7 +69,7 @@ end
 
 %%
 % cache with state dependent routing
-if ~isoctave(), clearvars -except exampleName; end
+clearvars -except exampleName;
 
 model = Network('model');
 

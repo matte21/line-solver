@@ -1,5 +1,5 @@
 % similar to example_forkJoin_1 but closed
-if ~isoctave(), clearvars -except exampleName; end
+clearvars -except exampleName;
 model = Network('model');
 
 delay = Delay(model,'Delay');

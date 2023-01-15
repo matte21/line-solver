@@ -137,7 +137,7 @@ classdef NetworkGenerator < handle
         function stations = createStations(obj, model, numQueues, numDelays, hasOClass)
             queues = cell(numQueues, 1);
             for i = 1 : numQueues
-                queues{i} = Queue(model, obj.name('queue', i), obj.chooseSchedStrat);
+                queues{i} = Queue(model, obj.name('queue', i), obj.chooseSchedStrat);                
                 queues{i}.setNumberOfServers(chooseNumServers);
             end
             
@@ -153,7 +153,7 @@ classdef NetworkGenerator < handle
             % Source and sink intentionally excluded from station list
             stations = [queues; delays];
             
-            function n = chooseNumServers
+            function n = chooseNumServers                
                 if obj.hasMultiServerQueues
                     n = randi(obj.maxServers);
                 else

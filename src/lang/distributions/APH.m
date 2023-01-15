@@ -1,7 +1,7 @@
 classdef APH < MarkovianDistribution
     % An astract class for acyclic phase-type distributions
     %
-    % Copyright (c) 2012-2022, Imperial College London
+    % Copyright (c) 2012-2023, Imperial College London
     % All rights reserved.
 
     methods
@@ -226,7 +226,7 @@ classdef APH < MarkovianDistribution
 
             % Fit the distribution from first three standard moments (mean,
             % SCV, skewness)
-            if MEAN <= Distrib.Zero
+            if MEAN <= GlobalConstants.FineTol
                 ex = Exp(Inf);
             else
                 ex = APH(1.0, [1]);
@@ -238,7 +238,7 @@ classdef APH < MarkovianDistribution
         function ex = fitRawMoments(m1, m2, m3)
 
             % Fit the distribution from first three moments
-            if m1 <= Distrib.Zero
+            if m1 <= GlobalConstants.FineTol
                 ex = Exp(Inf);
             else
                 ex = APH(1.0, [1]);
@@ -252,7 +252,7 @@ classdef APH < MarkovianDistribution
 
             % Fit the distribution from first three central moments (mean,
             % variance, skewness)
-            if MEAN <= Distrib.Zero
+            if MEAN <= GlobalConstants.FineTol
                 ex = Exp(Inf);
             else
                 ex = APH(1.0, [1]);
@@ -266,7 +266,7 @@ classdef APH < MarkovianDistribution
 
             % Fit the distribution from first three central moments (mean,
             % variance, skewness)
-            if MEAN <= Distrib.Zero
+            if MEAN <= GlobalConstants.FineTol
                 ex = Exp(Inf);                
             else
                 ex = APH(1.0, [1]);

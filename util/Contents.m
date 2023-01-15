@@ -14,7 +14,6 @@
 % findstring - find a string in a cell array
 % hashpop - hash a vector on a lattice
 % ifthenelse - returns first or second argument based on logic predicate
-% isoctave - checks if script is run in octave
 % krons - Kronecker sum of two matrices
 % logecdf - plots an empirical cumulative distribution in log scale
 % logmeanexp - approximate the logarithm of a mean of exponentials

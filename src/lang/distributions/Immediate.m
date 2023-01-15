@@ -1,7 +1,7 @@
 classdef Immediate < Distrib
     % A distribution with probability mass entirely at zero
     %
-    % Copyright (c) 2012-2022, Imperial College London
+    % Copyright (c) 2012-2023, Imperial College London
     % All rights reserved.
 
     methods (Hidden)
@@ -38,7 +38,8 @@ classdef Immediate < Distrib
         end
 
         function rate = getRate(self)
-            rate = Distrib.InfRate;
+            %global GlobalConstants.Inf
+            rate = GlobalConstants.Inf;
         end
 
         function ex = getMean(self)
@@ -59,9 +60,9 @@ classdef Immediate < Distrib
 
         function mu = getMu(self)
             % MU = GETMU()
-
+            %global GlobalConstants.Inf
             % Return total outgoing rate from each state
-            mu = Distrib.InfRate;
+            mu = GlobalConstants.Inf;
         end
 
         function phi = getPhi(self)
@@ -90,7 +91,8 @@ classdef Immediate < Distrib
         end
 
         function PH = getPH(self)
-            PH = {[-Distrib.InfRate] ,[Distrib.InfRate]};
+            %global GlobalConstants.Inf
+            PH = {[-GlobalConstants.Inf] ,[GlobalConstants.Inf]};
         end
 
         function bool = isImmediate(self)

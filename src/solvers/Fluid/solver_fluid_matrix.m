@@ -2,7 +2,7 @@ function [QN,UN,RN,TN,xvec_it,QNt,UNt,TNt,xvec_t,t,iters,runtime] = solver_fluid
 
 % [QN,UN,RN,TN,CN,RUNTIME] = SOLVER_FLUID_MATRIX(QN, OPTIONS)
 
-% Copyright (c) 2012-2022, Imperial College London
+% Copyright (c) 2012-2023, Imperial College London
 % All rights reserved.
 
 T0 = tic;
@@ -88,9 +88,9 @@ trange = [timespan(1),min(timespan(2),abs(10*itermax/min(nonZeroRates)))];
 
 iters = 1;
 if options.stiff
-    [t, xvec_t] = ode_solve_stiff(@(t,x) W'*(x./(Distrib.Zero+SQ*x).*min(S(Qa),Distrib.Zero+SQ*x)), trange, x0, odeopt, options);
+    [t, xvec_t] = ode_solve_stiff(@(t,x) W'*(x./(GlobalConstants.FineTol+SQ*x).*min(S(Qa),GlobalConstants.FineTol+SQ*x)), trange, x0, odeopt, options);
 else
-    [t, xvec_t] = ode_solve(@(t,x) W'*(x./(Distrib.Zero+SQ*x).*min(S(Qa),Distrib.Zero+SQ*x)), trange, x0, odeopt, options);
+    [t, xvec_t] = ode_solve(@(t,x) W'*(x./(GlobalConstants.FineTol+SQ*x).*min(S(Qa),GlobalConstants.FineTol+SQ*x)), trange, x0, odeopt, options);
 end
 
 Tmax = size(xvec_t,1);
@@ -108,8 +108,8 @@ for j=1:Tmax
     RNtmp{j} = zeros(K,M);
 
     QNtmp{j}(:) = SQC*x;
-    TNtmp{j}(:) = STC*(x./(Distrib.Zero+SQ*x).*min(Sa,Distrib.Zero+SQ*x));
-    UNtmp{j}(:) = SUC*(x./(Distrib.Zero+SQ*x).*min(Sa,Distrib.Zero+SQ*x));
+    TNtmp{j}(:) = STC*(x./(GlobalConstants.FineTol+SQ*x).*min(Sa,GlobalConstants.FineTol+SQ*x));
+    UNtmp{j}(:) = SUC*(x./(GlobalConstants.FineTol+SQ*x).*min(Sa,GlobalConstants.FineTol+SQ*x));
     % Little's law is invalid in transient so this vector is not returned
     % except the last element as an approximation of the actual RN
     RNtmp{j}(:) = QNtmp{j}(:)./TNtmp{j}(:);

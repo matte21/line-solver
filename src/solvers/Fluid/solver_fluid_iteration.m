@@ -1,7 +1,7 @@
 function [xvec_it, xvec_t, t, iter] = solver_fluid_iteration(sn, N, Mu, Phi, PH, P, S, xvec_it, ydefault, slowrate, Tstart, max_time, options)
 % [XVEC_IT, XVEC_T, T, ITER] = SOLVER_FLUID_ITERATION(QN, N, MU, PHI, PH, P, S, YMEAN, YDEFAULT, SLOWRATE, TSTART, MAX_TIME, OPTIONS)
 
-% Copyright (c) 2012-2022, Imperial College London
+% Copyright (c) 2012-2023, Imperial College London
 % All rights reserved.
 
 iter_max = options.iter_max;
@@ -20,10 +20,10 @@ t=[];
 xvec_t=[];
 % heuristic to select stiff or non-stiff ODE solver
 nonZeroRates = slowrate(:);
-nonZeroRates = nonZeroRates( nonZeroRates >Distrib.Tol );
+nonZeroRates = nonZeroRates( nonZeroRates >tol );
 
 nonZeroRates = nonZeroRates(isfinite(nonZeroRates));
-rategap = log10(max(nonZeroRates)/min(nonZeroRates)); % if the max rate is Distrib.InfRate and the min is 1, then rategap = 6
+rategap = log10(max(nonZeroRates)/min(nonZeroRates)); % if the max rate is InfRate and the min is 1, then rategap = 6
 
 % init ode
 [ode_h, ~] = solver_fluid_odes(sn, N, Mu, Phi, PH, P, S, sn.sched, sn.schedparam, options);

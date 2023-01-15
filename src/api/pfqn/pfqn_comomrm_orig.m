@@ -1,4 +1,4 @@
-function lG=pfqn_comomrm_orig(L,N,Z)
+function lG=pfqn_comomrm_orig(L,N,Z,atol)
 % comom for a finite repairment model
 if size(L,1)~=1
     line_error(mfilename,'The solver accepts at most a single queueing station.')
@@ -7,11 +7,11 @@ if nargin<4
     m=1;
 end
 lambda = 0*N;
-[~,L,N,Z,lG0] = pfqn_nc_sanitize(lambda,L,N,Z);
+[~,L,N,Z,lG0] = pfqn_nc_sanitize(lambda,L,N,Z,atol);
 [M,R]=size(L);
 % rescale demands
 Lmax = L; % use L
-Lmax(Lmax<Distrib.Tol)=Z(Lmax<Distrib.Tol); % unless zero
+Lmax(Lmax<atol)=Z(Lmax<atol); % unless zero
 L = L./repmat(Lmax,M,1);
 Z = Z./repmat(Lmax,M,1);
 % sort from smallest to largest

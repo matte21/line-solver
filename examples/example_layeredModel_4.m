@@ -1,5 +1,5 @@
 %% This example is temporarily disabled
-if ~isoctave(), clearvars -except exampleName; end
+clearvars -except exampleName;
 fprintf(1,'This example illustrates the solution of a moderately large LQN.\n')
 
 cwd = fileparts(which(mfilename));

@@ -1,5 +1,5 @@
 % class-dependende model
-if ~isoctave(), clearvars -except exampleName; end
+clearvars -except exampleName;
 N = 16; % number of jobs
 c = 2;
 %%

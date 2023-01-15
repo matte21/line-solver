@@ -1,12 +1,15 @@
-function type = getNodeType(self,nodeid)
-% TYPE = GETNODETYPE(SELF,NODEID)
-
-% Copyright (c) 2012-2022, Imperial College London
-% All rights reserved.
-G = self.lqnGraph;
-if ischar(nodeid)
-    type = G.Nodes.Type{self.getNodeIndex(nodeid)};
-else
-    type = G.Nodes.Type{nodeid};
+function type = getNodeType(self,node)
+% TYPE = GETNODETYPE(SELF,NODE)
+switch class(node)
+    case {'Processor','Host'}
+        type = LayeredNetworkElement.HOST;
+    case 'Task'
+        type = LayeredNetworkElement.TASK;
+    case 'Entry'
+        type = LayeredNetworkElement.ENTRY;
+    case 'Activity'
+        type = LayeredNetworkElement.ACTIVITY;
+    otherwise
+        line_error(mfilename,'Invalid input node');
 end
 end

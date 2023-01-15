@@ -50,6 +50,6 @@ lZ = (-h) * log(sqrt(2*pi)) + (phi) + sum(factln((m))) - sum(log(sqrt(xi))) - lo
 lZ=real(lZ); % remove small imaginary part roundoffs
 
 if ~isfinite(lZ)
-    %keyboard
+    %%keyboard
 end
 end

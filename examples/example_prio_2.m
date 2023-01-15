@@ -1,4 +1,4 @@
-if ~isoctave(), clearvars -except exampleName; end 
+clearvars -except exampleName; 
 %% multiclass example with PS, SIRO, FCFS, HOL priority
 model = Network('MyNetwork');
 

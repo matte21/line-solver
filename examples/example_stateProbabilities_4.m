@@ -1,4 +1,4 @@
-if ~isoctave(), clearvars -except exampleName; end 
+clearvars -except exampleName; 
 model = Network('model');
 
 node{1} = Queue(model, 'Queue1', SchedStrategy.PS);

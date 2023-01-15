@@ -10,10 +10,10 @@ if nargin<4
 end
 
 if nargin<3 %~exist('numEvents','var')
-    numEvents = -1;
+    %numEvents = -1;
 else
     line_warning(mfilename,'JMT does not allow to fix the number of events for individual nodes. The number of returned events may be inaccurate.');
-    numEvents = numEvents - 1; % we include the initialization as an event
+    %numEvents = numEvents - 1; % we include the initialization as an event
 end
 sn = self.getStruct;
 
@@ -35,7 +35,7 @@ logpath = lineTempDir;
 modelCopy.linkAndLog(Plinked, isNodeLogged, logpath);
 % simulate the model copy and retrieve log data
 solverjmt = SolverJMT(modelCopy, self.getOptions);
-if numEvents > 0
+if nargin>=3 && numEvents > 0
     solverjmt.maxEvents = numEvents*sn.nnodes*sn.nclasses;
 else
     solverjmt.maxEvents = -1;

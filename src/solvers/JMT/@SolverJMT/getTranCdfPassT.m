@@ -4,6 +4,7 @@ function RD = getTranCdfPassT(self, R)
 if nargin<2 %~exist('R','var')
     R = getAvgRespTHandles(self);
 end
+sn = self.getStruct;
 RD = cell(sn.nstations, sn.nclasses);
 cdfmodel = self.model.copy;
 cdfmodel.resetNetwork;

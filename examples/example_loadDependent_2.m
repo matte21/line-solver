@@ -1,4 +1,4 @@
-if ~isoctave(), clearvars -except exampleName; end
+clearvars -except exampleName;
 N = 4; % number of jobs
 c = 2; % number of servers
 %%
@@ -44,4 +44,4 @@ lldAvgTableNRP=SolverNC(ldmodel,'method','nr.probit').getAvgTable
 lldAvgTableNRL=SolverNC(ldmodel,'method','nr.logit').getAvgTable
 
 lldAvgTableMVALD=SolverMVA(ldmodel,'method','exact').getAvgTable
-lldAvgTableAMVAQD=SolverMVA(ldmodel,'method','amva').getAvgTable
+lldAvgTableAMVAQD=SolverMVA(ldmodel,'method','qd').getAvgTable

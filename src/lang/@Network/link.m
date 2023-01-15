@@ -1,7 +1,7 @@
 function self = link(self, P)
 % SELF = LINK(P)
 
-% Copyright (c) 2012-2022, Imperial College London
+% Copyright (c) 2012-2023, Imperial College London
 % All rights reserved.
 
 sanitize(self);
@@ -275,13 +275,13 @@ self.nodes = nodes;
 
 % check if the probability out of any node sums to >1.0
 pSum = cellsum(P);
-isAboveOne = pSum > 1.0 + Distrib.Zero;
+isAboveOne = pSum > 1.0 + GlobalConstants.FineTol;
 if any(isAboveOne)
     for i=find(isAboveOne)
         if SchedStrategy.toId(self.nodes{i}.schedStrategy) ~= SchedStrategy.ID_FORK
             line_error(mfilename,sprintf('The total routing probability for jobs leaving node %s in class %s is greater than 1.0.',self.nodes{i}.name,self.classes{r}.name));
         end
-        %        elseif pSum < 1.0 - Distrib.Zero % we cannot check this case as class r may not reach station i, in which case its outgoing routing prob is zero
+        %        elseif pSum < 1.0 - GlobalConstants.FineTol % we cannot check this case as class r may not reach station i, in which case its outgoing routing prob is zero
         %            if self.nodes{i}.schedStrategy ~= SchedStrategy.EXT % if not a sink
         %                line_error(mfilename,'The total routing probability for jobs leaving node %s in class %s is less than 1.0.',self.nodes{i}.name,self.classes{r}.name);
         %            end
