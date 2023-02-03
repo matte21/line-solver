@@ -16,7 +16,7 @@ LINE is an open source engine for computational algorithms for queueing theory. 
 
 To install LINE, expand the archive (or clone the repository) in the chosen installation folder.
 
-Start MATLAB, change the active directory to the installation folder and run only the first time:
+Start MATLAB, change the active directory to the installation folder and run:
 ```
 lineInstall
 ```
@@ -26,7 +26,9 @@ To begin using LINE, add all LINE folders to the path using the following comman
 ```
 lineStart
 ```
-The last command is required at the begin of every MATLAB session. You can now use LINE. For example, to solve a basic M/M/1 queue by simulation, type:
+The last command is required at the begin of every MATLAB session. You can now use LINE. 
+
+For example, to solve a basic M/M/1 queue by simulation, type:
 ```
 model = Network('M/M/1');
 source = Source(model, 'mySource');
