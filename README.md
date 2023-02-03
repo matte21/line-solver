@@ -48,11 +48,11 @@ To run other demonstrators type instead:
 ```
 allExamples
 ```
-Additional getting started examples and detailed instructions on the tool are given in the [User Manual](https://github.com/line-solver/line/raw/master/doc/LINE.pdf) and on the [Wiki](https://github.com/line-solver/line/wiki).
+Additional getting started examples and instructions can be found in the [User Manual](https://github.com/line-solver/line/raw/master/doc/LINE.pdf) and on the [Wiki](https://github.com/line-solver/line/wiki).
 
 
 ### License
-LINE is released as open source under the BSD-3 license: https://raw.githubusercontent.com/line-solver/line/master/LICENSE
+LINE is released as open source under the [BSD-3 license](https://raw.githubusercontent.com/line-solver/line/master/LICENSE).
 
 ### Acknowledgement
 The development of LINE has been partially funded by the European Commission grants FP7-318484 ([MODAClouds](http://multiclouddevops.com/)), H2020-644869 ([DICE](http://www.dice-h2020.eu/)), H2020-825040 ([RADON](http://radon-h2020.eu)), and by the EPSRC grant EP/M009211/1 ([OptiMAM](https://wp.doc.ic.ac.uk/optimam/)).
