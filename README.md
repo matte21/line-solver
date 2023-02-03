@@ -40,7 +40,7 @@ queue.setService(oclass, Exp(2));
 model.link(Network.serialRouting(source,queue,sink));
 
 AvgTable = SolverJMT(model,'seed',23000).getAvgTable
-'''
+```
 
 To run other demonstrators type instead:
 ```
