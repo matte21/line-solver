@@ -39,7 +39,7 @@ model.link(Network.serialRouting(source,queue,sink));
 
 AvgTable = SolverMVA(model).getAvgTable
 ```
-This will provide the following output:
+This will provide the following output, showing for example a 50% utilization value:
 ```
 MVA analysis (method: default) completed. Runtime: 0.002546 seconds. Iterations: 1.
 AvgTable =
