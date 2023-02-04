@@ -26,7 +26,7 @@ lineStart
 ```
 The last command is required at the beginning of every MATLAB session. You can now use LINE. 
 
-For example, to solve a basic M/M/1 queue by analytical methods, type:
+For example, to solve a basic M/M/1 queue by simulation, type:
 ```
 model = Network('M/M/1');
 source = Source(model, 'mySource');
@@ -39,7 +39,7 @@ queue.setService(oclass, Exp(2));
 
 model.link(Network.serialRouting(source,queue,sink));
 
-AvgTable = SolverMVA(model,'seed',23000).getAvgTable
+AvgTable = SolverSSA(model,'seed',23000).getAvgTable
 ```
 
 To run other demonstrators type instead:
