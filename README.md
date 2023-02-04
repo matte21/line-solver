@@ -42,11 +42,7 @@ model.link(Network.serialRouting(source,queue,sink));
 AvgTable = SolverMVA(model).getAvgTable
 ```
 
-To run other demonstrators type instead:
-```
-allExamples
-```
-Additional getting started examples and instructions can be found in the [User Manual](https://github.com/line-solver/line/raw/master/doc/LINE.pdf) and on the [Wiki](https://github.com/line-solver/line/wiki).
+Additional [getting started models](https://github.com/imperial-qore/line-solver/wiki/Getting-started) and [examples](https://github.com/imperial-qore/line-solver/wiki/Examples) and instructions can be found in the [User Manual](https://github.com/line-solver/line/raw/master/doc/LINE.pdf) and on the [Wiki](https://github.com/line-solver/line/wiki). A [model gallery](https://github.com/imperial-qore/line-solver/wiki/Getting-started#model-gallery) is also available.
 
 
 ### License
