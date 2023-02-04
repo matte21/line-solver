@@ -47,7 +47,7 @@ AvgTable =
     Station     JobClass    QLen    Util    RespT    ResidT    ArvR    Tput
     ________    ________    ____    ____    _____    ______    ____    ____
     mySource    myClass      0        0       0        0        0       1  
-    myQueue     myClass      1      0.5       1        1        0       1  
+    myQueue     myClass      1      0.5       1        1        1       1  
 ```    
 
 Additional [getting started models](https://github.com/imperial-qore/line-solver/wiki/Getting-started) and [examples](https://github.com/imperial-qore/line-solver/wiki/Examples) and instructions can be found in the [User Manual](https://github.com/line-solver/line/raw/master/doc/LINE.pdf) and on the [Wiki](https://github.com/line-solver/line/wiki). A [model gallery](https://github.com/imperial-qore/line-solver/wiki/Getting-started#model-gallery) is also available.
