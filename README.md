@@ -10,14 +10,12 @@ Latest stable release: https://sourceforge.net/projects/line-solver/files/latest
 
 LINE is an open source library to analyze queueing models via analytical methods and simulation. LINE features algorithms for the solution of open queueing systems (e.g., M/M/1, M/M/k, M/G/1, ...), open and closed queueing networks, and layered queueing networks. LINE can be run as a royalty-free [Docker container](https://hub.docker.com/r/linemcr/cli) or interactively as a MATLAB toolbox. A [Java version](https://github.com/imperial-qore/line-solver-java) is currently under development. Additional information is available in the [LINE wiki](https://github.com/imperial-qore/line-solver/wiki).
 
-### Installation
+### Getting started
 
 To install LINE, first expand the archive (or clone the repository) in the chosen installation folder. Then start MATLAB, change the active directory to the installation folder and run:
 ```
 lineInstall
 ```
-
-### Getting started
 To begin using LINE, add all LINE folders to the path using the following command:
 ```
 lineStart
