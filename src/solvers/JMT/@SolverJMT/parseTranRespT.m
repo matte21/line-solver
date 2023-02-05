@@ -51,8 +51,8 @@ for id=uIDs
             jobRespT{1+id}=max(jobData(:,1))-min(jobData(:,1));
             jobArvClass{1+id} = jobClassData{1+id}(1);
         end
-    catch
-        keyboard
+    %catch
+    %    keyboard
     end
     %end
 end

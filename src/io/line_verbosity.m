@@ -7,7 +7,7 @@ function line_verbosity(level)
 global LINEVerbose;
 
 if nargin<1
-    level = VerboseLevel.NORMAL;
+    level = VerboseLevel.STD;
 end
 
 switch level

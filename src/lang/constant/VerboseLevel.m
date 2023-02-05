@@ -6,7 +6,7 @@ classdef (Sealed) VerboseLevel
     
     properties (Constant)
         DEBUG=2;
-        NORMAL=1;
+        STD=1;
         SILENT=0;
     end
     

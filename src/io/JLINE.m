@@ -435,8 +435,13 @@ classdef JLINE
             ctmc.compile(network_object);
         end
 
-        function [fluid] = SolverFluid(network_object)
-            fluid = jline.solvers.fluid.SolverFluid(network_object);
+        function [fluid] = SolverFluid(network_object, method)
+           options = jline.solvers.SolverOptions(jline.lang.constant.SolverType.FLUID);
+           options.verbose = options.verbose.SILENT;
+           if nargin > 1
+            options.method = method;
+           end
+            fluid = jline.solvers.fluid.SolverFluid(network_object, options);
         end
 
         function [mva] = SolverMVA(network_object)

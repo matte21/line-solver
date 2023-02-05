@@ -19,7 +19,7 @@ warning ON BACKTRACE
 % assign global constants
 LINEStdOut = 1; % console
 LINEVersion = '2.0.26';
-LINEVerbose = VerboseLevel.NORMAL;
+LINEVerbose = VerboseLevel.STD;
 LINEDoChecks = true;
 LINECoarseTol = 1e-3; 
 LINEFineTol = 1e-8; 
@@ -33,8 +33,8 @@ switch LINEStdOut
 end 
 
 switch LINEVerbose
-    case VerboseLevel.NORMAL
-    fprintf(1,'VerboseLevel=NORMAL, ');
+    case VerboseLevel.STD
+    fprintf(1,'VerboseLevel=STD, ');
     case VerboseLevel.DEBUG
     fprintf(1,'VerboseLevel=DEBUG, ');
     case VerboseLevel.DISABLED

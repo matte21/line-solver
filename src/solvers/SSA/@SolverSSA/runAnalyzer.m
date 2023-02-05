@@ -14,21 +14,52 @@ end
 Solver.resetRandomGeneratorSeed(options.seed);
 
 switch options.method
-    case {'taussa','java'}
-        [X,U,Q,R,T,C, tranSysState, tranSync] = solver_ssa_analyzer_taussa(self.model, options, 0, 0.0);
+    case {'taussa','java','jline.ssa'}
+        [XN,UN,QN,RN,TN,CN, tranSysState, tranSync] = solver_ssa_analyzer_taussa(self.model, options, 0, 0.0);
         runtime = toc(T0);
-        self.setAvgResults(Q,U,R,T,[],[],C,X,runtime);
-    case 'tauleap'
-        [X,U,Q,R,T,C, tranSysState, tranSync] = solver_ssa_analyzer_taussa(self.model, options, 1, 0.0);
+        sn = self.getStruct;
+        M = sn.nstations;
+        R = sn.nclasses;
+        T = getAvgTputHandles(self);
+        if ~isempty(T)
+            AN = zeros(M,R);
+            for i=1:M
+                for j=1:M
+                    for k=1:R
+                        for r=1:R
+                            AN(i,k) = AN(i,k) + TN(j,r)*sn.rt((j-1)*R+r, (i-1)*R+k);
+                        end
+                    end
+                end
+            end
+        end
+        self.setAvgResults(QN,UN,RN,TN,AN,[],CN,XN,runtime);
+    case {'tauleap', 'jline.tauleap'}
+        [XN,UN,QN,RN,TN,CN, tranSysState, tranSync] = solver_ssa_analyzer_taussa(self.model, options, 1, 0.0);
         runtime = toc(T0);
-        self.setAvgResults(Q,U,R,T,[],[],C,X,runtime);
+        M = sn.nstations;
+        R = sn.nclasses;
+        T = getAvgTputHandles(self);
+        if ~isempty(T)
+            AN = zeros(M,R);
+            for i=1:M
+                for j=1:M
+                    for k=1:R
+                        for r=1:R
+                            AN(i,k) = AN(i,k) + TN(j,r)*sn.rt((j-1)*R+r, (i-1)*R+k);
+                        end
+                    end
+                end
+            end
+        end
+        self.setAvgResults(QN,UN,RN,TN,AN,[],CN,XN,runtime);
     otherwise
         sn = getStruct(self);
 
         % TODO: add priors on initial state
         sn.state = sn.state; % not used internally by SSA
 
-        [Q,U,R,T,C,X,~, tranSysState, tranSync, sn] = solver_ssa_analyzer(sn, options);
+        [QN,UN,RN,TN,CN,XN,~, tranSysState, tranSync, sn] = solver_ssa_analyzer(sn, options);
         for isf=1:sn.nstateful
             ind = sn.statefulToNode(isf);
             switch sn.nodetype(sn.statefulToNode(isf))
@@ -39,7 +70,22 @@ switch options.method
             end
         end
         runtime = toc(T0);
-        self.setAvgResults(Q,U,R,T,[],[],C,X,runtime);
+        M = sn.nstations;
+        R = sn.nclasses;
+        T = getAvgTputHandles(self);
+        if ~isempty(T)
+            AN = zeros(M,R);
+            for i=1:M
+                for j=1:M
+                    for k=1:R
+                        for r=1:R
+                            AN(i,k) = AN(i,k) + TN(j,r)*sn.rt((j-1)*R+r, (i-1)*R+k);
+                        end
+                    end
+                end
+            end
+        end
+        self.setAvgResults(QN,UN,RN,TN,AN,[],CN,XN,runtime);
         self.result.space = sn.space;
 end
 end

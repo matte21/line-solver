@@ -11,11 +11,18 @@ sn = getStruct(self); % this gets modified later on so pass by copy
 
 hasOpenClasses = any(sn.nodetype==NodeType.ID_SOURCE);
 switch options.method
-    case {'java','jline.fluid'}
+    case {'java','jline.fluid','jline.fluid.matrix','jline.fluid.closing'}
         jmodel = LINE2JLINE(self.model);
         M = jmodel.getNumberOfStatefulNodes;
         R = jmodel.getNumberOfClasses;
-        jsolver = JLINE.SolverFluid(jmodel);
+        switch options.method
+            case 'jline.fluid.closing'
+                jsolver = JLINE.SolverFluid(jmodel,'closing');
+            case 'jline.fluid.matrix'
+                jsolver = JLINE.SolverFluid(jmodel,'matrix');
+            otherwise
+                jsolver = JLINE.SolverFluid(jmodel);
+        end
         [QN,UN,RN,~,TN] = JLINE.arrayListToResults(jsolver.getAvgTable);
         runtime = toc(T0);
         CN = [];
@@ -26,9 +33,25 @@ switch options.method
         TN = reshape(TN',R,M)';
         lG = NaN;
         lastiter = NaN;
-        self.setAvgResults(QN,UN,RN,TN,[],[],CN,XN,runtime,'jline.fluid',lastiter);
+        sn = self.getStruct;
+        M = sn.nstations;
+        R = sn.nclasses;
+        T = getAvgTputHandles(self);
+        if ~isempty(T)
+            AN = zeros(M,R);
+            for i=1:M
+                for j=1:M
+                    for k=1:R
+                        for r=1:R
+                            AN(i,k) = AN(i,k) + TN(j,r)*sn.rt((j-1)*R+r, (i-1)*R+k);
+                        end
+                    end
+                end
+            end
+        end
+        self.setAvgResults(QN,UN,RN,TN,AN,[],CN,XN,runtime,'jline.fluid',lastiter);
         self.result.Prob.logNormConstAggr = lG;
-        return    
+        return
     case {'matrix'}
         if hasOpenClasses
             line_error(mfilename,'The matrix solver does not support open arrivals. Use options.method=''closing'' instead.');
@@ -44,7 +67,7 @@ switch options.method
         % do nothing
     otherwise
         line_warning(mfilename,'This solver does not support the specified method. Setting to default.');
-        options.method  = 'default';    
+        options.method  = 'default';
 end
 
 if isinf(options.timespan(1))
@@ -60,7 +83,7 @@ if options.timespan(1) == options.timespan(2)
 end
 
 if self.enableChecks && ~self.supports(self.model)
-    ME = MException('Line:FeatureNotSupportedBySolver', 'This model contains features not supported by the solver.'); 
+    ME = MException('Line:FeatureNotSupportedBySolver', 'This model contains features not supported by the solver.');
     throw(ME);
 end
 
@@ -89,14 +112,14 @@ while s0_id>=0 % for all possible initial states
         end
     end
     sn = self.model.getStruct;
-    if s0prior_val > 0        
-        %useJLine = false; 
+    if s0prior_val > 0
+        %useJLine = false;
         %if useJLine
         %    [Qfull, Ufull, Rfull, Tfull, Cfull, Xfull, t, Qfull_t, Ufull_t, Tfull_t, lastSol] = solver_fluid_analyzer_jline(self.model, options);
         %else
-            [Qfull, Ufull, Rfull, Tfull, Cfull, Xfull, t, Qfull_t, Ufull_t, Tfull_t, lastSol, iter] = solver_fluid_analyzer(sn, options);
+        [Qfull, Ufull, Rfull, Tfull, Cfull, Xfull, t, Qfull_t, Ufull_t, Tfull_t, lastSol, iter] = solver_fluid_analyzer(sn, options);
         %end
-        
+
         [t,uniqueIdx] = unique(t);
         if isempty(lastSol) % if solution fails
             Q = NaN*ones(M,K); R = NaN*ones(M,K);
@@ -144,16 +167,16 @@ while s0_id>=0 % for all possible initial states
                         Qfull_t{ist,r} = Qfull_t{ist,r}(uniqueIdx);
                         Ufull_t{ist,r} = Ufull_t{ist,r}(uniqueIdx);
                         %                                  Tfull_t{i,r} = Tfull_t{i,r}(uniqueIdx);
-                        
+
                         tunion = union(Qt{ist,r}(:,2), t);
                         dataOld = interp1(Qt{ist,r}(:,2),Qt{ist,r}(:,1),tunion);
                         dataNew = interp1(t,Qfull_t{ist,r},tunion);
                         Qt{ist,r} = [dataOld + s0prior_val * dataNew, tunion];
-                        
+
                         dataOld = interp1(Ut{ist,r}(:,2),Ut{ist,r}(:,1),tunion);
                         dataNew = interp1(t,Ufull_t{ist,r},tunion);
                         Ut{ist,r} = [dataOld + s0prior_val * dataNew, tunion];
-                        
+
                         %                                 dataOld = interp1(Tt{i,r}(:,2),Tt{i,r}(:,1),tunion);
                         %                                 dataNew = interp1(t,Tfull_t{i,r},tunion);
                         %                                 Tt{i,r} = [dataOld + s0prior_val * dataNew, tunion];
@@ -166,7 +189,23 @@ while s0_id>=0 % for all possible initial states
 end
 runtime = toc(T0);
 self.result.solverSpecific = lastSol;
-self.setAvgResults(Q,U,R,T,[],[],C,X,runtime,options.method,iter);
+QN = Q; UN=U; RN=R; TN=T; CN=C; XN=X;
+M = sn.nstations;
+R = sn.nclasses;
+if ~isempty(getAvgTputHandles(self))
+    AN = zeros(M,R);
+    for i=1:M
+        for j=1:M
+            for k=1:R
+                for r=1:R
+                    AN(i,k) = AN(i,k) + T(j,r)*sn.rt((j-1)*R+r, (i-1)*R+k);
+                end
+            end
+        end
+    end
+end
+% Compute average arrival rate at steady-state
+self.setAvgResults(QN,UN,RN,TN,AN,[],CN,XN,runtime,options.method,iter);
 Rt={}; Xt={}; Ct={};
 self.setTranAvgResults(Qt,Ut,Rt,Tt,Ct,Xt,runtime);
 end

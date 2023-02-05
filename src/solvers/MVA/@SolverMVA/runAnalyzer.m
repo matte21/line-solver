@@ -31,7 +31,23 @@ switch options.method
         TN = reshape(TN',R,M)';
         lG = NaN;
         lastiter = NaN;
-        self.setAvgResults(QN,UN,RN,TN,[],[],CN,XN,runtime,'jline.amva',lastiter);
+        sn = self.getStruct;
+        M = sn.nstations;
+        R = sn.nclasses;
+        T = getAvgTputHandles(self);
+        if ~isempty(T)
+            AN = zeros(M,R);
+            for i=1:M
+                for j=1:M
+                    for k=1:R
+                        for r=1:R
+                            AN(i,k) = AN(i,k) + TN(j,r)*sn.rt((j-1)*R+r, (i-1)*R+k);
+                        end
+                    end
+                end
+            end
+        end
+        self.setAvgResults(QN,UN,RN,TN,AN,[],CN,XN,runtime,'jline.amva',lastiter);
         self.result.Prob.logNormConstAggr = lG;
         return
     otherwise
@@ -192,7 +208,26 @@ switch options.method
             end
             iter = iter + lastiter;
         end
-        self.setAvgResults(QN,UN,RN,TN,[],[],CN,XN,runtime,method,iter);
+
+        sn = self.model.getStruct();
+
+        % Compute average arrival rate at steady-state
+        M = sn.nstations;
+        R = sn.nclasses;
+        T = getAvgTputHandles(self);
+        if ~isempty(T)
+            AN = zeros(M,R);
+            for i=1:M
+                for j=1:M
+                    for k=1:R
+                        for r=1:R
+                            AN(i,k) = AN(i,k) + TN(j,r)*sn.rt((j-1)*R+r, (i-1)*R+k);
+                        end
+                    end
+                end
+            end
+        end
+        self.setAvgResults(QN,UN,RN,TN,AN,[],CN,XN,runtime,method,iter);
         self.result.Prob.logNormConstAggr = lG;
 end
 end

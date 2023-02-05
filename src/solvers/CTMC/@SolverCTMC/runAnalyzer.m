@@ -80,12 +80,27 @@ if isinf(options.timespan(1))
     self.result.eventFilt = Dfilt;
     runtime = toc(T0);
     sn.space = {};
-    self.setAvgResults(QN,UN,RN,TN,[],[],CN,XN,runtime,options.method);
+    M = sn.nstations;
+    R = sn.nclasses;
+    T = getAvgTputHandles(self);
+    if ~isempty(T)
+        AN = zeros(M,R);
+        for i=1:M
+            for j=1:M
+                for k=1:R
+                    for r=1:R
+                        AN(i,k) = AN(i,k) + TN(j,r)*sn.rt((j-1)*R+r, (i-1)*R+k);
+                    end
+                end
+            end
+        end
+    end
+    self.setAvgResults(QN,UN,RN,TN,AN,[],CN,XN,runtime,options.method);
 else
     lastSol= [];
     s0 = sn.state;
     s0prior = sn.stateprior;
-    
+
     s0_sz = cellfun(@(x) size(x,1), s0)';
     s0_id = pprod(s0_sz-1);
     while s0_id>=0 % for all possible initial states
@@ -126,7 +141,7 @@ else
                         dataOld = interp1(self.result.Tran.Avg.U{i,r}(:,2),self.result.Tran.Avg.U{i,r}(:,1),tunion);
                         dataNew = interp1(t,UNt{i,r},tunion);
                         self.result.Tran.Avg.U{i,r} = [dataOld+s0prior_val*dataNew,tunion];
-                        
+
                         dataOld = interp1(self.result.Tran.Avg.T{i,r}(:,2),self.result.Tran.Avg.T{i,r}(:,1),tunion);
                         dataNew = interp1(t,TNt{i,r},tunion);
                         self.result.Tran.Avg.T{i,r} = [dataOld+s0prior_val*dataNew,tunion];

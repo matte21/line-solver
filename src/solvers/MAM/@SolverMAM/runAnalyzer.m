@@ -18,8 +18,22 @@ Solver.resetRandomGeneratorSeed(options.seed);
 
 sn = getStruct(self); 
 
-[Q,U,R,T,C,X] = solver_mam_analyzer(sn, options);
-
+[QN,UN,RN,TN,CN,XN] = solver_mam_analyzer(sn, options);
+M = sn.nstations;
+R = sn.nclasses;
+T = getAvgTputHandles(self);
+if ~isempty(T)
+    AN = zeros(M,R);
+    for i=1:M
+        for j=1:M
+            for k=1:R
+                for r=1:R
+                    AN(i,k) = AN(i,k) + TN(j,r)*sn.rt((j-1)*R+r, (i-1)*R+k);
+                end
+            end
+        end
+    end
+end
 runtime=toc(T0);
-self.setAvgResults(Q,U,R,T,[],[],C,X,runtime);
+self.setAvgResults(QN,UN,RN,TN,AN,[],CN,XN,runtime);
 end
