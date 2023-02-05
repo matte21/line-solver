@@ -8,7 +8,7 @@ Latest stable release: https://sourceforge.net/projects/line-solver/files/latest
 [![Hits](https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https%3A%2F%2Fgithub.com%2Fimperial-qore%2Fline-solver&count_bg=%23FFC401&title_bg=%23555555&icon=&icon_color=%23E7E7E7&title=hits&edge_flat=false)](https://hits.seeyoufarm.com)
 [![View LINE on File Exchange](https://www.mathworks.com/matlabcentral/images/matlab-file-exchange.svg)](https://www.mathworks.com/matlabcentral/fileexchange/71486-line)
 
-LINE is an open source library to analyze queueing models via analytical methods and simulation. LINE features algorithms for the solution of open queueing systems (e.g., M/M/1, M/M/k, M/G/1, ...), open and closed queueing networks, and layered queueing networks. LINE can be run as a royalty-free [Docker container](https://hub.docker.com/r/linemcr/cli) or interactively as a MATLAB toolbox. A [Java version](https://github.com/imperial-qore/line-solver-java) is currently under development. Additional information is available in the [LINE wiki](https://github.com/imperial-qore/line-solver/wiki).
+LINE is an open source solver to analyze queueing models via analytical methods and simulation. The tool features algorithms for the solution of open queueing systems (e.g., M/M/1, M/M/k, M/G/1, ...), open and closed queueing networks, and layered queueing networks. LINE can be run as a royalty-free [Docker container](https://hub.docker.com/r/linemcr/cli) or interactively as a MATLAB toolbox. A [Java version](https://github.com/imperial-qore/line-solver-java) is currently under development. Additional information is available in the [LINE wiki](https://github.com/imperial-qore/line-solver/wiki).
 
 ### Getting started
 
