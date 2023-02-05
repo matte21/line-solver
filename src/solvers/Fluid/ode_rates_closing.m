@@ -32,7 +32,7 @@ for i = 1:M
             end
         case SchedStrategy.ID_DPS %DPS
             w(i,:) = w(i,:)/sum(w(i,:));
-            %ni = 1e-2;
+            
             ni = mean(w(i,:));
             for k=1:K
                 idxIni = q_indices(i,k);

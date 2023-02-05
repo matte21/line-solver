@@ -34,10 +34,12 @@ lnoptions.verbose = 1;
 options = SolverNC.defaultOptions;
 options.verbose = 0;
 solver{1} = SolverLN(model, @(model) SolverNC(model, options), lnoptions);
-AvgTable{1} = solver{1}.getAvgTable
+AvgTable{1} = solver{1}.getAvgTable;
+AvgTable{1}
 
 options2 = SolverMVA.defaultOptions;
 options2.verbose = 0;
 solver{2} = SolverLN(model, @(model) SolverMVA(model, options2), lnoptions);
-AvgTable{2} = solver{2}.getAvgTable
+AvgTable{2} = solver{2}.getAvgTable;
+AvgTable{2}
 

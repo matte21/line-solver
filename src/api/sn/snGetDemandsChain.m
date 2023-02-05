@@ -39,7 +39,7 @@ for c=1:sn.nchains
     Vchain(:,c) = Vchain(:,c) / Vchain(sn.refstat(inchain(1)),c);
 end
 alpha(~isfinite(alpha))=0;
-alpha(alpha<1e-12)=0;
+alpha(alpha<GlobalConstants.Zero)=0;
 
 Lchain = zeros(M,C);
 STchain = zeros(M,C);

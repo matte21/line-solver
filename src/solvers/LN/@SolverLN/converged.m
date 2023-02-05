@@ -78,7 +78,7 @@ if it>1
         end
     end
     if self.options.verbose
-        line_printf(sprintf('\bChange: %f.',self.maxitererr(it)/E));
+        line_printf(sprintf('\bQLen change: %f.',self.maxitererr(it)/E));
         if it==iter_min
             if self.options.verbose
                 line_printf( ' Starting averaging to help convergence.');

@@ -64,7 +64,7 @@ for i = 1:sn.nstations
         if xi>0
             switch sn.schedid(i)
                 case SchedStrategy.ID_FCFS
-                    wni = 1e-2;
+                    wni = GlobalConstants.CoarseTol;
                     w = zeros(1,sn.nclasses);
                     for k = 1:sn.nclasses
                         idx = sum(sum(phases(1:i-1,:))) + sum( phases(i,1:k-1) );

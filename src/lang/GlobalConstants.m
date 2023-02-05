@@ -5,7 +5,7 @@ classdef GlobalConstants
     % All rights reserved.
 
     methods (Static)
-        function do=LINEDoChecks()
+        function do=DoChecks()
             global LINEDoChecks
             do = LINEDoChecks;
         end
@@ -13,10 +13,14 @@ classdef GlobalConstants
             global LINEStdOut
             stdo = LINEStdOut;
         end
-        function tol=Inf()
-            global LINEInf
-            tol = LINEInf;
+        function tol=Immediate()
+            global LINEImmediate
+            tol = LINEImmediate;
         end
+        function tol=Zero()
+            global LINEZero
+            tol = LINEZero;
+        end        
         function tol=CoarseTol()
             global LINECoarseTol
             tol = LINECoarseTol;
@@ -32,6 +36,39 @@ classdef GlobalConstants
         function ver=Version()
             global LINEVersion
             ver = LINEVersion;
+        end
+
+        function setDoChecks(val)
+            global LINEDoChecks
+            LINEDoChecks = val;
+        end
+        function setStdOut(val)
+            global LINEStdOut
+            LINEStdOut = val;
+        end
+        function setImmediate(val)
+            global LINEImmediate
+            LINEImmediate = val;
+        end
+        function setZero(val)
+            global LINEZero
+            LINEZero = val;
+        end
+        function setCoarseTol(val)
+            global LINECoarseTol
+            LINECoarseTol = val;
+        end
+        function setFineTol(val)
+            global LINEFineTol
+            LINEFineTol = val;
+        end
+        function setVerbose(val)
+            global LINEVerbose
+            LINEVerbose = val;
+        end
+        function setVersion(val)
+            global LINEVersion
+            LINEVersion = val;
         end
     end
 end

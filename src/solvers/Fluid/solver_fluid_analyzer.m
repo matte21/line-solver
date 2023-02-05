@@ -3,7 +3,7 @@ function [QN, UN, RN, TN, CN, XN, t, QNt, UNt, TNt, xvec, iter] = solver_fluid_a
 
 % Copyright (c) 2012-2023, Imperial College London
 % All rights reserved.
-%global GlobalConstants.Inf
+%global GlobalConstants.Immediate
 %global GlobalConstants.FineTol
 
 M = sn.nstations;
@@ -41,7 +41,7 @@ switch options.method
             iter = 0;
             eta_1 = zeros(1,M);
             eta = Inf*ones(1,M);
-            tol = 1e-2;
+            tol = GlobalConstants.CoarseTol;
 
             while max(abs(1-eta./eta_1)) > tol & iter <= options.iter_max
                 iter = iter + 1;
@@ -51,7 +51,7 @@ switch options.method
                     UN(i,sd) = TN(i,sd) ./ rates0(i,sd);
                 end
                 ST0 = 1./rates0;
-                ST0(isinf(ST0)) = GlobalConstants.Inf;
+                ST0(isinf(ST0)) = GlobalConstants.Immediate;
                 ST0(isnan(ST0)) = GlobalConstants.FineTol;
 
                 XN = zeros(1,K);
@@ -63,7 +63,7 @@ switch options.method
                 [ST,gamma,~,~,~,~,eta] = npfqn_nonexp_approx(options.config.highvar,sn,ST0,V,SCV,TN,UN,gamma,S);
 
                 rates = 1./ST;
-                rates(isinf(rates)) = GlobalConstants.Inf;
+                rates(isinf(rates)) = GlobalConstants.Immediate;
                 rates(isnan(rates)) = GlobalConstants.FineTol; %#ok<NASGU>
 
                 for i=1:M
@@ -130,7 +130,7 @@ switch options.method
 end
 
 if t(1) == 0
-    t(1) = 1e-8;
+    t(1) = GlobalConstants.FineTol;
 end
 
 for i=1:M

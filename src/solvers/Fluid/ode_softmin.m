@@ -104,7 +104,7 @@ for i = 1:M
             idxIni = q_indices(i,1);
             idxEnd = q_indices(i,K) + Kic(i,K) - 1;
             ni = sum( x(idxIni:idxEnd) );
-            wni = 1e-3;
+            wni = GlobalConstants.CoarseTol;
             for c=1:K
                 for kic = 1 : Kic(i,c)
                     if enabled(i,c)

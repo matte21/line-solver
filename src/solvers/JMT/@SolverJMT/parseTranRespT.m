@@ -29,26 +29,32 @@ uIDs=unique(jobIDs)';
 for id=uIDs
     jobData = jobLogData(ptrJob(1+id):(ptrJob(1+id+1)-1),[1,3]);
     jobClassData{1+id} = jobLogData(ptrJob(1+id):(ptrJob(1+id+1)-1),4);
-    if length(jobData)>2
-        jobData = sortrows(jobData,1);
-        firstTS=find(jobData(:,2)>0,1,'first'); % ts of first arrival
-        lastTS=find(jobData(:,2)<0,1,'last'); % ts of last departure
-        jobData=jobData(firstTS:lastTS,1);
-        jobClassData{1+id}=jobClassData{1+id}(firstTS:lastTS,1);
-        if length(jobData(2:2:end)) == length(jobData(1:2:end))
-            jobResTArvTS{1+id}=jobData(1:2:end); % unclear what happens in case of dropping
-            jobRespT{1+id}=jobData(2:2:end)-jobData(1:2:end); % unclear what happens in case of dropping
-            jobArvClass{1+id} = jobClassData{1+id}(1:2:end);
+    %if ~isempty(jobClassData{1+id})
+    try
+        if length(jobData)>2
+            jobData = sortrows(jobData,1);
+            firstTS=find(jobData(:,2)>0,1,'first'); % ts of first arrival
+            lastTS=find(jobData(:,2)<0,1,'last'); % ts of last departure
+            jobData=jobData(firstTS:lastTS,1);
+            jobClassData{1+id}=jobClassData{1+id}(firstTS:lastTS,1);
+            if length(jobData(2:2:end)) == length(jobData(1:2:end))
+                jobResTArvTS{1+id}=jobData(1:2:end); % unclear what happens in case of dropping
+                jobRespT{1+id}=jobData(2:2:end)-jobData(1:2:end); % unclear what happens in case of dropping
+                jobArvClass{1+id} = jobClassData{1+id}(1:2:end);
+            else
+                jobResTArvTS{1+id}=jobData(1:2:end-1); % unclear what happens in case of dropping
+                jobRespT{1+id}=jobData(2:2:end-1)-jobData(1:2:end-1); % unclear what happens in case of dropping
+                jobArvClass{1+id} = jobClassData{1+id}(1:2:end-1);
+            end
         else
-            jobResTArvTS{1+id}=jobData(1:2:end-1); % unclear what happens in case of dropping
-            jobRespT{1+id}=jobData(2:2:end-1)-jobData(1:2:end-1); % unclear what happens in case of dropping
-            jobArvClass{1+id} = jobClassData{1+id}(1:2:end-1);
+            jobResTArvTS{1+id}=min(jobData(:,1));
+            jobRespT{1+id}=max(jobData(:,1))-min(jobData(:,1));
+            jobArvClass{1+id} = jobClassData{1+id}(1);
         end
-    else
-        jobResTArvTS{1+id}=min(jobData(:,1));
-        jobRespT{1+id}=max(jobData(:,1))-min(jobData(:,1));
-        jobArvClass{1+id} = jobClassData{1+id}(1);
+    catch
+        keyboard
     end
+    %end
 end
 
 %% compute per-class residence times at the station

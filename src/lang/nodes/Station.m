@@ -247,7 +247,7 @@ classdef Station < StatefulNode
         
         function [map,mu,phi] = getMarkovianServiceRates(self)
             % [PH,MU,PHI] = GETPHSERVICERATES()
-            %global GlobalConstants.Inf
+            %global GlobalConstants.Immediate
             nclasses = size(self.server.serviceProcess,2);
             map = cell(1,nclasses);
             mu = cell(1,nclasses);
@@ -260,8 +260,8 @@ classdef Station < StatefulNode
                     mu{r}  = NaN;
                     phi{r}  = NaN;
                 elseif serviceProcess_r{end}.isImmediate()
-                    map{r}  = {[-GlobalConstants.Inf],[GlobalConstants.Inf]};
-                    mu{r}  = [GlobalConstants.Inf];
+                    map{r}  = {[-GlobalConstants.Immediate],[GlobalConstants.Immediate]};
+                    mu{r}  = [GlobalConstants.Immediate];
                     phi{r}  = [1];
                 elseif ~serviceProcess_r{end}.isDisabled()
                     switch class(serviceProcess_r{end})

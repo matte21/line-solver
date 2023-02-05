@@ -39,7 +39,7 @@ for c=1:nchains
     %                end
     alpha_visited = dtmc_solve(Pchain(visited,visited));
     alpha = zeros(1,M*K); alpha(visited) = alpha_visited;
-    if max(alpha)>=1-1e-10
+    if max(alpha)>=1-GlobalConstants.FineTol
         %disabled because a self-looping customer is an absorbing chain
         %line_error(mfilename,'Line:ChainAbsorbingState','One chain has an absorbing state.');
     end

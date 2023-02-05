@@ -183,7 +183,12 @@ classdef SolverLN < LayeredNetworkSolver & EnsembleSolver
                 switch self.solvers{e}.name
                     case {'SolverMVA', 'SolverNC'} %leaner than refreshService, no need to refresh phases
                         % note: this does not refresh the sn.proc field, only sn.rates and sn.scv
-                        refreshRates(self.ensemble{e});
+			switch self.options.method
+				case 'default'
+		                        refreshRates(self.ensemble{e});
+				case 'moment3'
+                        		refreshService(self.ensemble{e});
+			end
                     otherwise
                         refreshService(self.ensemble{e});
                 end

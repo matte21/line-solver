@@ -181,10 +181,10 @@ end
 
 %             for r=1:R
 %                 Psum=cellsum({P{r,:}})*ones(M,1);
-%                 if min(Psum)<1-1e-4
+%                 if min(Psum)<1-GlobalConstants.CoarseTol
 %                   line_error(mfilename,'Invalid routing probabilities (Node %d departures, switching from class %d).',minpos(Psum),r);
 %                 end
-%                 if max(Psum)>1+1e-4
+%                 if max(Psum)>1+GlobalConstants.CoarseTol
 %                   line_error(mfilename,sprintf('Invalid routing probabilities (Node %d departures, switching from class %d).',maxpos(Psum),r));
 %                 end
 %             end

@@ -49,7 +49,7 @@ pi0(state0) = 1; % find initial state and set it to probability 1
 %else
 [pit,t] = ctmc_transient(InfGen,pi0,options.timespan(1),options.timespan(2),options.stiff);
 %end
-pit(pit<1e-14)=0;
+pit(pit<GlobalConstants.Zero)=0;
 
 QNt = cell(M,K);
 UNt = cell(M,K);
@@ -57,7 +57,7 @@ UNt = cell(M,K);
 TNt = cell(M,K);
 
 if t(1) == 0
-    t(1) = 1e-8;
+    t(1) = GlobalConstants.Zero;
 end
 for k=1:K
     %    XNt(k) = pi*arvRates(:,sn.refstat(k),k);

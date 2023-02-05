@@ -79,7 +79,7 @@ for nc=1:sn.nchains
     if ~isinf(njobs_chain)
         statejobs_chain = sum(sum(n(:,find(sn.chains(nc,:))),2),1);
         %if ~options.force && abs(1-njobs_chain/statejobs_chain) > options.iter_tol
-        if abs(1-njobs_chain/statejobs_chain) > 1e-4
+        if abs(1-njobs_chain/statejobs_chain) > GlobalConstants.CoarseTol
             isValid = false;
             line_error(mfilename,sprintf('Chain %d is initialized with an incorrect number of jobs: %f instead of %d.', nc, statejobs_chain, njobs_chain));
             return

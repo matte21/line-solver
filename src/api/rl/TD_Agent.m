@@ -135,7 +135,7 @@ classdef TD_Agent < handle
     methods(Static)
         function policy = createGreedyPolicy(state_Q, epsilon, nA)
              policy = ones(1, nA) * epsilon / nA;
-             argmin = find(state_Q-min(state_Q)<1e-9);
+             argmin = find(state_Q-min(state_Q)<GlobalConstants.FineTol);
              policy(argmin) = policy(argmin) + (1-epsilon)/length(argmin);
         end
 

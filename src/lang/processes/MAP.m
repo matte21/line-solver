@@ -250,7 +250,7 @@ classdef MAP < MarkovModulated
                 iter_max=100;
             end
             if nargin<4
-                iter_tol=1e-9;
+                iter_tol=GlobalConstants.FineTol;
             end
             T = kpcfit_init(trace);
             % ls - mean arrival rate

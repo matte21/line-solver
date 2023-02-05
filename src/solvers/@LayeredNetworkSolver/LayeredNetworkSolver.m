@@ -101,8 +101,8 @@ classdef LayeredNetworkSolver < Solver
             options.method = 'default';
             options.init_sol = [];
             options.iter_max = 100;
-            options.iter_tol = 1e-4;
-            options.tol = 1e-4;
+            options.iter_tol = GlobalConstants.CoarseTol;
+            options.tol = GlobalConstants.CoarseTol;
             options.verbose = 0;
         end
     end

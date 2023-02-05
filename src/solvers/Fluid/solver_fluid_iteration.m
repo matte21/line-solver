@@ -29,8 +29,6 @@ rategap = log10(max(nonZeroRates)/min(nonZeroRates)); % if the max rate is InfRa
 [ode_h, ~] = solver_fluid_odes(sn, N, Mu, Phi, PH, P, S, sn.sched, sn.schedparam, options);
 
 T0 = timespan(1);
-%opt = odeset();
-%opt = odeset('AbsTol', min(10^(-rategap),1e-4), 'RelTol', 1e-3, 'NonNegative', 1:length(y0));
 odeopt = odeset('AbsTol', tol, 'RelTol', tol, 'NonNegative', 1:length(xvec_it{1}));
 T = 0;
 while (isfinite(timespan(2)) && T < timespan(2)) || (goon && iter < iter_max)

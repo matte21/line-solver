@@ -1,4 +1,4 @@
-function p_opt = getting_started_ex8()
+function p_opt = getting_started_ex8
 model = Network('LoadBalCQN');
 % Block 1: nodes
 delay = Delay(model,'Think');
@@ -14,12 +14,12 @@ P = model.initRoutingMatrix;
 P{cclass}(queue1, delay) = 1.0;
 P{cclass}(queue2, delay) = 1.0;
 
+function R = objFun(p)
+P{cclass}(delay, queue1) = p;
+P{cclass}(delay, queue2) = 1-p;
+model.link(P);
+R = SolverMVA(model,'exact','verbose',false).getAvgSysRespT;
+end
 % Block 4: solution
-    function R = objFun(p)
-        P{cclass}(delay, queue1) = p;
-        P{cclass}(delay, queue2) = 1-p;
-        model.link(P);
-        R = SolverMVA(model,'exact','verbose',false).getAvgSysRespT;
-    end
 p_opt = fminbnd(@(p) objFun(p), 0,1)
 end

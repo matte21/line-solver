@@ -14,7 +14,7 @@ end
 Solver.resetRandomGeneratorSeed(options.seed);
 
 switch options.method
-    case 'taussa'
+    case {'taussa','java'}
         [X,U,Q,R,T,C, tranSysState, tranSync] = solver_ssa_analyzer_taussa(self.model, options, 0, 0.0);
         runtime = toc(T0);
         self.setAvgResults(Q,U,R,T,[],[],C,X,runtime);

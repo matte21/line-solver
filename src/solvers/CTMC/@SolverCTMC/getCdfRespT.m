@@ -10,7 +10,10 @@ RD = cell(sn.nstations, sn.nclasses);
 M = sn.nstations;
 K = sn.nclasses;
 N = sn.njobs;
-for c=1:sn.nchains
+if any(isinf(N))
+    line_error(mfilename,'getCdfRespT is presently supported only for closed models.')
+end
+for c=1:sn.nchains    
     inchain = sn.inchain{c};
     s = inchain(N(inchain)>0); % tag a class that has non-zero jobs.
     jobclass = self.model.getClassByIndex(s);

@@ -41,7 +41,7 @@ for c=1:size(chains,1)
     %                end
     alpha_visited = dtmc_solve(Pchain(visited,visited));
     alpha = zeros(1,M*K); alpha(visited) = alpha_visited;
-    if max(alpha)>=1-1e-10
+    if max(alpha)>=1-GlobalConstants.FineTol
         line_error(mfilename,'One chain has an absorbing state.');
     end
     

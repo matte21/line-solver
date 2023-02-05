@@ -1,9 +1,11 @@
 % Block 1: nodes
 model = Network('model');
+
 % Block 1: nodes
 clientDelay = Delay(model, 'Client');
 cacheNode = Cache(model, 'Cache', 1000, 50, ReplacementStrategy.LRU);
 cacheDelay = Delay(model, 'CacheDelay');
+
 % Block 2: classes
 clientClass = ClosedClass(model, 'ClientClass', 1, clientDelay, 0);
 hitClass = ClosedClass(model, 'HitClass', 0, clientDelay, 0);

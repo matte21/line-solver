@@ -71,7 +71,7 @@ classdef TimeSeries < PointProcess
             SCV = self.getSCV;
             SKEW = skewness(self.data);
             QUART = [prctile(self.data,25),prctile(self.data,50),prctile(self.data,75)];
-            TAILS1PERC = [prctile(self.data,95),prctile(self.data,(1-1e-6)*100)];
+            TAILS1PERC = [prctile(self.data,95),prctile(self.data,(1-GlobalConstants.FineTol)*100)];
             MINMAX = [min(self.data),max(self.data)];
             MAD = mad(self.data,1); %median based mad
             line_printf('\nReplayer: length=%d NaNs=%d\nMoments: mean=%f scv=%f cv=%f skew=%f\nPercentiles: p25=%f p50=%f p75=%f p95=%f\nOrder: min=%f max=%f median=%f mad=%f',length(self.data),sum(isnan(self.data)),MEAN,SCV,sqrt(SCV),SKEW,QUART(1),QUART(2),QUART(3),TAILS1PERC(1),MINMAX(1),MINMAX(2),MED,MAD);

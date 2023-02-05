@@ -80,7 +80,7 @@ for ind=1:I
     if isNCS(ind) && sn.nodetype(ind) ~= NodeType.Source
         inc = nodeToNCS(ind);
         for jnd=1:Inc
-            if ~isempty(LINKS{jnd,inc}) && sum(mmap_lambda(LINKS{jnd,inc}))>1e-6
+            if ~isempty(LINKS{jnd,inc}) && sum(mmap_lambda(LINKS{jnd,inc}))> GlobalConstants.FineTol
                 FLOWS{end+1} = LINKS{jnd,inc};
             end
         end

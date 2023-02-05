@@ -4,7 +4,8 @@ global LINEVersion
 global LINEDoChecks
 global LINECoarseTol % Coarse tolerance for comparing averages, weights, states
 global LINEFineTol % Fine tolerance eg for distribution comparisons
-global LINEInf % Generic representation of infinity
+global LINEImmediate % Representation of infinite rate
+global LINEZero % Generic representation of zero
 global BuToolsVerbose
 global BuToolsCheckInput
 global BuToolsCheckPrecision
@@ -17,18 +18,20 @@ warning ON BACKTRACE
 
 % assign global constants
 LINEStdOut = 1; % console
-LINEVersion = '2.0.25';
+LINEVersion = '2.0.26';
 LINEVerbose = VerboseLevel.NORMAL;
 LINEDoChecks = true;
 LINECoarseTol = 1e-3; 
 LINEFineTol = 1e-8; 
-LINEInf = 1/LINEFineTol; 
+LINEImmediate = 1/LINEFineTol;
+LINEZero = 1e-14;
 
 fprintf(1,'Starting LINE version %s: ',LINEVersion);
 switch LINEStdOut
     case 1
     fprintf(1,'StdOut=console, ');
 end 
+
 switch LINEVerbose
     case VerboseLevel.NORMAL
     fprintf(1,'VerboseLevel=NORMAL, ');
@@ -37,14 +40,17 @@ switch LINEVerbose
     case VerboseLevel.DISABLED
     fprintf(1,'VerboseLevel=DISABLED, ');    
 end
+
 if LINEDoChecks
     fprintf(1,'DoChecks=true, ');
 else
     fprintf(1,'DoChecks=false, ');
 end
-fprintf(1,'CoarseTol=%x, ',LINECoarseTol);
-fprintf(1,'FineTol=%x\n',LINEFineTol);
+
+fprintf(1,'CoarseTol=%e, ',LINECoarseTol);
+fprintf(1,'FineTol=%e, ',LINEFineTol);
+fprintf(1,'Zero=%e\n',LINEZero);
 
 BuToolsVerbose = false;
-BuToolsCheckInput = true;
-BuToolsCheckPrecision = LINEFineTol;
+BuToolsCheckInput = false;
+BuToolsCheckPrecision = 1e-12;

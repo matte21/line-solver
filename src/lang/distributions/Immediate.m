@@ -38,8 +38,8 @@ classdef Immediate < Distrib
         end
 
         function rate = getRate(self)
-            %global GlobalConstants.Inf
-            rate = GlobalConstants.Inf;
+            %global GlobalConstants.Immediate
+            rate = GlobalConstants.Immediate;
         end
 
         function ex = getMean(self)
@@ -60,9 +60,9 @@ classdef Immediate < Distrib
 
         function mu = getMu(self)
             % MU = GETMU()
-            %global GlobalConstants.Inf
+            %global GlobalConstants.Immediate
             % Return total outgoing rate from each state
-            mu = GlobalConstants.Inf;
+            mu = GlobalConstants.Immediate;
         end
 
         function phi = getPhi(self)
@@ -91,8 +91,8 @@ classdef Immediate < Distrib
         end
 
         function PH = getPH(self)
-            %global GlobalConstants.Inf
-            PH = {[-GlobalConstants.Inf] ,[GlobalConstants.Inf]};
+            %global GlobalConstants.Immediate
+            PH = {[-GlobalConstants.Immediate] ,[GlobalConstants.Immediate]};
         end
 
         function bool = isImmediate(self)

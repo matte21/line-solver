@@ -161,7 +161,7 @@ classdef MarkedMMPP < MarkovModulated
         function id = getTypeIDC(self, t) % asymptotic index of dispersion for counts for each type
             % ID = GETTYPEIDC() % ASYMPTOTIC INDEX OF DISPERSION
             if nargin < 2
-                id = mmpp_count_idc(self.getRepres, GlobalConstants.Inf);
+                id = mmpp_count_idc(self.getRepres, GlobalConstants.Immediate);
             else
                 id = mmpp_count_idc(self.getRepres, t);
             end

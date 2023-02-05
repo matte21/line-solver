@@ -4,9 +4,6 @@ function [RD] = solver_mam_passage_time(sn, PH, options)
 % Copyright (c) 2012-2023, Imperial College London
 % All rights reserved.
 
-global BuToolsVerbose;
-global BuToolsCheckInput;
-global BuToolsCheckPrecision;
 %% generate local state spaces
 M = sn.nstations;
 K = sn.nclasses;
@@ -23,9 +20,6 @@ X = zeros(1,K);
 
 if M==2 && all(isinf(N))
     % open queueing system (one node is the external world)
-    BuToolsVerbose = false;
-    BuToolsCheckInput = true;
-    BuToolsCheckPrecision = 1e-12;
     pie = {};
     S = {};
     for i=1:M

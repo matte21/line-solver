@@ -11,6 +11,24 @@ sn = getStruct(self); % this gets modified later on so pass by copy
 
 hasOpenClasses = any(sn.nodetype==NodeType.ID_SOURCE);
 switch options.method
+    case {'java','jline.fluid'}
+        jmodel = LINE2JLINE(self.model);
+        M = jmodel.getNumberOfStatefulNodes;
+        R = jmodel.getNumberOfClasses;
+        jsolver = JLINE.SolverFluid(jmodel);
+        [QN,UN,RN,~,TN] = JLINE.arrayListToResults(jsolver.getAvgTable);
+        runtime = toc(T0);
+        CN = [];
+        XN = [];
+        QN = reshape(QN',R,M)';
+        UN = reshape(UN',R,M)';
+        RN = reshape(RN',R,M)';
+        TN = reshape(TN',R,M)';
+        lG = NaN;
+        lastiter = NaN;
+        self.setAvgResults(QN,UN,RN,TN,[],[],CN,XN,runtime,'jline.fluid',lastiter);
+        self.result.Prob.logNormConstAggr = lG;
+        return    
     case {'matrix'}
         if hasOpenClasses
             line_error(mfilename,'The matrix solver does not support open arrivals. Use options.method=''closing'' instead.');

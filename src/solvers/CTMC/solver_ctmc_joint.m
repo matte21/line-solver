@@ -17,7 +17,7 @@ if options.keep
     line_printf([fname, '.mat'])
 end
 pi = ctmc_solve(Q);
-pi(pi<1e-14)=0;
+pi(pi<GlobalConstants.Zero)=0;
 
 statevec = [];
 state = sn.state;

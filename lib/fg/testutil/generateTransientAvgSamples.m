@@ -5,7 +5,7 @@ function [respT, arvR, util] = generateTransientAvgSamples(model, samples, C)
     solver = SolverJMT(model);
 
     [~,~,~,~] = solver.getAvg();
-    arvR = repmat(solver.getAvgArvR(), samples, ;
+    arvR = repmat(solver.getAvgArvR(), samples, 1);
 
 
     [Q, U, T] = model.getTranHandles();

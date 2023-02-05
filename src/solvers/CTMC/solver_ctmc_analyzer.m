@@ -65,7 +65,7 @@ if any(isnan(probSysState))
     end
 end
 
-probSysState(probSysState<1e-14)=0;
+probSysState(probSysState<GlobalConstants.Zero)=0;
 probSysState = probSysState/sum(probSysState);
 
 XN = NaN*zeros(1,K);

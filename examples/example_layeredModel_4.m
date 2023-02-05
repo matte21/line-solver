@@ -1,5 +1,5 @@
 %% This example is temporarily disabled
-clearvars -except exampleName;
+clearvars -except exampleName T0;
 fprintf(1,'This example illustrates the solution of a moderately large LQN.\n')
 
 cwd = fileparts(which(mfilename));

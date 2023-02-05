@@ -106,8 +106,8 @@ fprintf(1,'\n\nExample: <strong>example_cdfRespT_1</strong>\n');
 clear; example_cdfRespT_1; fprintf(1,'Pausing...'); pause(3.0); try close(handleFig); end
 fprintf(1,'\n\nExample: <strong>example_cdfRespT_2</strong>\n');
 clear; example_cdfRespT_2; fprintf(1,'Pausing...'); pause(3.0); try close(handleFig); end
-%fprintf(1,'\n\nExample: <strong>example_cdfRespT_3</strong>\n');
-%clear; example_cdfRespT_3; fprintf(1,'Pausing...'); pause(3.0); try close(handleFig); end
+fprintf(1,'\n\nExample: <strong>example_cdfRespT_3</strong>\n');
+clear; example_cdfRespT_3; fprintf(1,'Pausing...'); pause(3.0); try close(handleFig); end
 fprintf(1,'\n\nExample: <strong>example_cdfRespT_4</strong>\n');
 clear; example_cdfRespT_4; fprintf(1,'Pausing...'); pause(3.0); try close(handleFig); end
 fprintf(1,'\n\nExample: <strong>example_cdfRespT_5</strong>\n');

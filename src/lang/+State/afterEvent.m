@@ -9,7 +9,7 @@ function [outspace, outrate, outprob] =  afterEvent(sn, ind, inspace, event, cla
 %if ~exist('isSimulation','var')
 %    isSimulation = false;
 %end
-%global GlobalConstants.Inf
+%global GlobalConstants.Immediate
 
 M = sn.nstations;
 R = sn.nclasses;
@@ -25,6 +25,7 @@ isf = sn.nodeToStateful(ind);
 
 if sn.isstation(ind)
     ismkvmod = any(sn.procid(sn.nodeToStation(ind),:)==ProcessType.ID_MAP | sn.procid(sn.nodeToStation(ind),:)==ProcessType.ID_MMPP2);
+    ismkvmodclass = zeros(R,1);
     for r=1:R
         ismkvmodclass(r) = any(sn.procid(sn.nodeToStation(ind),r)==ProcessType.ID_MAP | sn.procid(sn.nodeToStation(ind),r)==ProcessType.ID_MMPP2);
     end
@@ -40,8 +41,10 @@ end
 
 cdscaling = sn.cdscaling;
 if isempty(cdscaling)
-    for i=1:M
-        cdscaling{i} = @(ni) 1;
+    cdscaling = cell(M,1);
+    cdscaling{1} = @(ni) 1;
+    for i=2:M % faster this way
+        cdscaling{i} = cdscaling{1};
     end
 end
 
@@ -693,7 +696,7 @@ elseif sn.isstateful(ind)
                                 end
                         end
                         outspace = [space_srv, space_var]; % buf is empty
-                        outrate = GlobalConstants.Inf*ones(size(outspace,1)); % immediate action
+                        outrate = GlobalConstants.Immediate*ones(size(outspace,1)); % immediate action
                     end
             end            
         case NodeType.Cache
@@ -717,7 +720,7 @@ elseif sn.isstateful(ind)
                                 end
                         end
                         outspace = [space_srv, space_var]; % buf is empty
-                        outrate = GlobalConstants.Inf*ones(size(outspace,1)); % immediate action
+                        outrate = GlobalConstants.Immediate*ones(size(outspace,1)); % immediate action
                     end
                 case EventType.ID_READ
                     n = sn.nodeparam{ind}.nitems; % n items
@@ -761,10 +764,10 @@ elseif sn.isstateful(ind)
                                                 space_var_k = [space_var_k; varp];
                                                 if isSimulation
                                                     %% no p(k) weighting since that goes in the outprob vec
-                                                    outrate(end+1,1) = GlobalConstants.Inf;
+                                                    outrate(end+1,1) = GlobalConstants.Immediate;
                                                 else
                                                     for l=2
-                                                        outrate(end+1,1) = ac{class,k}(1,l) * p(k) * GlobalConstants.Inf;
+                                                        outrate(end+1,1) = ac{class,k}(1,l) * p(k) * GlobalConstants.Immediate;
                                                     end
                                                 end
                                             case ReplacementStrategy.ID_RR
@@ -774,7 +777,7 @@ elseif sn.isstateful(ind)
                                                     varp(r) = k;
                                                     space_srv_k = [space_srv_k; space_srv_e];
                                                     space_var_k = [space_var_k; (varp)];
-                                                    outrate(end+1,1) = GlobalConstants.Inf;
+                                                    outrate(end+1,1) = GlobalConstants.Immediate;
                                                 else
                                                     for r=1:m(1) % random position in list 1
                                                         varp = var;
@@ -782,7 +785,7 @@ elseif sn.isstateful(ind)
                                                         space_srv_k = [space_srv_k; space_srv_e];
                                                         space_var_k = [space_var_k; (varp)];
                                                         for l=2
-                                                            outrate(end+1,1) = ac{class,k}(1,l) * p(k)/m(1) * GlobalConstants.Inf;
+                                                            outrate(end+1,1) = ac{class,k}(1,l) * p(k)/m(1) * GlobalConstants.Immediate;
                                                         end
                                                     end
                                                 end
@@ -808,7 +811,7 @@ elseif sn.isstateful(ind)
 
                                                     space_srv_k = [space_srv_k; space_srv_e];
                                                     space_var_k = [space_var_k; varp];
-                                                    outrate(end+1,1) = GlobalConstants.Inf;
+                                                    outrate(end+1,1) = GlobalConstants.Immediate;
                                                 else
                                                     for inew = i:h
                                                         varp = var;
@@ -817,7 +820,7 @@ elseif sn.isstateful(ind)
                                                         varp(cpos(inew,1)) = k;
                                                         space_srv_k = [space_srv_k; space_srv_e];
                                                         space_var_k = [space_var_k; varp];
-                                                        outrate(end+1,1) = ac{class,k}(1+i,1+inew) * p(k) * GlobalConstants.Inf;
+                                                        outrate(end+1,1) = ac{class,k}(1+i,1+inew) * p(k) * GlobalConstants.Immediate;
                                                     end
                                                 end
                                             case ReplacementStrategy.ID_RR
@@ -830,7 +833,7 @@ elseif sn.isstateful(ind)
                                                     outprob = outprob * ac{class,k}(1+i,1+inew);
                                                     space_srv_k = [space_srv_k; space_srv_e];
                                                     space_var_k = [space_var_k; varp];
-                                                    outrate(end+1,1) = GlobalConstants.Inf;
+                                                    outrate(end+1,1) = GlobalConstants.Immediate;
                                                 else
                                                     for inew = i:h
                                                         for r=1:m(inew) % random position in new list
@@ -839,7 +842,7 @@ elseif sn.isstateful(ind)
                                                             varp(cpos(inew,r)) = k;
                                                             space_srv_k = [space_srv_k; space_srv_e];
                                                             space_var_k = [space_var_k; varp];
-                                                            outrate(end+1,1) = ac{class,k}(1+i,1+inew) * p(k)/m(inew) * GlobalConstants.Inf;
+                                                            outrate(end+1,1) = ac{class,k}(1+i,1+inew) * p(k)/m(inew) * GlobalConstants.Immediate;
                                                         end
                                                     end
                                                 end
@@ -853,7 +856,7 @@ elseif sn.isstateful(ind)
                                                     varp(cpos(inew,1)) = k;
                                                     space_srv_k = [space_srv_k; space_srv_e];
                                                     space_var_k = [space_var_k; varp];
-                                                    outrate(end+1,1) = GlobalConstants.Inf;
+                                                    outrate(end+1,1) = GlobalConstants.Immediate;
                                                 else
                                                     for inew = i:h
                                                         varp = var;
@@ -863,7 +866,7 @@ elseif sn.isstateful(ind)
                                                         varp(cpos(inew,1)) = k;
                                                         space_srv_k = [space_srv_k; space_srv_e];
                                                         space_var_k = [space_var_k; varp];
-                                                        outrate(end+1,1) = ac{class,k}(1+i,1+inew) * p(k) * GlobalConstants.Inf;
+                                                        outrate(end+1,1) = ac{class,k}(1+i,1+inew) * p(k) * GlobalConstants.Immediate;
                                                     end
                                                 end
                                         end
@@ -876,17 +879,17 @@ elseif sn.isstateful(ind)
                                                 space_srv_k = [space_srv_k; space_srv_e];
                                                 space_var_k = [space_var_k; (var)];
                                                 if isSimulation
-                                                    outrate(end+1,1) = GlobalConstants.Inf;
+                                                    outrate(end+1,1) = GlobalConstants.Immediate;
                                                 else
-                                                    outrate(end+1,1) = ac{class,k}(1+h,1+h) * p(k) * GlobalConstants.Inf;
+                                                    outrate(end+1,1) = ac{class,k}(1+h,1+h) * p(k) * GlobalConstants.Immediate;
                                                 end
                                             case {ReplacementStrategy.ID_FIFO, ReplacementStrategy.ID_SFIFO}
                                                 space_srv_k = [space_srv_k; space_srv_e];
                                                 space_var_k = [space_var_k; var];
                                                 if isSimulation
-                                                    outrate(end+1,1) = GlobalConstants.Inf;
+                                                    outrate(end+1,1) = GlobalConstants.Immediate;
                                                 else
-                                                    outrate(end+1,1) = ac{class,k}(1+h,1+h) * p(k) * GlobalConstants.Inf;
+                                                    outrate(end+1,1) = ac{class,k}(1+h,1+h) * p(k) * GlobalConstants.Immediate;
                                                 end
                                             case ReplacementStrategy.ID_LRU
                                                 varp = var;
@@ -895,9 +898,9 @@ elseif sn.isstateful(ind)
                                                 space_srv_k = [space_srv_k; space_srv_e];
                                                 space_var_k = [space_var_k; varp];
                                                 if isSimulation
-                                                    outrate(end+1,1) = GlobalConstants.Inf;
+                                                    outrate(end+1,1) = GlobalConstants.Immediate;
                                                 else
-                                                    outrate(end+1,1) = ac{class,k}(1+h,1+h) * p(k) * GlobalConstants.Inf;
+                                                    outrate(end+1,1) = ac{class,k}(1+h,1+h) * p(k) * GlobalConstants.Immediate;
                                                 end
                                         end
                                     end

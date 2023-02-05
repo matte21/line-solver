@@ -3,10 +3,6 @@ function [QN,UN,RN,TN,CN,XN] = solver_mam(sn, options)
 
 %Copyright (c) 2012-2023, Imperial College London
 %All rights reserved.
-global SCVmam
-global BuToolsVerbose;
-global BuToolsCheckInput;
-global BuToolsCheckPrecision;
 
 config = options.config;
 
@@ -40,9 +36,6 @@ end
 
 if all(isinf(sn.njobs)) % is open
     %    open queueing system (one node is the external world)
-    BuToolsVerbose = false;
-    BuToolsCheckInput = false;
-    BuToolsCheckPrecision = 1e-14;
     
     pie = {};
     D0 = {};
@@ -161,12 +154,6 @@ if all(isinf(sn.njobs)) % is open
             end
         end
         
-        if it>1
-            SCVmam=SCVd(2:end);
-            %SCVmam
-            %IDCd
-            %QN
-        end
     end
     if options.verbose
         line_printf('\nMAM parametric decomposition completed in %d iterations.',it);
