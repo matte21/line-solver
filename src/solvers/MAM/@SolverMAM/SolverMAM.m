@@ -24,6 +24,13 @@ classdef SolverMAM < NetworkSolver
     end
     
     methods (Static)
+
+        function [allMethods] = listValidMethods()
+            % allMethods = LISTVALIDMETHODS()
+            % List valid methods for this solver
+            allMethods = {'default','dec.source','dec.mmap','dec.poisson'};
+        end
+
         function featSupported = getFeatureSet()
             % FEATSUPPORTED = GETFEATURESET()
             

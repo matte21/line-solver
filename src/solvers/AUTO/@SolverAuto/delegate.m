@@ -13,7 +13,6 @@ switch class(this_model)
                 proposedSolvers = self.candidates;
             end
         else % if the user wishes to use a precise solver
-            self.solvers
             proposedSolvers = {self.solvers{:}};
         end
         for s=1:length(proposedSolvers)

@@ -47,14 +47,14 @@ classdef Solver < handle
         function bool = supports(self,model)
             % BOOL = SUPPORTS(SELF,MODEL)
             % True if the input model is supported by the solver
-            line_error(mfilename,'Line:AbstractMethodCall','An abstract method was called. The function needs to be overridden by a subclass.');
+            line_error(mfilename,'An abstract method was called. The function needs to be overridden by a subclass.');
         end
 
         function runtime = runAnalyzer(self, options) % generic method to run the solver
             % RUNTIME = RUN()
             % Run the solver % GENERIC METHOD TO RUN THE SOLVER
             % Solve the model
-            line_error(mfilename,'Line:AbstractMethodCall','An abstract method was called. The function needs to be overridden by a subclass.');
+            line_error(mfilename,'An abstract method was called. The function needs to be overridden by a subclass.');
         end
 
         function self = setDoChecks(self, bool)
@@ -170,25 +170,25 @@ classdef Solver < handle
         function fun = accurateStiffOdeSolver()
             % FUN = ACCURATESTIFFODESOLVER()
             % Return default high-accuracy stiff solver
-            fun = @ode15s;
+            fun = @ode15s; % variable-order method
         end
 
         function fun = accurateOdeSolver()
             % FUN = ACCURATEODESOLVER()
             % Return default high-accuracy non-stiff solver
-            fun = @ode45;
+            fun = @ode113; % variable-order method
         end
 
         function fun = fastStiffOdeSolver()
             % FUN = FASTSTIFFODESOLVER()
             % Return default low-accuracy stiff solver
-            fun = @ode23s;
+            fun = @ode23s; % low-order method   
         end
 
         function fun = fastOdeSolver()
             % FUN = FASTODESOLVER()
             % Return default low-accuracy non-stiff solver
-            fun = @ode23s;
+            fun = @ode23; % low-order method
         end
 
         function [optList, allOpt] = listValidOptions()
@@ -208,7 +208,7 @@ classdef Solver < handle
                 'fluid','matrix','softmin','statedep','closing','fluid.softmin','fluid.statedep''fluid.closing','fluid.matrix',...
                 'nc','nc.exact','nc.imci','ls','nc.ls','nc.cub','cub','le','nc.le','nc.panacea','panacea','nc.mmint2','mmint2','mam','dec.source','dec.mmap',...
                 'mmk','gigk', 'gigk.kingman_approx', ...
-                'mm1','mg1','gm1','gig1','gim1','gig1.kingman','gig1.gelenbe','gig1.heyman','gig1.kimura','gig1.allen','gig1.kobayashi','gig1.klb','gig1.marchal','gig1.myskja','gig1.myskja.b',...
+                'mm1','mg1','gm1','gig1','gim1','gig1.kingman','gig1.gelenbe','gig1.heyman','gig1.kimura','gig1.allen','gig1.kobayashi','gig1.klb','gig1.marchal',...
                 'aba.upper','aba.lower','gb.upper','gb.lower','sb.upper','sb.lower','bjb.upper','bjb.lower','pb.upper','pb.lower',...
                 'jline.amva','jline.fluid','jline.fluid.matrix','jline.fluid.closing','jline.ssa'};
         end
@@ -290,22 +290,23 @@ classdef Solver < handle
                         'amva.qdaql','mva.amva.qdaql', ...
                         'mm1','mmk','mg1','gm1','gig1','gim1','gig1.kingman', ...
                         'gigk', 'gigk.kingman_approx', ...
-                        'gig1.gelenbe','gig1.heyman','gig1.kimura','gig1.allen','gig1.kobayashi','gig1.klb','gig1.marchal','gig1.myskja','gig1.myskja.b', ...
+                        'gig1.gelenbe','gig1.heyman','gig1.kimura','gig1.allen','gig1.kobayashi','gig1.klb','gig1.marchal', ...
                         'aba.upper', 'aba.lower', 'bjb.upper', 'bjb.lower', 'gb.upper', 'gb.lower', 'pb.upper', 'pb.lower', 'sb.upper', 'sb.lower', ...
-                        'jline.amva','jline.fluid','jline.fluid.matrix','jline.fluid.closing','jline.ssa'}
+                        'jline.amva'
+                        }
                     if strcmp(options.method,'mva'), options.method='default'; end
                     options.method = erase(options.method,'mva.');
                     solver = SolverMVA(model, options);
-                case {'ssa','ssa.serial.hash','ssa.para.hash','ssa.parallel.hash','ssa.serial','ssa.para','ssa.parallel','serial.hash','serial','para','parallel','para.hash','parallel.hash','hashed','ssa','java','taussa','tauleap'}
+                case {'ssa','ssa.serial.hash','ssa.para.hash','ssa.parallel.hash','ssa.serial','ssa.para','ssa.parallel','serial.hash','serial','para','parallel','para.hash','parallel.hash','hashed','taussa','tauleap','jline.ssa'}
                     if strcmp(options.method,'ssa'), options.method='default'; end
                     options.method = erase(options.method,'ssa.');
                     solver = SolverSSA(model, options);
                 case {'jmt','jsim','jmva','jmva.mva','jmva.recal','jmva.comom','jmva.chow','jmva.bs','jmva.aql','jmva.lin','jmva.dmlin','jmva.ls',...
-                        'jmt.jsim','jmt.jmva','jmt.jmva.mva','jmt.jmva.amva','jmt.jmva.recal','jmt.jmva.comom','jmt.jmva.chow','jmt.jmva.bs','jmt.jmva.aql','jmt.jmva.lin','jmt.jmva.dmlin','jmt.jmva.ls'}
+                        'jmt.jsim','jmt.jmva','jmt.jmva.mva','jmt.jmva.amva','jmva.amva','jmt.jmva.recal','jmt.jmva.comom','jmt.jmva.chow','jmt.jmva.bs','jmt.jmva.aql','jmt.jmva.lin','jmt.jmva.dmlin','jmt.jmva.ls'}
                     if strcmp(options.method,'jmt'), options.method='default'; end
                     options.method = erase(options.method,'jmt.');
                     solver = SolverJMT(model, options);
-                case {'fluid','fluid.softmin','fluid.statedep','fluid.closing'}
+                case {'fluid','fluid.softmin','fluid.statedep','fluid.closing','jline.fluid','jline.fluid.matrix','jline.fluid.closing'}
                     if strcmp(options.method,'fluid'), options.method='default'; end
                     options.method = erase(options.method,'fluid.');
                     solver = SolverFluid(model, options);

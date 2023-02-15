@@ -9,15 +9,14 @@ if nargin<2
 end
 
 if ~isinf(options.timespan(1)) && (options.timespan(1) == options.timespan(2))
-    line_warning(mfilename,'%s: timespan is a single point, spacing by options.tol (%e).\n',mfilename, options.tol);
+    line_warning(mfilename,'%s: timespan is a single point, spacing by options.tol (%e).',mfilename, options.tol);
     options.timespan(2) = options.timespan(1) + options.tol;
 end
 
 Solver.resetRandomGeneratorSeed(options.seed);
 
 if self.enableChecks && ~self.supports(self.model)
-    ME = MException('Line:FeatureNotSupportedBySolver', 'This model contains features not supported by the solver.');
-    throw(ME);
+    line_error(mfilename,'This model contains features not supported by the solver.');    
 end
 
 sn = getStruct(self);
@@ -41,9 +40,8 @@ end
 
 if sizeEstimator > 6
     if ~isfield(options,'force') || options.force == false
-        %        line_error(mfilename,'Line:ModelTooLargeToSolve','CTMC size may be too large to solve. Stopping SolverCTMC. Set options.force=true to bypass this control.\n');
-        ME = MException('Line:ModelTooLargeToSolve', 'CTMC size may be too large to solve. Stopping SolverCTMC. Set options.force=true or use SolverCTMC(...,''force'',true) to bypass this control.\n');
-        throw(ME);
+        %        line_error(mfilename,'CTMC size may be too large to solve. Stopping SolverCTMC. Set options.force=true to bypass this control.');
+        line_error(mfilename,'CTMC size may be too large to solve. Stopping SolverCTMC. Set options.force=true or use SolverCTMC(...,''force'',true) to bypass this control.');        
         return
     end
 end
@@ -83,7 +81,7 @@ if isinf(options.timespan(1))
     M = sn.nstations;
     R = sn.nclasses;
     T = getAvgTputHandles(self);
-    if ~isempty(T)
+    if ~isempty(T) && ~isempty(TN)
         AN = zeros(M,R);
         for i=1:M
             for j=1:M
@@ -94,6 +92,8 @@ if isinf(options.timespan(1))
                 end
             end
         end
+    else
+        AN = [];
     end
     self.setAvgResults(QN,UN,RN,TN,AN,[],CN,XN,runtime,options.method);
 else

@@ -18,7 +18,6 @@ end
 %% generate state spaces, detailed and aggregate
 [stateSpace, stateSpaceAggr, stateSpaceHashed,~,sn] = ctmc_ssg(sn,options);
 
-%size(SS)
 %%
 Q = sparse(eye(size(stateSpaceHashed,1))); % the diagonal elements will be removed later
 A = length(sync);
@@ -111,8 +110,8 @@ for a=1:A
                             ns = matchrow(stateSpaceHashed, new_state);
                             if ns>0
                                 if ~isnan(rate_a)
-                                    if node_p < local && ~csmask(class_a, class_p) && rate_a(ia) * prob_sync_p >0 && (sn.nodetype(node_p)~=NodeType.Source)
-                                        line_error(mfilename,sprintf('Error: state-dependent routing at node %d (%s) violates the class switching mask (node %d -> node %d, class %d -> class %d).', node_a, sn.nodenames{node_a}, node_a, node_p, class_a, class_p));
+                                    if node_p < local && ~csmask(class_a, class_p) && rate_a(ia) * prob_sync_p >0 && (sn.nodetype(node_p)~=NodeType.Source)    
+                                        line_error(mfilename,sprintf('Error: state-dependent routing at node %d (%s) violates the class switching mask (node %s -> node %s, class %s -> class %s).', node_a, sn.nodenames{node_a}, sn.nodenames{node_a}, sn.nodenames{node_p}, sn.classnames{class_a}, sn.classnames{class_p}));
                                     end
                                     if size(Dfilt{a}) >= [s,ns] % check needed as D{a} is a sparse matrix
                                         Dfilt{a}(s,ns) = Dfilt{a}(s,ns) + rate_a(ia) * prob_sync_p;
@@ -191,7 +190,7 @@ Q = ctmc_makeinfgen(Q);
 
 if options.hide_immediate % if want to remove immediate transitions
     statefuls = find(sn.isstateful-sn.isstation);
-    imm=[];
+    imm = [];
     for st = statefuls(:)'
         imm_st = find(sum(sn.space{st}(:,1:nclasses),2)>0);
         imm = [imm; find(arrayfun(@(a) any(a==imm_st),stateSpaceHashed(:,st)))];
@@ -200,7 +199,9 @@ if options.hide_immediate % if want to remove immediate transitions
     nonimm = setdiff(1:size(Q,1),imm);
     stateSpace(imm,:) = [];
     stateSpaceAggr(imm,:) = [];
+%    full(Q)
     [Q,~,Q12,~,Q22] = ctmc_stochcomp(Q, nonimm);
+%    full(Q)
     for a=1:A
         % stochastic complement for action a
         Q21a = Dfilt{a}(imm,nonimm);
@@ -208,28 +209,31 @@ if options.hide_immediate % if want to remove immediate transitions
         Ta = Q12*Ta;
         Dfilt{a} = Dfilt{a}(nonimm,nonimm)+Ta;
     end
+
+    depRates(imm,:,:) = [];
+    arvRates(imm,:,:) = [];
     % recompute arvRates and depRates
-    arvRates = zeros(size(stateSpace,1),nstateful,nclasses);
-    depRates = zeros(size(stateSpace,1),nstateful,nclasses);
-    for a=1:A
-        % active
-        node_a = sync{a}.active{1}.node;
-        class_a = sync{a}.active{1}.class;
-        event_a = sync{a}.active{1}.event;
-        % passive
-        node_p = sync{a}.passive{1}.node;
-        class_p = sync{a}.passive{1}.class;
-        if event_a == EventType.ID_DEP
-            node_a_sf = sn.nodeToStateful(node_a);
-            node_p_sf = sn.nodeToStateful(node_p);
-            for s=1:size(stateSpace,1)
-                depRates(s,node_a_sf,class_a) = depRates(s,node_a_sf,class_a) + sum(Dfilt{a}(s,:));
-                arvRates(s,node_p_sf,class_p) = arvRates(s,node_p_sf,class_p) + sum(Dfilt{a}(s,:));
-            end
-        end
-    end
+%     arvRates = zeros(size(stateSpace,1),nstateful,nclasses);
+%     depRates = zeros(size(stateSpace,1),nstateful,nclasses);
+%     for a=1:A
+%         % active
+%         node_a = sync{a}.active{1}.node;
+%         class_a = sync{a}.active{1}.class;
+%         event_a = sync{a}.active{1}.event;
+%         % passive
+%         node_p = sync{a}.passive{1}.node;
+%         class_p = sync{a}.passive{1}.class;
+%         if event_a == EventType.ID_DEP
+%             node_a_sf = sn.nodeToStateful(node_a);
+%             node_p_sf = sn.nodeToStateful(node_p);
+%             for s=1:size(stateSpace,1)
+%                 depRates(s,node_a_sf,class_a) = depRates(s,node_a_sf,class_a) + sum(Dfilt{a}(s,:));
+%                 arvRates(s,node_p_sf,class_p) = arvRates(s,node_p_sf,class_p) + sum(Dfilt{a}(s,:));
+%             end
+%         end
+%     end
 end
-%SolverCTMC.printInfGen(Q,SS)
+%SolverCTMC.printInfGen(Q,stateSpace)
 %%
 Q = ctmc_makeinfgen(Q);
 end

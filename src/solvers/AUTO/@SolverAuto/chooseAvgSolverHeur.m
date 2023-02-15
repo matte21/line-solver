@@ -1,4 +1,4 @@
-function solver = chooseAvgSolver(self)
+function solver = chooseAvgSolverHeur(self)
 % SOLVER = CHOOSEAVGSOLVER()
 
 this_model = self.model;

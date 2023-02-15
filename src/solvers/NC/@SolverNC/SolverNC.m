@@ -36,6 +36,16 @@ classdef SolverNC < NetworkSolver
     end
     
     methods (Static)
+        function [allMethods] = listValidMethods()
+            % allMethods = LISTVALIDMETHODS()
+            % List valid methods for this solver
+            allMethods = {'default','exact','imci','ls',...
+                'le','mmint2','panacea','pana',...
+                'kt','deterministic','sampling',...
+                'propfair','comom','mom','cub','brute',...
+                'rd', 'nrp','nr.probit','nrl','nr.logit','gm'};
+        end
+        
         function featSupported = getFeatureSet()
             % FEATSUPPORTED = GETFEATURESET()
             

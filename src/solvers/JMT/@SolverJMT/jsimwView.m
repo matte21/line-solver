@@ -5,8 +5,7 @@ function jsimwView(self, options)
 % All rights reserved.
 
 if self.enableChecks && ~self.supports(self.model)
-    ME = MException('Line:FeatureNotSupportedBySolver', 'This model contains features not supported by the solver.');
-    throw(ME);
+    line_error(mfilename,'This model contains features not supported by the solver.');    
 end
 
 if nargin<2

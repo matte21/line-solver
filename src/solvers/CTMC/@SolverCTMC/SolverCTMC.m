@@ -56,6 +56,13 @@ classdef SolverCTMC < NetworkSolver
     end
            
     methods (Static)
+
+        function [allMethods] = listValidMethods()
+            % allMethods = LISTVALIDMETHODS()
+            % List valid methods for this solver
+            allMethods = {'default','gpu'};
+        end
+
         function featSupported = getFeatureSet()
             % FEATSUPPORTED = GETFEATURESET()
             

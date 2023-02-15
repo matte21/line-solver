@@ -16,7 +16,7 @@ end
 %% build one subnetwork for every task
 for t = 1:lqn.ntasks
     tidx = lqn.tshift + t;
-    if ~lqn.isref(tidx) | ~(isempty(find(self.lqn.iscaller(tidx,:), 1)) & isempty(find(self.lqn.iscaller(:,tidx), 1)))  %#ok<OR2,AND2> % ignore isolated tasks and ref tasks
+    if ~lqn.isref(tidx) & ~(isempty(find(self.lqn.iscaller(tidx,:), 1)) & isempty(find(self.lqn.iscaller(:,tidx), 1)))  %#ok<OR2,AND2> % ignore isolated tasks and ref tasks
         % obtain the activity graph of each task that calls some entry in t
         [calling_idx, called_entries] = find(lqn.iscaller(:, lqn.entriesof{tidx})); %#ok<ASGLU>
         callers = intersect(lqn.tshift+(1:lqn.ntasks), unique(calling_idx)');

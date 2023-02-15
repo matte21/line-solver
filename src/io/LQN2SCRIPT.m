@@ -42,7 +42,7 @@ for t=1:sn.ntasks
             case {'Erlang','HyperExp', 'Coxian', 'APH'}
                 fprintf(fid, '.setThinkTime(%s.fitMeanAndSCV(%g,%g))', sn.think{tidx}.name, sn.think{tidx}.getMean, sn.think{tidx}.getSCV);
             otherwise
-                line_error(filename,sprintf('LQN2SCRIPT does not support the %d distribution yet.',sn.think{tidx}.name));
+                line_error(mfilename,sprintf('LQN2SCRIPT does not support the %d distribution yet.',sn.think{tidx}.name));
         end
     end
     fprintf(fid,';\n');
@@ -94,7 +94,7 @@ for a=1:sn.nacts
         case {'Erlang','HyperExp','Coxian','APH'}
             fprintf(fid, 'A{%d} = Activity(model, ''%s'', %s.fitMeanAndSCV(%g,%g)).on(T{%d})%s%s%s;\n', a, sn.names{aidx},sn.hostdem{aidx}.name,sn.hostdem{aidx}.getMean,sn.hostdem{aidx}.getSCV, onTask, boundToStr, callStr, repliesToStr);
         otherwise
-            line_error(filename,sprintf('LQN2SCRIPT does not support the %d distribution yet.',sn.hostdem{aidx}.name));
+            line_error(mfilename,sprintf('LQN2SCRIPT does not support the %d distribution yet.',sn.hostdem{aidx}.name));
     end
 end
 fprintf(fid,'\n');
@@ -109,7 +109,7 @@ for h=1:sn.nhosts
             case {'Erlang','HyperExp','Coxian','APH'}
                 fprintf(fid, 'P{%d}.setThinkTime(%s.fitMeanAndSCV(%g,%g));\n', h, sn.think{h}.name, sn.think{h}.getMean, sn.think{h}.getSCV);
             otherwise
-                line_error(filename,sprintf('LQN2SCRIPT does not support the %d distribution yet.',sn.think{h}.name));
+                line_error(mfilename,sprintf('LQN2SCRIPT does not support the %d distribution yet.',sn.think{h}.name));
         end
     end
 end

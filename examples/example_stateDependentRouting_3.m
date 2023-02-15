@@ -23,7 +23,13 @@ model.addLinks([source, router;...
     queue2, sink]);
 router.setRouting(oclass, RoutingStrategy.RROBIN);
 
+solver = {};
 solver{1} = SolverJMT(model,'seed',23000);
-AvgTable{1} = solver{1}.getAvgNodeTable
+solver{2} = SolverCTMC(model,'cutoff',5);
 
-%SolverCTMC(model,'cutoff',5).getAvgNodeTable
+AvgTable = {};
+for s=1:length(solver)
+    fprintf(1,'SOLVER: %s\n',solver{s}.getName());
+    AvgTable{s} = solver{s}.getAvgNodeTable();
+    AvgTable{s}
+end

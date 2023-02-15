@@ -4,6 +4,7 @@ function [Pnir,logPnir] = getProbAggr(self, ist)
 if nargin<2 %~exist('ist','var')
     line_error(mfilename,'getProbAggr requires to pass a parameter the station of interest.');
 end
+sn = self.getStruct;
 if ist > sn.nstations
     line_error(mfilename,'Station number exceeds the number of stations in the model.');
 end
@@ -11,7 +12,6 @@ if isempty(self.result)
     self.run;
 end
 Q = self.result.Avg.Q;
-sn = self.getStruct;
 N = sn.njobs;
 if all(isfinite(N))
     switch self.options.method

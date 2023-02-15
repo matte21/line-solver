@@ -7,8 +7,7 @@ if nargin<2 %~exist('options','var')
 end
 
 if self.enableChecks && ~self.supports(self.model)
-    ME = MException('Line:FeatureNotSupportedBySolver', 'This model contains features not supported by the solver.');
-    throw(ME);
+    line_error(mfilename,'This model contains features not supported by the solver.');
 end
 
 Solver.resetRandomGeneratorSeed(options.seed);
@@ -21,7 +20,7 @@ switch options.method
         M = sn.nstations;
         R = sn.nclasses;
         T = getAvgTputHandles(self);
-        if ~isempty(T)
+        if ~isempty(T) && ~isempty(TN)
             AN = zeros(M,R);
             for i=1:M
                 for j=1:M
@@ -32,15 +31,18 @@ switch options.method
                     end
                 end
             end
+        else
+            AN = [];
         end
         self.setAvgResults(QN,UN,RN,TN,AN,[],CN,XN,runtime);
     case {'tauleap', 'jline.tauleap'}
         [XN,UN,QN,RN,TN,CN, tranSysState, tranSync] = solver_ssa_analyzer_taussa(self.model, options, 1, 0.0);
         runtime = toc(T0);
+        sn = self.getStruct;
         M = sn.nstations;
         R = sn.nclasses;
         T = getAvgTputHandles(self);
-        if ~isempty(T)
+        if ~isempty(T) && ~isempty(TN)
             AN = zeros(M,R);
             for i=1:M
                 for j=1:M
@@ -51,6 +53,8 @@ switch options.method
                     end
                 end
             end
+        else
+            AN = [];
         end
         self.setAvgResults(QN,UN,RN,TN,AN,[],CN,XN,runtime);
     otherwise
@@ -73,7 +77,7 @@ switch options.method
         M = sn.nstations;
         R = sn.nclasses;
         T = getAvgTputHandles(self);
-        if ~isempty(T)
+        if ~isempty(T) && ~isempty(TN)
             AN = zeros(M,R);
             for i=1:M
                 for j=1:M
@@ -84,6 +88,8 @@ switch options.method
                     end
                 end
             end
+        else
+            AN = [];
         end
         self.setAvgResults(QN,UN,RN,TN,AN,[],CN,XN,runtime);
         self.result.space = sn.space;

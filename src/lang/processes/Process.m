@@ -14,7 +14,7 @@ classdef Process < Copyable
             % X = SAMPLE()
             
             % Sample a value from the inter-arrival time distribution
-            line_error(mfilename,'Line:AbstractMethodCall','An abstract method was called. The function needs to be overridden by a subclass.');
+            line_error(mfilename,'An abstract method was called. The function needs to be overridden by a subclass.');
         end        
     end
     

@@ -85,20 +85,15 @@ for it=1:options.iter_max
     [visits, nodevisits, sn] = snRefreshVisits(sn, sn.chains, sn.rt, sn.rtnodes);
     sn.visits = visits;
 
-    switch options.method
-        case {'aba.upper', 'aba.lower', 'bjb.upper', 'bjb.lower', 'pb.upper', 'pb.lower', 'gb.upper', 'gb.lower', 'sb.upper', 'sb.lower'}
-            [QN,UN,RN,TN,CN,XN,lG,runtime] = solver_mva_bound_analyzer(sn, options);
-        otherwise
-            if ~isempty(sn.lldscaling) || ~isempty(sn.cdscaling)
-                [QN,UN,RN,TN,CN,XN,lG,runtime] = solver_ncld_analyzer(sn, options);
-            else
-                [QN,UN,RN,TN,CN,XN,lG,runtime] = solver_nc_analyzer(sn, options);
-            end
+    if ~isempty(sn.lldscaling) || ~isempty(sn.cdscaling)
+        [QN,UN,RN,TN,CN,XN,lG,runtime] = solver_ncld_analyzer(sn, options);
+    else
+        [QN,UN,RN,TN,CN,XN,lG,runtime] = solver_nc_analyzer(sn, options);
     end
 
     nodevisits = cellsum(nodevisits);
     for ind=caches
-        for r=inputClass            
+        for r=inputClass
             c = find(sn.chains(:,r));
             inchain = find(sn.chains(c,:));
             if sn.refclass(c)>0

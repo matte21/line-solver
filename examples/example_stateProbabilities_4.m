@@ -76,7 +76,7 @@ Pr_ctmc = solver.getProbSysAggr()
 
 toc
 tic;
-solver = SolverJMT(model,'seed',23000);
+solver = SolverJMT(model,'seed',23000,'samples',1e5);
 Pr_jmt = solver.getProbSysAggr()
 
 toc

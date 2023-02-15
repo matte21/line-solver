@@ -53,16 +53,14 @@ wset = 1:length(InfGen);
 % for caches we keep the immediate transitions to give hit/miss rates
 [probSysState, ~, nConnComp, connComp] = ctmc_solve(InfGen, options);
 
-if any(isnan(probSysState))
-    if nConnComp > 1
-        % the matrix was reducible
-        initState = matchrow(StateSpace, cell2mat(sn.state'));
-        % determine the weakly connected component associated to the initial state
-        wset = find(connComp == connComp(initState));
-        probSysState = ctmc_solve(InfGen(wset, wset), options);
-        InfGen = InfGen(wset, wset);
-        StateSpace = StateSpace(wset,:);
-    end
+if nConnComp > 1
+    % the matrix was reducible
+    initState = matchrow(StateSpace, cell2mat(sn.state'));
+    % determine the weakly connected component associated to the initial state
+    wset = find(connComp == connComp(initState));
+    probSysState = ctmc_solve(InfGen(wset, wset), options);
+    InfGen = InfGen(wset, wset);
+    StateSpace = StateSpace(wset,:);
 end
 
 probSysState(probSysState<GlobalConstants.Zero)=0;
@@ -91,53 +89,78 @@ end
 
 for i=1:M
     isf = sn.stationToStateful(i);
+    ind = sn.stationToNode(i);
     for k=1:K
         TN(i,k) = probSysState*depRates(wset,isf,k);
         QN(i,k) = probSysState*StateSpaceAggr(wset,(i-1)*K+k);
     end
-    switch schedid(i)
-        case SchedStrategy.ID_INF
-            for k=1:K
-                UN(i,k) = QN(i,k);
-            end
-        case {SchedStrategy.ID_PS, SchedStrategy.ID_DPS, SchedStrategy.ID_GPS}
-            if isempty(sn.lldscaling) && isempty(sn.cdscaling)
+    if sn.nodetype(ind) ~= NodeType.Source
+        switch schedid(i)
+            case SchedStrategy.ID_INF
                 for k=1:K
-                    if ~isempty(PH{i}{k})
-                        UN(i,k) = probSysState*arvRates(wset,isf,k)*map_mean(PH{i}{k})/S(i);
-                    end
+                    UN(i,k) = QN(i,k);
                 end
-            else % lld/cd cases
-                ind = sn.stationToNode(i);
-                UN(i,1:K) = 0;
-                for st = wset
-                    [ni,nir] = State.toMarginal(sn, ind, StateSpace(st,(istSpaceShift(i)+1):(istSpaceShift(i)+size(sn.space{i},2))));
-                    if ni>0                        
-                        for k=1:K
-                            UN(i,k) = UN(i,k) + probSysState(st)*nir(k)*sn.schedparam(i,k)/(nir*sn.schedparam(i,:)');
+            case {SchedStrategy.ID_PS, SchedStrategy.ID_DPS, SchedStrategy.ID_GPS}
+                if isempty(sn.lldscaling) && isempty(sn.cdscaling)
+                    for k=1:K
+                        if ~isempty(PH{i}{k})
+                            % There are cases where due to remove of
+                            % immediate transitions or due to cutoff the
+                            % utilization estimator based on arrivals or
+                            % departures can be under-estimated. E.g.:
+                            % UNarv_ik doesn't work well with example_stateDependentRouting_3
+                            % UNdep_ik doesn't work well with test_OQN_JMT_6
+                            % Therefore, we take the maximum of the two
+                            % Note: the two estimators are normally
+                            % identical.
+                            UNarv_ik = probSysState*arvRates(wset,isf,k)*map_mean(PH{i}{k})/S(i);
+                            UNdep_ik = TN(i,k)*map_mean(PH{i}{k})/S(i); % this is valid because CS in LINE is in a separate node
+                            UN(i,k) = max(UNarv_ik,UNdep_ik);
+                        end
+                    end
+                else % lld/cd cases
+                    ind = sn.stationToNode(i);
+                    UN(i,1:K) = 0;
+                    for st = wset
+                        [ni,nir] = State.toMarginal(sn, ind, StateSpace(st,(istSpaceShift(i)+1):(istSpaceShift(i)+size(sn.space{i},2))));
+                        if ni>0
+                            for k=1:K
+                                UN(i,k) = UN(i,k) + probSysState(st)*nir(k)*sn.schedparam(i,k)/(nir*sn.schedparam(i,:)');
+                            end
                         end
                     end
                 end
-            end
-        otherwise
-            if isempty(sn.lldscaling) && isempty(sn.cdscaling)
-                for k=1:K
-                    if ~isempty(PH{i}{k})
-                        UN(i,k) = probSysState*arvRates(wset,isf,k)*map_mean(PH{i}{k})/S(i);
+            otherwise
+                if isempty(sn.lldscaling) && isempty(sn.cdscaling)
+                    for k=1:K
+                        if ~isempty(PH{i}{k})
+                            % There are cases where due to remove of
+                            % immediate transitions or due to cutoff the
+                            % utilization estimator based on arrivals or
+                            % departures can be under-estimated. E.g.:
+                            % UNarv_ik doesn't work well with example_stateDependentRouting_3
+                            % UNdep_ik doesn't work well with test_OQN_JMT_6
+                            % Therefore, we take the maximum of the two
+                            % Note: the two estimators are normally
+                            % identical.                            
+                            UNarv_ik = probSysState*arvRates(wset,isf,k)*map_mean(PH{i}{k})/S(i);
+                            UNdep_ik = TN(i,k)*map_mean(PH{i}{k})/S(i); % this is valid because CS in LINE is in a separate node
+                            UN(i,k) = max(UNarv_ik,UNdep_ik);
+                        end
                     end
-                end
-            else % lld/cd cases
-                ind = sn.stationToNode(i);
-                UN(i,1:K) = 0;
-                for st = wset
-                    [ni,~,sir] = State.toMarginal(sn, ind, StateSpace(st,(istSpaceShift(i)+1):(istSpaceShift(i)+size(sn.space{i},2))));
-                    if ni>0
-                        for k=1:K
-                            UN(i,k) = UN(i,k) + probSysState(st)*sir(k)/S(i);
+                else % lld/cd cases
+                    ind = sn.stationToNode(i);
+                    UN(i,1:K) = 0;
+                    for st = wset
+                        [ni,~,sir] = State.toMarginal(sn, ind, StateSpace(st,(istSpaceShift(i)+1):(istSpaceShift(i)+size(sn.space{i},2))));
+                        if ni>0
+                            for k=1:K
+                                UN(i,k) = UN(i,k) + probSysState(st)*sir(k)/S(i);
+                            end
                         end
                     end
                 end
-            end
+        end
     end
 end
 
@@ -162,7 +185,7 @@ TN(isnan(TN))=0;
 runtime = toc(Tstart);
 
 % now update the routing probabilities in nodes with state-dependent routing
-TNcache = [];
+TNcache = zeros(sn.nstateful,K);
 for k=1:K
     for isf=1:sn.nstateful
         if sncopy.nodetype(isf) == NodeType.Cache

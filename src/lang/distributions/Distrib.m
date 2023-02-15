@@ -21,7 +21,7 @@ classdef Distrib < Copyable
         function X = sample(self,n)
             % X = SAMPLE(n)
             % Get n samples from the distribution
-            line_error(mfilename,'Line:AbstractMethodCall','An abstract method was called. The function needs to be overridden by a subclass.');
+            line_error(mfilename,'An abstract method was called. The function needs to be overridden by a subclass.');
         end
         
         function RATE = getRate(self)
@@ -33,13 +33,13 @@ classdef Distrib < Copyable
         function MEAN = getMean(self)
             % MEAN = GETMEAN()
             % Get distribution mean
-            line_error(mfilename,'Line:AbstractMethodCall','An abstract method was called. The function needs to be overridden by a subclass.');
+            line_error(mfilename,'An abstract method was called. The function needs to be overridden by a subclass.');
         end
         
         function SCV = getSCV(self)
             % SCV = GETSCV()
             % Get distribution squared coefficient of variation (SCV = variance / mean^2)
-            line_error(mfilename,'Line:AbstractMethodCall','An abstract method was called. The function needs to be overridden by a subclass.');
+            line_error(mfilename,'An abstract method was called. The function needs to be overridden by a subclass.');
         end
         
         function VAR = getVariance(self)
@@ -51,19 +51,19 @@ classdef Distrib < Copyable
         function SKEW = getSkewness(self)
             % SKEW = GETSKEWNESS()
             % Get distribution skewness
-            line_error(mfilename,'Line:AbstractMethodCall','An abstract method was called. The function needs to be overridden by a subclass.');
+            line_error(mfilename,'An abstract method was called. The function needs to be overridden by a subclass.');
         end
         
         function Ft = evalCDF(self,t)
             % FT = EVALCDF(SELF,T)
             % Evaluate the cumulative distribution function at t
-            line_error(mfilename,'Line:AbstractMethodCall','An abstract method was called. The function needs to be overridden by a subclass.');
+            line_error(mfilename,'An abstract method was called. The function needs to be overridden by a subclass.');
         end
         
         function L = evalLST(self, s)
             % L = EVALLAPLACETRANSFORM(S)
             % Evaluate the Laplace transform of the distribution function at t
-            line_error(mfilename,'Line:AbstractMethodCall','An abstract method was called. The function needs to be overridden by a subclass.');
+            line_error(mfilename,'An abstract method was called. The function needs to be overridden by a subclass.');
             
         end
     end

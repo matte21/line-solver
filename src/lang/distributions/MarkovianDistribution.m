@@ -192,7 +192,7 @@ classdef MarkovianDistribution < ContinuousDistrib
             % UPDATE(SELF,VARARGIN)
 
             % Update parameters to match given moments
-            line_error(mfilename,'Line:AbstractMethodCall','An abstract method was called. The function needs to be overridden by a subclass.');
+            line_error(mfilename,'An abstract method was called. The function needs to be overridden by a subclass.');
 
         end
 
@@ -274,7 +274,7 @@ classdef MarkovianDistribution < ContinuousDistrib
                     self.representation = PH;
                 catch
                     % Return the renewal process associated to the distribution
-                    line_error(mfilename,'Line:AbstractMethodCall','An abstract method was called. The function needs to be overridden by a subclass.');
+                    line_error(mfilename,'An abstract method was called. The function needs to be overridden by a subclass.');
                 end
             end
         end

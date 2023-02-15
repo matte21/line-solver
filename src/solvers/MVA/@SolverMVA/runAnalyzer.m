@@ -11,8 +11,7 @@ if nargin<2
 end
 
 if self.enableChecks && ~self.supports(self.model)
-    ME = MException('Line:FeatureNotSupportedBySolver', 'This model contains features not supported by the solver.');
-    throw(ME);
+    line_error(mfilename,'This model contains features not supported by the solver.');
 end
 
 switch options.method
@@ -35,7 +34,7 @@ switch options.method
         M = sn.nstations;
         R = sn.nclasses;
         T = getAvgTputHandles(self);
-        if ~isempty(T)
+        if ~isempty(T) && ~isempty(TN)
             AN = zeros(M,R);
             for i=1:M
                 for j=1:M
@@ -46,6 +45,8 @@ switch options.method
                     end
                 end
             end
+        else
+            AN = [];
         end
         self.setAvgResults(QN,UN,RN,TN,AN,[],CN,XN,runtime,'jline.amva',lastiter);
         self.result.Prob.logNormConstAggr = lG;
@@ -215,7 +216,7 @@ switch options.method
         M = sn.nstations;
         R = sn.nclasses;
         T = getAvgTputHandles(self);
-        if ~isempty(T)
+        if ~isempty(T) && ~isempty(TN)
             AN = zeros(M,R);
             for i=1:M
                 for j=1:M
@@ -226,6 +227,8 @@ switch options.method
                     end
                 end
             end
+        else
+            AN = [];
         end
         self.setAvgResults(QN,UN,RN,TN,AN,[],CN,XN,runtime,method,iter);
         self.result.Prob.logNormConstAggr = lG;

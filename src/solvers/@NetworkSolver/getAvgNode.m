@@ -45,8 +45,9 @@ for ist=1:M
     QNn(ind,:) = QN(ist,:);
     UNn(ind,:) = UN(ist,:);
     RNn(ind,:) = RN(ist,:);
+    WNn(ind,:) = WN(ist,:);
     %TNn(ind,:) = TN(ist,:); % this is built later from ANn
-    %ANn(ind,:) = TN(ist,:);
+    ANn(ind,:) = AN(ist,:);
 end
 
 %if any(sn.isstatedep(:,3)) || any(sn.nodetype == NodeType.Cache)

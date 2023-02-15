@@ -78,7 +78,7 @@ classdef CTMC < Process
 
         function plot(self)
             if issym(self.infGen)
-                line_error('CTMC.plot does not support symbolic CTMCs.');
+                line_error(mfilename,'CTMC.plot does not support symbolic CTMCs.');
             end
             G = digraph(self.infGen-diag(diag(self.infGen)));
             nodeLbl = {};

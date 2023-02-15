@@ -280,6 +280,12 @@ classdef SolverLN < LayeredNetworkSolver & EnsembleSolver
     end
 
     methods (Static)
+        function [allMethods] = listValidMethods()
+            % allMethods = LISTVALIDMETHODS()
+            % List valid methods for this solver
+            allMethods = {'default','moment3','java','jline'};
+        end
+        
         function [bool, featSupported] = supports(model)
             % [BOOL, FEATSUPPORTED] = SUPPORTS(MODEL)
             ensemble = model.getEnsemble;

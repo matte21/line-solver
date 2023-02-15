@@ -57,12 +57,12 @@ elseif ~keepDisabled
                 Uval(end+1) = UN(i,k);
                 Rval(end+1) = RN(i,k);
                 if RN(i,k)<GlobalConstants.FineTol
-                    Residval(end+1) = RN(i,k);
+                    Residval(end+1) = WN(i,k);
                 else
                     if sn.refclass(c)>0
-                        Residval(end+1) = RN(i,k)*V(i,k)/sum(V(sn.refstat(k),sn.refclass(c)));
+                        Residval(end+1) = WN(i,k)/sum(V(sn.refstat(k),sn.refclass(c)));
                     else
-                        Residval(end+1) = RN(i,k)*V(i,k)/sum(V(sn.refstat(k),sn.chains(c,:)));
+                        Residval(end+1) = WN(i,k)/sum(V(sn.refstat(k),sn.chains(c,:)));
                     end
                 end
                 Tval(end+1) = TN(i,k);
@@ -118,9 +118,9 @@ else
                 Residval((i-1)*K+k) = RN(i,k);
             else
                 if sn.refclass(c)>0
-                    Residval((i-1)*K+k)  = RN(i,k)*V(i,k)/sum(V(sn.refstat(k),sn.refclass(c)));
+                    Residval((i-1)*K+k)  = WN(i,k)/sum(V(sn.refstat(k),sn.refclass(c)));
                 else
-                    Residval((i-1)*K+k)  = RN(i,k)*V(i,k)/sum(V(sn.refstat(k),sn.chains(c,:)));
+                    Residval((i-1)*K+k)  = WN(i,k)/sum(V(sn.refstat(k),sn.chains(c,:)));
                 end
             end
 

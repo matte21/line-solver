@@ -29,55 +29,55 @@ classdef EnsembleSolver < Solver
         function bool = supports(self, model) % true if model is supported by the solver
             % BOOL = SUPPORTS(MODEL) % TRUE IF MODEL IS SUPPORTED BY THE SOLVER
             
-            line_error(mfilename,'Line:AbstractMethodCall','An abstract method was called. The function needs to be overridden by a subclass.');
+            line_error(mfilename,'An abstract method was called. The function needs to be overridden by a subclass.');
             
         end
         
         function [QN,UN,RT,TT] = getEnsembleAvg(self)
             % [QN,UN,RT,TT] = GETENSEMBLEAVG()
             
-            line_error(mfilename,'Line:AbstractMethodCall','An abstract method was called. The function needs to be overridden by a subclass.');
+            line_error(mfilename,'An abstract method was called. The function needs to be overridden by a subclass.');
             
         end
         
         function init(self) % operations before starting to iterate
             % INIT() % OPERATIONS BEFORE STARTING TO ITERATE
             
-            line_error(mfilename,'Line:AbstractMethodCall','An abstract method was called. The function needs to be overridden by a subclass.');
+            line_error(mfilename,'An abstract method was called. The function needs to be overridden by a subclass.');
             
         end
         
         function pre(self, it) % operations before an iteration
             % PRE(IT) % OPERATIONS BEFORE AN ITERATION
             
-            line_error(mfilename,'Line:AbstractMethodCall','An abstract method was called. The function needs to be overridden by a subclass.');
+            line_error(mfilename,'An abstract method was called. The function needs to be overridden by a subclass.');
             
         end
         
         function [results, runtime] = analyze(self, e) % operations within an iteration
             % [RESULTS, RUNTIME] = ANALYZE(E) % OPERATIONS WITHIN AN ITERATION
             
-            line_error(mfilename,'Line:AbstractMethodCall','An abstract method was called. The function needs to be overridden by a subclass.');
+            line_error(mfilename,'An abstract method was called. The function needs to be overridden by a subclass.');
             
         end
         
         function post(self, it) % operations after an iteration
             % POST(IT) % OPERATIONS AFTER AN ITERATION
             
-            line_error(mfilename,'Line:AbstractMethodCall','An abstract method was called. The function needs to be overridden by a subclass.');
+            line_error(mfilename,'An abstract method was called. The function needs to be overridden by a subclass.');
             
         end
         
         function finish(self) % operations after interations are completed
             % FINISH() % OPERATIONS AFTER INTERATIONS ARE COMPLETED
-            line_error(mfilename,'Line:AbstractMethodCall','An abstract method was called. The function needs to be overridden by a subclass.');
+            line_error(mfilename,'An abstract method was called. The function needs to be overridden by a subclass.');
             
         end
         
         function bool = converged(self, it) % convergence test at iteration it
             % BOOL = CONVERGED(IT) % CONVERGENCE TEST AT ITERATION IT
             
-            line_error(mfilename,'Line:AbstractMethodCall','An abstract method was called. The function needs to be overridden by a subclass.');
+            line_error(mfilename,'An abstract method was called. The function needs to be overridden by a subclass.');
             
         end
     end

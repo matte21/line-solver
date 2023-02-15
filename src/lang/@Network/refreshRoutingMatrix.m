@@ -177,7 +177,7 @@ self.sn = sn;
                 % ----- new added contents ----- %
                 if self.nodes{ind}.output.outputStrategy{1,r}{5}==0         % state_size=0, use tabular value fn
                     if r~=1
-                        line_error("not support multiple jobs!");
+                        line_error(mfilename,'no support for multiple classes');
                     end
                     value_function = self.nodes{ind}.output.outputStrategy{1,r}{3};
                     nodes_need_action = self.nodes{ind}.output.outputStrategy{1,r}{4};
@@ -237,7 +237,7 @@ self.sn = sn;
                 
                 elseif self.nodes{ind}.output.outputStrategy{1,r}{5}>0      % state_size>0, use fn approx for value fn 
                     if r~=1
-                        line_error("not support multiple jobs!");
+                        line_error(mfilename,'no support for multiple classes');
                     end
                     coeff = self.nodes{ind}.output.outputStrategy{1,r}{3};
                     nodes_need_action = self.nodes{ind}.output.outputStrategy{1,r}{4};

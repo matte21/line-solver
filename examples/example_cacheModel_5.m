@@ -41,6 +41,7 @@ cacheNode.setRouting(hitClass,RoutingStrategy.RROBIN);
 catch ME
     line_printf('The example first illustrates and invalid routing setup for a cache that triggers the following exception:');
     line_printf('%s',ME.message);
+    fprintf(GlobalConstants.StdOut,' \n');
     line_printf('We now illustrate the correct setup of the same model.');
 end
 % cacheNode.setRouting(missClass,RoutingStrategy.RROBIN);

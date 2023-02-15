@@ -95,17 +95,15 @@ classdef NetworkGenerator < handle
         end
         % Can be any function handle that takes an integer and returns a
         % digraph object
-        function set.topologyFcn(obj, fcn)
-            err = MException('NG:topologyFcn', ...
-                'topologyFcn should take a positive integer and return a digraph');
+        function set.topologyFcn(obj, fcn)            
             try
                 graph = fcn(2);
             catch
-                throw(err);
+                line_error(mfilename,'topologyFcn should take a positive integer and return a digraph');
             end
             
             if ~isa(graph, 'digraph') || numnodes(graph) ~= 2
-                throw(err);
+                line_error(mfilename,'topologyFcn should take a positive integer and return a digraph');
             end
             
             obj.topologyFcn = fcn;

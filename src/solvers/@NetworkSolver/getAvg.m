@@ -57,30 +57,30 @@ else
 end
 
 if ~self.hasAvgResults || ~self.options.cache
-    try
+%    try
         runAnalyzer(self);
         % the next line is required because getAvg can alter the chain
         % structure in the presence of caches so we need to reload sn
-        sn = self.model.getStruct;
-    catch ME
-        switch ME.identifier
-            case {'Line:FeatureNotSupportedBySolver', 'Line:ModelTooLargeToSolve', 'Line:UnspecifiedOption'}
-                if self.options.verbose
-                    line_printf('\n%s',ME.message);
-                end
-                QNclass=[];
-                UNclass=[];
-                RNclass=[];
-                TNclass=[];
-                ANclass=[];
-                WNclass=[];
-                return
-            otherwise
-                rethrow(ME)
-        end
-    end
+        sn = self.model.getStruct;        
+%     catch ME
+%         switch ME.identifier
+%             case {'Line:FeatureNotSupportedBySolver', 'Line:ModelTooLargeToSolve', 'Line:UnspecifiedOption'}
+%                 if self.options.verbose
+%                     line_printf('\n%s',ME.message);
+%                 end
+%                 QNclass=[];
+%                 UNclass=[];
+%                 RNclass=[];
+%                 TNclass=[];
+%                 ANclass=[];
+%                 WNclass=[];
+%                 return
+%             otherwise
+%                 rethrow(ME)
+%         end
+%     end
     if ~self.hasAvgResults
-        line_error(mfilename,'Line is unable to return results for this model.');
+        line_error(mfilename,'Unable to return results for this model.');
     end
 end % else return cached value
 

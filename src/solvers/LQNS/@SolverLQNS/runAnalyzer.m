@@ -38,7 +38,7 @@ if isunix
     %                         system(['lqns ',verbose,' ',multiserver_praqma,' --iteration-limit=',num2str(options.iter_max),' -Pstop-on-message-loss=false -x ',filename]);
     %                     case {'srvn'}
     %                         system(['lqns ',verbose,' ',multiserver_praqma,' --iteration-limit=',num2str(options.iter_max),' -Playering=srvn -Pstop-on-message-loss=false -x ',filename]);
-    %                     case {'exact'}
+    %                     case {'exactmva'}
     %                         system(['lqns ',verbose,' ',multiserver_praqma,' --iteration-limit=',num2str(options.iter_max),' -Pmva=exact -Pstop-on-message-loss=false -x ',filename]);
     %                     case {'srvnexact'}
     %                         system(['lqns ',verbose,' ',multiserver_praqma,' --iteration-limit=',num2str(options.iter_max),' -Playering=srvn -Pmva=exact -Pstop-on-message-loss=false -x ',filename]);
@@ -57,9 +57,9 @@ if isunix
                 system(['lqns ',verbose,' ',multiserver_praqma,' -Pstop-on-message-loss=false -x ',filename]);
             case {'srvn'}
                 system(['lqns ',verbose,' ',multiserver_praqma,' -Playering=srvn -Pstop-on-message-loss=false -x ',filename]);
-            case {'exact'}
+            case {'exactmva'}
                 system(['lqns ',verbose,' ',multiserver_praqma,' -Pmva=exact -Pstop-on-message-loss=false -x ',filename]);
-            case {'srvnexact'}
+            case {'srvn.exactmva'}
                 system(['lqns ',verbose,' ',multiserver_praqma,' -Playering=srvn -Pmva=exact -Pstop-on-message-loss=false -x ',filename]);
             case {'sim','lqsim'}
                 system(['lqsim ',verbose,' ',multiserver_praqma,' -A ',num2str(options.samples),',3  -Pstop-on-message-loss=false -x ',filename]);
@@ -74,9 +74,9 @@ if isunix
                 system(['lqns ',verbose,' ',multiserver_praqma,' -Pstop-on-message-loss=false -x ',filename,' 2>&1']);
             case {'srvn'}
                 system(['lqns ',verbose,' ',multiserver_praqma,' -Playering=srvn -Pstop-on-message-loss=false -x ',filename,' 2>&1']);
-            case {'exact'}
+            case {'exactmva'}
                 system(['lqns ',verbose,' ',multiserver_praqma,' -Pmva=exact -Pstop-on-message-loss=false -x ',filename,' 2>&1']);
-            case {'srvnexact'}
+            case {'srvn.exactmva'}
                 system(['lqns ',verbose,' ',multiserver_praqma,' -Playering=srvn -Pmva=exact -Pstop-on-message-loss=false -x ',filename,' 2>&1']);
             case {'sim','lqsim'}
                 system(['lqsim ',verbose,' ',multiserver_praqma,' -A ',num2str(options.samples),',3  -Pstop-on-message-loss=false -x ',filename,' 2>&1']);
@@ -92,7 +92,7 @@ else
 %             system(['lqns ',verbose,' ',multiserver_praqma,' -i ',num2str(options.iter_max),' -Pstop-on-message-loss=false -x ',filename]);
 %         case {'srvn'}
 %             system(['lqns ',verbose,' ',multiserver_praqma,' -i ',num2str(options.iter_max),' -Playering=srvn -Pstop-on-message-loss=false -x ',filename]);
-%         case {'exact'}
+%         case {'exactmva'}
 %             system(['lqns ',verbose,' ',multiserver_praqma,' -i ',num2str(options.iter_max),' -Pmva=exact -Pstop-on-message-loss=false -x ',filename]);
 %         case {'srvnexact'}
 %             system(['lqns ',verbose,' ',multiserver_praqma,' -i ',num2str(options.iter_max),' -Playering=srvn -Pmva=exact -Pstop-on-message-loss=false -x ',filename]);
@@ -106,9 +106,9 @@ else
             system(['lqns ',verbose,' ',multiserver_praqma,' -Pstop-on-message-loss=false -x ',filename]);
         case {'srvn'}
             system(['lqns ',verbose,' ',multiserver_praqma,' -Playering=srvn -Pstop-on-message-loss=false -x ',filename]);
-        case {'exact'}
+        case {'exactmva'}
             system(['lqns ',verbose,' ',multiserver_praqma,' -Pmva=exact -Pstop-on-message-loss=false -x ',filename]);
-        case {'srvnexact'}
+        case {'srvn.exactmva'}
             system(['lqns ',verbose,' ',multiserver_praqma,' -Playering=srvn -Pmva=exact -Pstop-on-message-loss=false -x ',filename]);
         case {'sim','lqsim'}
             system(['lqsim ',verbose,' ',multiserver_praqma,' -A ',num2str(options.samples),',3  -Pstop-on-message-loss=false -x ',filename]);

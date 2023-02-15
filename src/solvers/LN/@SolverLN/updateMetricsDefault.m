@@ -12,8 +12,19 @@ for r=1:size(self.servt_classes_updmap,1)
 
     % store the residence times and tput at this layer to become
     % the servt / tputs of aidx in another layer, as needed
-    self.servt(aidx) = self.results{end,self.idxhash(idx)}.WN(nodeidx,classidx);
-    self.tput(aidx) = self.results{end,self.idxhash(idx)}.TN(nodeidx,classidx);
+    iter_min = min(30,ceil(self.options.iter_max/4));
+    wnd_size = (it-self.averagingstart+1);
+    if ~isempty(self.averagingstart) && it>=iter_min % assume steady-state
+        self.servt(aidx) = 0;
+        self.tput(aidx) = 0;
+        for w=1:(wnd_size-1)
+            self.servt(aidx) = self.servt(aidx) + self.results{end-w,self.idxhash(idx)}.WN(nodeidx,classidx)/wnd_size;
+            self.tput(aidx) = self.tput(aidx) + self.results{end-w,self.idxhash(idx)}.TN(nodeidx,classidx)/wnd_size;
+        end
+    else
+        self.servt(aidx) = self.results{end,self.idxhash(idx)}.WN(nodeidx,classidx);
+        self.tput(aidx) = self.results{end,self.idxhash(idx)}.TN(nodeidx,classidx);
+    end
     self.servtproc{aidx} = Exp.fitMean(self.servt(aidx));
     self.tputproc{aidx} = Exp.fitRate(self.tput(aidx));
 end
@@ -104,7 +115,7 @@ for hidx = 1:lqn.nhosts
         caller_tput(caller_idx-lqn.tshift)  = caller_tput(caller_idx-lqn.tshift) + sum(self.results{end,self.idxhash(hidx)}.TN(self.ensemble{self.idxhash(hidx)}.attribute.clientIdx,caller_idxclass));
     end
     host_tput = sum(caller_tput);
-    self.ptaskcallers(hidx,(lqn.tshift+1):(lqn.tshift+lqn.ntasks))=caller_tput/host_tput;
+    self.ptaskcallers(hidx,(lqn.tshift+1):(lqn.tshift+lqn.ntasks)) = caller_tput/host_tput;
 end
 
 % impute call probability using a DTMC random walk on the taskcaller graph

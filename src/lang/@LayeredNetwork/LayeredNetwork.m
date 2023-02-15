@@ -62,8 +62,8 @@ classdef LayeredNetwork < Model & Ensemble
         end
 
 
-        function G = summary(self)
-            % G = SUMMARY()
+        function sn = summary(self)
+            % sn = SUMMARY()
 
             sn = self.getStruct;
         end

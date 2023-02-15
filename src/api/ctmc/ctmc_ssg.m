@@ -30,11 +30,11 @@ for a=1:A
                 if sn.isstation(ind)
                     ist = sn.nodeToStation(ind);
                     [~,nir] = State.toMarginal(sn,ind,stateCell{isf});
+                    
                     stateSpaceAggr(s,((ist-1)*nclasses+1):ist*nclasses) = nir;
                 end
             end
         end
     end
 end
-
 end

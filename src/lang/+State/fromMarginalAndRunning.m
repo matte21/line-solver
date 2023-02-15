@@ -98,7 +98,7 @@ switch sn.nodetype(ind)
                 sizeEstimator = round(sizeEstimator/log(10));
                 if sizeEstimator > 2
                     if ~isfield(options,'force') || options.force == false
-                        line_warning(mfilename,sprintf('State space size is very large: 1e%d states. Stopping execution. Set options.force=true to bypass this control.\n',round(sizeEstimator/log(10))));
+                        line_warning(mfilename,sprintf('State space size is very large: 1e%d states. Stopping execution. Set options.force=true to bypass this control.',round(sizeEstimator/log(10))));
                     end
                 end
                 if sum(n) == 0

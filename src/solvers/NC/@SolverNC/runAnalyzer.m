@@ -15,8 +15,7 @@ if strcmp(options.method,'exact') && ~self.model.hasProductFormSolution
 end
 
 if self.enableChecks && ~self.supports(self.model)
-    ME = MException('Line:FeatureNotSupportedBySolver', 'This model contains features not supported by the solver.');
-    throw(ME);
+    line_error(mfilename,'This model contains features not supported by the solver.');
 end
 
 Solver.resetRandomGeneratorSeed(options.seed);
@@ -79,7 +78,7 @@ end
 M = sn.nstations;
 R = sn.nclasses;
 T = getAvgTputHandles(self);
-if ~isempty(T)
+if ~isempty(T) && ~isempty(TN)
     AN = zeros(M,R);
     for i=1:M
         for j=1:M
@@ -90,6 +89,8 @@ if ~isempty(T)
             end
         end
     end
+else
+    AN = [];
 end
 self.setAvgResults(QN,UN,RN,TN,AN,[],CN,XN,runtime,options.method,iter);
 self.result.Prob.logNormConstAggr = real(lG);

@@ -44,7 +44,7 @@ lnoptions.seed = 2300;
 options = SolverNC.defaultOptions;
 options.verbose = 0;
 solver{2} = SolverLN(model, @(model) SolverNC(model, options), lnoptions);
-AvgTable{2} = solver{1}.getAvgTable
+AvgTable{2} = solver{2}.getAvgTable
 AvgTable{2}
 
 % this method adapts with the features of each layer

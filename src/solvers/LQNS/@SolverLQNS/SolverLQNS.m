@@ -27,6 +27,12 @@ classdef SolverLQNS < LayeredNetworkSolver
     
     methods (Static)
         
+        function [allMethods] = listValidMethods()
+            % allMethods = LISTVALIDMETHODS()
+            % List valid methods for this solver
+            allMethods = {'default','lqns','srvn','exactmva','srvn.exactmva','sim','lqsim','lqnsdefault'};
+        end
+
         function bool = isAvailable()
             % BOOL = ISAVAILABLE()
             

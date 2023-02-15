@@ -25,6 +25,12 @@ classdef SolverQNS < NetworkSolver
     end
 
     methods (Static)
+       function [allMethods] = listValidMethods()
+            % allMethods = LISTVALIDMETHODS()
+            % List valid methods for this solver
+            allMethods = {'default','conway','rolia','zhou','suri','reiser','schmidt'};
+        end
+
         function featSupported = getFeatureSet()
             % FEATSUPPORTED = GETFEATURESET()
 

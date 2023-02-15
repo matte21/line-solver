@@ -10,19 +10,18 @@ end
 
 if self.enableChecks && ~self.supports(self.model)
     line_warning(mfilename,'This model contains features not supported by the solver.');
-    ME = MException('Line:FeatureNotSupportedBySolver', 'This model contains features not supported by the solver.');
-    throw(ME);
+    line_error(mfilename,'This model contains features not supported by the solver.');
 end
 
 Solver.resetRandomGeneratorSeed(options.seed);
 
-sn = getStruct(self); 
+sn = getStruct(self);
 
 [QN,UN,RN,TN,CN,XN] = solver_mam_analyzer(sn, options);
 M = sn.nstations;
 R = sn.nclasses;
 T = getAvgTputHandles(self);
-if ~isempty(T)
+if ~isempty(T) && ~isempty(TN)
     AN = zeros(M,R);
     for i=1:M
         for j=1:M
@@ -33,6 +32,8 @@ if ~isempty(T)
             end
         end
     end
+else
+    AN = [];
 end
 runtime=toc(T0);
 self.setAvgResults(QN,UN,RN,TN,AN,[],CN,XN,runtime);

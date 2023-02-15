@@ -402,6 +402,12 @@ classdef SolverEnv < EnsembleSolver
     end
 
     methods (Static)
+        function [allMethods] = listValidMethods()
+            % allMethods = LISTVALIDMETHODS()
+            % List valid methods for this solver
+            allMethods = {'default'};
+        end
+        
         function [bool, featSupported] = supports(model)
             % [BOOL, FEATSUPPORTED] = SUPPORTS(MODEL)
 

@@ -42,7 +42,7 @@ modelCopy.linkAndLog(Plinked, isNodeLogged, logpath);
 % simulate the model copy and retrieve log data
 options = self.getOptions; options.samples = numEvents;
 solverjmt = SolverJMT(modelCopy, options);
-solverjmt.maxEvents = numEvents;
+solverjmt.maxEvents = numEvents*sn.nnodes*sn.nclasses;
 solverjmt.runAnalyzer(); % log data
 logData = SolverJMT.parseLogs(modelCopy, isNodeLogged, MetricType.QLen);
 

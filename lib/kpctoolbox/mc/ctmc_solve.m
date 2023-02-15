@@ -36,6 +36,7 @@ end
 [nConnComp, connComp] = weaklyconncomp(B);
 if nConnComp > 1
     % reducible generator - solve each component recursively
+    line_warning(mfilename,'Reducible generator. No initial vector available, decomposing and solving each component recursively.');
     if issym(Q)
         p = sym(zeros(1,n));
     else

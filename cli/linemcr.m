@@ -57,7 +57,7 @@ for v=1:2:length(varargin)
         case {'-h','--help'}
             fprintf('--------------------------------------------------------------------\n');
             fprintf('LINE Solver - Command Line Interface\n');
-            fprintf('Copyright (c) 2012-2022, QORE group, Imperial College London\n');
+            fprintf('Copyright (c) 2012-2023, QORE group, Imperial College London\n');
             fprintf(sprintf('Version %s. All rights reserved.\n',Model('').getVersion()));
             fprintf('--------------------------------------------------------------------\n');
             fprintf('-p, --port     : run in server mode on the specified port \n');
@@ -88,7 +88,7 @@ if serverMode
     fprintf(sprintf('Version %s. All rights reserved.\n',Model('').getVersion()));
     fprintf('--------------------------------------------------------------------\n');
     fprintf(sprintf('Running in server mode on port %d.\n',serverPort));
-    fprintf('Press Q to stop the server at any time.\n')    
+    fprintf('Press Q to stop the server at any time.\n')
     while true
         cmd = input('','s');
         switch cmd
@@ -119,39 +119,39 @@ if isempty(file)
     end
     fclose(fid);
 else
-    switch inputext
-        case 'zip'
-            % recursively call solver on each zip content
-            destFolder = tempname;
-            unzip(file, destFolder);
-            D = dir(destFolder);
-            output = cell(length(D)-2,1);
-            for d=3:length(D)
-                [~,~,dext]=fileparts(D(d).name);
-                output{d-2,1}=D(d).name;
-                output{d-2,2}=LINECLI('-i',[dext(2:end)],'-f',[destFolder,filesep,D(d).name],'-a',analysis,'-s',solver,'-v','silent','-o','bin');
-            end
-            outputMsg = jsonencode(output');
-            switch outputext
-                case 'json'
-                    if nargout>0
-                        ret = outputMsg;
-                    end
-                    switch verbosity
-                        case {'silent'}
-                        case {'normal'}
-                            fprintf(outputMsg);
-                            fprintf('\n');
-                        otherwise
-                            error('Unknown verbosity level: %s',verbosity);
-                    end
-                case 'bin'
-                    ret = output;
-            end
-            return
-        otherwise
-            copyfile(file,modelfile,'f');
-    end
+    %     switch inputext
+    %         case 'zip'
+    %             % recursively call solver on each zip content
+    %             destFolder = tempname;
+    %             unzip(file, destFolder);
+    %             D = dir(destFolder);
+    %             output = cell(length(D)-2,1);
+    %             for d=3:length(D)
+    %                 [~,~,dext]=fileparts(D(d).name);
+    %                 output{d-2,1}=D(d).name;
+    %                 output{d-2,2}=LINECLI('-i',[dext(2:end)],'-f',[destFolder,filesep,D(d).name],'-a',analysis,'-s',solver,'-v','silent','-o','bin');
+    %             end
+    %             outputMsg = jsonencode(output');
+    %             switch outputext
+    %                 case 'json'
+    %                     if nargout>0
+    %                         ret = outputMsg;
+    %                     end
+    %                     switch verbosity
+    %                         case {'silent'}
+    %                         case {'normal'}
+    %                             fprintf(outputMsg);
+    %                             fprintf('\n');
+    %                         otherwise
+    %                             error('Unknown verbosity level: %s',verbosity);
+    %                     end
+    %                 case 'bin'
+    %                     ret = output;
+    %             end
+    %             return
+    %         otherwise
+    copyfile(file,modelfile,'f');
+    %end
 end
 [fpath, name, fileext] = fileparts(modelfile);
 

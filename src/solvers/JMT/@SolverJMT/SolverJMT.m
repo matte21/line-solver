@@ -121,6 +121,14 @@ classdef SolverJMT < NetworkSolver
     
     methods (Static)
         
+        function [allMethods] = listValidMethods()
+            % allMethods = LISTVALIDMETHODS()
+            % List valid methods for this solver
+            allMethods = {'default','jsim','jmva','jmva.mva','jmva.recal',...
+                'jmva.comom','jmva.chow','jmva.bs','jmva.aql',...
+                'jmva.lin','jmva.dmlin','jmva.ls'};
+        end        
+
         function bool = isAvailable()
             % BOOL = ISAVAILABLE()
             

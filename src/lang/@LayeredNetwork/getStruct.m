@@ -37,13 +37,10 @@ lqn.graph = zeros(lqn.nidx,lqn.nidx);
 %lqn.replies = [];
 lqn.replygraph = false(lqn.nacts,lqn.nentries);
 
-lqn.nitems = zeros(lqn.nhosts+lqn.ntasks,1);
+lqn.nitems = zeros(lqn.nhosts+lqn.ntasks+lqn.nentries,1);
 lqn.itemcap  = {};
 lqn.itemproc = {};
 lqn.iscache = zeros(lqn.nhosts+lqn.ntasks,1);
-tshift = lqn.nhosts;
-eshift = lqn.nhosts + lqn.ntasks;
-ashift = lqn.nhosts + lqn.ntasks + lqn.nentries;
 
 lqn.parent = [];
 for p=1:lqn.nhosts  % for every processor, scheduling, multiplicity, replication, names, type
@@ -148,11 +145,9 @@ lqn.actposttype = sparse(lqn.nidx,1);
 
 for t = 1:lqn.ntasks
     tidx = lqn.tshift+t;
-    lqn.actsof{tidx} = zeros(1,length(self.tasks{t}.activities));
     for a=1:length(self.tasks{t}.activities)
         aidx = findstring(lqn.hashnames, ['A:',tasks{t}.activities(a).name]);
         lqn.callsof{aidx} = [];
-        lqn.actsof{tidx}(a) = aidx;
         boundToEntry = tasks{t}.activities(a).boundToEntry;
         %for b=1:length(boundToEntry)
         eidx = findstring(lqn.hashnames, ['E:',boundToEntry]);
@@ -201,8 +196,9 @@ for t = 1:lqn.ntasks
             %lqn.callshortnames{cidx,1} = [lqn.shortnames{aidx},'->',lqn.shortnames{target_eidx}];
             lqn.callproc{cidx,1} = Geometric(1/tasks{t}.activities(a).asyncCallMeans(s)); % asynch
             lqn.callsof{aidx}(end+1) = cidx;
-            lqn.iscaller(tidx, target_tidx) = true;
             lqn.iscaller(aidx, target_tidx) = true;
+            lqn.iscaller(aidx, target_eidx) = true;            
+            lqn.iscaller(tidx, target_tidx) = true;
             lqn.iscaller(tidx, target_eidx) = true;
             lqn.isasynccaller(tidx, target_tidx) = true;
             lqn.isasynccaller(tidx, target_eidx) = true;

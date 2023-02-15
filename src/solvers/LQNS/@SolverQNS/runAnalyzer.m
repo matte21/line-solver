@@ -13,8 +13,7 @@ CN = []; XN = [];
 lG = NaN;
 
 if self.enableChecks && ~self.supports(self.model)
-    ME = MException('Line:FeatureNotSupportedBySolver', 'This model contains features not supported by the solver.');
-    throw(ME);
+    line_error(mfilename,'This model contains features not supported by the solver.');
 end
 
 Solver.resetRandomGeneratorSeed(options.seed);
@@ -53,7 +52,26 @@ if nargout > 1
     analyzer = @(sn) solver_qns_analyzer(sn, options);
 end
 
-self.setAvgResults(QN,UN,RN,TN,[],[],CN,XN,runtime,method);
+sn = self.getStruct;
+M = sn.nstations;
+R = sn.nclasses;
+T = getAvgTputHandles(self);
+if ~isempty(T) && ~isempty(TN)
+    AN = zeros(M,R);
+    for i=1:M
+        for j=1:M
+            for k=1:R
+                for r=1:R
+                    AN(i,k) = AN(i,k) + TN(j,r)*sn.rt((j-1)*R+r, (i-1)*R+k);
+                end
+            end
+        end
+    end
+else
+    AN = [];
+end
+
+self.setAvgResults(QN,UN,RN,TN,AN,[],CN,XN,runtime,method);
 
 runtime = toc(T0);
 end

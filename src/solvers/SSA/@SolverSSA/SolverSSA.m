@@ -3,7 +3,6 @@ classdef SolverSSA < NetworkSolver
     %
     % Copyright (c) 2012-2023, Imperial College London
     % All rights reserved.
-    
     methods
         function self = SolverSSA(model,varargin)
             % SELF = SOLVERSSA(MODEL,VARARGIN)
@@ -31,6 +30,15 @@ classdef SolverSSA < NetworkSolver
     end
     
     methods (Static)
+        function [allMethods] = listValidMethods()
+            % allMethods = LISTVALIDMETHODS()
+            % List valid methods for this solver
+            allMethods = {'default','ssa','serial.hash','serial',...
+            'para','parallel','para.hash','parallel.hash','hashed',...
+            'taussa','tauleap','jline.ssa','java'};
+
+        end
+
         function featSupported = getFeatureSet()
             % FEATSUPPORTED = GETFEATURESET()
             

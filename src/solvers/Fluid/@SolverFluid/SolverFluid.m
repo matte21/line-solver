@@ -31,6 +31,14 @@ classdef SolverFluid < NetworkSolver
     end
     
     methods (Static)
+        function [allMethods] = listValidMethods()
+            % allMethods = LISTVALIDMETHODS()
+            % List valid methods for this solver
+            allMethods = {'default','softmin','statedep',...
+                'closing','jline.fluid','jline.fluid.matrix',...
+                'jline.fluid.closing'};
+        end
+
         function featSupported = getFeatureSet()
             % FEATSUPPORTED = GETFEATURESET()
             

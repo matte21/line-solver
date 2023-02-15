@@ -124,7 +124,7 @@ for ind=1:I
                                 rtnodes((ind-1)*K+k,(jnd-1)*K+k) = GlobalConstants.FineTol;
                             end
                         end
-                        %line_error([outputStrategy_k{2},' routing policy is not yet supported.']);
+                        %line_error(mfilename,[outputStrategy_k{2},' routing policy is not yet supported.']);
                 end
             end
     end
