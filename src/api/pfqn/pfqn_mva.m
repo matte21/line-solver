@@ -10,6 +10,7 @@ InfServ=1;
 if nargin == 2
     InfServ=0;
 end
+N = ceil(N);
 [M,R]=size(L); % M stations, R classes
 N=N(:)';
 if nargin<4

@@ -53,7 +53,7 @@ switch solverName
         % use default
     case 'LN'
         options = EnsembleSolver.defaultOptions();
-        options.config.interlocking = false;
+        options.config.interlocking = true;
         options.config.multiserver = 'default';
         options.timespan = [Inf,Inf];
         options.keep = false;

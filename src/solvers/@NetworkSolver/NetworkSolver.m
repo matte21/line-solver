@@ -136,7 +136,6 @@ classdef NetworkSolver < Solver
         function setOptions(self, options)
             % SETOPTIONS(OPTIONS)
             % Assign the solver options
-
             self.checkOptions(options);
             setOptions@Solver(self,options);
         end

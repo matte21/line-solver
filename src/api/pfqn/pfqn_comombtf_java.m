@@ -1,12 +1,11 @@
 function [G,lG,XN,QN]=pfqn_comombtf_java(Din,Nin,Zin)
-persistent isNCLibLoaded;
-if isempty(isNCLibLoaded)
-    javaaddpath(which('pfqn_nclib.jar'));
-    isNCLibLoaded = true;
-end
+% global isNCLibLoaded;
+% if isempty(isNCLibLoaded)
+%     javaaddpath(which('pfqn_nclib.jar')); % now in lineStart
+%     isNCLibLoaded = true;
+% end
 import DataStructures.*; %#ok<SIMPT>
 import QueueingNet.*; %#ok<SIMPT>
-import DataStructures.*; %#ok<SIMPT>
 import Utilities.*; %#ok<SIMPT>
 
 %Din=Din(sum(Din,2)>GlobalConstants.FineTol,:);
@@ -46,7 +45,7 @@ for i=1:M
     end
 end
 
-qnm = QNModel(M,R);
+qnm = DataStructures.QNModel(M,R);
 qnm.N = PopulationVector(N);
 qnm.Z = EnhancedVector(Z);
 qnm.multiplicities = MultiplicitiesVector(mult);

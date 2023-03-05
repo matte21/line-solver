@@ -25,12 +25,24 @@ N = length(alpha(1,:));
 mu = zeros(M,N);
 for i=1:M
     mu(i,1) = alpha(i,1)/(1+c(i));
+    alphanum = sparse(zeros(N,N));
+    alphaden = sparse(zeros(N,N));
+    for n=2:N
+        alphanum(n,1) = alpha(i,n);
+        alphaden(n,1) = alpha(i,n-1);
+        for k=2:(n-1)
+            alphanum(n,k) = alphanum(n,k-1) * alpha(i,n-k+1);
+            alphaden(n,k) = alphaden(n,k-1) * alpha(i,n-k);
+        end
+    end
     for n=2:N
         rho = 0;
+        muden = 1;
         for k=1:(n-1)
-            rho = rho+(prod(alpha(i,(n-k+1):n))-prod(alpha(i,(n-k):(n-1))))/prod(mu(i,1:k));
+            muden = muden * mu(i,k);
+            rho = rho+(alphanum(n,k)-alphaden(n,k)) / muden;
         end
-        mu(i,n) = (prod(alpha(i,1:n))/prod(mu(i,1:(n-1))));
+        mu(i,n) = alphanum(n,n-1)*alpha(i,1)/muden;
         mu(i,n) = mu(i,n)/(1-rho);
     end
 end

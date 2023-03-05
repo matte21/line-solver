@@ -318,6 +318,15 @@ for tidx = find(lqn.schedid== SchedStrategy.ID_INF)
     end
 end
 
+lqn.refset = zeros(lqn.nidx,1);
+[conncomps, roots]=graph_connected_components(lqn.taskgraph(lqn.nhosts+1:end, lqn.nhosts+1:end));
+lqn.conntasks = conncomps;
+for r=1:length(roots)
+    lqn.conntasks(find(lqn.conntasks == r)) = lqn.tshift+roots(r);
+end
+
 lqn.isref = lqn.schedid==SchedStrategy.ID_REF;
 lqn.iscache(1:(lqn.tshift+lqn.ntasks)) = lqn.nitems(1:(lqn.tshift+lqn.ntasks))>0;
 end
+
+

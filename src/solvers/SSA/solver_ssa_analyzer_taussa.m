@@ -10,6 +10,8 @@ K = jmodel.getNumberOfClasses;    %number of classes
 
 jsolver.setOptions().samples = options.samples;
 jsolver.setOptions().seed = options.seed;
+%jsolver.setOptions().R5(7);
+jsolver.setOptions().MSER5();
 
 if tl_option == 1    
     if tau <= 0

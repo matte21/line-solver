@@ -16,9 +16,16 @@ addpath(genpath(cwd));
 format compact
 warning ON BACKTRACE
 
+% import java classes
+javaaddpath(which('linesolver.jar'));
+javaaddpath(which('pfqn_nclib.jar'));
+import DataStructures.*; %#ok<SIMPT>
+import QueueingNet.*; %#ok<SIMPT>
+import Utilities.*; %#ok<SIMPT>
+
 % assign global constants
 LINEStdOut = 1; % console
-LINEVersion = '2.0.26';
+LINEVersion = '2.0.27';
 LINEVerbose = VerboseLevel.STD;
 LINEDoChecks = true;
 LINECoarseTol = 1e-3; 

@@ -126,7 +126,12 @@ classdef Solver < handle
             optList = Solver.listValidOptions();
             for l=1:length(optList)
                 if ~isfield(options,optList{l})
-                    options.(optList{l}) = defaultOptions.(optList{l});
+                    switch optList{l}
+                        case 'config.multiserver'
+                            % no-op
+                        otherwise
+                            options.(optList{l}) = defaultOptions.(optList{l});
+                    end
                 end
             end
             self.options = options;
@@ -182,7 +187,7 @@ classdef Solver < handle
         function fun = fastStiffOdeSolver()
             % FUN = FASTSTIFFODESOLVER()
             % Return default low-accuracy stiff solver
-            fun = @ode23s; % low-order method   
+            fun = @ode23s; % low-order method
         end
 
         function fun = fastOdeSolver()
@@ -195,18 +200,19 @@ classdef Solver < handle
             % OPTLIST = LISTVALIDOPTIONS()
             % List valid fields for options data structure
             optList = {'cache','cutoff','force','init_sol','iter_max','iter_tol','tol', ...
-                'keep','method','odesolvers','samples','seed','stiff', 'timespan','verbose'};
+                'keep','method','odesolvers','samples','seed','stiff', 'timespan','verbose','config.multiserver'};
             allOpt = {'cache','cutoff','force','init_sol','iter_max','iter_tol','tol', ...
-                'keep','method','odesolvers','samples','seed','stiff', 'timespan','verbose', ...
-                'default','exact','auto','ctmc','ctmc.gpu','gpu','mva','mva.exact','mva.amva','mva.qna',...
+                'keep','method','odesolvers','samples','seed','stiff', 'timespan','verbose','config.multiserver', ...
+                'java','fast', ...
+                'default','exact','auto','ctmc','ctmc.gpu','gpu','mva','mva.exact','mva.amva','mva.qna','sqrt','mva.sqrt',...
                 'amva','amva.bs','amva.qd','bs','qd','amva.qli','qli','amva.fli','fli','amva.aql','aql','amva.qdaql','qdaql','amva.lin','lin','amva.qdlin','qdlin',...
-                'ssa','ssa.serial.hash','ssa.para.hash','ssa.parallel.hash','ssa.serial','ssa.para','ssa','java','taussa','tauleap',...
+                'ssa','ssa.serial.hash','ssa.para.hash','ssa.parallel.hash','ssa.serial','ssa.para','ssa','taussa','tauleap',...
                 'ssa.parallel','serial.hash','serial','para','parallel','para.hash','parallel.hash',...
                 'jmt','jsim','jmva','jmva.mva','jmva.recal','jmva.mom','jmva.comom','jmva.chow','jmva.bs','jmva.aql','jmva.lin','jmva.dmlin','jmva.ls',...
                 'jmt.jsim','jmt.jmva','jmt.jmva.mva','jmt.jmva.amva','jmt.jmva.recal','jmt.jmva.comom','jmt.jmva.chow','jmt.jmva.bs','jmt.jmva.aql','jmt.jmva.lin','jmt.jmva.dmlin','jmt.jmva.ls',...
-                'brute','ca','comom','gm','mom','propfair','recal','kt', 'rd', 'nr.probit', 'nr.logit', 'nc.brute','nc.ca', 'nc.comom','nc.gm','nc.mom','nc.propfair','nc.recal','nc.kt', 'nc.rd', 'nc.nr.probit', 'nc.nr.logit', ...
+                'brute','ca','comom','comomld','gm','mom','propfair','recal','kt', 'rd', 'nr.probit', 'nr.logit', 'nc.brute','nc.ca','nc.comom','nc.comomld','nc.gm','nc.mom','nc.propfair','nc.recal','nc.kt', 'nc.rd', 'nc.nr.probit', 'nc.nr.logit', ...
                 'fluid','matrix','softmin','statedep','closing','fluid.softmin','fluid.statedep''fluid.closing','fluid.matrix',...
-                'nc','nc.exact','nc.imci','ls','nc.ls','nc.cub','cub','le','nc.le','nc.panacea','panacea','nc.mmint2','mmint2','mam','dec.source','dec.mmap',...
+                'nc','nc.exact','nc.imci','ls','nc.ls','nc.cub','cub','le','nc.le','nc.panacea','panacea','nc.mmint2','mmint2','nc.gleint','gleint','mam','dec.source','dec.mmap',...
                 'mmk','gigk', 'gigk.kingman_approx', ...
                 'mm1','mg1','gm1','gig1','gim1','gig1.kingman','gig1.gelenbe','gig1.heyman','gig1.kimura','gig1.allen','gig1.kobayashi','gig1.klb','gig1.marchal',...
                 'aba.upper','aba.lower','gb.upper','gb.lower','sb.upper','sb.lower','bjb.upper','bjb.lower','pb.upper','pb.lower',...
@@ -253,7 +259,12 @@ classdef Solver < handle
                                 options.method = varargin{1};
                                 varargin(1) = [];
                             otherwise
-                                options.(varargin{1}) = varargin{2};
+                                switch varargin{1}
+                                    case 'config.multiserver'
+                                        options.config.multiserver = varargin{2};
+                                    otherwise
+                                        options.(varargin{1}) = varargin{2};
+                                end
                                 varargin(1) = [];
                                 varargin(1) = [];
                         end
@@ -280,7 +291,7 @@ classdef Solver < handle
                     if strcmp(options.method,'ctmc'), options.method='default'; end
                     options.method = erase(options.method,'ctmc.');
                     solver = SolverCTMC(model, options);
-                case {'mva','mva.exact','amva','mva.amva','qna','mva.qna', ...
+                case {'mva','mva.exact','amva','mva.amva','qna','mva.qna','sqrt','mva.sqrt' ...
                         'amva.qd','mva.amva.qd', ...
                         'amva.bs','mva.amva.bs', ...
                         'amva.qli','mva.amva.qli', ...
@@ -292,12 +303,12 @@ classdef Solver < handle
                         'gigk', 'gigk.kingman_approx', ...
                         'gig1.gelenbe','gig1.heyman','gig1.kimura','gig1.allen','gig1.kobayashi','gig1.klb','gig1.marchal', ...
                         'aba.upper', 'aba.lower', 'bjb.upper', 'bjb.lower', 'gb.upper', 'gb.lower', 'pb.upper', 'pb.lower', 'sb.upper', 'sb.lower', ...
-                        'jline.amva'
+                        'jline.amva','fast','java',
                         }
                     if strcmp(options.method,'mva'), options.method='default'; end
                     options.method = erase(options.method,'mva.');
                     solver = SolverMVA(model, options);
-                case {'ssa','ssa.serial.hash','ssa.para.hash','ssa.parallel.hash','ssa.serial','ssa.para','ssa.parallel','serial.hash','serial','para','parallel','para.hash','parallel.hash','hashed','taussa','tauleap','jline.ssa'}
+                case {'java','ssa','ssa.serial.hash','ssa.para.hash','ssa.parallel.hash','ssa.serial','ssa.para','ssa.parallel','serial.hash','serial','para','parallel','para.hash','parallel.hash','hashed','taussa','tauleap','jline.ssa'}
                     if strcmp(options.method,'ssa'), options.method='default'; end
                     options.method = erase(options.method,'ssa.');
                     solver = SolverSSA(model, options);
@@ -306,11 +317,11 @@ classdef Solver < handle
                     if strcmp(options.method,'jmt'), options.method='default'; end
                     options.method = erase(options.method,'jmt.');
                     solver = SolverJMT(model, options);
-                case {'fluid','fluid.softmin','fluid.statedep','fluid.closing','jline.fluid','jline.fluid.matrix','jline.fluid.closing'}
+                case {'java','fluid','fluid.softmin','fluid.statedep','fluid.closing','jline.fluid','jline.fluid.matrix','jline.fluid.closing'}
                     if strcmp(options.method,'fluid'), options.method='default'; end
                     options.method = erase(options.method,'fluid.');
                     solver = SolverFluid(model, options);
-                case {'nc','nc.exact','nc.imci','nc.ls','cub','ls','nc.le','le','mmint2','nc.panacea','nc.pana','nc.mmint2','nc.kt','nc.deterministic','nc.sampling','nc.propfair','nc.comom','nc.mom','nc.cub','nc.brute','nc.rd', 'nc.nr.probit', 'nc.nr.logit','nc.gm'}
+                case {'nc','nc.exact','nc.imci','nc.ls','comom','comomld','cub','ls','nc.le','le','mmint2','nc.panacea','nc.pana','nc.mmint2','nc.kt','nc.deterministic','nc.sampling','nc.propfair','nc.comom','nc.comomld','nc.mom','nc.cub','nc.brute','nc.rd', 'nc.nr.probit', 'nc.nr.logit','nc.gm'}
                     if strcmp(options.method,'nc'), options.method='default'; end
                     options.method = erase(options.method,'nc.');
                     solver = SolverNC(model, options);

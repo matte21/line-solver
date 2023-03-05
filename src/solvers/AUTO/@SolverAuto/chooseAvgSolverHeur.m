@@ -9,17 +9,25 @@ switch class(this_model)
         else % MultiChain
             if this_model.hasHomogeneousScheduling(SchedStrategy.INF)
                 solver = self.solvers{self.CANDIDATE_MVA}; % all infinite servers
-            elseif this_model.hasMultiServer
-                if sum(this_model.getNumberOfJobs) / sum(this_model.getNumberOfChains) > 30 % likely fluid regime
+            elseif this_model.hasProductFormSolution() && ~this_model.hasMultiServer
+                solver = self.solvers{self.CANDIDATE_NC};
+            elseif this_model.hasHomogeneousScheduling(SchedStrategy.FCFS) && ~this_model.hasMultiServer
+                if sum(this_model.getNumberOfJobs) / sum(this_model.getNumberOfChains) > 30 % likely fluid regime  
                     solver = self.solvers{self.CANDIDATE_FLUID};
                 elseif sum(this_model.getNumberOfJobs) / sum(this_model.getNumberOfChains) > 10 % mid/heavy load
                     solver = self.solvers{self.CANDIDATE_MVA};
                 elseif sum(this_model.getNumberOfJobs) < 5 % light load, avoid errors of AMVA in low populations
                     solver = self.solvers{self.CANDIDATE_NC};
+                end
+            elseif this_model.hasHomogeneousScheduling(SchedStrategy.PS) && this_model.hasMultiServer
+                solver = self.solvers{self.CANDIDATE_MVA};
+            elseif this_model.hasHomogeneousScheduling(SchedStrategy.FCFS) && this_model.hasMultiServer
+                if sum(this_model.getNumberOfJobs) < 5 % light load, avoid errors of AMVA in low populations
+                    solver = self.solvers{self.CANDIDATE_NC};
                 else
                     solver = self.solvers{self.CANDIDATE_MVA};
                 end
-            else % product-form, no infinite servers
+            else
                 solver = self.solvers{self.CANDIDATE_MVA};
             end
         end

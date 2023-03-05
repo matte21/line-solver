@@ -1,4 +1,4 @@
-function [QLen,Loss,E] = lossn_erlangfp(nu,A,C)
+function [QLen,Loss,E,niter] = lossn_erlangfp(nu,A,C)
 % [QLen,Loss,E] = LOSS_ERLANGFP(rho,A,C)
 % Erlang fixed point approximation for loss networks
 %
@@ -26,7 +26,9 @@ R = length(nu);
 J = length(C);
 E = 0.5*ones(J,1);
 E_1 = 0*ones(J,1);
+niter = 0;
 while norm(E-E_1,1)>1e-8
+    niter = niter + 1;
     E_1 = E;
     for j=1:J
         rhoj_1 = 0;

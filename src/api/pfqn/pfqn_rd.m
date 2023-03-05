@@ -23,7 +23,7 @@ if sum(N)==0
     lGN=0;
     return
 end
-gamma = ones(M,sum(N));
+gamma = ones(M,ceil(sum(N)));
 mu = mu(:,1:sum(N));
 %mu(mu==0)=Inf;
 mu(isnan(mu))=Inf;
@@ -65,7 +65,7 @@ end
 % isLI(isDelay) = [];
 % M = M - sum(isDelay);
 
-beta = ones(M,sum(N));
+beta = ones(M,ceil(sum(N)));
 for i=1:M
     beta(i,1) = gamma(i,1) / (1-gamma(i,1)) ;
     for j=2:sum(N)
@@ -81,13 +81,12 @@ if (all(beta==Inf))
 else
     Cgamma=0;
     sld = s(s>1);
-    vmax = min(sum(sld-1),sum(N));
-    Y = pfqn_mva(y,N,0*N);
+    vmax = min(sum(sld-1),ceil(sum(N)));
+    Y = pfqn_mva(y,N,0*N); % single class model
     rhoN = y*Y';
     for vtot=1:vmax
-        lEN(vtot+1) = pfqn_gldsingle(rhoN,vtot,beta);
+        lEN(vtot+1) = real(pfqn_gldsingle(rhoN,vtot,beta));
     end
-    lEN = real(lEN);
     
     for vtot=0:vmax
         EN = exp(lEN(vtot+1));

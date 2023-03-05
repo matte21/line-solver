@@ -21,9 +21,9 @@ switch options.method
         %    [Q,U,R,T,C,X] = solver_qna(sn, options);
         %    lG = NaN;
         %else
-            [Q,U,R,T,C,X,lG,iter] = solver_amva(sn, options);
+        [Q,U,R,T,C,X,lG,iter] = solver_amva(sn, options);
         %end
-    case {'amva','bs','qd','qli','fli','aql','qdaql','lin','qdlin'}
+    case {'amva','bs','qd','qli','fli','aql','qdaql','lin','qdlin','sqni'}
         [Q,U,R,T,C,X,lG,iter] = solver_amva(sn, options);
     otherwise
         line_error(mfilename,'Unsupported SolverMVA method.');

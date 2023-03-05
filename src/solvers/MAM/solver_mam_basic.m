@@ -207,12 +207,21 @@ while nanmax(nanmax(abs(TN-TN_1))) > tol && it <= options.iter_max %#ok<NANMAX>
                                         [Qret{1:K}] = MMAPPH1FCFS({aggrArrivalAtNode{[1,3:end]}}, {pie{ist}{:}}, {D0{ist,:}}, 'ncMoms', 1);
                                     else % all closed classes
                                         maxLevel = max(N(isfinite(N)))+1;
-                                        [pdistr{1:K}] = MMAPPH1FCFS({aggrArrivalAtNode{[1,3:end]}}, {pie{ist}{:}}, {D0{ist,:}}, 'ncDistr', maxLevel);
-                                        for k=1:K
-                                            pdistr{k} = abs(pdistr{k}(1:(N(k)+1)));
-                                            pdistr{k}(end) = abs(1-sum(pdistr{k}(1:end-1)));
-                                            pdistr{k} = pdistr{k} / sum(pdistr{k});
-                                            Qret{k} = max(0,min(N(k),(0:N(k))*pdistr{k}(1:(N(k)+1))'));
+                                        D = {aggrArrivalAtNode{[1,3:end]}};
+                                        pdistr = cell(1,K);
+                                        if map_lambda(D)< GlobalConstants.FineTol
+                                            for k=1:K
+                                                pdistr{k} = [1-GlobalConstants.FineTol, GlobalConstants.FineTol];
+                                                Qret{k} = GlobalConstants.FineTol / sn.rates(ist);
+                                            end
+                                        else
+                                            [pdistr{1:K}] = MMAPPH1FCFS(D, {pie{ist}{:}}, {D0{ist,:}}, 'ncDistr', maxLevel);
+                                            for k=1:K
+                                                pdistr{k} = abs(pdistr{k}(1:(N(k)+1)));
+                                                pdistr{k}(end) = abs(1-sum(pdistr{k}(1:end-1)));
+                                                pdistr{k} = pdistr{k} / sum(pdistr{k});
+                                                Qret{k} = max(0,min(N(k),(0:N(k))*pdistr{k}(1:(N(k)+1))'));
+                                            end
                                         end
                                     end
                                 else

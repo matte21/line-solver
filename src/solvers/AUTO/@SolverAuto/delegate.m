@@ -4,7 +4,7 @@ this_model = self.model;
 switch class(this_model)
     case 'Network'
         % first try with chosen solver, if the method is not available
-        %     or fails keep going with the other candidates
+        %     or fails keep going with the other candidates        
         if length(self.candidates)>1
             chosenSolver = chooseSolver(self, method);
             if chosenSolver.supports(self.model)
@@ -51,11 +51,15 @@ switch class(this_model)
                         varargout{5} = r5;
                         varargout{6} = r6;
                 end
-                line_printf('Successful method execution completed by %s.',proposedSolvers{s}.getName);
+                if self.options.verbose
+                    line_printf('Successful method execution completed by %s.',proposedSolvers{s}.getName);
+                end
                 return
             catch ME
                 if ~isempty(strfind(ME.message,'Unrecognized method'))
-                    line_printf('Method unsupported by %s.',proposedSolvers{s}.getName);
+                    if self.options.verbose
+                        line_printf('Method unsupported by %s.',proposedSolvers{s}.getName);
+                    end
                 else
                     line_warning(mfilename,ME.message);
                 end
@@ -106,10 +110,14 @@ switch class(this_model)
                         varargout{5} = r5;
                         varargout{6} = r6;
                 end
-                line_printf('Successful method execution completed by %s.',proposedSolvers{s}.getName);
+                if self.options.verbose
+                    line_printf('Successful method execution completed by %s.',proposedSolvers{s}.getName);
+                end
                 return
             catch
-                line_printf('Switching %s.',proposedSolvers{s}.getName);
+                if self.options.verbose
+                    line_printf('Switching %s.',proposedSolvers{s}.getName);
+                end
             end
         end
 end

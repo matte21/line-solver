@@ -45,11 +45,11 @@ end
 
 %% IMCI
 if strcmpi(variant,'imci') % improved mci
-    tput = pfqn_amvabs(D,N,Z);
+    tput = pfqn_bs(D,N,Z);
     util = D*tput';
     gamma = max( 0.01, 1-util )'; % MonteQueue 2.0 recommendation
 elseif strcmpi(variant,'mci') % original mci
-    tput = pfqn_amvabs(D,N,Z);
+    tput = pfqn_bs(D,N,Z);
     util = D*tput';
     %% Original MCI
     for i=1:length(util)

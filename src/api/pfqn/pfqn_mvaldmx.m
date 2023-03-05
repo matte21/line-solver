@@ -1,5 +1,5 @@
-function [XN,QN,UN,CN,lGN] = pfqn_mvaldmx(lambda,D,N,Z,mu,S)
-% [XN,QN,UN,CN] = PFQN_MVALDMX(LAMBDA,D,N,Z,MU,S)
+function [XN,QN,UN,CN,lGN,Pc] = pfqn_mvaldmx(lambda,D,N,Z,mu,S)
+% [XN,QN,UN,CN,lGN,Pc] = PFQN_MVALDMX(LAMBDA,D,N,Z,MU,S)
 
 if nargin<5
     mu=ones(size(D,1),sum(N(isfinite(N))));
@@ -110,8 +110,8 @@ for r=openClasses
     XN(r) = lambda(r);
     for i=1:M
         % Queue-length
-        QN(i,r) = 0;
-        for n=0:sum(Nc)
+        QN(i,r) = 0;   
+        for n=0:sum(Nc)             
             QN(i,r) = QN(i,r) + lambda(r) * D(i,r) * (n+1) * EC(i,n+1) * Pc(i, 1+n, hnvec);
         end
         % Response time
@@ -124,4 +124,6 @@ for r=openClasses
         end
     end
 end
+
+Pc = Pc(1:M,:,hnvec);
 end

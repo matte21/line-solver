@@ -15,8 +15,13 @@ T = lqn.graph;
 figure;
 switch method
     case 'nodes'
+        lqn.hashnames = strrep(lqn.hashnames,'\_','_'); % remove escaping if it exists
+        lqn.hashnames = strrep(lqn.hashnames,'_','\_'); % reapply it include to those which did not have it
+
         h = plot(digraph(T),'Layout','layered','NodeLabel',lqn.hashnames);
     case 'names'
+        lqn.names = strrep(lqn.names,'\_','_'); % remove escaping if it exists
+        lqn.names = strrep(lqn.names,'_','\_'); % reapply it include to those which did not have it
         h = plot(digraph(T),'Layout','layered','NodeLabel',lqn.names);
     case 'ids'
         h = plot(digraph(T),'Layout','layered');
@@ -47,14 +52,14 @@ for r=find(lqn.type==LayeredNetworkElement.ACTIVITY)'
     if r>0
         switch lqn.actpretype(r)
             case ActivityPrecedenceType.ID_PRE_AND
-               % highlight(h,p,'NodeColor','magenta','Marker','o');
+                % highlight(h,p,'NodeColor','magenta','Marker','o');
         end
     end
     p = find(lqn.graph(r,:))';
     if r>0
         switch lqn.actposttype(r)
             case ActivityPrecedenceType.ID_POST_AND
-               % highlight(h,p,'NodeColor','magenta','Marker','o');
+                % highlight(h,p,'NodeColor','magenta','Marker','o');
         end
     end
 end

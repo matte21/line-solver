@@ -5,7 +5,6 @@ function [QN,UN,RN,TN,xvec_it,QNt,UNt,TNt,xvec_t,t,iters,runtime] = solver_fluid
 % Copyright (c) 2012-2023, Imperial College London
 % All rights reserved.
 
-T0 = tic;
 M = sn.nstations;    %number of stations
 K = sn.nclasses;    %number of classes
 pie = sn.pie;
@@ -86,12 +85,14 @@ odeopt = odeset('AbsTol', tol, 'RelTol', tol, 'NonNegative', 1:length(x0));
 nonZeroRates = abs(W(abs(W)>0)); nonZeroRates=nonZeroRates(:);
 trange = [timespan(1),min(timespan(2),abs(10*itermax/min(nonZeroRates)))];
 
+T0 = tic;
 iters = 1;
 if options.stiff
     [t, xvec_t] = ode_solve_stiff(@(t,x) W'*(x./(GlobalConstants.FineTol+SQ*x).*min(S(Qa),GlobalConstants.FineTol+SQ*x)), trange, x0, odeopt, options);
 else
     [t, xvec_t] = ode_solve(@(t,x) W'*(x./(GlobalConstants.FineTol+SQ*x).*min(S(Qa),GlobalConstants.FineTol+SQ*x)), trange, x0, odeopt, options);
 end
+runtime = toc(T0);
 
 Tmax = size(xvec_t,1);
 QNtmp = cell(1,Tmax);
@@ -148,6 +149,5 @@ QN = reshape(QNtmp(end,:),M,K);
 UN = reshape(UNtmp(end,:),M,K);
 RN = reshape(RNtmp(end,:),M,K);
 TN = reshape(TNtmp(end,:),M,K);
-runtime = toc(T0);
 xvec_it = {xvec_t(end,:)};
 end

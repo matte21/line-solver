@@ -63,7 +63,8 @@ switch options.method
         if hasOpenClasses
             options.method = 'closing';
         else
-            options.method = 'matrix';
+            options.method = 'closing';
+            %options.method = 'matrix'; %% many cases where it fails with 'Incorrect dimensions for matrix multiplication'
         end
     case {'closing','statedep','softmin'}
         % do nothing

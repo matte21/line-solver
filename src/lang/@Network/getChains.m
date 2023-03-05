@@ -38,9 +38,9 @@ for c=1:size(chains,1)
     %                Pchain(visited,visited)
     %                if ~dtmc_isfeasible(Pchain(visited,visited))
     %                    line_error(mfilename,sprintf('The routing matrix in chain %d is not stochastic. Chain %d classes: %s',c, c, int2str(inchain{c})));
-    %                end
+    %                end    
     alpha_visited = dtmc_solve(Pchain(visited,visited));
-    alpha = zeros(1,M*K); alpha(visited) = alpha_visited;
+    alpha = zeros(1,M*K); alpha(visited) = alpha_visited;    
     if max(alpha)>=1-GlobalConstants.FineTol
         line_error(mfilename,'One chain has an absorbing state.');
     end

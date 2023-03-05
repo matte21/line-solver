@@ -161,7 +161,7 @@ switch options.method
     case {'adaptive','default'}
         if M>1
             if R==1 || (R <= 3 && sum(N)<50)
-                [~,~,~,~,lG] = pfqn_mva(L,N,sum(Z,1));
+                [~,lG] = pfqn_ca(L,N,sum(Z,1));
             else
                 if M>R
                     [~,lG] = pfqn_kt(L,N,sum(Z,1));
@@ -173,8 +173,11 @@ switch options.method
             lG = -N*log(L)';
         else % repairman model
             if N<10000
-                %[lG] = pfqn_comomrm(L,N,sum(Z,1));
-                [~,lG] = pfqn_mmint2_gausslegendre(L,N,sum(Z,1));
+                %if max(abs(N-round(N))) < GlobalConstants.FineTol
+                    %[lG] = pfqn_comomrm(L,N,Z,1,options.tol);
+                %else
+                    [~,lG] = pfqn_mmint2_gausslegendre(L,N,sum(Z,1));
+                %end
             else
                 [~,lG] = pfqn_le(L,N,sum(Z,1));
             end
@@ -187,7 +190,7 @@ switch options.method
         else
             [~,lG] = pfqn_ls(L,N,sum(Z,1),options.samples);
         end
-    case {'mmint2'}
+    case {'mmint2','gleint'}
         if size(L,1)>1
             line_error(mfilename,sprintf('The %s method requires a model with a delay and a single queueing station.',options.method));
         end
@@ -209,37 +212,40 @@ switch options.method
         if length(N)>1
             try
                 [~,lG,X,Q] = pfqn_mom(L,N,Z);
-            catch
+            catch ME
+                ME.getReport
                 % java exception, probably singular linear system
-                line_warning(mfilename,'Numerical problems.');
+                %line_warning(mfilename,'Numerical problems.');
                 lG = NaN;
             end
         else
-            [X,Q,~,~,lG] = pfqn_mva(L,N,Z);
+            [~,lG] = pfqn_ca(L,N,sum(Z,1));
         end
-    %case {'exact'}
-        %if M>=R || sum(N)>20 || sum(Z)>0
-        %    [~,lG] = pfqn_ca(L,N,sum(Z,1));
-        %else
-        %    [~,lG] = pfqn_recal(L,N,sum(Z,1));% implemented with Z=0
-        %end
-    case {'exact','comom'}
+    case {'exact'}
+        if M>=R || sum(N)>10 || sum(Z)>0
+           [~,lG] = pfqn_ca(L,N,sum(Z,1));
+        else
+           [~,lG] = pfqn_recal(L,N,sum(Z,1));% implemented with Z=0
+        end
+    case {'comom'}
         if R>1
             try
                 % comom has a bug in computing X, sometimes the
                 % order is switched
                 if M>1
+                    %line_error(mfilename,'comom is temporarily disabled');
                     [~,lG,X,Q] = pfqn_comombtf_java(L,N,Z);
                 else % use double precision script for M=1
                     [lG] = pfqn_comomrm(L,N,Z,1,options.tol);
                 end
-            catch
+            catch ME
+                ME.getReport
                 % java exception, probably singular linear system
-                line_warning(mfilename,'Numerical problems.');
+                %line_warning(mfilename,'Numerical problems.');
                 lG = NaN;
             end
         else
-            [X,Q,~,~,lG] = pfqn_mva(L,N,Z);
+            [~,lG] = pfqn_ca(L,N,sum(Z,1));
         end
     case {'pana','panacea','pnc'}
         [~,lG] = pfqn_panacea(L,N,sum(Z,1));

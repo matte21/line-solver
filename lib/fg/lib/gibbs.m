@@ -229,7 +229,7 @@ if strcmp(alg,'TE')
     
     logG = zeros(1,N);
     
-    [~,QN]=amvabs(x(2:end,:),nbJobs,x(1,:));
+    [~,QN]=pfqn_bs(x(2:end,:),nbJobs,x(1,:));
     
     index_previous = find(range==theta(index));
     logG(index_previous) = logG_initial;
@@ -237,7 +237,7 @@ if strcmp(alg,'TE')
     for i = index_previous-1:-1:1
         x(index_i,index_j) = range(i+1);
         %[~,QN]=aql(x(2:end,:),nbJobs,x(1,:),interval);
-        [~,QN]=amvabs(x(2:end,:),nbJobs,x(1,:),interval,1000,QN);
+        [~,QN]=pfqn_bs(x(2:end,:),nbJobs,x(1,:),interval,1000,QN);
         if 1+QN(index_i-1,index_j)/(range(i+1)+eps)*-interval < 0
             logG(i) = logG(i+1);
         else
@@ -246,12 +246,12 @@ if strcmp(alg,'TE')
     end
     
     x(index_i,index_j) = theta(index);
-    [~,QN]=amvabs(x(2:end,:),nbJobs,x(1,:));
+    [~,QN]=pfqn_bs(x(2:end,:),nbJobs,x(1,:));
     
     for i = index_previous+1:N
         x(index_i,index_j) = range(i-1);
         %[~,QN]=aql(x(2:end,:),nbJobs,x(1,:),interval);
-        [~,QN]=amvabs(x(2:end,:),nbJobs,x(1,:),interval,1000,QN);
+        [~,QN]=pfqn_bs(x(2:end,:),nbJobs,x(1,:),interval,1000,QN);
         if 1+QN(index_i-1,index_j)/(range(i-1)+eps)*interval < 0
             logG(i) = logG(i-1);
         else

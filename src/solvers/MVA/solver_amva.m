@@ -6,49 +6,8 @@ function [Q,U,R,T,C,X,lG,totiter] = solver_amva(sn,options)
 if nargin < 2
     options = SolverMVA.defaultOptions;
 end
-totiter = 0;
+%% aggregate chains
 [Lchain,STchain,Vchain,alpha,Nchain,SCVchain,refstatchain] = snGetDemandsChain(sn);
-
-M = sn.nstations;
-K = sn.nchains;
-Nt = sum(Nchain(isfinite(Nchain)));
-delta  = (Nt - 1) / Nt;
-deltaclass = (Nchain - 1) ./ Nchain;
-deltaclass(isinf(Nchain)) = 1;
-tol = options.iter_tol;
-nservers = sn.nservers;
-
-Uchain = zeros(M,K);
-Tchain = zeros(M,K);
-Cchain_s = zeros(1,K);
-
-%% initialize Q,X, U
-Qchain = options.init_sol;
-if isempty(Qchain)
-    % balanced initialization
-    Qchain = ones(M,K);
-    Qchain = Qchain ./ repmat(sum(Qchain,1),size(Qchain,1),1) .* repmat(Nchain,size(Qchain,1),1);
-    Qchain(isinf(Qchain))=0; % open classes
-    for r=find(isinf(Nchain)) % open classes
-        Qchain(refstatchain(r),r)=0;
-    end
-end
-
-nnzclasses = find(Nchain>0);
-Xchain = 1./sum(STchain,1);
-for r=find(isinf(Nchain)) % open classes
-    Xchain(r) = 1 ./ STchain(refstatchain(r),r);
-end
-
-for k=1:M
-    for r=nnzclasses
-        if isinf(nservers(k)) % infinite server
-            Uchain(k,r) = Vchain(k,r)*STchain(k,r)*Xchain(r);
-        else
-            Uchain(k,r) = Vchain(k,r)*STchain(k,r)*Xchain(r)/nservers(k);
-        end
-    end
-end
 
 %% check options
 if ~isfield(options.config,'np_priority')
@@ -79,180 +38,129 @@ switch options.method
     case 'amva.bs'
         options.method = 'bs';
     case 'default'
-        if Nt<2 && any(Nchain<1)
-            options.method = 'fli';
-        elseif Nt<=2
-            options.method = 'bs';
+        if sum(Nchain)<=2 || any(Nchain<1)
+            options.method = 'qd'; % changing to bs degrades accuracy
         else
-            %options.method = 'aql';
             options.method = 'lin'; % seems way worse than aql in test_LQN_8.xml
         end
 end
 
-switch options.method
-    case {'lin','qdlin'}
-        gamma = zeros(K,M,K); % class-based customer fraction corrections
-        tau = zeros(K,K); % throughput difference
-    otherwise
-        gamma = zeros(K,M); % total customer fraction corrections
-        tau = zeros(K,K); % throughput difference
+%% trivial models
+if snHasHomogeneousScheduling(sn,SchedStrategy.INF)
+    options.config.multiserver = 'default';
+    [Q,U,R,T,C,X,lG,totiter] = solver_amvald(sn,Lchain,STchain,Vchain,alpha,Nchain,SCVchain,refstatchain,options);
+    return
 end
 
-%% main loop
-outer_iter = 0;
-while (outer_iter < 2 || max(max(abs(Qchain-QchainOuter_1))) > tol) && outer_iter <= options.iter_max    
-    outer_iter = outer_iter + 1;
-
-    QchainOuter_1 = Qchain;
-    XchainOuter_1 = Xchain;
-    UchainOuter_1 = Uchain;
-
-    if isfinite(Nt) && Nt>0
-        switch options.method
-            case {'aql','qdaql'}
-                line_error(mfilename,'AQL is currently disabled in SolverMVA, please use the SolverJMT implementation (method jmva.aql).');
-            case {'lin','qdlin'}
-                % iteration at population N-1_s
-                for s=1:K
-                    if isfinite(Nchain(s)) % don't recur on open classes
-                        iter_s = 0;
-                        Nchain_s = oner(Nchain,s);
-                        Qchain_s = Qchain * (Nt-1)/Nt;
-                        Xchain_s = Xchain * (Nt-1)/Nt;
-                        Uchain_s = Uchain * (Nt-1)/Nt;
-                        while (iter_s < 2 || max(max(abs(Qchain_s-Qchain_s_1))) > tol) && iter_s <= options.iter_max
-                            iter_s = iter_s + 1;
-
-                            Qchain_s_1 = Qchain_s;
-                            Xchain_s_1 = Xchain_s;
-                            Uchain_s_1 = Uchain_s;
-
-                            [Wchain_s, STeff_s] = solver_amva_iter(sn, gamma, tau, Qchain_s_1, Xchain_s_1, Uchain_s_1, STchain, Vchain, Nchain_s, SCVchain, options);
-                            totiter = totiter + 1;
-
-                            %% update other metrics
-                            for r=nnzclasses
-                                if sum(Wchain_s(:,r)) == 0
-                                    Xchain_s(r) = 0;
-                                else
-                                    if isinf(Nchain_s(r))
-                                        Cchain_s(r) = Vchain(:,r)' * Wchain_s(:,r);
-                                        % X(r) remains constant
-                                    elseif Nchain(r)==0
-                                        Xchain_s(r) = 0;
-                                        Cchain_s(r) = 0;
-                                    else
-                                        Cchain_s(r) = Vchain(:,r)' * Wchain_s(:,r);
-                                        Xchain_s(r) = Nchain_s(r) / Cchain_s(r);
-                                    end
-                                end
-                                for k=1:M
-                                    Rchain_s(k,r) = Vchain(k,r) * Wchain_s(k,r);
-                                    Qchain_s(k,r) = Xchain_s(r) * Vchain(k,r) * Wchain_s(k,r);
-                                    Tchain_s(k,r) = Xchain_s(r) * Vchain(k,r);
-                                    Uchain_s(k,r) = Vchain(k,r) * STeff_s(k,r) * Xchain_s(r);
-                                end
-                            end
-                        end
-
-                        switch options.method
-                            case {'lin'}
-                                for k=1:M
-                                    for r=nnzclasses
-                                        if ~isinf(Nchain(r)) && Nchain_s(r)>0
-                                            gamma(s,k,r) = Qchain_s_1(k,r)./Nchain_s(r) - QchainOuter_1(k,r)./Nchain(r);
-                                        end
-                                    end
-                                end
-                            otherwise
-                                for k=1:M
-                                    gamma(s,k) = sum(Qchain_s_1(k,:),2)/(Nt-1) - sum(QchainOuter_1(k,:),2)/Nt;
-                                end
-                        end
-
-                        for r=nnzclasses
-                            tau(s,r) = Xchain_s_1(r) - XchainOuter_1(r); % save throughput for priority AMVA
-                        end
-                    end
-                end
-        end
+queueIdx = isfinite(sn.nservers);
+delayIdx = isinf(sn.nservers); % TODO: check correctness in models with more than a single delay station
+%% run amva method
+M = sn.nstations;
+%K = sn.nclasses;
+C = sn.nchains;
+Q = zeros(M,C);
+U = zeros(M,C);
+if snHasProductFormExceptMultiClassHeterExpFCFS(sn) && ~snHasLoadDependence(sn) && ~snHasOpenClasses(sn)
+    [~,L0,N,Z0,~,nservers,V] = snGetProductFormChainParams(sn);
+    L = L0;
+    Z = Z0;
+    switch options.config.multiserver
+        case {'default','seidmann'}
+            % apply seidmann
+            L = L ./ repmat(nservers(:),1,C);
+            for j=1:size(L,1) % move componnet of queue j to the first delay
+                Z(1,:) = Z(1,:) + L0(j,:) .* (repmat(nservers(j),1,C) - 1)./ repmat(nservers(j),1,C);
+            end
+        case 'softmin'
+            [Q,U,R,T,C,X,lG,totiter] = solver_amvald(sn,Lchain,STchain,Vchain,alpha,Nchain,SCVchain,refstatchain,options);
+            return
+        otherwise
+            %no-op
     end
-
-    iter = 0;
-    % iteration at population N
-    while (iter < 2 || max(max(abs(Qchain-Qchain_1))) > tol) && iter <= options.iter_max
-        iter = iter + 1;
-
-        Qchain_1 = Qchain;
-        Xchain_1 = Xchain;
-        Uchain_1 = Uchain;
-
-        [Wchain, STeff] = solver_amva_iter(sn, gamma, tau, Qchain_1, Xchain_1, Uchain_1, STchain, Vchain, Nchain, SCVchain, options);
-        totiter = totiter + 1;
-
-        %% update other metrics
-        for r=nnzclasses
-            if sum(Wchain(:,r)) == 0
-                Xchain(r) = 0;
+    
+    switch options.method
+        case 'sqni' % square root non-iterative approximation
+            if sn.nstations==2
+                Nvec = N;
+                Nt = sum(sn.njobs);
+                X = zeros(1,C);
+                for r=1:C
+                    Nr = Nvec(r);
+                    Lr = L(r);
+                    Zr = Z(r);
+                    Nvec_1r = Nvec; Nvec_1r(r)=Nvec_1r(r)-1;
+                    Br = Nvec./(Z+L+L.*(sum(Nvec)-1-sum(Z.*Nvec_1r./(Z+L+L*(sum(Nvec)-2))))).*Z;
+                    Br = sum(Br(setdiff(1:C,r)));
+                    X(r) = (Zr - (Br^2*Lr^2 - 2*Br*Lr^2*Nt - 2*Br*Lr*Zr + Lr^2*Nt^2 + 2*Lr*Nt*Zr - 4*Nr*Lr*Zr + Zr^2)^(1/2) - Br*Lr + Lr*Nt)/(2*Lr*Zr);
+                    U(queueIdx,r) = X(r)*L(r);                    
+                    Q(queueIdx,r) = N(r)-X(r)*Z(r);
+                    %Q(queueIdx,r) = max([N(r)-X(r)*Z(r) (U(queueIdx,:)-sum(U(queueIdx,:))^(Ntot+1))./(1-sum(U(queueIdx,:)))]);
+                    totiter=1;
+                end
+            end
+        case 'bs'
+            [X,Q(queueIdx,:),U(queueIdx,:),~,totiter] = pfqn_bs(L,N,Z,options.tol,options.iter_max,[],sn.schedid(queueIdx));
+        case 'aql'
+            if snHasMultiClassHeterExpFCFS(sn)
+                line_error(mfilename,'AQL cannot handle multi-server stations. Try with the ''default'' or ''lin'' methods.');
+            end
+            [X,Q(queueIdx,:),U(queueIdx,:),~,totiter] = pfqn_aql(L,N,Z,options.tol,options.iter_max);
+        case 'lin'
+            if snHasSingleChain(sn) || max(nservers)==1
+                [Q(queueIdx,:),U(queueIdx,:),~,~,X,totiter] = pfqn_linearizer(L,N,Z,sn.schedid(queueIdx),options.tol,options.iter_max);
             else
-                if isinf(Nchain(r))
-                    Cchain_s(r) = Vchain(:,r)'*Wchain(:,r);
-                    % X(r) remains constant
-                elseif Nchain(r)==0
-                    Xchain(r) = 0;
-                    Cchain_s(r) = 0;
-                else
-                    Cchain_s(r) = Vchain(:,r)'*Wchain(:,r);
-                    Xchain(r) = Nchain(r) / Cchain_s(r);
+                switch options.config.multiserver
+                    %case 'seidmann' % L,Z already scaled by nservers
+                    %[Q(queueIdx,:),U(queueIdx,:),~,~,X,totiter] = pfqn_linearizer(L,N,Z,sn.schedid(queueIdx),options.tol,options.iter_max);
+                    case 'conway'
+                        [Q(queueIdx,:),U(queueIdx,:),~,~,X,totiter] = pfqn_conwayms(L,N,Z,nservers,sn.schedid(queueIdx),options.tol,options.iter_max);
+                    case 'erlang'
+                        [Q(queueIdx,:),U(queueIdx,:),~,~,X,totiter] = pfqn_conwayms_heur(L,N,Z,nservers,sn.schedid(queueIdx),options.tol,options.iter_max);
+                    case 'krzesinski'
+                        [Q(queueIdx,:),U(queueIdx,:),~,~,X,totiter] = pfqn_linearizerms(L,N,Z,nservers,sn.schedid(queueIdx),options.tol,options.iter_max);
+                    case {'default', 'softmin', 'seidmann' }
+                        [Q,U,R,T,C,X,lG,totiter] = solver_amvald(sn,Lchain,STchain,Vchain,alpha,Nchain,SCVchain,refstatchain,options);
+                        return
                 end
             end
-            for k=1:M
-                Rchain(k,r) = Vchain(k,r) * Wchain(k,r);
-                Qchain(k,r) = Xchain(r) * Vchain(k,r) * Wchain(k,r);
-                Tchain(k,r) = Xchain(r) * Vchain(k,r);
-                Uchain(k,r) = Vchain(k,r) * STeff(k,r) * Xchain(r);
+        otherwise
+            switch options.config.multiserver
+                case {'conway','erlang','krzesinski'}
+                    options.config.multiserver = 'default';
             end
-        end
+            [Q,U,R,T,C,X,lG,totiter] = solver_amvald(sn,Lchain,STchain,Vchain,alpha,Nchain,SCVchain,refstatchain,options);
+            return
     end
-end
 
-
-% the next block is a coarse approximation for LD and CD, would need
-% cdterm and qterm in it but these are hidden within the iteration calls
-for k=1:M
-    for r=1:K
-        if Vchain(k,r) * STeff(k,r) >0
-            switch sn.schedid(k)
-                case {SchedStrategy.ID_FCFS, SchedStrategy.ID_SIRO, SchedStrategy.ID_PS, SchedStrategy.ID_LCFSPR, SchedStrategy.ID_DPS, SchedStrategy.ID_HOL}
-                    if sum(Uchain(k,:))>1
-                        Uchain(k,r) = min(1,sum(Uchain(k,:))) * Vchain(k,r) * STeff(k,r) * Xchain(r) / ((Vchain(k,:) .* STeff(k,:)) * Xchain(:));
+    % compute performance at delay, then unapply seidmann if needed
+    for i=1:size(Z0,1)
+        id = find(delayIdx,i);
+        Q(id,:) = Z0(i,:) .* X;
+        U(id,:) = Z0(i,:) .* X;
+        switch options.config.multiserver
+            case {'default','seidmann'}
+                for j=1:size(L,1)
+                    if i == 1 && nservers(j)>1
+                        % un-apply seidmann from first delay and move it to
+                        % the origin queue
+                        jq = find(queueIdx,j);
+                        Q(jq,:) = Q(jq,:) + (L0(j,:) .* (repmat(nservers(j),1,C) - 1)./ repmat(nservers(j),1,C)) .* X;
                     end
-            end
+                end
         end
     end
-end
-
-Rchain = Qchain./Tchain;
-Xchain(~isfinite(Xchain))=0;
-Uchain(~isfinite(Uchain))=0;
-%Qchain(~isfinite(Qchain))=0;
-Rchain(~isfinite(Rchain))=0;
-
-Xchain(Nchain==0)=0;
-Uchain(:,Nchain==0)=0;
-%Qchain(:,Nchain==0)=0;
-Rchain(:,Nchain==0)=0;
-Tchain(:,Nchain==0)=0;
-
-if isempty(sn.lldscaling) && isempty(sn.cdscaling)
-    [Q,U,R,T,C,X] = snDeaggregateChainResults(sn, Lchain, [], STchain, Vchain, alpha, [], [], Rchain, Tchain, [], Xchain);
+    T = V .* repmat(X,M,1);
+    R = Q ./ T;
+    C = N ./ X - Z;
+    lG = NaN;
+    if snHasClassSwitching(sn)
+        [Q,U,R,T,C,X] = snDeaggregateChainResults(sn, Lchain, [], STchain, Vchain, alpha, [], [], R, T, [], X);
+    end
 else
-    [Q,U,R,T,C,X] = snDeaggregateChainResults(sn, Lchain, [], STchain, Vchain, alpha, [], Uchain, Rchain, Tchain, [], Xchain);
+    switch options.config.multiserver
+        case {'conway','erlang','krzesinski'}
+            options.config.multiserver = 'default';
+    end
+    [Q,U,R,T,C,X,lG,totiter] = solver_amvald(sn,Lchain,STchain,Vchain,alpha,Nchain,SCVchain,refstatchain,options);
 end
-
-% estimate normalizing constant for closed classes
-ccl = isfinite(Nchain);
-Nclosed = Nchain(ccl);
-Xclosed = Xchain(ccl);
-lG = - Nclosed(Xclosed>options.tol) * log(Xclosed(Xclosed>options.tol))'; % asymptotic approximation
 end

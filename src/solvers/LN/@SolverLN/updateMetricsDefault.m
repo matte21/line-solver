@@ -68,7 +68,6 @@ for r=1:size(self.call_classes_updmap,1)
     cidx = self.call_classes_updmap(r,2);
     eidx = lqn.callpair(cidx,2);
     if self.call_classes_updmap(r,3) > 1
-
         self.servtproc{eidx} = Exp.fitMean(self.servt(eidx));
     end
 end
@@ -101,8 +100,7 @@ for t = 1:lqn.ntasks
             caller_idxclass = self.ensemble{self.idxhash(tidx)}.attribute.tasks(1+find(self.ensemble{self.idxhash(tidx)}.attribute.tasks(2:end,2) == caller_idx),1);
             caller_tput(caller_idx-lqn.tshift)  = sum(self.results{end,self.idxhash(tidx)}.TN(self.ensemble{self.idxhash(tidx)}.attribute.clientIdx,caller_idxclass));
         end
-        task_tput = sum(caller_tput);
-        self.ptaskcallers(tidx,(lqn.tshift+1):(lqn.tshift+lqn.ntasks))=caller_tput/task_tput;
+        self.ptaskcallers(tidx,(lqn.tshift+1):(lqn.tshift+lqn.ntasks))=caller_tput/sum(caller_tput);
     end
 end
 
@@ -114,8 +112,7 @@ for hidx = 1:lqn.nhosts
         caller_idxclass = self.ensemble{self.idxhash(hidx)}.attribute.tasks(find(self.ensemble{self.idxhash(hidx)}.attribute.tasks(:,2) == caller_idx),1);
         caller_tput(caller_idx-lqn.tshift)  = caller_tput(caller_idx-lqn.tshift) + sum(self.results{end,self.idxhash(hidx)}.TN(self.ensemble{self.idxhash(hidx)}.attribute.clientIdx,caller_idxclass));
     end
-    host_tput = sum(caller_tput);
-    self.ptaskcallers(hidx,(lqn.tshift+1):(lqn.tshift+lqn.ntasks)) = caller_tput/host_tput;
+    self.ptaskcallers(hidx,(lqn.tshift+1):(lqn.tshift+lqn.ntasks)) = caller_tput/sum(caller_tput);
 end
 
 % impute call probability using a DTMC random walk on the taskcaller graph

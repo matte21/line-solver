@@ -28,7 +28,7 @@ resultFilename = [fpath,filesep,fname,'.lqxo'];
 if self.options.verbose
     line_printf('\nParsing LQNS result file: %s',resultFilename);
     if self.options.keep
-        line_printf('\nLQNS result file available at: %s',resultFilename);
+        %line_printf('\nLQNS result file available at: %s',resultFilename);
     end
 end
 

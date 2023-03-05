@@ -147,8 +147,12 @@ classdef SolverLN < LayeredNetworkSolver & EnsembleSolver
         function [result, runtime] = analyze(self, it, e)
             % [RESULT, RUNTIME] = ANALYZE(IT, E)
             T0 = tic;
-            result = struct();
-            [result.QN, result.UN, result.RN, result.TN, result.AN, result.WN] = self.solvers{e}.getAvg();
+            result = struct();            
+            %if it>2*length(self.model.ensemble)
+                [result.QN, result.UN, result.RN, result.TN, result.AN, result.WN] = self.solvers{e}.getAvg();
+            %else
+            %    [result.QN, result.UN, result.RN, result.TN, result.AN, result.WN] = SolverMVA(self.model.ensemble{e},'sqni').getAvg();
+            %iveend
             runtime = toc(T0);
         end
 
@@ -183,17 +187,17 @@ classdef SolverLN < LayeredNetworkSolver & EnsembleSolver
                 switch self.solvers{e}.name
                     case {'SolverMVA', 'SolverNC'} %leaner than refreshService, no need to refresh phases
                         % note: this does not refresh the sn.proc field, only sn.rates and sn.scv
-			switch self.options.method
-				case 'default'
-		                        refreshRates(self.ensemble{e});
-				case 'moment3'
-                        		refreshService(self.ensemble{e});
-			end
+            			switch self.options.method
+            				case 'default'
+                                refreshRates(self.ensemble{e});
+            				case 'moment3'
+                                refreshService(self.ensemble{e});
+            			end
                     otherwise
                         refreshService(self.ensemble{e});
                 end
                 self.solvers{e}.reset(); % commenting this out des not seem to produce a problem, but it goes faster with it
-            end            
+            end
 
             % this is required to handle population changes due to interlocking
             if self.options.config.interlocking
@@ -207,7 +211,7 @@ classdef SolverLN < LayeredNetworkSolver & EnsembleSolver
                 for e=1:length(self.ensemble)
                     self.solvers{e}.setDoChecks(false);
                 end
-            end                          
+            end
         end
 
 
@@ -285,7 +289,7 @@ classdef SolverLN < LayeredNetworkSolver & EnsembleSolver
             % List valid methods for this solver
             allMethods = {'default','moment3','java','jline'};
         end
-        
+
         function [bool, featSupported] = supports(model)
             % [BOOL, FEATSUPPORTED] = SUPPORTS(MODEL)
             ensemble = model.getEnsemble;

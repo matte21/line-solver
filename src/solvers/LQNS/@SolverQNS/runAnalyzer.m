@@ -26,19 +26,56 @@ end
 
 method = options.method;
 
+switch options.method
+    case 'conway'
+        options.config.multiserver = 'conway';
+    case 'rolia'
+        options.config.multiserver = 'rolia';
+    case 'zhou'
+        options.config.multiserver = 'zhou';
+    case 'suri'
+        options.config.multiserver = 'suri';
+    case 'reiser'
+        options.config.multiserver = 'reiser';
+    case 'schmidt'
+        options.config.multiserver = 'schmidt';
+    case 'default'
+        options.config.multiserver = 'rolia';        
+end
+
 if self.model.hasProductFormSolution() %|| sn.nstations > 2
     [QN,UN,RN,TN,CN,XN,runtime] = solver_qns_analyzer(sn, options);
 else
     lqnmodel=QN2LQN(self.model);
     lqn = lqnmodel.getStruct;
     tic;
-    AvgTable = SolverLQNS(lqnmodel).getAvgTable;
+    lqnsoptions = SolverLQNS.defaultOptions;
+    lqnsoptions.verbose = false;
+    switch options.method
+        case 'conway'
+            lqnsoptions.config.multiserver = 'conway';
+        case 'rolia'
+            lqnsoptions.config.multiserver = 'rolia';
+        case 'zhou'
+            lqnsoptions.config.multiserver = 'zhou';
+        case 'suri'
+            lqnsoptions.config.multiserver = 'suri';
+        case 'reiser'
+            lqnsoptions.config.multiserver = 'reiser';
+        case 'schmidt'
+            lqnsoptions.config.multiserver = 'schmidt';
+    end
+    AvgTable = SolverLQNS(lqnmodel,lqnsoptions).getAvgTable;
     runtime=toc;
     for r=1:sn.nclasses
         for i=1:sn.nstations
             t = lqn.ashift + r + (i-1)*sn.nclasses;
             QN(i,r) = AvgTable.QLen(t);
-            UN(i,r) = AvgTable.Util(t);
+            if ~isinf(sn.nservers(i))
+                UN(i,r) = AvgTable.Util(t)/sn.nservers(i);
+            else
+                UN(i,r) = AvgTable.Util(t);
+            end
             RN(i,r) = AvgTable.RespT(t);
             WN(i,r) = AvgTable.ResidT(t);
             TN(i,r) = AvgTable.Tput(t);

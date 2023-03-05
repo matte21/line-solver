@@ -19,14 +19,12 @@ switch method
                     if range(ST(i,nnzClasses))>0 || (max(SCV(i,nnzClasses))>1 + GlobalConstants.FineTol || min(SCV(i,nnzClasses))<1 - GlobalConstants.FineTol) % check if non-product-form
                         scva(i) = 1; %use a M/G/k approximation
                         scvs(i) = (SCV(i,nnzClasses)*T(i,nnzClasses)')/sum(T(i,nnzClasses));
-
-                        nservers(i) = 1;
                         % multi-server asymptotic decay rate
                         gamma(i) = (rho(i)^nservers(i)+rho(i))/2;
 
                         if scvs(i) > 1-1e-6 && scvs(i) < 1+1e-6 && nservers(i)==1
                             eta(i) = rho(i);
-                            %continue % M/M/1
+                            %continue % use M/M/1
                         else
                             % single-server (diffusion approximation, Kobayashi JACM)
                             eta(i) = exp(-2*(1-rho(i))/(scvs(i)+scva(i)*rho(i)));

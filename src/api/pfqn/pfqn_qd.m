@@ -1,7 +1,13 @@
-function [Q,X,U,iter] = pfqn_amvaqd(L,N,ga,be,Q0)
+function [Q,X,U,iter] = pfqn_qd(L,N,ga,be,Q0)
 [M,R]=size(L);
 
 Q = zeros(M,R);
+if nargin <3
+    ga = @(A) ones(M,1);
+end
+if nargin <4
+    be = @(A) ones(M,R);
+end
 if nargin < 5
     Q = L ./ repmat(sum(L,1),M,1) .* repmat(N,M,1);
 else

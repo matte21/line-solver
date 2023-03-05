@@ -5,6 +5,10 @@ classdef SolverAuto
     %Copyright (c) 2012-2023, Imperial College London
     %All rights reserved.
 
+    properties (Hidden, Access = public)
+        enableChecks;
+    end
+
     properties (Hidden)
         % Network solvers
         CANDIDATE_MVA = 1;
@@ -41,14 +45,14 @@ classdef SolverAuto
             self.model = model;
             self.name = 'SolverAuto';
             if self.options.verbose
-                line_printf('Running LINE version %s',model.getVersion);
+                %line_printf('Running LINE version %s',model.getVersion);
             end
             switch self.options.method
                 case 'mam'
                     self.options.method = 'default';
                     self.solvers{1,1} = SolverMAM(model,self.options);
                 case 'mva'
-                    self.options.method = 'default';
+                    self.options.method = 'qd';
                     self.solvers{1,1} = SolverMVA(model,self.options);
                 case 'nc'
                     self.options.method = 'default';
@@ -71,7 +75,7 @@ classdef SolverAuto
                 case 'lqns'
                     self.options.method = 'default';
                     self.solvers{1,1} = SolverLQNS(model,self.options);
-                case 'default'
+                case {'default','ai','nn','heur'}
                     %solvers sorted from fastest to slowest
                     self.solvers = {};
                     switch class(model)
@@ -136,8 +140,23 @@ classdef SolverAuto
         solver = chooseSolverHeur(self, method);
         % AI-based choice solver for Avg* methods
         solver = chooseAvgSolverAI(self);
+        solver = chooseAvgSolverNN(self); % AI v2
         % Heuristic choice of solver for Avg* methods
         solver = chooseAvgSolverHeur(self);
+
+    end
+
+    methods
+        function reset(self)
+            for s=1:length(self.solvers)
+                self.solvers{s}.reset();
+            end
+        end
+        function setDoChecks(self,bool)
+            for s=1:length(self.solvers)
+                self.solvers{s}.setDoChecks(bool);
+            end
+        end
     end
 
     methods

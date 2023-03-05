@@ -54,7 +54,7 @@ for c=1:sn.nchains
             D = map_normalize({Q-D1, D1});
 
             nonZeroRates = abs(Q(Q~=0));
-            nonZeroRates = nonZeroRates( nonZeroRates > GlobalConstantsGlobalConstants.FineTol );
+            nonZeroRates = nonZeroRates( nonZeroRates > GlobalConstants.FineTol );
             T = abs(100/min(nonZeroRates)); % solve ode until T = 100 events with the slowest rate
             dT = T/100000; % solve ode until T = 100 events with the slowest rate
             tset = 0:dT:T;

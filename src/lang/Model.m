@@ -43,7 +43,6 @@ classdef Model < Copyable
 
         function self = setName(self, name)
             % SELF = SETNAME(NAME)
-
             self.name = name;
         end
 

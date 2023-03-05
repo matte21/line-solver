@@ -1,6 +1,6 @@
 clearvars -except exampleName;
 N = 4; % number of jobs
-c = 2; % number of servers
+c = 3; % number of servers
 %%
 model = Network('model');
 node{1} = Delay(model, 'Delay');
@@ -50,7 +50,7 @@ ldmodel.link(P);
 
 lldAvgTableCTMC=SolverCTMC(ldmodel).getAvgTable %exact
 
-lldAvgTableNC=SolverNC(ldmodel).getAvgTable %exact
+lldAvgTableNC=SolverNC(ldmodel,'method','exact').getAvgTable %exact
 lldAvgTableRD=SolverNC(ldmodel,'method','rd').getAvgTable
 lldAvgTableNRP=SolverNC(ldmodel,'method','nr.probit').getAvgTable
 lldAvgTableNRL=SolverNC(ldmodel,'method','nr.logit').getAvgTable

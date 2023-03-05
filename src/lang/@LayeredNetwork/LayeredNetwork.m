@@ -70,6 +70,7 @@ classdef LayeredNetwork < Model & Ensemble
 
         plot(self, showTaskGraph)
         plotGraph(self, useNodes)
+        plotGraphSimple(self, useNodes)
         plotTaskGraph(self, useNodes)
     end
 
@@ -169,8 +170,12 @@ classdef LayeredNetwork < Model & Ensemble
 
     methods (Static)
         function myLN = readXML(filename, verbose)
+            if nargin < 2
+                verbose = false;
+            end
             myLN = LayeredNetwork.parseXML(filename, verbose);
         end
+        
         myLN = parseXML(filename, verbose)
 
         function myLN = fromNetwork(model)

@@ -1,6 +1,5 @@
 function [Gn,lGn]=pfqn_ca(L,N,Z)
 [M,R]=size(L);
-
 if M==0
     lGn = - sum(factln(N)) + sum(N.*log(sum(Z,1)));
     Gn = exp(lGn);
@@ -104,8 +103,13 @@ if sum(n)==0
 end
 f=0;
 for r=1:R
-    f=f+log(Z(r))*n(r);
-    f=f-gammaln(1+n(r));
+    if Z(r)>0
+        f=f+log(Z(r))*n(r);
+        f=f-gammaln(1+n(r));
+    elseif n(r)>0
+        f = 0;
+        return
+    end
 end
 f=exp(f);
 end

@@ -1,6 +1,4 @@
-% UNTITLED   Generate static library pfqn_amvabs from pfqn_amvabs.
-% 
-% Script generated from project 'pfqn_amvabs.prj' on 31-Dec-2022.
+% UNTITLED   Generate static library pfqn_bs.
 % 
 % See also CODER, CODER.CONFIG, CODER.TYPEOF, CODEGEN.
 

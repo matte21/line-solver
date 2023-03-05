@@ -1,16 +1,16 @@
 function [G,lG,XN,QN]=pfqn_mom(Din,Nin,Zin)
-try
-    import DataStructures.*; %#ok<SIMPT>
-    import QueueingNet.*; %#ok<SIMPT>
-    import DataStructures.*; %#ok<SIMPT>
-    import Utilities.*; %#ok<SIMPT>
-catch
-    javaaddpath(which('pfqn_nclib.jar'));
-    import DataStructures.*; %#ok<SIMPT>
-    import QueueingNet.*; %#ok<SIMPT>
-    import DataStructures.*; %#ok<SIMPT>
-    import Utilities.*; %#ok<SIMPT>
-end
+%try % now in lineStart
+import DataStructures.*; %#ok<SIMPT>
+import QueueingNet.*; %#ok<SIMPT>
+import DataStructures.*; %#ok<SIMPT>
+import Utilities.*; %#ok<SIMPT>
+% catch
+%     javaaddpath(which('pfqn_nclib.jar'));
+%     import DataStructures.*; %#ok<SIMPT>
+%     import QueueingNet.*; %#ok<SIMPT>
+%     import DataStructures.*; %#ok<SIMPT>
+%     import Utilities.*; %#ok<SIMPT>
+% end
 
 Din=Din(sum(Din,2)>GlobalConstants.FineTol,:);
 % rescale

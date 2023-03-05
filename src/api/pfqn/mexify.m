@@ -1,6 +1,4 @@
-% UNTITLED   Generate static library pfqn_amvabs from pfqn_amvabs.
-% 
-% Script generated from project 'pfqn_amvabs.prj' on 31-Dec-2022.
+% UNTITLED   Generate static library pfqn_bs 
 % 
 % See also CODER, CODER.CONFIG, CODER.TYPEOF, CODEGEN.
 
@@ -20,7 +18,7 @@ ARGS{1}{4} = coder.typeof(0); %tol
 ARGS{1}{5} = coder.typeof(0); %maxiter
 ARGS{1}{6} = coder.typeof(0,[Inf Inf],[1 1]); %QN
 ARGS{1}{7} = coder.typeof(0,[Inf Inf],[1 1]); %weight
-codegen -config cfg pfqn_amvabs -args ARGS{1}
+codegen -config cfg pfqn_bs -args ARGS{1}
 
 %% 
 %ARGS = cell(1,1);

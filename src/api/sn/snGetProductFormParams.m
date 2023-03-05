@@ -1,5 +1,5 @@
-function [lambda,D,N,Z,mu,S]= snGetProductFormParams(sn)
-% [LAMBDA,D,N,Z,MU,S]= NETWORKSTRUCT_GETPRODUCTFORMPARAMS()
+function [lambda,D,N,Z,mu,S,V]= snGetProductFormParams(sn)
+% [LAMBDA,D,N,Z,MU,S,V]= SNGETPRODUCTFORMPARAMS()
 
 % mu also returns max(S) elements after population |N| as this is
 % required by MVALDMX
@@ -21,7 +21,7 @@ end
 
 D = zeros(Mq,R);
 Nct = sum(N(isfinite(N)));
-mu = ones(Mq, Nct+max(S(isfinite(S))));
+mu = ones(Mq, ceil(Nct)+max(S(isfinite(S))));
 for i=1:Mq
     for r=1:R
         c = find(sn.chains(:,r),1);
@@ -44,4 +44,5 @@ for i=1:Mz
         end
     end
 end
+V=cellsum(sn.visits);
 end

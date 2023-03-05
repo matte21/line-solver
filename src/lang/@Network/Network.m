@@ -407,29 +407,11 @@ classdef Network < Model
             % Z: think times
             % mu: load-dependent rates
             % S: number of servers
-
-
+            
             % mu also returns max(S) elements after population |N| as this is
             % required by MVALDMX
 
-            qn = self.getStruct;
-            [lambda,~,N,~,mu,~] = snGetProductFormParams(qn);
-            [Dchain,~,~,alpha,Nchain,~,~] = snGetDemandsChain(qn);
-            for c=1:qn.nchains
-                lambda_chains(c) = sum(lambda(qn.inchain{c}));
-                if qn.refclass(c)>0
-                    D_chains(:,c) = Dchain(find(isfinite(qn.nservers)),c)/alpha(qn.refstat(c),qn.refclass(c));
-                    Z_chains(:,c) = Dchain(find(isinf(qn.nservers)),c)/alpha(qn.refstat(c),qn.refclass(c));
-                else
-                    D_chains(:,c) = Dchain(find(isfinite(qn.nservers)),c);
-                    Z_chains(:,c) = Dchain(find(isinf(qn.nservers)),c);
-                end
-            end
-            S = qn.nservers(find(isfinite(qn.nservers)));
-            lambda = lambda_chains;
-            N = Nchain;
-            D = D_chains;
-            Z = Z_chains;
+            [lambda,D,N,Z,mu,S]= snGetProductFormChainParameters(self.getStruct);
         end
 
         function statefulnodes = getStatefulNodes(self)
@@ -1000,16 +982,22 @@ classdef Network < Model
 
         function model = cyclicPs(N,D)
             % MODEL = CYCLICPS(N,D)
-
-            model = Network.cyclicPsInf(N,D,[]);
+            M  = size(D,1);
+            if nargin<4
+                S = ones(M,1);
+            end
+            model = Network.cyclicPsInf(N,D,[],S);
         end
 
-        function model = cyclicPsInf(N,D,Z)
-            % MODEL = CYCLICPSINF(N,D,Z)
+        function model = cyclicPsInf(N,D,Z,S)
+            % MODEL = CYCLICPSINF(N,D,Z,S)
             if nargin<3
                 Z = [];
             end
             M  = size(D,1);
+            if nargin<4
+                S = ones(M,1);
+            end
             Mz = size(Z,1);
             strategy = cell(M+Mz,1);
             for i=1:Mz
@@ -1018,22 +1006,29 @@ classdef Network < Model
             for i=1:M
                 strategy{Mz+i} = SchedStrategy.PS;
             end
-            model = Network.cyclic(N,[Z;D],strategy);
+            model = Network.cyclic(N,[Z;D],strategy,[Inf*ones(size(Z,1),1);S]);
         end
 
-        function model = cyclicFcfs(N,D)
-            % MODEL = CYCLICFCFS(N,D)
-
-            model = Network.cyclicFcfsInf(N,D,[]);
+        function model = cyclicFcfs(N,D,S)
+            % MODEL = CYCLICFCFS(N,D,S)
+            M  = size(D,1);
+            if nargin<4
+                S = ones(M,1);
+            end
+            model = Network.cyclicFcfsInf(N,D,[],S);
         end
 
-        function model = cyclicFcfsInf(N,D,Z)
-            % MODEL = CYCLICFCFSINF(N,D,Z)
+        function model = cyclicFcfsInf(N,D,Z,S)
+            % MODEL = CYCLICFCFSINF(N,D,Z,S)
 
             if nargin<3%~exist('Z','var')
                 Z = [];
             end
             M  = size(D,1);
+            if nargin<4
+                S = ones(M,1);
+            end
+
             Mz = size(Z,1);
             strategy = {};
             for i=1:Mz
@@ -1042,15 +1037,16 @@ classdef Network < Model
             for i=1:M
                 strategy{Mz+i} = SchedStrategy.FCFS;
             end
-            model = Network.cyclic(N,[Z;D],strategy);
+            model = Network.cyclic(N,[Z;D],strategy,[Inf*ones(size(Z,1),1);S]);
         end
 
-        function model = cyclic(N,D,strategy)
-            % MODEL = CYCLIC(N,D,STRATEGY)
+        function model = cyclic(N,D,strategy,S)
+            % MODEL = CYCLIC(N,D,STRATEGY,S)
 
             % L(i,r) - demand of class r at station i
             % N(r) - number of jobs of class r
             % strategy(i) - scheduling strategy at station i
+            % S(i) - number of servers at station i
             model = Network('Model');
             [M,R] = size(D);
             node = cell(M,1);
@@ -1063,6 +1059,7 @@ classdef Network < Model
                     otherwise
                         nQ = nQ + 1;
                         node{i} = Queue(model, ['Queue',num2str(nQ)], strategy{i});
+                        node{i}.setNumberOfServers(S(i));
                 end
             end
             P = cellzeros(R,M);

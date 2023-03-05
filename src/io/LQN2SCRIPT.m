@@ -66,13 +66,13 @@ for a=1:sn.nacts
     end
     if sn.sched{tidx} ~= SchedStrategy.ID_REF % ref tasks don't reply
         repliesToStr = '';
-        repliesTo = find(sn.replygraph(a,:)); % index of entry
+        repliesTo = find(sn.replygraph(aidx,:))-sn.eshift; % index of entry
         if ~isempty(repliesTo)
             if ~sn.isref(sn.parent(sn.eshift+repliesTo))
                 repliesToStr = sprintf('.repliesTo(E{%d})',repliesTo);
             end
         end
-    end
+    end    
     callStr = '';
     if ~isempty(sn.callpair)
         cidxs = find(sn.callpair(:,1)==aidx);

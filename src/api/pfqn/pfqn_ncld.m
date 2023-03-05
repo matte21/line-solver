@@ -4,7 +4,6 @@ function [lG,G] = pfqn_ncld(L,N,Z,mu,varargin)
 options = Solver.parseOptions(varargin, SolverNC.defaultOptions);
 % backup initial parameters
 
-X=[]; Q=[];
 mu = mu(:,1:sum(N));
 % first remove empty classes
 nnzClasses = find(N);
@@ -79,7 +78,11 @@ N = N(nonzeroDemandClasses);
 Z = Z(:,nonzeroDemandClasses);
 scalevecz = scalevec(nonzeroDemandClasses);
 % compute G for classes No with non-zero demand
-[lGnnzdem] = compute_norm_const_ld(L, N, Z, mu, options);
+if any(N<0)
+    lGnnzdem = 0;
+else
+    [lGnnzdem] = compute_norm_const_ld(L, N, Z, mu, options);
+end
 % scale back to original demands
 lG = lGnnzdem + lGzdem + N*log(scalevecz)';
 G = exp(lG);
@@ -87,7 +90,7 @@ end
 
 function [lG] = compute_norm_const_ld(L,N,Z,mu,options)
 % LG = COMPUTE_NORM_CONST_LD(L,N,Z,OPTIONS)
-[~,R] = size(L);
+[M,R] = size(L);
 switch options.method
     case {'default','exact'}
         D = size(Z,1); % number of delays
@@ -104,6 +107,13 @@ switch options.method
         [lG] = pfqn_nrp(L, N, Z, mu, options);
     case {'nrl','nr.logit'}
         [lG] = pfqn_nrl(L, N, Z, mu, options);
+    case 'comomld'
+        if M<=2 % case M = 2 handled inside the function
+            [~,lG]= pfqn_comomrm_ld(L, N, Z, mu, options);
+        else
+            line_warning(mfilename,'Load-dependent CoMoM is available only in models with a delay and m identical stations, running the ''rd'' algorithm instead.');
+            [lG] = pfqn_rd(L, N, Z, mu, options);
+        end
     otherwise
         line_error(mfilename,sprintf('Unrecognized method for solving load-dependent models: %s',options.method));
 end

@@ -132,6 +132,7 @@ function varargout = MMAPPH1FCFS(D, sigma, S, varargin)
         ro = ro + lambda(k)/mu(k);
     end
     alpha = theta*Da/sum(lambda);
+    
     D0i = inv(-D0);
 
     Sa = S{1};

@@ -3,7 +3,7 @@ model = Network('model');
 
 node{1} = Delay(model, 'Delay');
 node{2} = Queue(model, 'Queue1', SchedStrategy.PS);
-%node{2}.setNumberOfServers(2);
+node{2}.setNumberOfServers(2);
 
 jobclass{1} = ClosedClass(model, 'Class1', 2, node{1}, 0);
 jobclass{2} = ClosedClass(model, 'Class2', 0, node{1}, 0);
@@ -34,7 +34,7 @@ P{3,2} = zeros(M);
 P{3,3} = circul(M);
 
 model.link(P);
-
+%%
 % This part illustrates the execution of different solvers
 solver = {};
 solver{end+1} = SolverCTMC(model);

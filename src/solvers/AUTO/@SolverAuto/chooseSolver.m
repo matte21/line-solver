@@ -6,5 +6,7 @@ switch self.options.method
         solver = chooseSolverHeur(self, method);
     case 'ai'
         solver = chooseSolverAI(self, method);
+    case 'nn'
+        solver = chooseSolverNN(self, method);
 end
 end
