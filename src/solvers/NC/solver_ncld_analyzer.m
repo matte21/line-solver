@@ -1,9 +1,10 @@
-function [Q,U,R,T,C,X,lG,runtime,iter] = solver_ncld_analyzer(sn, options)
-% [Q,U,R,T,C,X,LG,RUNTIME] = SOLVER_NCLD_ANALYZER(QN, OPTIONS)
+function [Q,U,R,T,C,X,lG,runtime,iter,method] = solver_ncld_analyzer(sn, options)
+% [Q,U,R,T,C,X,LG,RUNTIME,ITER,METHOD] = SOLVER_NCLD_ANALYZER(QN, OPTIONS)
 
 % Copyright (c) 2012-2023, Imperial College London
 % All rights reserved.
 Tstart = tic;
+method = options.method;
 
 nservers = sn.nservers;
 if max(nservers(nservers<Inf))>1 & any(isinf(sn.njobs)) & strcmpi(options.method,'exact') %#ok<AND2>
@@ -19,7 +20,7 @@ if any(eta>GlobalConstants.FineTol)
     sn_floor = sn; sn_floor.njobs = floor(sn.njobs);
     [Qf,Uf,Rf,Tf,Cf,Xf,lGf,~,iterf] = solver_ncld(sn_floor, options);
     sn_ceil = sn; sn_ceil.njobs = ceil(sn.njobs);
-    [Qc,Uc,Rc,Tc,Cc,Xc,lGc,~,iterc] = solver_ncld(sn_ceil, options);
+    [Qc,Uc,Rc,Tc,Cc,Xc,lGc,~,iterc,method] = solver_ncld(sn_ceil, options);
     Q = Qf +  eta .* (Qc-Qf);
     U = Uf +  eta .* (Uc-Uf);
     R = Rf +  eta .* (Rc-Rf);
@@ -29,8 +30,7 @@ if any(eta>GlobalConstants.FineTol)
     lG = lGf +  eta .* (lGf-lGc);
     iter = iterc + iterf;
 else
-    [Q,U,R,T,C,X,lG,~,iter] = solver_ncld(sn, options);
+    [Q,U,R,T,C,X,lG,~,iter,method] = solver_ncld(sn, options);
 end
 runtime = toc(Tstart);
-
 end

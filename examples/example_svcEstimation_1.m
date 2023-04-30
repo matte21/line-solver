@@ -1,3 +1,5 @@
+clear node jobclass solver AvgTable
+
 clearvars -except exampleName; 
 model = Network('model');
 

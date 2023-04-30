@@ -1,4 +1,8 @@
 function ret = tget(AvgTable,station,class)
+if GlobalConstants.DummyMode
+    ret = [];
+    return
+end
 if ~isstr(station) % inputs are objects
     if nargin==2
         if isa(station,'JobClass')

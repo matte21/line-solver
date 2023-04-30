@@ -1,4 +1,5 @@
-clearvars -except exampleName; 
+clear node jobclass
+
 % This example illustrates the automatic checks of the model features
 model = Network('model');
 
@@ -7,7 +8,6 @@ node{2} = Queue(model, 'Queue1', SchedStrategy.PS);
 node{3} = Queue(model, 'Queue2', SchedStrategy.PS);
 node{4} = Queue(model, 'Queue3', SchedStrategy.PS);
 node{5} = Queue(model, 'Queue4', SchedStrategy.PS);
-
 
 jobclass{1} = ClosedClass(model, 'Class1', 1, node{1}, 0);
 jobclass{2} = ClosedClass(model, 'Class2', 2, node{1}, 0);

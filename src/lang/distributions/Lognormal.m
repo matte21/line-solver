@@ -1,4 +1,4 @@
-classdef Lognormal < ContinuousDistrib
+classdef Lognormal < ContinuousDistribution
     % The Lognormal statistical distribution
     %
     % Copyright (c) 2012-2023, Imperial College London
@@ -10,7 +10,7 @@ classdef Lognormal < ContinuousDistrib
             
             % Constructs a Lognormal distribution with given mu and sigma
             % parameters
-            self@ContinuousDistrib('Lognormal',2,[0,Inf]);
+            self@ContinuousDistribution('Lognormal',2,[0,Inf]);
             if sigma < 0
                 line_error(mfilename,'sigma parameter must be >= 0.0');
             end

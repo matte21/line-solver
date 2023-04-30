@@ -1,4 +1,5 @@
-clearvars -except exampleName; 
+clear node jobclass;
+
 figure;
 label = {};
 nJobs = [1,4,8];

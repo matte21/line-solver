@@ -1,6 +1,11 @@
 function Pnir = getProb(self, node, state)
 % PNIR = GETPROB(NODE, STATE)
 
+if GlobalConstants.DummyMode
+    Pnir = NaN;
+    return
+end
+
 if nargin<2 %~exist('node','var')
     line_error(mfilename,'getProb requires to pass a parameter the station of interest.');
 end

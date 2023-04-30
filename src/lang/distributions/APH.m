@@ -52,7 +52,7 @@ classdef APH < MarkovianDistribution
             SCV = varargin{2};
             SKEW = varargin{3};
             if length(varargin) > 3
-                line_warning(mfilename,'Warning: update in %s distributions can only handle 3 moments, ignoring higher-order moments.',class(self));
+                line_warning(mfilename,'Update in %s distributions can only handle 3 moments, ignoring higher-order moments.\n',class(self));
             end
             e1 = MEAN;
             e2 = (1+SCV)*e1^2;
@@ -72,7 +72,7 @@ classdef APH < MarkovianDistribution
             e2 = varargin{2};
             e3 = varargin{3};
             if length(varargin) > 3
-                line_warning(mfilename,'Warning: update in %s distributions can only handle 3 moments, ignoring higher-order moments.',class(self));
+                line_warning(mfilename,'Update in %s distributions can only handle 3 moments, ignoring higher-order moments.\n',class(self));
             end
             try
                 [alpha,T] = APHFrom3Moments([e1,e2,e3]);
@@ -174,6 +174,8 @@ classdef APH < MarkovianDistribution
             e1 = MEAN;
             e2 = (1+SCV)*e1^2;
             [alpha,T] = APHFrom2Moments([e1,e2]);
+            %e3=(3/2+1e-3)*e2^2/e1;            
+            %[alpha,T] = APHFrom3Moments([e1,e2,e3]);
             self.setParam(1, 'alpha', alpha);
             self.setParam(2, 'T', T);
             self.immediate = NaN;
@@ -263,11 +265,13 @@ classdef APH < MarkovianDistribution
 
         function ex = fitMeanAndSCV(MEAN, SCV)
             % EX = FITMEANANDSCV(MEAN, SCV)
-
+            
             % Fit the distribution from first three central moments (mean,
             % variance, skewness)
-            if MEAN <= GlobalConstants.FineTol
+            if MEAN <= GlobalConstants.FineTol 
                 ex = Exp(Inf);                
+            elseif SCV==1.0
+                ex = Exp(1/MEAN);                
             else
                 ex = APH(1.0, [1]);
                 ex.updateMeanAndSCV(MEAN, SCV);

@@ -22,6 +22,6 @@ sn = self.getStruct;
 writeJSIM(self, sn);
 %            if options.verbose
 fileName = [getFilePath(self),filesep, getFileName(self), '.jsim'];
-line_printf('\nJMT Model: %s',fileName);
+line_printf('JMT Model: %s\n',fileName);
 jsimgView(fileName);
 end

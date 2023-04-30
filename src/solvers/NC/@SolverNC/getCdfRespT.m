@@ -17,7 +17,7 @@ fcfsNodeIds = find(sn.schedid == SchedStrategy.ID_FCFS);
 delayNodeIds = find(sn.schedid == SchedStrategy.ID_INF);
 if ~isempty(fcfsNodes)
     T = max(sum(N) * mean(1./sn.rates(fcfsNodes,:)));
-    tset = logspace(-5,log10(T),100);
+    tset = logspace(0,2*log10(T),100);
     rates = sn.rates(sn.schedid == SchedStrategy.ID_FCFS,:);
     switch config.algorithm
         case 'exact'
@@ -38,7 +38,7 @@ if ~isempty(fcfsNodes)
     runtime = toc(T0);
     self.setDistribResults(RD, runtime);
 else
-    line_warning(mfilename, 'getCdfRespT applies only to FCFS nodes.');
+    line_warning(mfilename, 'getCdfRespT applies only to FCFS nodes.\n');
     return
 end
 end

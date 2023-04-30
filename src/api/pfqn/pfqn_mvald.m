@@ -1,6 +1,19 @@
 function [XN,QN,UN,CN,lGN,isNumStable,pi]=pfqn_mvald(L,N,Z,mu,stabilize)
 % [XN,QN,UN,CN,LGN]=PFQN_MVALD(L,N,Z,MU)
 
+[M,R]=size(L); % get number of queues (M) and classes (R)
+
+XN = zeros(M,R);
+QN = zeros(M,R);
+UN = zeros(M,R);
+CN = zeros(M,R);
+WN = zeros(M,R);
+lGN = -Inf;
+
+if any(N<0)
+    isNumStable = true;
+    return
+end
 % stabilize ensures that probabilities do not become negative
 if nargin<5
     stabilize = true;
@@ -8,10 +21,8 @@ end
 
 warn = true;
 isNumStable = true;
-[M,R]=size(L); % get number of queues (M) and classes (R)
 Xs=zeros(R,prod(N+1)); % throughput for a model with station i less
 pi=ones(M,sum(N)+1,prod(N+1)); % marginal queue-length probabilities pi(k)
-WN=zeros(M,R);
 n=pprod(N); % initialize the current population
 lGN = 0;
 while n~=-1
@@ -41,13 +52,13 @@ while n~=-1
             end
         end
     end
-    
+        
     % compute pi(0|n)
     for i=1:M
         p0 = 1-sum(pi(i,(1:sum(n))+1,hashpop(n,N)));
         if p0<0
             if warn
-                line_warning(mfilename,'MVA-LD is numerically unstable on this model, forcing all probabilities to be non-negative.'); 
+                line_warning(mfilename,'MVA-LD is numerically unstable on this model, forcing all probabilities to be non-negative.\n'); 
 %                N
                 warn=false;
                 isNumStable = false;

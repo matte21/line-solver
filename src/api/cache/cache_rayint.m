@@ -4,7 +4,7 @@ h=length(m);
 n=length(gamma);
 mt=sum(m);
 if n==mt
-    line_warning(mfilename,'The number of items equals the cache capacity');
+    line_warning(mfilename,'The number of items equals the cache capacity.\n');
 end
 
 

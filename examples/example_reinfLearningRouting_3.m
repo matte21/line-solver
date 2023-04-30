@@ -57,20 +57,16 @@ queue2.setProbRouting(oclass, queue5, 0.5);
 queue5.setProbRouting(oclass, queue6, 0.5);
 queue5.setProbRouting(oclass, queue7, 0.5);
 
-    
-
 % Model View
 % model.jsimgView
 % model.printRoutingMatrix
 [~,H] = model.getGraph();
 plot(H,'EdgeLabel',H.Edges.Weight,'Layout','Layered')
 
-
 %% heuristic performance 
 
 % Prob
 SolverSSA(model).getAvgSysTable()
-
 
 % JSQ
 model.reset();
@@ -80,8 +76,6 @@ queue2.setRouting(oclass, RoutingStrategy.JSQ);
 queue5.setRouting(oclass, RoutingStrategy.JSQ);
 
 SolverSSA(model).getAvgSysTable()
-
-
 
 %% RL control
 
@@ -148,8 +142,6 @@ queue5.setRouting(oclass, RoutingStrategy.RL, coeff_best_full.', {[1,2,3,6], tru
 
 SolverSSA(model).getAvgSysTable
 
-
-
 % partial quad
 coeff_best_partial = quad_approx_coeff_partial("11");
 model.reset();
@@ -159,7 +151,6 @@ queue2.setRouting(oclass, RoutingStrategy.RL, coeff_best_partial.', {[1], trunca
 queue5.setRouting(oclass, RoutingStrategy.RL, coeff_best_partial.', {[1], truncation+1});
 
 SolverSSA(model).getAvgSysTable
-
 
 %% runtime analysis for RL-learning and control
 % comment all previous codes except mode-definition

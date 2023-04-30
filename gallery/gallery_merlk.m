@@ -1,5 +1,8 @@
 function model=gallery_merlk(k)
-model = Network('M/Erl/1');
+if ~exist('k','var')
+    k = 2;
+end
+model = Network(['M/Erl/',num2str(k)]);
 %% Block 1: nodes
 source = Source(model, 'mySource');
 queue = Queue(model, 'myQueue', SchedStrategy.FCFS);

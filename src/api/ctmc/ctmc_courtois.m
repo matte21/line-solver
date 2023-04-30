@@ -14,8 +14,6 @@ function [p,Qperm,Qdec,eps,epsMAX,P,B,C,q]=ctmc_courtois(Q,MS,q)
 % eps    : nearly-complete decomposability (NCD) index 
 % epsMAX : max acceptable value for eps (otherwise Q is not NCD)
 % q      : randomization coefficient
-%
-% The majority of the code is provided by Dr Giuliano Casale.
 
 %% INIT
 if nargin==2

@@ -159,7 +159,7 @@ if all(isinf(sn.njobs)) % is open
         line_printf('\nMAM parametric decomposition completed in %d iterations.',it);
     end
 else
-    line_warning(mfilename,'This model is not supported by SolverMAM yet. Returning with no result.');
+    line_warning(mfilename,'This model is not supported by SolverMAM yet. Returning with no result.\n');
 end
 
 end

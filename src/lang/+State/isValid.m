@@ -42,7 +42,7 @@ for ist=1:sn.nstations
         end
     end
     if any(n(ist,:)>sn.classcap(ist,:))
-        line_warning(mfilename,'Station %d is in a state with more jobs than its allowed capacity');
+        line_warning(mfilename,'Station %d is in a state with more jobs than its allowed capacity.\n');
         isValid = false;
         return
     end

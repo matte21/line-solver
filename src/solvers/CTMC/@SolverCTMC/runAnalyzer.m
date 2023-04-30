@@ -9,14 +9,16 @@ if nargin<2
 end
 
 if ~isinf(options.timespan(1)) && (options.timespan(1) == options.timespan(2))
-    line_warning(mfilename,'%s: timespan is a single point, spacing by options.tol (%e).',mfilename, options.tol);
+    line_warning(mfilename,'%s: timespan is a single point, spacing by options.tol (%e).\n',mfilename, options.tol);
     options.timespan(2) = options.timespan(1) + options.tol;
 end
 
+
+self.runAnalyzerChecks(options);
 Solver.resetRandomGeneratorSeed(options.seed);
 
 if self.enableChecks && ~self.supports(self.model)
-    line_error(mfilename,'This model contains features not supported by the solver.');    
+    line_error(mfilename,'This model contains features not supported by the solver.\n');    
 end
 
 sn = getStruct(self);
@@ -31,17 +33,17 @@ end
 
 if any(isinf(sn.njobs))
     if isinf(options.cutoff)
-        line_warning(mfilename,sprintf('The model has open chains, it is recommended to specify a finite cutoff value, e.g., SolverCTMC(model,''cutoff'',1).'));
+        line_warning(mfilename,sprintf('The model has open chains, it is recommended to specify a finite cutoff value, e.g., SolverCTMC(model,''cutoff'',1).\n'));
         self.options.cutoff= ceil(6000^(1/(M*K)));
         options.cutoff= ceil(6000^(1/(M*K)));
-        line_warning(mfilename,sprintf('Setting cutoff=%d.',self.options.cutoff));
+        line_warning(mfilename,sprintf('Setting cutoff=%d.\n',self.options.cutoff));
     end
 end
 
 if sizeEstimator > 6
     if ~isfield(options,'force') || options.force == false
         %        line_error(mfilename,'CTMC size may be too large to solve. Stopping SolverCTMC. Set options.force=true to bypass this control.');
-        line_error(mfilename,'CTMC size may be too large to solve. Stopping SolverCTMC. Set options.force=true or use SolverCTMC(...,''force'',true) to bypass this control.');        
+        line_error(mfilename,'CTMC size may be too large to solve. Stopping SolverCTMC. Set options.force=true or use SolverCTMC(...,''force'',true) to bypass this control.\n');        
         return
     end
 end

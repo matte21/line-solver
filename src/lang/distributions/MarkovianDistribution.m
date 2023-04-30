@@ -1,4 +1,4 @@
-classdef MarkovianDistribution < ContinuousDistrib
+classdef MarkovianDistribution < ContinuousDistribution
     % An astract class for Markovian distributions
     %
     % Copyright (c) 2012-2023, Imperial College London
@@ -9,7 +9,7 @@ classdef MarkovianDistribution < ContinuousDistrib
             % SELF = MARKOVIANDISTRIBUTION(NAME, NUMPARAM)
 
             % Abstract class constructor
-            self@ContinuousDistrib(name, numParam, [0,Inf]);
+            self@ContinuousDistribution(name, numParam, [0,Inf]);
 
             self.invSubgenerator = [];
             self.initProb = [];
@@ -166,7 +166,11 @@ classdef MarkovianDistribution < ContinuousDistrib
             % Return the probability that a transition out of a state is
             % absorbing
             aph = self.getRepres;
-            phi = - aph{2}*ones(size(aph{1},1),1) ./ diag(aph{1});
+            if aph{1}(1,1)==0
+                phi = 1;
+            else
+                phi = - aph{2}*ones(size(aph{1},1),1) ./ diag(aph{1});
+            end
         end
 
     end

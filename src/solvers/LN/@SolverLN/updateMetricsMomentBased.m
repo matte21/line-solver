@@ -84,7 +84,7 @@ else
             catch me
                 switch me.identifier
                     case 'MATLAB:class:undefinedMethod'
-                        line_warning(mfilename,'The solver for layer %d does not allow response time distribution calculation, switching to fluid solver.');
+                        line_warning(mfilename,'The solver for layer %d does not allow response time distribution calculation, switching to fluid solver.\n');
                         repo{submodelidx} = SolverFluid(ensemble{submodelidx}).getCdfRespT;
                 end
             end

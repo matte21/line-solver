@@ -9,14 +9,22 @@ S = snc.nservers;
 NK = snc.njobs';  % initial population per class
 
 spmd
-    laboptions.samples = ceil(laboptions.samples / numlabs);
-    laboptions.verbose = false;
+    if isMATLABReleaseOlderThan("R2022b")
+        nLabs = numlabs; %#ok<DNUMLABS>
+    else
+        nLabs = spmdSize;
+    end    
+    
+    laboptions.samples = ceil(laboptions.samples / nLabs);    
+    laboptions.verbose = true;
+    
     switch laboptions.method
         case {'para','parallel'}
             [probSysState,SSq,arvRates,depRates,~,~,snc] = solver_ssa(snc, laboptions);
         case {'para.hash','parallel.hash'}
             [probSysState,SSq,arvRates,depRates,snc] = solver_ssa_hashed(snc, laboptions);
     end
+    
     XN = NaN*zeros(1,K);
     UN = NaN*zeros(M,K);
     QN = NaN*zeros(M,K);
@@ -86,7 +94,6 @@ spmd
         end
     end
 end
-
 nLabs = length(QN);
 QN = cellsum(QN)/nLabs;
 UN = cellsum(UN)/nLabs;

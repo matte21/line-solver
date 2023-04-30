@@ -1,4 +1,5 @@
-clearvars -except exampleName;
+clear node jobclass
+
 N = 4; % number of jobs
 c = 2; % number of servers
 %%
@@ -44,4 +45,4 @@ lldAvgTableNRP=SolverNC(ldmodel,'method','nr.probit').getAvgTable
 lldAvgTableNRL=SolverNC(ldmodel,'method','nr.logit').getAvgTable
 
 lldAvgTableMVALD=SolverMVA(ldmodel,'method','exact').getAvgTable
-lldAvgTableAMVAQD=SolverMVA(ldmodel,'method','qd').getAvgTable
+lldAvgTableQD=SolverMVA(ldmodel,'method','qd').getAvgTable

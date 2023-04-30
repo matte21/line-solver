@@ -5,9 +5,13 @@ function runtime = runAnalyzer(self, options)
 % All rights reserved.
 
 Tstart=tic;
+
 if nargin<2 %%~exist('options','var')
     options = self.getOptions;
 end
+
+self.runAnalyzerChecks(options);
+Solver.resetRandomGeneratorSeed(options.seed);
 
 if ~isfield(options,'verbose')
     options.verbose = 0;
@@ -23,7 +27,7 @@ end
 
 if self.enableChecks && ~self.supports(self.model)
     %    if options.verbose
-    line_error(mfilename,'This model contains features not supported by the JMT solver.');
+    line_error(mfilename,'This model contains features not supported by the solver.');
     %    end
     %    runtime = toc(T0);
     %    return
@@ -33,7 +37,7 @@ if ~isfield(options,'samples')
     options.samples = 1e4; % default: this is the samples / measure, not the total number of simulation events, which can be much larger.
 elseif options.samples < 5e3
     if ~strcmpi(options.method,'jmva.ls')
-        line_warning(mfilename,'JMT requires at least 5000 samples for each metric, the current value is %d. Starting the simulation with 5000 samples.', options.samples);
+        line_warning(mfilename,'JMT requires at least 5000 samples for each metric, the current value is %d. Starting the simulation with 5000 samples.\n', options.samples);
     end
     options.samples = 5e3;
 end
@@ -69,8 +73,8 @@ switch options.method
         fname = self.writeJSIM(sn);
         cmd = ['java -cp "',getJMTJarPath(self),filesep,'JMT.jar" jmt.commandline.Jmt sim "',fname,'" -seed ',num2str(options.seed),' --illegal-access=permit'];
         if options.verbose
-            line_printf('\nJMT model: %s',fname);
-            line_printf('\nJMT command: %s',cmd);
+            line_printf('JMT model: %s\n',fname);
+            line_printf('JMT command: %s\n',cmd);
         end
         [~, cmdoutput] = system(cmd);
         runtime = toc(Tstart);
@@ -78,9 +82,9 @@ switch options.method
         if ~options.keep
             rmdir(getFilePath(self),'s');
         end
-        if options.verbose
-            line_printf('\nJMT analysis (seed: %d) completed. Runtime: %f seconds.\n',options.seed,runtime);
-        end
+        %if options.verbose
+        %    line_printf('\nJMT analysis (seed: %d) completed. Runtime: %f seconds.\n',options.seed,runtime);
+        %end
     case {'closing'}
         options = self.getOptions;
         initSeed = self.options.seed;
@@ -159,16 +163,16 @@ switch options.method
         self.options.timespan = initTimeSpan;
         self.result.('solver') = getName(self);
         self.result.runtime = runtime;
-        if options.verbose
-            line_printf('\nJMT analysis (seed: %d) completed. Runtime: %f seconds.\n',options.seed,runtime);
-        end
+        %if options.verbose
+         %   line_printf('\nJMT analysis (seed: %d) completed. Runtime: %f seconds.\n',options.seed,runtime);
+        %end
     case {'jmva','jmva.amva','jmva.mva','jmva.recal','jmva.comom','jmva.chow','jmva.bs','jmva.aql','jmva.lin','jmva.dmlin','jmva.ls',...
             'jmt.jmva','jmt.jmva.mva','jmt.jmva.amva','jmt.jmva.recal','jmt.jmva.comom','jmt.jmva.chow','jmt.jmva.bs','jmt.jmva.aql','jmt.jmva.lin','jmt.jmva.dmlin','jmt.jmva.ls'}
         fname = self.writeJMVA(sn, getJMVATempPath(self), self.options);
         cmd = ['java -cp "',getJMTJarPath(self),filesep,'JMT.jar" jmt.commandline.Jmt mva "',fname,'" -seed ',num2str(options.seed),' --illegal-access=permit'];
         if options.verbose
-            line_printf('\nJMT model: %s',fname);
-            line_printf('\nJMT command: %s',cmd);
+            line_printf('JMT model: %s\n',fname);
+            line_printf('JMT command: %s\n',cmd);
         end
         [~, cmdoutput] = system(cmd);
         runtime = toc(Tstart);
@@ -176,11 +180,11 @@ switch options.method
         if ~options.keep
             rmdir(getFilePath(self),'s');
         end
-        if options.verbose
-            line_printf('\nJMT analysis (method: %d) completed. Runtime: %f seconds.\n',options.method,runtime);
-        end
+        %if options.verbose
+        %    line_printf('\nJMT analysis (method: %d) completed. Runtime: %f seconds.\n',options.method,runtime);
+        %end
     otherwise
-        line_warning(mfilename,'This solver does not support the specified method. Setting to default.');
+        line_warning(mfilename,'This solver does not support the specified method. Setting to default.\n');
         self.options.method  = 'default';
         runAnalyzer(self);
 end

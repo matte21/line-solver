@@ -12,7 +12,7 @@ if self.hasState
 end
 
 if ~isempty(self.connections)
-    line_warning(mfilename,'Network topology already instantiated. Calling resetNetwork automatically before adding loggers.');
+    line_warning(mfilename,'Network topology already instantiated. Calling resetNetwork automatically before adding loggers.\n');
     self.resetNetwork;
 end
 R = self.getNumberOfClasses;
@@ -27,14 +27,14 @@ isNodeLogged = [isNodeLogged(:)'];
 if ~isempty(self.getSource)
     sinkIndex = self.getIndexSinkNode;
     if isNodeLogged(sinkIndex)
-        line_warning(mfilename,'Sink station cannot be logged, ignoring.');
+        line_warning(mfilename,'Sink station cannot be logged, ignoring.\n');
         isNodeLogged(sinkIndex) = false;
     end
 end
 if ~isempty(self.getSource)
     sourceIndex = self.getIndexSourceNode;
     if isNodeLogged(sourceIndex)
-        line_warning(mfilename,'Source station cannot be logged, ignoring.');
+        line_warning(mfilename,'Source station cannot be logged, ignoring.\n');
         isNodeLogged(sourceIndex) = false;
     end
 end

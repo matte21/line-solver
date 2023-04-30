@@ -1,6 +1,6 @@
-clearvars -except exampleName; 
-%% a large multiclass example with PS and FCFS
+clear node jobclass solver AvgTable
 
+%% a large multiclass example with PS and FCFS
 model = Network('MyNetwork');
 
 %% Block 1: nodes

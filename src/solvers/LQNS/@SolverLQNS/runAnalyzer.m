@@ -3,10 +3,15 @@ function runtime = runAnalyzer(self, options)
 % Run the solver
 
 tic;
-options = self.getOptions;
+if nargin<2
+    options = self.getOptions;
+end
 dirpath = lineTempName('lqns');
 filename = [dirpath,filesep,'model.lqnx'];
 self.model.writeXML(filename);
+
+%self.runAnalyzerChecks(options);
+Solver.resetRandomGeneratorSeed(options.seed);
 
 if options.verbose
     %verbose = '-v';
@@ -117,7 +122,8 @@ else
         case {'srvn.exactmva'}
             cmd=['lqns ',verbose,' ',multiserver_praqma,' -Playering=srvn -Pmva=exact -Pstop-on-message-loss=false -x ',filename];
         case {'sim','lqsim'}
-            cmd=['lqsim ',verbose,' ',multiserver_praqma,' -A ',num2str(options.samples),',3  -Pstop-on-message-loss=false -x ',filename];
+            cmd=['lqsim ',verbose,' ',multiserver_praqma,' -Pstop-on-message-loss=false -x ',filename];
+            %cmd=['lqsim ',verbose,' ',multiserver_praqma,' -A ',num2str(options.samples),',3  -Pstop-on-message-loss=false -x ',filename];
         case {'lqnsdefault'}
             cmd=['lqns ',verbose,' ',multiserver_praqma,' -x ',filename];
         otherwise

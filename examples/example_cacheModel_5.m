@@ -1,5 +1,5 @@
 % cache with state dependent routing
-clearvars -except exampleName;
+clear solver AvgTable;
 
 model = Network('model');
 
@@ -39,10 +39,9 @@ source.setProbRouting(jobClass, cacheNode, 1.0);
 try
 cacheNode.setRouting(hitClass,RoutingStrategy.RROBIN);
 catch ME
-    line_printf('The example first illustrates and invalid routing setup for a cache that triggers the following exception:');
-    line_printf('%s',ME.message);
-    fprintf(GlobalConstants.StdOut,' \n');
-    line_printf('We now illustrate the correct setup of the same model.');
+    line_printf('The example first illustrates and invalid routing setup for a cache that triggers the following exception:\n');
+    line_printf('%s\n',ME.message);
+    line_printf('We now illustrate the correct setup of the same model.\n');
 end
 % cacheNode.setRouting(missClass,RoutingStrategy.RROBIN);
 % delay1.setProbRouting(hitClass, sink, 1.0);
@@ -70,7 +69,7 @@ end
 
 %%
 % cache with state dependent routing
-clearvars -except exampleName;
+clear solver AvgTable;
 
 model = Network('model');
 

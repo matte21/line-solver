@@ -1,5 +1,5 @@
 % similar to example_forkJoin_1 but closed
-clearvars -except exampleName;
+clear solver AvgTable;
 model = Network('model');
 
 delay = Delay(model,'Delay');

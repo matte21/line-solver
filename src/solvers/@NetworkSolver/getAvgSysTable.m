@@ -6,6 +6,12 @@ function [AvgSysChainTable, CT,XT] = getAvgSysTable(self,R,T)
 % Copyright (c) 2012-2023, Imperial College London
 % All rights reserved.
 
+if GlobalConstants.DummyMode
+    AvgSysChainTable = Table();
+    CT = Table(); XT = Table();
+    return
+end
+
 if nargin==1
     R = self.getAvgRespTHandles;
     T = self.getAvgTputHandles;

@@ -1,4 +1,5 @@
-clearvars -except exampleName testName;
+clear node jobclass solver AvgTable
+
 % this is a difficult sparse LDMX model
 model = Network('model');
 

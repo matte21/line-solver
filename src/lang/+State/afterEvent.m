@@ -104,9 +104,43 @@ if sn.isstation(ind)
                             break
                         end
                     case {SchedStrategy.ID_PS, SchedStrategy.ID_INF, SchedStrategy.ID_DPS, SchedStrategy.ID_GPS}
+                        % SPN code:
+                        %                         if sn.nodetype(ind) == NodeType.Place
+                        %                             indp = sn.varsparam{ind}.nodeToPlace;
+                        %                             % Find all connecting transition into this place node
+                        %                             ct = find(sn.rtnodes(:, ind));
+                        %                             % Iterate through all transitions
+                        %                             for itr=1:length(ct)
+                        %                                 tr = ct(itr);
+                        %                                 if sn.isstation(tr)
+                        %                                     % space_srv_k(:,Ks(class)+kentry) = space_srv_k(:,Ks(class)+kentry) + 1;
+                        %                                     outprob_k = pentry(kentry)*ones(size(space_srv_k,1));
+                        %                                 else
+                        %                                     nmodes = sn.varsparam{tr}.nmodes;
+                        %                                     % Iterate through all modes of transition
+                        %                                     for im=1:nmodes
+                        %                                         space_srv_k(:,Ks(class)+kentry) = space_srv_k(:,Ks(class)+kentry) + sn.varsparam{tr}.forw(indp,nmodes);
+                        %                                         en = classcap(ist,class)> nir(:,class) | capacity(ist)*ones(size(ni,1),1) > ni;
+                        %                                         outspace = [outspace; space_srv_k(en,:)];
+                        %                                         outprob_k = ones(size(space_srv_k,1));
+                        %                                         outprob = [outprob; outprob_k];
+                        %                                         space_srv_k(:,Ks(class)+kentry) = space_srv_k(:,Ks(class)+kentry) - sn.varsparam{tr}.forw(indp,nmodes);
+                        %                                         trans = [trans, tr];
+                        %                                         modes = [modes, im];
+                        %                                     end
+                        %                                 end
+                        %                             end
+                        %                             space_srv_k = [];
+                        %                             outprob_k = [];
+                        %                         else
                         % job enters service immediately
-                        space_srv_k(:,Ks(class)+kentry) = space_srv_k(:,Ks(class)+kentry) + 1;
-                        outprob_k = pentry(kentry)*ones(size(space_srv_k,1));
+                        if space_srv_k(:,Ks(class)+kentry) < classcap(ist,class)
+                            space_srv_k(:,Ks(class)+kentry) = space_srv_k(:,Ks(class)+kentry) + 1;
+                            outprob_k = pentry(kentry)*ones(size(space_srv_k,1));
+                        else
+                            outprob_k = pentry(kentry)*zeros(size(space_srv_k,1));
+                        end
+                        %                        end
                     case {SchedStrategy.ID_SIRO, SchedStrategy.ID_SEPT, SchedStrategy.ID_LEPT}
                         if ni<S(ist)
                             space_srv_k(:,Ks(class)+kentry) = space_srv_k(:,Ks(class)+kentry) + 1;
@@ -121,7 +155,7 @@ if sn.isstation(ind)
 
                         % if MAP service, when empty restart from the phase
                         % stored in space_var for this class
-                        if ~ismkvmodclass(class) || kentry == space_var(sum(sn.nvars(ind,1:class)))
+                        if ~ismkvmodclass(class) || (ismkvmodclass(class) && kentry == space_var(sum(sn.nvars(ind,1:class))))
                             if ismkvmodclass(class)
                                 pentry = zeros(size(pentry));
                                 pentry(kentry) = 1.0;
@@ -134,16 +168,18 @@ if sn.isstation(ind)
 
                             % this section dynamically grows the number of
                             % elements in the buffer
-                            if isSimulation
-                                if ni < capacity(ist) && nir(class) < classcap(ist,class) % if there is room
+                            %if isSimulation
+                            if any(ni < capacity(ist))
+                                if any(nir(:,class) < classcap(ist,class)) % if there is room
                                     if ~any(space_buf_k(:)==0) % but the buffer has no empty slots
                                         % append job slot
                                         space_buf_k = [zeros(size(space_buf_k,1),1),space_buf_k];
                                     end
                                 end
                             end
+                            %end
                             %get position of first empty slot
-                            empty_slots = -1*ones(all_busy_srv,1);
+                            empty_slots = -1*ones(size(all_busy_srv,1),1);
                             if size(space_buf_k,2) == 0
                                 empty_slots(all_busy_srv) = false;
                             elseif size(space_buf_k,2) == 1
@@ -162,9 +198,9 @@ if sn.isstation(ind)
                                 space_buf_k(sub2ind(size(space_buf_k),1:size(space_buf_k,1),empty_slots')) = class;
                                 %outspace(all_busy_srv(wbuf_empty),:) = [space_buf, space_srv, space_var];
                             end
-                            outprob_k = pentry(kentry)*ones(size(space_srv_k,1));
+                            outprob_k = pentry(kentry)*ones(size(space_srv_k,1),1);
                         else
-                            outprob_k = 0*ones(size(space_srv_k,1));
+                            outprob_k = 0*ones(size(space_srv_k,1),1); % zero probability event
                         end
                     case SchedStrategy.ID_LCFSPR
                         % find states with all servers busy - this
@@ -243,10 +279,18 @@ if sn.isstation(ind)
                 % form the new state
                 outspace_k = [space_buf_k, space_srv_k, space_var_k];
                 % remove states where new arrival violates capacity or cutoff constraints
-                en = classcap(ist,class)> nir(:,class) | capacity(ist)*ones(size(ni,1),1) > ni;
-                outspace = [outspace; outspace_k(en,:)];
-                outrate = [outrate; -1*ones(size(outspace_k(en,:),1),1)]; % passive action, rate is unspecified
-                outprob = [outprob; outprob_k(en,:)];
+                [oi,oir] = State.toMarginalAggr(sn,ind,outspace_k,K,Ks,space_buf_k,space_srv_k,space_var_k);
+                en_o = classcap(ist,class)>= oir(:,class) | capacity(ist)*ones(size(oi,1),1) >= oi;
+
+                if size(outspace,2)>size(outspace_k(en_o,:),2)
+                    outspace = [outspace; zeros(1,size(outspace,2)-size(outspace_k(en_o,:),2)),outspace_k(en_o,:)];
+                elseif size(outspace,2)<size(outspace_k(en_o,:),2)
+                    outspace = [zeros(size(outspace,1),size(outspace_k(en_o,:),2)-size(outspace,2)), outspace; outspace_k(en_o,:)];
+                else
+                    outspace = [outspace; outspace_k(en_o,:)];
+                end
+                outrate = [outrate; -1*ones(size(outspace_k(en_o,:),1),1)]; % passive action, rate is unspecified
+                outprob = [outprob; outprob_k(en_o,:)];
             end
             if isSimulation
                 if size(outprob,1) > 1
@@ -313,6 +357,40 @@ if sn.isstation(ind)
                                     end
                                     outprob = [outprob; ones(size(rate(en,:),1),1)];
                                 case SchedStrategy.ID_PS % move first job in service
+                                    %                                     SPN code:
+                                    %                                     if sn.nodetype(ind) == NodeType.Place
+                                    %                                         indp = sn.varsparam{ind}.nodeToPlace;
+                                    %                                         % Find all connecting transition from this place node
+                                    %                                         ct = find(sn.rtnodes(ind,:));
+                                    %                                         % Iterate through all transitions
+                                    %                                         for itr=1:length(ct)
+                                    %                                             tr = ct(itr);
+                                    %                                             nmodes = sn.varsparam{tr}.nmodes;
+                                    %                                             % Iterate through all modes of transition
+                                    %                                             for im=1:nmodes
+                                    %                                                 afterstate = space_srv(en,Ks(class)+k) - sn.varsparam{tr}.back(indp,nmodes);
+                                    %                                                 if afterstate >= 0
+                                    %                                                     % #input arcs x #output arcs
+                                    %                                                     mult = length(find((sn.varsparam{tr}.back(:,nmodes)>0)))*length(find((sn.varsparam{tr}.forw(:,nmodes)>0)));
+                                    %                                                     space_srv(en,Ks(class)+k) = afterstate;
+                                    %                                                     rate(en) = 0;
+                                    %                                                     % If transition is timed
+                                    %                                                     if sn.varsparam{tr}.timingstrategies(im) == TimingStrategy.Timed
+                                    %                                                         % mu and phi of mode
+                                    %                                                         mu_l = sn.varsparam{tr}.mu{nmodes};
+                                    %                                                         phi_l = sn.varsparam{tr}.phi{nmodes};
+                                    %                                                         rate(en) = mu_l*(phi_l).*(kir(en,class,k)./ni(en)).*min(ni(en),S(ist))./mult;
+                                    %                                                     end
+                                    %                                                     outspace = [outspace; space_srv(en,:)];
+                                    %                                                     outrate = [outrate; rate(en,:)];
+                                    %                                                     outprob = [outprob; ones(size(rate(en,:),1),1)];
+                                    %                                                     trans = [trans, tr];
+                                    %                                                     modes = [modes, im];
+                                    %                                                     space_srv(en,Ks(class)+k) = space_srv(en,Ks(class)+k) + sn.varsparam{tr}.back(indp,nmodes);
+                                    %                                                 end
+                                    %                                             end
+                                    %                                         end
+                                    %                                     else
                                     space_srv(en,Ks(class)+k) = space_srv(en,Ks(class)+k) - 1; % record departure
                                     rate(en) = mu{ist}{class}(k)*(phi{ist}{class}(k)).*(kir(en,class,k)./ni(en)).*min(ni(en),S(ist)); % assume active
                                     % if state is unchanged, still add with rate 0
@@ -323,6 +401,7 @@ if sn.isstation(ind)
                                         outrate = [outrate; cdscaling{ist}(nir).*lldscaling(ist,min(ni,lldlimit)).*rate(en,:)];
                                     end
                                     outprob = [outprob; ones(size(rate(en,:),1),1)];
+                                    %                                    end
                                 case SchedStrategy.ID_DPS
                                     space_srv(en,Ks(class)+k) = space_srv(en,Ks(class)+k) - 1; % record departure
                                     if S(ist) > 1
@@ -364,7 +443,7 @@ if sn.isstation(ind)
                                     for kdest=1:K(class) % new phase
                                         space_buf_kd = space_buf;
                                         space_var_kd = space_var;
-                                        if ismkvmodclass(class)                                            
+                                        if ismkvmodclass(class)
                                             space_var_kd(en,sum(sn.nvars(ind,1:class))) = kdest;
                                         end
                                         rate_kd = rate;
@@ -387,23 +466,32 @@ if sn.isstation(ind)
                                             if start_svc_class > 0 % redunant if?
                                                 % update input buffer
                                                 space_buf_kd(en_wbuf,:) = [zeros(sum(en_wbuf),1),space_buf_kd(en_wbuf,1:end-1)];
-                                                % probability vector for the next job of starting in phase kentry
-                                                pentry_svc_class = pie{ist}{start_svc_class};
-                                                if ismkvmodclass(start_svc_class)
-                                                    pentry_svc_class = zeros(size(pentry_svc_class));
-                                                    pentry_svc_class(space_var_kd(sum(sn.nvars(ind,1:(start_svc_class-1)))+1)) = 1.0;
+                                                % probability vector for the next job of starting in phase kentry                                                
+                                                if ismkvmodclass(start_svc_class) % if markov-modulated
+                                                    if start_svc_class==class % if successive service from the same class
+                                                        kentry_range = kdest; % new job enters in phase left by departing job
+                                                    else % resume phase from local variables
+                                                        kentry_range = space_var_kd(en,sum(sn.nvars(ind,1:start_svc_class)));
+                                                    end
+                                                    pentry_svc_class = 0*pie{ist}{start_svc_class};
+                                                    pentry_svc_class(kentry_range) = 1.0; 
+                                                else % if i.i.d.
+                                                    pentry_svc_class = pie{ist}{start_svc_class};
+                                                    kentry_range = 1:K(start_svc_class);
                                                 end
-                                                for kentry = 1:K(start_svc_class)
+                                                for kentry = kentry_range 
                                                     space_srv(en_wbuf,Ks(start_svc_class)+kentry) = space_srv(en_wbuf,Ks(start_svc_class)+kentry) + 1;
                                                     outspace = [outspace; space_buf_kd(en,:), space_srv(en,:), space_var_kd(en,:)];
                                                     rate_k = rate_kd;
                                                     rate_k(en_wbuf,:) = rate_kd(en_wbuf,:)*pentry_svc_class(kentry);
-                                                    if isinf(ni) % hit limited load-dependence
+                                                    if isinf(ni) % use limited load-dependence at the latest user-provided level
                                                         outrate = [outrate; cdscaling{ist}(nir).*lldscaling(ist,end).*rate_k(en,:)];
                                                     else
                                                         outrate = [outrate; cdscaling{ist}(nir).*lldscaling(ist,min(ni,lldlimit)).*rate_k(en,:)];
                                                     end
-                                                    outprob = [outprob; ones(size(rate_kd(en,:),1),1)];
+                                                    outprob_cur = ones(size(rate_kd(en,:),1),1);
+                                                    outprob_cur(outrate==0.0) = 0;
+                                                    outprob = [outprob; outprob_cur'];
                                                     space_srv(en_wbuf,Ks(start_svc_class)+kentry) = space_srv(en_wbuf,Ks(start_svc_class)+kentry) - 1;
                                                 end
                                             end
@@ -698,7 +786,7 @@ elseif sn.isstateful(ind)
                         outspace = [space_srv, space_var]; % buf is empty
                         outrate = GlobalConstants.Immediate*ones(size(outspace,1)); % immediate action
                     end
-            end            
+            end
         case NodeType.Cache
             % job arrives in class, then reads and moves into hit or miss
             % class, then departs

@@ -5,6 +5,22 @@ R = self.getNumberOfClasses;
 nvars = zeros(self.getNumberOfNodes, 2*R+1);
 nodeparam = cell(self.getNumberOfNodes, 1);
 rtnodes = self.sn.rtnodes;
+% Draft SPN code:
+% isp = [];
+% ist = [];
+% nodeToPlace = zeros(1, self.getNumberOfNodes);
+% nodeToTransition = zeros(1, self.getNumberOfNodes);
+% for ind=1:self.getNumberOfNodes
+%     node = self.getNodeByIndex(ind);
+%     switch class(node)
+%     case 'Place'
+%         isp = [isp, ind];
+%         nodeToPlace(ind) = length(isp);
+%     case 'Transition'
+%         ist = [ist, ind];
+%         nodeToTransition(ind) = length(ist);
+%     end
+% end
 sn = self.sn;
 
 for ind=1:self.getNumberOfNodes
@@ -50,6 +66,54 @@ for ind=1:self.getNumberOfNodes
             nodeparam{ind}.jobClass = node.getJobClass;
             nodeparam{ind}.timeSameClass = node.getTimeSameClass;
             nodeparam{ind}.timeAnyClass = node.getTimeAnyClass;
+            % Draft SPN code:
+            %         case 'Transition'
+            %             varsparam{ind} = struct();
+            %             varsparam{ind}.modenames = node.modeNames;
+            %             nmodes = length(node.modeNames);
+            %             inputs = rtnodes(isp, ind);
+            %             outputs = rtnodes(ind, isp)';
+            %             forw = zeros(length(outputs),nmodes);
+            %             back = zeros(length(inputs),nmodes);
+            %             inh = zeros(length(inputs),nmodes);
+            %             for m=1:nmodes
+            %                 for inp=1:length(inputs)
+            %                     if inputs(inp) > 0
+            %                         back(inp,m) = node.enablingConditions(isp(inp),1,m);
+            %                     end
+            %                     inh(inp,m) = node.inhibitingConditions(isp(inp),1,m);
+            %                 end
+            %                 for out=1:length(outputs)
+            %                     if outputs(out) > 0
+            %                         forw(out,m) = node.firingOutcomes(isp(out),1,m);
+            %                     end
+            %                 end
+            %             end
+            %
+            %             varsparam{ind}.back = back;
+            %             varsparam{ind}.inh = inh;
+            %             varsparam{ind}.forw = forw;
+            %             varsparam{ind}.nmodes = nmodes;
+            %
+            %             varsparam{ind}.enablingconditions = node.enablingConditions;
+            %             varsparam{ind}.inhibitingconditions = node.inhibitingConditions;
+            %
+            %             varsparam{ind}.numbersofservers = node.numbersOfServers;
+            %             varsparam{ind}.timingstrategies = node.timingStrategies;
+            %             varsparam{ind}.distributions = node.distributions;
+            %             varsparam{ind}.firingpriorities = node.firingPriorities;
+            %             varsparam{ind}.firingweights = node.firingWeights;
+            %             varsparam{ind}.firingoutcomes = node.firingOutcomes;
+            %             varsparam{ind}.nodeToTransition = nodeToTransition(ind);
+            %
+            %             [map, mu, phi] = node.getMarkovianServiceRates();
+            %
+            %             varsparam{ind}.map = map;
+            %             varsparam{ind}.mu = mu;
+            %             varsparam{ind}.phi = phi;
+            %         case 'Place'
+            %             varsparam{ind}.nodeToPlace = nodeToPlace(ind);
+            %             varsparam{ind}.capacityc = node.classCap;
         case {'Queue','QueueingStation','Delay','DelayStation','Transition'}
             for r=1:self.getNumberOfClasses
                 switch class(node.server.serviceProcess{r}{3})

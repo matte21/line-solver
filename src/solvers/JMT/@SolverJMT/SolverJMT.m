@@ -34,10 +34,10 @@ classdef SolverJMT < NetworkSolver
             self@NetworkSolver(model, mfilename);
             self.setOptions(Solver.parseOptions(varargin, self.defaultOptions));
             if ~Solver.isJavaAvailable
-                line_error(mfilename,'SolverJMT requires the java command to be available on the system path.');
+                line_error(mfilename,'SolverJMT requires the java command to be available on the system path.\n');
             end
             if ~SolverJMT.isAvailable
-                line_warning(mfilename,'SolverJMT cannot located JMT.jar in the MATLAB path.');
+                line_warning(mfilename,'SolverJMT cannot located JMT.jar in the MATLAB path.\n');
             end
             self.simConfInt = 0.99;
             self.simMaxRelErr = 0.03;
@@ -124,7 +124,7 @@ classdef SolverJMT < NetworkSolver
         function [allMethods] = listValidMethods()
             % allMethods = LISTVALIDMETHODS()
             % List valid methods for this solver
-            allMethods = {'default','jsim','jmva','jmva.mva','jmva.recal',...
+            allMethods = {'default','jsim','jmva','jmva.amva','jmva.mva','jmva.recal',...
                 'jmva.comom','jmva.chow','jmva.bs','jmva.aql',...
                 'jmva.lin','jmva.dmlin','jmva.ls'};
         end        

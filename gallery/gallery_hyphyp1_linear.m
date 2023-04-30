@@ -2,6 +2,9 @@ function model = gallery_hyphyp1_linear(n,Umax)
 if ~exist('Umax','var')
     Umax = 0.9;
 end
+if ~exist('n','var')
+    n = 2;
+end
 model = Network('Hyp/Hyp/1-Linear');
 %% Block 1: nodes
 line{1} = Source(model, 'mySource');

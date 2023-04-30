@@ -35,7 +35,7 @@ classdef SolverSSA < NetworkSolver
             % List valid methods for this solver
             allMethods = {'default','ssa','serial.hash','serial',...
             'para','parallel','para.hash','parallel.hash','hashed',...
-            'taussa','tauleap','jline.ssa','java'};
+            'taussa','tauleap'};
 
         end
 
@@ -76,7 +76,7 @@ classdef SolverSSA < NetworkSolver
             
             solverName = mfilename;
             if isfield(options,'timespan')  && isfinite(options.timespan(2)) && options.verbose
-                line_warning(mfilename,'Finite timespan not supported in %s',solverName);
+                line_warning(mfilename,'Finite timespan not supported in %s.\n',solverName);
             end
         end
                

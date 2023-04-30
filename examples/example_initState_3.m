@@ -1,3 +1,4 @@
+clear node jobclass solver AvgTable
 model = Network('model');
 
 node{1} = DelayStation(model, 'InfiniteServer');
@@ -38,14 +39,12 @@ options.seed=23000;
 
 disp('This example shows the execution of the solver on a 2-class 2-node class-switching model with specified initial state.')
 % This part illustrates the execution of different solvers
-solver={};
-solver{end+1} = SolverCTMC(model,options);
+solver{1} = SolverCTMC(model,options);
 solver{end+1} = SolverJMT(model,options);
 solver{end+1} = SolverSSA(model,options);
 solver{end+1} = SolverFluid(model,options);
 solver{end+1} = SolverMVA(model,options);
 solver{end+1} = SolverNC(model,options);
-AvgTable = [];
 for s=1:length(solver)
     fprintf(1,'SOLVER: %s\n',solver{s}.getName());
     AvgTable{s} = solver{s}.getAvgTable();

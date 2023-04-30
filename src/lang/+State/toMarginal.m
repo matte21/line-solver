@@ -1,5 +1,9 @@
 function [ni, nir, sir, kir] = toMarginal(sn, ind, state_i, phasesz, phaseshift, space_buf, space_srv, space_var) %#ok<INUSD>
 % [NI, NIR, SIR, KIR] = TOMARGINAL(QN, IND, STATE_I, K, KS, SPACE_BUF, SPACE_SRV, SPACE_VAR) %#OK<INUSD>
+% NI: total jobs in node IND
+% NIR: total jobs per class in node IND
+% SIR: total jobs in service per class in node IND
+% KIR: totak jobs in service per class and per phase in node IND
 
 % Copyright (c) 2012-2023, Imperial College London
 % All rights reserved.

@@ -1,4 +1,4 @@
-classdef Det < ContinuousDistrib & DiscreteDistrib
+classdef Det < ContinuousDistribution & DiscreteDistribution
     % Deterministic distribution
     %
     % Copyright (c) 2012-2023, Imperial College London
@@ -12,8 +12,8 @@ classdef Det < ContinuousDistrib & DiscreteDistrib
             % SELF = DET(T)
             
             % Construct a deterministic distribution with value t
-            self@ContinuousDistrib('Det',1,[t,t]);
-            self@DiscreteDistrib('Det',1,[t,t]);
+            self@ContinuousDistribution('Det',1,[t,t]);
+            self@DiscreteDistribution('Det',1,[t,t]);
             setParam(self, 1, 't', t);
         end
         

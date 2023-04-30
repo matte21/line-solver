@@ -24,12 +24,12 @@ end
 outer_iters = 1;
 outer_runtime = tic;
 switch options.method
-    case {'matrix','fluid.matrix'}
+    case {'matrix','fluid.matrix','default'}
         [QN, UN, RN, TN, xvec_iter, QNt, UNt, TNt, ~, t] = solver_fluid_matrix(sn, options);
     case {'closing','statedep','softmin','fluid.closing','fluid.statedep','fluid.softmin'}        
         [QN, UN, RN, TN, xvec_iter, QNt, UNt, TNt, ~, t] = solver_fluid_closing(sn, options);
     otherwise
-        line_error(mfilename,'Unsupported method');
+        line_error(mfilename,sprintf('The ''%s'' method is unsupported by this solver.',options.method));
 end
 outer_runtime = toc(outer_runtime);
 

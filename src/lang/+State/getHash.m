@@ -17,8 +17,13 @@ inspace = [zeros(size(inspace,1),size(sn.space{isf},2)-size(inspace,2)), inspace
 if isempty(sn.space{isf})
     line_error(mfilename,'Station state space is not initialized. Use setStateSpace method.\n');
 end
+
 hashid=zeros(size(inspace,1),1);
 for j=1:size(inspace,1)
-    hashid(j,1) = matchrow(sn.space{isf},inspace(j,:));
+    if size(sn.space{isf},2)<size(inspace(j,:),2) % cutoff exceeded
+        hashid(j,1) = -1 ;
+    else
+        hashid(j,1) = matchrow(sn.space{isf},inspace(j,:));
+    end
 end
 end

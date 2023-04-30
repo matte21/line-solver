@@ -1,4 +1,4 @@
-classdef Geometric < DiscreteDistrib
+classdef Geometric < DiscreteDistribution
     % A Geometric probability distribution
     %
     % The distribution of the number of Bernoulli trials needed to get 
@@ -10,7 +10,7 @@ classdef Geometric < DiscreteDistrib
     methods
         function self = Geometric(p)
             % SELF = GEOMETRIC(P)
-            self@DiscreteDistrib('Geometric',1,[1,Inf]);
+            self@DiscreteDistribution('Geometric',1,[1,Inf]);
             % Construct a geometric distribution with probability p
             
             setParam(self, 1, 'p', p);

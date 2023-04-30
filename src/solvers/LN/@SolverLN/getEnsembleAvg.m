@@ -34,7 +34,7 @@ for e=1:E
                 if ~isnan(sourceIdx)
                     t = max(t, self.results{end,e}.TN(sourceIdx,c));
                 end
-                TN(hidx) = TN(hidx) + nanmax(t,self.results{end,e}.TN(serverIdx,c));
+                TN(hidx) = TN(hidx) + max(t,self.results{end,e}.TN(serverIdx,c));
             end
             type = self.ensemble{e}.classes{c}.attribute(1);
             switch type

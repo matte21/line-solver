@@ -34,7 +34,8 @@ classdef SolverMVA < NetworkSolver
         function [allMethods] = listValidMethods()
             % allMethods = LISTVALIDMETHODS()
             % List valid methods for this solver
-            allMethods = {'default','mva','exact','amva','qna', ...
+            allMethods = {'default',...
+                'mva','exact','amva','qna', ...
                 'qd','amva.qd', ...
                 'qdlin','amva.qdlin', ...
                 'qdaql','amva.qdaql', ...
@@ -47,7 +48,6 @@ classdef SolverMVA < NetworkSolver
                 'gigk', 'gigk.kingman_approx', ...
                 'gig1.gelenbe','gig1.heyman','gig1.kimura','gig1.allen','gig1.kobayashi','gig1.klb','gig1.marchal',...
                 'aba.upper', 'aba.lower', 'bjb.upper', 'bjb.lower', 'gb.upper', 'gb.lower', 'pb.upper', 'pb.lower', 'sb.upper', 'sb.lower', ...
-                'jline.amva','java'
                 };
         end
 
@@ -83,7 +83,7 @@ classdef SolverMVA < NetworkSolver
 
             solverName = mfilename;
             if isfield(options,'timespan')  && isfinite(options.timespan(2)) && options.verbose
-                line_warning(mfilename,sprintf('Finite timespan not supported in %s',solverName));
+                line_warning(mfilename,sprintf('Finite timespan not supported in %s.\n',solverName));
             end
         end
 
@@ -91,8 +91,6 @@ classdef SolverMVA < NetworkSolver
             % OPTIONS = DEFAULTOPTIONS()
 
             options = lineDefaults('MVA');
-            options.iter_max = 10^3;
-            options.iter_tol = 10^-6;
         end
 
     end

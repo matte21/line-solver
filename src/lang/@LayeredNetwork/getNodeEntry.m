@@ -10,5 +10,5 @@ function entry = getNodeEntry(self,node)
 % else
 %     entry = G.Nodes.Entry{node};
 % end
-line_warning(mfilename,'Method is deprecated, use lqn.getStruct to access this information.')
+line_warning(mfilename,'Method is deprecated, use lqn.getStruct to access this information.\n')
 end

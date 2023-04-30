@@ -98,7 +98,7 @@ end
 
 sd = isfinite(sn.nservers);
 
-while nanmax(nanmax(abs(TN-TN_1))) > tol && it <= options.iter_max %#ok<NANMAX>
+while max(max(abs(TN-TN_1))) > tol && it <= options.iter_max %#ok<max>
     it = it + 1;
     TN_1 = TN;
     Umax = max(sum(UN(sd,:),2));
@@ -109,7 +109,7 @@ while nanmax(nanmax(abs(TN-TN_1))) > tol && it <= options.iter_max %#ok<NANMAX>
             inchain = sn.inchain{c};
             if ~isinf(sum(sn.njobs(inchain))) % if closed chain
                 Nc = sum(sn.njobs(inchain)); % closed population
-                QNc = max(tol, sum(nansum(QN(:,inchain),2))); %#ok<NANSUM>
+                QNc = max(tol, sum(sum(QN(:,inchain),2,"omitnan"))); %#ok<NANSUM>
                 TNlb = Nc./sum(Lchain(:,c));
                 if it == 1
                     lambda(c) = TNlb; % lower bound

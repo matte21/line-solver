@@ -67,7 +67,7 @@ for i= 1:sn.nnodes
             %                end
             %            end
             %fprintf(fid,'node{%d} = ClassSwitch(model, ''%s'', csMatrix%d);\n',i,sn.nodenames{i},i);
-            fprintf(fid,'node{%d} = ClassSwitch(model, ''%s'', eye(%d)); %% Class switching is embedded in the routing matrix P \n',i,sn.nodenames{i},sn.nclasses);
+            fprintf(fid,'node{%d} = Router(model, ''%s''); %% Class switching is embedded in the routing matrix P \n',i,sn.nodenames{i});
     end
 end
 %% write classes

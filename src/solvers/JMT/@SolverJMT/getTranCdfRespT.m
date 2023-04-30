@@ -1,6 +1,11 @@
 function RD = getTranCdfRespT(self, R)
 % RD = GETTRANCDFRESPT(R)
 
+if GlobalConstants.DummyMode
+    RD = NaN;
+    return
+end
+
 sn = self.getStruct;
 
 if nargin<2 %~exist('R','var')

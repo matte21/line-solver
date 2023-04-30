@@ -4,6 +4,14 @@ function [AvgChain,QTc,UTc,RTc,WTc,TTc] = getAvgChainTable(self,Q,U,R,T)
 % Copyright (c) 2012-2023, Imperial College London
 % All rights reserved.
 
+if GlobalConstants.DummyMode
+    AvgChain = Table();
+    QTc = Table(); UTc = Table();
+    RTc = Table(); TTc = Table();
+    WTc = Table();
+    return
+end
+
 sn = self.model.getStruct;
 M = sn.nstations;
 C = sn.nchains;

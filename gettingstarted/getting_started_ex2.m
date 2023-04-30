@@ -1,3 +1,4 @@
+% https://github.com/imperial-qore/line-solver/wiki/Getting-started#example-2-a-multiclass-mg1-queue
 cwd = fileparts(mfilename('fullpath'));
 
 model = Network('M/G/1');

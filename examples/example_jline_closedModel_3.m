@@ -1,3 +1,5 @@
+clear node jobclass solver AvgTable
+
 model = JNetwork('model');
 
 node{1} = Delay(model, 'Delay');

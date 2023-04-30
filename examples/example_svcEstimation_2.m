@@ -1,3 +1,5 @@
+clear node jobclass solver AvgTable
+
 %% define model
 model = Network('model');
 

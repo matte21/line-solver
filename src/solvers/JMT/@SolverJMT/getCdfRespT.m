@@ -1,10 +1,16 @@
 function [RD,logData] = getCdfRespT(self, R)
 % RD = GETCDFRESPT(R)
 
+sn = self.getStruct;
+if GlobalConstants.DummyMode
+    RD = cell(sn.nstations,sn.nclasses);
+    logData = NaN;
+    return
+end
+
 if nargin<2 %~exist('R','var')
     R = getAvgRespTHandles(self);
 end
-sn = self.getStruct;
 RD = cell(sn.nstations, sn.nclasses);
 QN = getAvgQLen(self); % steady-state qlen
 n = QN;

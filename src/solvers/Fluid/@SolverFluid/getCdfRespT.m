@@ -1,6 +1,13 @@
 function RD = getCdfRespT(self, R)
 % RD = GETCDFRESPT(R)
 
+sn = self.getStruct;
+if GlobalConstants.DummyMode
+    RD = cell(sn.nstations,sn.nclasses);
+    logData = NaN;
+    return
+end
+
 T0 = tic;
 if nargin<2 %~exist('R','var')
     R = self.getAvgRespTHandles;

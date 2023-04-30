@@ -1,4 +1,5 @@
-clearvars -except exampleName; 
+clear node jobclass solver AvgTable
+
 model = Network('model');
 
 node{1} = Delay(model, 'Delay');
@@ -33,15 +34,13 @@ K = model.getNumberOfClasses();
 % This part illustrates the execution of different solvers
 fprintf(1,'This example illustrates the calculation of probabilities via normalizing constants.\n')
 
-%pause
-solver={};
 options = Solver.defaultOptions;
 options.verbose=1;
 %options.samples=1e5;
 
-n=[ -1,-1;
-    -1,-1;
-    0, 0];% rows set to -1 are ignored in the calculation of the marginal probabilities
+n=[-1,-1;
+   -1,-1;
+    0, 0];  % rows set to -1 are ignored in the calculation of the marginal probabilities
 
 for i=1:M
     node{i}.setState(n(i,:));

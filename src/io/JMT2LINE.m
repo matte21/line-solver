@@ -21,7 +21,7 @@ switch fext
             model = JSIM2LINE(filename, modelName);
         end
     otherwise
-        line_warning(mfilename,'The file has unknown extension, trying to parse as a JSIMG file.');
+        line_warning(mfilename,'The file has unknown extension, trying to parse as a JSIMG file.\n');
         if nargin<2
             model = JSIM2LINE(filename);
         else

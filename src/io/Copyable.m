@@ -8,18 +8,8 @@ classdef Copyable < handle
         function newObj = copy(obj)
             % NEWOBJ = COPY(OBJ)
 
-            try
-                % MATLAB R2010b or newer - directly in memory (faster)
                 objByteArray = getByteStreamFromArray(obj);
                 newObj = getArrayFromByteStream(objByteArray);
-            catch ME
-                fname = [lineTempName '.mat'];
-                save(fname, 'obj');
-                newObj = load(fname);
-                newObj = newObj.obj;
-                delete(fname);
-            end
         end
-    end
-
+    end          
 end

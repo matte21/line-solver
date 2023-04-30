@@ -4,7 +4,7 @@ function logData = parseLogs(model,isNodeLogged, metric)
 % Copyright (c) 2012-2023, Imperial College London
 % All rights reserved.
 
-line_printf('\nJMT log parsing...');
+%line_printf('\nJMT log parsing...');
 T0=tic;
 sn = model.getStruct;
 nclasses = sn.nclasses;
@@ -105,6 +105,6 @@ for ind=1:sn.nnodes
     end
 end
 runtime=toc(T0);
-line_printf(' completed. Runtime: %f seconds.\n',runtime);
+%line_printf(' completed. Runtime: %f seconds.\n',runtime);
 end
 

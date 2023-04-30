@@ -15,7 +15,7 @@ sn = getStruct(self);
 [isvalidn] = State.isValid(sn, n, [], options);
 if ~isvalidn
     %         line_error(mfilename,'The specified state does not have the correct number of jobs.');
-    line_warning(mfilename,'Initial state not contained in the state space. Trying to recover.');
+    line_warning(mfilename,'Initial state not contained in the state space. Trying to recover.\n');
     n = round(n);
     [isvalidn] = State.isValid(sn, n, [], options);
     if ~isvalidn

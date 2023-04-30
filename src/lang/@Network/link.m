@@ -40,7 +40,7 @@ if size(P,1) == size(P,2)
                 % degenerate
                 isLinearP = false;
                 if self.nodes{ind}.server.hitClass == self.nodes{ind}.server.missClass
-                    line_warning(mfilename,'Ambiguous use of hitClass and missClass at cache, it is recommended to use different classes.');
+                    line_warning(mfilename,'Ambiguous use of hitClass and missClass at cache, it is recommended to use different classes.\n');
                 end
         end
     end
@@ -85,7 +85,7 @@ for r=1:K
         for s=1:K
             P{r,s} = 0 * P{r,s};
         end
-        P{r,r}(self.classes{r}.reference, self.classes{r}.reference) = 1.0;
+        P{r,r}(self.classes{r}.refstat, self.classes{r}.refstat) = 1.0;
     end
 end
 
@@ -207,13 +207,17 @@ for i=1:I
 end
 
 csid = zeros(I);
-csmatrix = zeros(K);
+csMatrix = zeros(K);
 nodeNames = self.getNodeNames;
 for i=1:I
     for j=1:I
-        csmatrix = csmatrix + csnodematrix{i,j};
+        % eye(K) is because any job that travels to an autoAdded class 
+        % switch stays in the same class prior to reaching the ClassSwitch
+        % and anyway the diagonal of csMatrix is irrelevant for the chains
+        csMatrix = csMatrix + eye(K) + csnodematrix{i,j}; 
         if ~isdiag(csnodematrix{i,j})
             self.nodes{end+1} = ClassSwitch(self, sprintf('CS_%s_to_%s',nodeNames{i},nodeNames{j}),csnodematrix{i,j});
+            self.nodes{end}.autoAdded = true;
             csid(i,j) = length(self.nodes);
         end
     end
@@ -224,14 +228,20 @@ for i=1:I
     % are accounted
     if isa(self.nodes{i},'Cache')
         for r=find(self.nodes{i}.server.hitClass)
-            csmatrix(r,self.nodes{i}.server.hitClass(r)) = 1.0;
+            csMatrix(r,self.nodes{i}.server.hitClass(r)) = 1.0;
         end
         for r=find(self.nodes{i}.server.missClass)
-            csmatrix(r,self.nodes{i}.server.missClass(r)) = 1.0;
+            csMatrix(r,self.nodes{i}.server.missClass(r)) = 1.0;
         end
+    elseif isa(self.nodes{i},'ClassSwitch')
+        if isempty(self.nodes{i}.server.csMatrix )
+            line_error(mfilename,'Uninitialized ClassSwitch node, use the setClassSwitchingMatrix method.');
+        end
+        csMatrix  = csMatrix | self.nodes{i}.server.csMatrix > 0.0;
     end
 end
-self.csmatrix = csmatrix~=0;
+
+self.csMatrix = csMatrix~=0;
 
 Ip = length(self.nodes); % number of nodes after addition of cs nodes
 
@@ -293,8 +303,6 @@ for i=1:I
         self.nodes{i}.init;
     end
 end
-
-%self.csmatrix;
 
 if isReset
     self.refreshChains; % without this exception with linkAndLog

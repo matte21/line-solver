@@ -1,3 +1,4 @@
+% https://github.com/imperial-qore/line-solver/wiki/Getting-started#example-7-response-time-distribution-and-percentiles
 model = Network('model');
 
 % Block 1: nodes
@@ -17,7 +18,9 @@ RDfluid = SolverFluid(model).getCdfRespT();
 RDsim = SolverJMT(model,'seed',23000,'samples',1e4).getCdfRespT();
 
 %% Plot results
-semilogx(RDsim{2,1}(:,2),1-RDsim{2,1}(:,1),'r'); hold all;
-semilogx(RDfluid{2,1}(:,2),1-RDfluid{2,1}(:,1),'k--');
-legend('jmt-transient','fluid-steady','Location','Best'); 
-ylabel('Pr(T > t)'); xlabel('time t');
+if ~isempty(RDsim{2,1})
+    semilogx(RDsim{2,1}(:,2),1-RDsim{2,1}(:,1),'r'); hold all;
+    semilogx(RDfluid{2,1}(:,2),1-RDfluid{2,1}(:,1),'k--');
+    legend('jmt-transient','fluid-steady','Location','Best');
+    ylabel('Pr(T > t)'); xlabel('time t');
+end

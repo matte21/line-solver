@@ -1,5 +1,11 @@
 function Pnir = getProb(self, node, state)
 % PNIR = GETPROB(NODE, STATE)
+
+if GlobalConstants.DummyMode
+    Pnir = NaN;
+    return
+end
+
 if nargin<3 %~exist('state','var')
     state = sn.state{sn.nodeToStateful(node.index)};
 end

@@ -1,5 +1,4 @@
 % This example shows the computation of the generator
-clearvars -except exampleName;
 N = 2;
 M = 2;
 E = 3;

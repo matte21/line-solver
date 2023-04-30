@@ -1,6 +1,11 @@
 function sysStateAggr = sampleSysAggr(self, numEvents, markActivePassive)
 % SYSSTATEAGGR = SAMPLESYSAGGR(NUMEVENTS)
 
+if GlobalConstants.DummyMode
+    sysStateAggr = NaN;
+    return
+end
+
 if nargin<2 %~exist('numEvents','var')
     numEvents = self.options.samples;
 end

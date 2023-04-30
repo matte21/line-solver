@@ -13,7 +13,7 @@ classdef Sink < Node
         function self = Sink(model, name)
             % SELF = SINK(MODEL, NAME)
 
-            self@Node(name);
+            self@Node(name);            
             if isa(model,'Network')
                 if model ~= 0
                     self.input = '';
@@ -22,10 +22,10 @@ classdef Sink < Node
                     self.setModel(model);
                     self.model.addNode(self);
                     self.schedStrategy = SchedStrategy.EXT;
-                    if length(model.classes)>1 % Sink created after some closed classes
+                    if length(model.classes)>1 % if Sink created after some closed classes
                         for r=1:model.getNumberOfClasses
                             self.setRouting(model.classes{r},RoutingStrategy.DISABLED);
-                        end
+                        end                        
                     end
                 end
             elseif isa(model,'JNetwork')

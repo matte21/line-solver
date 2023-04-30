@@ -10,17 +10,22 @@ classdef StatelessClassSwitcher < ClassSwitcher
     
     methods
         %Constructor
-        function self = StatelessClassSwitcher(classes, csMatrix)
+        function self = StatelessClassSwitcher(jobclasses, csMatrix)
             % SELF = STATELESSCLASSSWITCHER(CLASSES, CSMATRIX)
             
-            self@ClassSwitcher(classes, 'StatelessClassSwitcher');
+            self@ClassSwitcher(jobclasses, 'StatelessClassSwitcher');
             self.csMatrix = csMatrix;
             % this is slower than indexing the matrix, but it is a small
             % matrix anyway
             self.csFun = @(r,s,state,statep) csMatrix(r,s); % state parameter if present is ignored
         end
         
+        function self = updateClasses(self, jobclasses)
+            self.classes = jobclasses; % state parameter if present is ignored
+        end
+        
         function self = updateClassSwitch(self, csMatrix)
+            self.csMatrix = csMatrix;
             self.csFun = @(r,s,state,statep) csMatrix(r,s); % state parameter if present is ignored
         end
     end

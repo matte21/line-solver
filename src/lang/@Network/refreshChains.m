@@ -19,7 +19,7 @@ sn = self.sn;
 %% determine class switching mask
 stateful = find(sn.isstateful); stateful = stateful(:)';
 K = sn.nclasses;
-if isempty(self.csmatrix) % only for models created without a call to link()
+if isempty(self.csMatrix) % only for models created without a call to link()
     csmask = false(K,K);
     for r=1:K
         for s=1:K
@@ -57,7 +57,7 @@ if isempty(self.csmatrix) % only for models created without a call to link()
     end
     sn.csmask = csmask;
 else
-    sn.csmask = self.csmatrix;
+    sn.csmask = self.csMatrix;
 end
 
 if isfield(sn,'refclass') && length(sn.refclass)<sn.nchains

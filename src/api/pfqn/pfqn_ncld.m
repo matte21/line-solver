@@ -1,7 +1,11 @@
-function [lG,G] = pfqn_ncld(L,N,Z,mu,varargin)
-% [LGN] = PFQN_NCLD(L,N,Z,VARARGIN)
+function [lG,G,method] = pfqn_ncld(L,N,Z,mu,varargin)
+% [LGN,G,METHOD] = PFQN_NCLD(L,N,Z,VARARGIN)
 
 options = Solver.parseOptions(varargin, SolverNC.defaultOptions);
+lG = NaN;
+G = NaN;
+method = options.method;
+
 % backup initial parameters
 
 mu = mu(:,1:sum(N));
@@ -32,12 +36,14 @@ mu = mu(demStations,:);
 
 % if there is a class with jobs but with L and Z all zero
 if any(N((sum(L,1) + sum(Z,1)) == 0)>0)
-    line_warning(mfilename,'The model has no positive demands in any class.');
+    line_warning(mfilename,'The model has no positive demands in any class.\n');
     if isempty(Z) || sum(Z(:))<options.tol
         lG = 0;
     else
         lG = - sum(factln(N)) + sum(N.*log(sum(Z,1))) + N*log(scalevec)';
     end
+    G = NaN;
+
     return
 end
 
@@ -81,16 +87,17 @@ scalevecz = scalevec(nonzeroDemandClasses);
 if any(N<0)
     lGnnzdem = 0;
 else
-    [lGnnzdem] = compute_norm_const_ld(L, N, Z, mu, options);
+    [lGnnzdem,method] = compute_norm_const_ld(L, N, Z, mu, options);
 end
 % scale back to original demands
 lG = lGnnzdem + lGzdem + N*log(scalevecz)';
 G = exp(lG);
 end
 
-function [lG] = compute_norm_const_ld(L,N,Z,mu,options)
+function [lG,method] = compute_norm_const_ld(L,N,Z,mu,options)
 % LG = COMPUTE_NORM_CONST_LD(L,N,Z,OPTIONS)
 [M,R] = size(L);
+method = options.method;
 switch options.method
     case {'default','exact'}
         D = size(Z,1); % number of delays
@@ -98,9 +105,12 @@ switch options.method
         muz = [mu; repmat(1:size(mu,2),D,1)];
         if R==1
             [lG] = pfqn_gldsingle(Lz, N, muz, options);
+        elseif M==1 && any(Z>0)
+            [~,lG]= pfqn_comomrm_ld(L, N, Z, mu, options);
         else
             [~,lG] = pfqn_gld(Lz, N, muz, options);
         end
+        method = 'exact';
     case 'rd'
         [lG] = pfqn_rd(L, N, Z, mu, options);
     case {'nrp','nr.probit'}
@@ -111,8 +121,9 @@ switch options.method
         if M<=2 % case M = 2 handled inside the function
             [~,lG]= pfqn_comomrm_ld(L, N, Z, mu, options);
         else
-            line_warning(mfilename,'Load-dependent CoMoM is available only in models with a delay and m identical stations, running the ''rd'' algorithm instead.');
+            line_warning(mfilename,'Load-dependent CoMoM is available only in models with a delay and m identical stations, running the ''rd'' algorithm instead.\n');
             [lG] = pfqn_rd(L, N, Z, mu, options);
+            method = 'rd';
         end
     otherwise
         line_error(mfilename,sprintf('Unrecognized method for solving load-dependent models: %s',options.method));

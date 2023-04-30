@@ -56,7 +56,7 @@ end
 
 % generate local-state space
 switch sn.nodetype(ind)
-    case {NodeType.Queue, NodeType.Delay, NodeType.Source}
+    case {NodeType.Queue, NodeType.Delay, NodeType.Source, NodeType.Place}
         switch sn.schedid(ist)
             case SchedStrategy.ID_EXT
                 for r=1:R
@@ -150,7 +150,7 @@ switch sn.nodetype(ind)
                     mi_srv = mi(:,max(size(mi,2)-S(ist)+1,1):end);
                     % si: number of class r jobs that are running
                     si =[];
-                    for k=1:size(mi_srv,1)
+                    for k=1:size(mi_srv,1)                
                         si(k,1:R) = hist(mi_srv(k,:),1:R);
                     end
                     %si = unique(si,'rows');

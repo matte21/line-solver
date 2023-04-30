@@ -1,4 +1,5 @@
-clearvars -except exampleName;
+clear node jobclass solver AvgTable AvgChainTable AvgSysChainTable;
+
 model = Network('model');
 
 node{1} = Delay(model, 'Delay');
@@ -36,8 +37,7 @@ P{3,3} = circul(M);
 model.link(P);
 %%
 % This part illustrates the execution of different solvers
-solver = {};
-solver{end+1} = SolverCTMC(model);
+solver{1} = SolverCTMC(model);
 solver{end+1} = SolverJMT(model,'seed',23000,'samples',5e3,'verbose',true);
 solver{end+1} = SolverSSA(model,'seed',23000,'samples',5e3,'verbose',true);
 solver{end+1} = SolverFluid(model);

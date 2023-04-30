@@ -73,8 +73,7 @@ Pr = exp(lPr);
 Pr(isnan(Pr))=0;
 lG = log(G);
 runtime = toc(Tstart);
-if options.verbose
-    line_printf('Normalizing constant (NC) analysis completed. Runtime: %f seconds.\n',runtime);
-end
-return
+%if options.verbose
+%    line_printf('Normalizing constant (NC) analysis completed. Runtime: %f seconds.\n',runtime);
+%end
 end

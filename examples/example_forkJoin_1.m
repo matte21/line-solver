@@ -1,3 +1,5 @@
+clear solver AvgTable;
+
 clearvars -except exampleName;
 model = Network('model');
 

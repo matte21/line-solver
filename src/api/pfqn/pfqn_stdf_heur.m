@@ -18,7 +18,18 @@ for k=fcfsNodes(:)'
     for r=1:R
         if L(k,r) > GlobalConstants.FineTol
             Nr = oner(N,r);
-            [X1,Q1,~,~,lGr,isNumStable]  = pfqn_mvald(L,Nr,Z,mu);
+            if M==1
+                options = SolverNC.defaultOptions;
+                [~,lGr] = pfqn_comomrm_ld(L,Nr,Z,mu,options);
+                m = 2;  [~,lGra] = pfqn_comomrm_ld(L,Nr,Z,pfqn_mu_ms(sum(N),m,S(k)),options);
+                Q1 = zeros(1,R);
+                for s=1:R
+                    Q1(k,s) = L(k,s)* exp(lGra-lGr);
+                end
+                isNumStable = true;
+            else
+                [~,Q1,~,~,lGr,isNumStable]  = pfqn_mvald(L,Nr,Z,mu);
+            end
             
             hMAPr = cell(1,1+sum(N));
             for n=0:sum(N)
@@ -39,7 +50,7 @@ for k=fcfsNodes(:)'
             lGr = lGr(end);
             if ~isNumStable && ~stabilityWarnIssued
                 stabilityWarnIssued = true;
-                line_warning(mfilename,'The computation of the sojourn time distribution is numerically unstable');
+                line_warning(mfilename,'The computation of the sojourn time distribution is numerically unstable.\n');
             end
             RD{k,r} = zeros(length(tset),2);
             RD{k,r}(:,2) = tset(:);

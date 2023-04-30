@@ -1,4 +1,4 @@
-classdef DiscreteSampler < DiscreteDistrib
+classdef DiscreteSampler < DiscreteDistribution
     % A class for discrete distributions specified from the probability mass function
     %
     % Copyright (c) 2012-2023, Imperial College London
@@ -17,7 +17,7 @@ classdef DiscreteSampler < DiscreteDistrib
             if nargin<2 %~exist('x','var')
                 x=1:n;
             end
-            self@DiscreteDistrib('DiscreteSampler',3,[min(x),max(x)]);
+            self@DiscreteDistribution('DiscreteSampler',3,[min(x),max(x)]);
             setParam(self, 1, 'p', p(:)');
             setParam(self, 2, 'x', x(:)');
             setParam(self, 3, 'f', cumsum(p(:)')/sum(p));

@@ -1,15 +1,14 @@
-function [QN,UN,RN,TN,CN,XN,lG,runtime,it] = solver_mva_qsys_analyzer(sn, options)
+function [Q,U,R,T,C,X,lG,runtime,totiter] = solver_mva_qsys_analyzer(sn, options)
 % [Q,U,R,T,C,X,LG,RUNTIME,ITER] = SOLVER_MVA_QSYS_ANALYZER(QN, OPTIONS)
 
 % Copyright (c) 2012-2023, Imperial College London
 % All rights reserved.
 
 T0=tic;
-QN = []; UN = [];
-RN = []; TN = [];
-CN = []; XN = [];
-lG = NaN;
-it = 1;
+Q = []; U = [];
+R = []; T = [];
+C = []; X = [];
+totiter = 1;
 
 method = options.method;
 source_ist = sn.nodeToStation(sn.nodetype == NodeType.Source);
@@ -78,13 +77,13 @@ switch method
         line_error(mfilename,'Unsupported method for a model with 1 station and 1 class.');
 end
 
-RN(queue_ist,1) = R *sn.visits{1}(sn.stationToStateful(queue_ist));
-CN(queue_ist,1) = RN(1,1);
-XN(queue_ist,1) = lambda;
-UN(queue_ist,1) = lambda/mu/k;
-TN(source_ist,1) = lambda;
-TN(queue_ist,1) = lambda;
-QN(queue_ist,1) = XN(queue_ist,1) * RN(queue_ist,1);
+R(queue_ist,1) = R *sn.visits{1}(sn.stationToStateful(queue_ist));
+C(queue_ist,1) = R(1,1);
+X(queue_ist,1) = lambda;
+U(queue_ist,1) = lambda/mu/k;
+T(source_ist,1) = lambda;
+T(queue_ist,1) = lambda;
+Q(queue_ist,1) = X(queue_ist,1) * R(queue_ist,1);
 lG = 0;
 runtime=toc(T0);
 end

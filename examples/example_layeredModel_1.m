@@ -1,4 +1,5 @@
-clearvars -except exampleName;
+clear P T E A solver AvgTable
+
 fprintf(1,'This example illustrates the execution on a layered queueing network model.\n')
 fprintf(1,'Performance indexes now refer to processors, tasks, entries, and activities.\n')
 fprintf(1,'Indexes refer to the submodel (layer) where the processor or task acts as a server.\n')

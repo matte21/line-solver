@@ -1,6 +1,11 @@
 function stationStateAggr = sampleAggr(self, node, numEvents, markActivePassive)
 % STATIONSTATEAGGR = SAMPLEAGGR(NODE, NUMEVENTS)
 
+if GlobalConstants.DummyMode
+    stationStateAggr = NaN;
+    return
+end
+
 if nargin<2 %~exist('node','var')
     line_error(mfilename,'sampleAggr requires to specify a node.');
 end
@@ -12,7 +17,7 @@ end
 if nargin<3 %~exist('numEvents','var')
     %numEvents = -1;
 else
-    line_warning(mfilename,'JMT does not allow to fix the number of events for individual nodes. The number of returned events may be inaccurate.');
+    line_warning(mfilename,'JMT does not allow to fix the number of events for individual nodes. The number of returned events may be inaccurate.\n');
     %numEvents = numEvents - 1; % we include the initialization as an event
 end
 sn = self.getStruct;
@@ -80,7 +85,7 @@ if isfinite(self.options.timespan(2))
 end
 
 if length(t) < 1+numEvents
-    line_warning(mfilename,'LINE could not estimate correctly the JMT simulation length to return the desired number of events at the specified node. Try to re-run increasing the number of events.');
+    line_warning(mfilename,'LINE could not estimate correctly the JMT simulation length to return the desired number of events at the specified node. Try to re-run increasing the number of events.\n');
 end
 
 stationStateAggr = struct();

@@ -6,7 +6,7 @@ function [infGen, eventFilt, ev] = getGenerator(self, options)
 % associated filtration for each event
 
 if nargin>1 && islogical(options)
-    line_warning(mfilename,'getGenerator(boolean) is now deprecated - remove the boolean argument.');
+    line_warning(mfilename,'getGenerator(boolean) is now deprecated - remove the boolean argument.\n');
     options = self.getOptions;
 elseif nargin<2 
     options = self.getOptions;

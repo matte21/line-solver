@@ -20,9 +20,6 @@ function [p,p_1,pcourt,Qperm]=ctmc_multi(Q,MS,MSS)
 % epsMAX : max acceptable value for eps (otherwise Q is not NCD)
 % q      : randomization coefficient
 
-% Reference: the code is a variation of file ctmc_courtois.m, and the
-% majority is provided by Dr Giuliano Casale.
-
 %% INIT
 if nargin==2
     q=1;

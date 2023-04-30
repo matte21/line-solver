@@ -1,4 +1,5 @@
-clearvars -except exampleName; 
+clear node jobclass solver
+
 model = Network('model');
 
 node{1} = Delay(model, 'Delay');
@@ -6,7 +7,6 @@ node{2} = Queue(model, 'Queue1', SchedStrategy.PS);
 node{3} = Queue(model, 'Queue2', SchedStrategy.PS);
 
 node{3}.setNumServers(2);
-
 
 N=[1,0,4,0];
 jobclass{1} = ClosedClass(model, 'Class1', N(1), node{1}, 0);

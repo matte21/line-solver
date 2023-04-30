@@ -23,23 +23,29 @@ for k=fcfsNodes(:)'
         if n < S(k)
             hMAP{1+n} = map_exponential(1/rates(k,1));
         else
-            hMAP{1+n} = map_sumind({map_exponential(1/rates(k,1)), map_erlang((n-S(k)+1)/(S(k)*rates(k,1)),n-S(k)+1)});            
+            hMAP{1+n} = map_sumind({map_exponential(1/rates(k,1)), map_erlang((n-S(k)+1)/(S(k)*rates(k,1)),n-S(k)+1)});
         end
         hkc(1:T,1+n) = map_cdf(hMAP{1+n}, tset)';
     end
-    
+
     for r=1:R
         if L(k,r) > GlobalConstants.FineTol
             Nr = oner(N,r);
-            [~,~,~,~,lGr,isNumStable]  = pfqn_mvald(L,Nr,Z,mu);
+            if size(L,1)==1
+                options = SolverNC.defaultOptions;
+                [~,lGr]  = pfqn_comomrm_ld(L,Nr,Z,mu,options);
+                isNumStable = true;
+            else
+                [~,~,~,~,lGr,isNumStable]  = pfqn_mvald(L,Nr,Z,mu);
+            end
             lGr = lGr(end);
             if ~isNumStable && ~stabilityWarnIssued
                 stabilityWarnIssued = true;
-                line_warning(mfilename,'The computation of the sojourn time distribution is numerically unstable');
+                line_warning(mfilename,'The computation of the sojourn time distribution is numerically unstable.\n');
             end
             RD{k,r} = zeros(length(tset),2);
             RD{k,r}(:,2) = tset(:);
-            
+
             %% this is the original code in the paper
             %             Gkrt = zeros(T,1);
             %             nvec = pprod(Nr);
@@ -62,10 +68,15 @@ for k=fcfsNodes(:)'
             %             end
             %             lGkrt = log(Gkrt);
             %             RD{k,r}(1:T,1) = exp(lGkrt - lGr);
-            
+
             %% this is faster as it uses the recursive form for LD models
             Hkrt = [];
-            [~,~,~,~,lGk]  = pfqn_mvald(L(setdiff(1:M,k),:),Nr,Z,mu(setdiff(1:M,k),:));
+            if size(L,1)==1
+                options = SolverNC.defaultOptions;
+                [~,lGk]  = pfqn_comomrm_ld(L(setdiff(1:M,k),:),Nr,Z,mu(setdiff(1:M,k),:),options);
+            else
+                [~,~,~,~,lGk]  = pfqn_mvald(L(setdiff(1:M,k),:),Nr,Z,mu(setdiff(1:M,k),:));
+            end
             lGk = lGk(end);
             for t=1:T
                 %[t,T]
@@ -77,12 +88,18 @@ for k=fcfsNodes(:)'
                 Hkrt(t) = hkc(t,1+0) * exp(lGk); % nvec = 0
                 for s=1:R % nvec >= 1s
                     if Nr(s)>0
-                        %gammak                        
+                        %gammak
                         %lYks_t  = pfqn_rd(L,oner(Nr,s),Z,gammak);
                         %RD = lYks_t
-                        %NRP 
+                        %NRP
                         %lYks_t = pfqn_nrp(L,oner(Nr,s),Z,gammak);
-                        [~,~,~,~,lYks_t]  = pfqn_mvald(L,oner(Nr,s),Z,gammak); lYks_t = lYks_t(end);
+                        if size(L,1)==1
+                            options = SolverNC.defaultOptions;
+                            [~,lYks_t] = pfqn_comomrm_ld(L,oner(Nr,s),Z,gammak,options);
+                        else
+                            [~,~,~,~,lYks_t] = pfqn_mvald(L,oner(Nr,s),Z,gammak);
+                        end
+                        lYks_t = lYks_t(end);
                         %if t==10
                         %    %keyboard
                         %end
@@ -92,7 +109,7 @@ for k=fcfsNodes(:)'
             end
             Hkrt(isnan(Hkrt)) = GlobalConstants.FineTol;
             lHkrt = log(Hkrt);
-            
+
             RD{k,r}(1:T,1) = min(1,exp(lHkrt - lGr));
         end
     end

@@ -1,3 +1,5 @@
+clear solver AvgTable
+
 clearvars -except exampleName;
 fprintf(1,'This example illustrates the solution of a complext layered queueing network extracted from a BPMN model.\n')
 

@@ -1,3 +1,4 @@
+clear solver AvgTable;
 % Example of Layered Network with a multi-level cache
 
 model = LayeredNetwork('LQNwithCaching');

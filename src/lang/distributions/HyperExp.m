@@ -16,17 +16,7 @@ classdef HyperExp < MarkovianDistribution
                 setParam(self, 1, 'p', p);
                 setParam(self, 2, 'lambda1', lambda);
                 setParam(self, 3, 'lambda2', lambda);
-                try
-                    self.obj = jline.lang.distributions.HyperExp(p, lambda, lambda);
-                catch
-                    try
-                        import jline.*; %#ok<SIMPT>
-                    catch
-                        javaaddpath(which('linesolver.jar'));
-                        import jline.*; %#ok<SIMPT>
-                    end
-                    self.obj = jline.lang.distributions.HyperExp(p, lambda, lambda);
-                end
+                self.obj = jline.lang.distributions.HyperExp(p, lambda, lambda);
             elseif length(varargin)==3
                 p1 = varargin{1};
                 lambda1 = varargin{2};
@@ -34,13 +24,7 @@ classdef HyperExp < MarkovianDistribution
                 setParam(self, 1, 'p', p1);
                 setParam(self, 2, 'lambda1', lambda1);
                 setParam(self, 3, 'lambda2', lambda2);
-                try
-                    self.obj = jline.lang.distributions.HyperExp(p1, lambda1, lambda2);
-                catch
-                    javaaddpath(which('linesolver.jar'));
-                    import jline.*; %#ok<SIMPT>
-                    self.obj = jline.lang.distributions.HyperExp(p1, lambda1, lambda2);
-                end
+                self.obj = jline.lang.distributions.HyperExp(p1, lambda1, lambda2);
             end
         end
 

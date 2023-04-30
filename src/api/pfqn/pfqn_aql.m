@@ -48,7 +48,6 @@ while 1
             gamma(k,s) = (Q{0+1}(k)/sum(N)) - (Q{s+1}(k)/(sum(N)-1));
         end
     end
-
     if max(abs((Q_olditer{1}(:)-Q{1}(:))./Q{1}(:))) < TOL || it == MAXITER
         numIters=it;
         break

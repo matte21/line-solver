@@ -1,4 +1,5 @@
-clearvars -except exampleName; 
+clear solver AvgTable
+
 model = LayeredNetwork('LQN1');
 
 % definition of processors, tasks and entries

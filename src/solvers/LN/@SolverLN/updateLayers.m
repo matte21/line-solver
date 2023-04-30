@@ -118,6 +118,7 @@ for c=1:size(call_classes_updmap,1)
             %%task_tput = sum(self.results{end,self.idxhash(tidx)}.TN(self.ensemble{self.idxhash(tidx)}.attribute.serverIdx,eidxclass))
             %%entry_tput = sum(self.results{end,self.idxhash(tidx)}.TN(self.ensemble{self.idxhash(tidx)}.attribute.serverIdx,eidxclass))
             %            if it==1
+            
             node.setService(class, servtproc{eidx});
             %             else
             %                 if ~node.serviceProcess{class.index}.isImmediate()

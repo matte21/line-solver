@@ -1,6 +1,9 @@
 function Pr = getProbAggr(self, node, state_a)
 % PR = GETPROBSTATEAGGR(NODE, STATE_A)
-
+if GlobalConstants.DummyMode
+    Pr = NaN;
+    return
+end
 sn = self.getStruct;
 if nargin<3 %~exist('state_a','var')
     state_a = sn.state{sn.nodeToStation(node.index)};

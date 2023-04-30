@@ -52,6 +52,7 @@ switch options.method
 end
 
 %% main loop
+omicron = 0.5; % under-relaxation parameter
 outer_iter = 0;
 while (outer_iter < 2 || max(max(abs(Qchain-QchainOuter_1))) > tol) && outer_iter <= options.iter_max    
     outer_iter = outer_iter + 1;
@@ -96,14 +97,14 @@ while (outer_iter < 2 || max(max(abs(Qchain-QchainOuter_1))) > tol) && outer_ite
                                         Cchain_s(r) = 0;
                                     else
                                         Cchain_s(r) = Vchain(:,r)' * Wchain_s(:,r);
-                                        Xchain_s(r) = Nchain_s(r) / Cchain_s(r);
+                                        Xchain_s(r) = omicron * Nchain_s(r) / Cchain_s(r) + (1-omicron) * Xchain_s_1(r);
                                     end
                                 end
                                 for k=1:M
                                     Rchain_s(k,r) = Vchain(k,r) * Wchain_s(k,r);
-                                    Qchain_s(k,r) = Xchain_s(r) * Vchain(k,r) * Wchain_s(k,r);
+                                    Qchain_s(k,r) = omicron * Xchain_s(r) * Vchain(k,r) * Wchain_s(k,r) + (1-omicron) * Qchain_s_1(k,r);
                                     Tchain_s(k,r) = Xchain_s(r) * Vchain(k,r);
-                                    Uchain_s(k,r) = Vchain(k,r) * STeff_s(k,r) * Xchain_s(r);
+                                    Uchain_s(k,r) = omicron * Vchain(k,r) * STeff_s(k,r) * Xchain_s(r) + (1-omicron) * Uchain_s_1(k,r);
                                 end
                             end
                         end
@@ -156,14 +157,14 @@ while (outer_iter < 2 || max(max(abs(Qchain-QchainOuter_1))) > tol) && outer_ite
                     Cchain_s(r) = 0;
                 else
                     Cchain_s(r) = Vchain(:,r)'*Wchain(:,r);
-                    Xchain(r) = Nchain(r) / Cchain_s(r);
+                    Xchain(r) = omicron * Nchain(r) / Cchain_s(r) + (1-omicron) *Xchain_1(r);
                 end
             end
             for k=1:M
                 Rchain(k,r) = Vchain(k,r) * Wchain(k,r);
-                Qchain(k,r) = Xchain(r) * Vchain(k,r) * Wchain(k,r);
+                Qchain(k,r) = omicron * Xchain(r) * Vchain(k,r) * Wchain(k,r) + (1-omicron) * Qchain_1(k,r);
                 Tchain(k,r) = Xchain(r) * Vchain(k,r);
-                Uchain(k,r) = Vchain(k,r) * STeff(k,r) * Xchain(r);
+                Uchain(k,r) = omicron * Vchain(k,r) * STeff(k,r) * Xchain(r) + (1-omicron) * Uchain_1(k,r);
             end
         end
     end

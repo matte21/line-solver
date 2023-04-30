@@ -32,11 +32,13 @@ for c=1:nchains
             cols(1,(i-1)*nIC+ik) = (i-1)*K+inchain{c}(ik);
         end
     end    
+    
     Pchain = rt(cols,cols); % routing probability of the chain
     visited = sum(Pchain,2) > 0;
     %                if ~dtmc_isfeasible(Pchain(visited,visited))
     %                    line_error(mfilename,sprintf('The routing matrix in chain %d is not stochastic. Chain %d classes: %s',c, c, int2str(inchain{c})));
     %                end
+    
     alpha_visited = dtmc_solve(Pchain(visited,visited));
     alpha = zeros(1,M*K); alpha(visited) = alpha_visited;
     if max(alpha)>=1-GlobalConstants.FineTol
@@ -84,11 +86,5 @@ end
 %% save results in sn
 sn.visits = visits;
 sn.nodevisits = nodevisits;
-sn.isslc = false(sn.nchains,1);
 sn.inchain = inchain;
-for c=1:nchains
-    if nnz(visits{c}) == 1
-        sn.isslc(c) = true;
-    end
-end
 end

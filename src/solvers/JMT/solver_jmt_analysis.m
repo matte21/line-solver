@@ -5,8 +5,8 @@ self.writeJSIM(sn);
 
 cmd = ['java -cp "',getJMTJarPath(self),filesep,'JMT.jar" jmt.commandline.Jmt sim "',getFilePath(self),'jsim',filesep,getFileName(self),'.jsim" -seed ',num2str(options.seed)];
 if options.verbose
-    line_printf('\nJMT model: %s',[getFilePath(self),'jsim',filesep,getFileName(self),'.jsim']);
-    line_printf('\nJMT command: %s',cmd);
+    line_printf('JMT model: %s\n',[getFilePath(self),'jsim',filesep,getFileName(self),'.jsim']);
+    line_printf('JMT command: %s\n',cmd);
 end
 
 status = system(cmd);

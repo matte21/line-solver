@@ -52,7 +52,7 @@ classdef SolverAuto
                     self.options.method = 'default';
                     self.solvers{1,1} = SolverMAM(model,self.options);
                 case 'mva'
-                    self.options.method = 'qd';
+                    self.options.method = 'default';
                     self.solvers{1,1} = SolverMVA(model,self.options);
                 case 'nc'
                     self.options.method = 'default';
@@ -162,7 +162,11 @@ classdef SolverAuto
     methods
         function AvgChainTable = getAvgChainTable(self)
             % [AVGCHAINTABLE] = GETAVGCHAINTABLE(self)
+            try
             AvgChainTable = self.delegate('getAvgChainTable', 1);
+            catch
+                keyboard
+            end
         end
 
         function AvgQlenTable = getAvgQLenTable(self)

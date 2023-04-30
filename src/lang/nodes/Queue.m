@@ -164,7 +164,7 @@ classdef Queue < Station
                     distribution = self.server.serviceProcess{1, class.index}{3};
                 catch ME
                     distribution = [];
-                    line_warning(mfilename,'No distribution is available for the specified class');
+                    line_warning(mfilename,'No distribution is available for the specified class.\n');
                 end
             end
         end

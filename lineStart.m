@@ -2,6 +2,7 @@ global LINEStdOut
 global LINEVerbose
 global LINEVersion
 global LINEDoChecks
+global LINEDummyMode % If true, getAvgTable returns empty results without running the solvers
 global LINECoarseTol % Coarse tolerance for comparing averages, weights, states
 global LINEFineTol % Fine tolerance eg for distribution comparisons
 global LINEImmediate % Representation of infinite rate
@@ -17,7 +18,7 @@ format compact
 warning ON BACKTRACE
 
 % import java classes
-javaaddpath(which('linesolver.jar'));
+javaaddpath(which('jline.jar'));
 javaaddpath(which('pfqn_nclib.jar'));
 import DataStructures.*; %#ok<SIMPT>
 import QueueingNet.*; %#ok<SIMPT>
@@ -25,9 +26,10 @@ import Utilities.*; %#ok<SIMPT>
 
 % assign global constants
 LINEStdOut = 1; % console
-LINEVersion = '2.0.27';
+LINEVersion = '2.0.28';
 LINEVerbose = VerboseLevel.STD;
 LINEDoChecks = true;
+LINEDummyMode = false; 
 LINECoarseTol = 1e-3; 
 LINEFineTol = 1e-8; 
 LINEImmediate = 1/LINEFineTol;

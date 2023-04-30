@@ -10,12 +10,16 @@ if nargin<2
     options = self.getOptions;
 end
 
+self.runAnalyzerChecks(options);
 Solver.resetRandomGeneratorSeed(options.seed);
+method = options.method;
+wasDefault = false;
 
 switch options.method
     case 'default'
         if sn.nstations == 2 && ~any(sn.nodetype == NodeType.ID_CACHE) && any(sn.nodetype == NodeType.ID_DELAY) && any(sn.nservers(isfinite(sn.nservers))>1)
             options.method = 'comomld'; % default for multi-server models
+            wasDefault = true;
         end
     case 'exact'
         if ~self.model.hasProductFormSolution
@@ -70,7 +74,7 @@ if sn.nclosedjobs == 0 && length(sn.nodetype)==3 && all(sort(sn.nodetype)' == so
                 h = hitClass(k);
                 m = missClass(k);
                 if h>0 && m>0
-                    hitprob(k) = XN(h) / nansum(XN(inchain));
+                    hitprob(k) = XN(h) / sum(XN(inchain),"omitnan");
                 end
             end
             self.model.nodes{ind}.setResultHitProb(hitprob);
@@ -90,42 +94,36 @@ else % queueing network
         self.model.refreshChains();
     else % ordinary queueing network
         if ~isempty(sn.lldscaling) || ~isempty(sn.cdscaling)
-            [QN,UN,RN,TN,CN,XN,lG,runtime,iter] = solver_ncld_analyzer(sn, options);
+            [QN,UN,RN,TN,CN,XN,lG,runtime,iter,method] = solver_ncld_analyzer(sn, options);
         else
             switch options.method
                 case 'exact'
                     if ~snHasOpenClasses(sn)
                         % multi-servers have already been transformed before
-                        [QN,UN,RN,TN,CN,XN,lG,runtime,iter] = solver_ncld_analyzer(sn, options);
+                        [QN,UN,RN,TN,CN,XN,lG,runtime,iter,method] = solver_ncld_analyzer(sn, options);
                     else%if ~snHasClosedClasses(sn)
-                        [QN,UN,RN,TN,CN,XN,lG,runtime,iter] = solver_nc_analyzer(sn, options);
+                        [QN,UN,RN,TN,CN,XN,lG,runtime,iter,method] = solver_nc_analyzer(sn, options);
                     end
                 case {'rd','nrp','nr.probit','nrl','nr.logit','comomld'}
-                    [QN,UN,RN,TN,CN,XN,lG,runtime,iter] = solver_ncld_analyzer(sn, options);
+                    [QN,UN,RN,TN,CN,XN,lG,runtime,iter,method] = solver_ncld_analyzer(sn, options);
                 otherwise
-                    [QN,UN,RN,TN,CN,XN,lG,runtime,iter] = solver_nc_analyzer(sn, options);
+                    [QN,UN,RN,TN,CN,XN,lG,runtime,iter,method] = solver_nc_analyzer(sn, options);
             end
         end
     end
 end
 % Compute average arrival rate at steady-state
-M = sn.nstations;
-R = sn.nclasses;
-T = getAvgTputHandles(self);
-if ~isempty(T) && ~isempty(TN)
-    AN = zeros(M,R);
-    for i=1:M
-        for j=1:M
-            for k=1:R
-                for r=1:R
-                    AN(i,k) = AN(i,k) + TN(j,r)*sn.rt((j-1)*R+r, (i-1)*R+k);
-                end
-            end
+AN = getAvgArvRFromTput(sn, TN, self.getAvgTputHandles());
+
+switch method
+    case 'default'
+        self.setAvgResults(QN,UN,RN,TN,AN,[],CN,XN,runtime,['default(',options.method,')'],iter);
+    otherwise
+        if wasDefault
+            self.setAvgResults(QN,UN,RN,TN,AN,[],CN,XN,runtime,['default(',options.method,')'],iter);
+        else
+            self.setAvgResults(QN,UN,RN,TN,AN,[],CN,XN,runtime,method,iter);
         end
-    end
-else
-    AN = [];
 end
-self.setAvgResults(QN,UN,RN,TN,AN,[],CN,XN,runtime,options.method,iter);
 self.result.Prob.logNormConstAggr = real(lG);
 end

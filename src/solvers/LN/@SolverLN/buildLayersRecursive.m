@@ -4,12 +4,7 @@ jobPosKey = zeros(lqn.nidx,1);
 curClassKey = cell(lqn.nidx,1);
 nreplicas = lqn.repl(idx);
 callresidtproc = self.callresidtproc;
-switch self.options.method
-    case {'java','jline'}
-        model = JNetwork(lqn.hashnames{idx});
-    otherwise
-        model = Network(lqn.hashnames{idx});
-end
+model = Network(lqn.hashnames{idx});
 model.setDoChecks(false); % fast mode
 model.attribute = struct('hosts',[],'tasks',[],'entries',[],'activities',[],'calls',[],'serverIdx',0);
 if ishostlayer | any(any(lqn.issynccaller(callers, lqn.entriesof{idx}))) %#ok<OR2>

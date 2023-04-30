@@ -1,4 +1,3 @@
-clearvars -except exampleName;
 N = 1;
 M = 2;
 

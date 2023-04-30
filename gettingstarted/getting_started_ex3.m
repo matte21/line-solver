@@ -1,3 +1,4 @@
+% https://github.com/imperial-qore/line-solver/wiki/Getting-started#example-3-machine-interference-problem
 model = Network('MRP');
 %% Block 1: nodes
 delay = Delay(model,'WorkingState');

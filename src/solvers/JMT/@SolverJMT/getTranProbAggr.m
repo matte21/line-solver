@@ -1,5 +1,10 @@
 function [Pi_t, SSnode_a] = getTranProbAggr(self, node)
 % [PI_T, SSNODE_A] = GETTRANPROBSTATEAGGR(NODE)
+if GlobalConstants.DummyMode
+    Pi_t = NaN;
+    SSnode_a = NaN;
+    return
+end
 line_error(mfilename,'Method not implemented yet.')
 options = self.getOptions;
 initSeed = self.options.seed;

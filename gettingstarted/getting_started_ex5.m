@@ -1,3 +1,4 @@
+% https://github.com/imperial-qore/line-solver/wiki/Getting-started#example-5-modelling-a-re-entrant-line
 model = Network('RL');
 queue = Queue(model, 'Queue', SchedStrategy.FCFS);
 

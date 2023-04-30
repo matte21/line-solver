@@ -1,4 +1,5 @@
-clearvars -except exampleName;
+clear solver AvgTable;
+
 model = Network('model');
 
 n = 5; % number of items

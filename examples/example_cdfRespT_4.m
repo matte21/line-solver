@@ -1,4 +1,4 @@
-clearvars -except exampleName;
+clear node jobclass;
 model = Network('model');
 
 node{1} = Delay(model, 'Delay');

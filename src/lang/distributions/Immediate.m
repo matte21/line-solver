@@ -1,4 +1,4 @@
-classdef Immediate < Distrib
+classdef Immediate < Distribution
     % A distribution with probability mass entirely at zero
     %
     % Copyright (c) 2012-2023, Imperial College London
@@ -9,15 +9,9 @@ classdef Immediate < Distrib
         function self = Immediate()
             % SELF = IMMEDIATE()
 
-            self@Distrib('Immediate', 0,[0,0]);
+            self@Distribution('Immediate', 0,[0,0]);
             self.immediate = true;
-            try
-                self.obj = jline.lang.distributions.Immediate();            
-            catch
-                javaaddpath(which('linesolver.jar'));
-                import jline.*; %#ok<SIMPT>
-                self.obj = jline.lang.distributions.Immediate();            
-            end
+            self.obj = jline.lang.distributions.Immediate();            
         end
     end
 
@@ -99,7 +93,7 @@ classdef Immediate < Distrib
             % BOOL = ISIMMEDIATE()
             % Check if the distribution is equivalent to an Immediate
             % distribution
-            % Overrides Distrib.isImmediate(self)
+            % Overrides Distribution.isImmediate(self)
             bool = true;
         end
 

@@ -30,7 +30,7 @@ if ~any(strcmp('Symbolic Math Toolbox ', {v.Name}))
 end
 disp('Checking LQNS...')
 [status,result] = system('lqns --h');
-if (isunix & result == 127) | (ispc & result > 0) % command not found
+if (isunix & result == 127) | (ispc & result > 0) %#ok<AND2> % command not found
     warning('WARNING: LQNS is not installed, this may be required by some LINE methods. Download it at: https://github.com/layeredqueuing/dist')
     hasWarnings = true;
 end

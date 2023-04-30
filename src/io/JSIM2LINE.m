@@ -482,7 +482,7 @@ for i=1:length(node_name)
                         T = [T; pars{c}.value];
                     end
                     if any(any(tril(T,-1))>0) % not APH
-                        line_warning(mfilename,'The input model uses a general PH distribution, which is not yet supported in LINE. Fitting the first three moments into an APH distribution.');
+                        line_warning(mfilename,'The input model uses a general PH distribution, which is not yet supported in LINE. Fitting the first three moments into an APH distribution.\n');
                         PH = {T,-T*ones(size(T,1),1)*alpha};
                         ax = APH.fitCentral(map_mean(PH), map_var(PH), map_skew(PH));
                     else % APH
@@ -594,7 +594,7 @@ end
 %line_printf(['JMT2LINE parsing time: ',num2str(Ttot),' s\n']);
 
 if length(model.getIndexSourceStation)>1
-    txt = sprintf('LINE supports JMT models with at most a single source node. You can refactor your JMT model in several ways:\n - If you are mapping in JMT each class to a different source, this is not required. You can instead assign the same reference station to each class and configure class routing in the routing panel of the source node.\n - In more general cases, you may follow these three steps:\n    (1) give a different name to each class of arrival, assigning these classes to a single source as reference station.\n    (2) put a class-switch node after the source to switch the new classes into the original classes they were in the model with multiple sources.\n    (3) configure the routing section of this class-switch node to set the same routing for the classes as they were in the original model.');
+    txt = sprintf('LINE supports JMT models with at most a single source node. You can refactor your JMT model in several ways:\n - If you are mapping in JMT each class to a different source, this is not required. You can instead assign the same reference station to each class and configure class routing in the routing panel of the source node.\n - In more general cases, you may follow these three steps:\n    (1) give a different name to each class of arrival, assigning these classes to a single source as reference station.\n    (2) put a class-switch node after the source to switch the new classes into the original classes they were in the model with multiple sources.\n    (3) configure the routing section of this class-switch node to set the same routing for the classes as they were in the original model.\n');
     error(txt);    
 end
 
@@ -613,7 +613,7 @@ if isfield(xDoc,'preload') && ~isempty(xDoc.preload.stationPopulations)
         if isa(node{ind},'Place')
             %node{ind}.setState(state(ind,:));
             if length(classes)>1
-                line_error(mfilename,'Import failed: Colored Petri net models are not yet supported in LINE.');
+                line_error(mfilename,'Import failed: Colored Petri net models are not yet supported in LINE.\n');
             end
         end
     end
@@ -621,7 +621,7 @@ end
 try
     model.initFromMarginal(state);
 catch
-    line_warning(mfilename,'Import failed to automatically initialize the model.');
+    line_warning(mfilename,'Import failed to automatically initialize the model.\n');
 end
 Ttot=toc(T0);
 end

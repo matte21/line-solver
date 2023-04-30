@@ -1,4 +1,4 @@
-classdef Gamma < ContinuousDistrib
+classdef Gamma < ContinuousDistribution
     % The gamma statistical distribution
     %
     % Copyright (c) 2012-2023, Imperial College London
@@ -10,7 +10,7 @@ classdef Gamma < ContinuousDistrib
             
             % Constructs a gamma distribution from shape and scale
             % parameters
-            self@ContinuousDistrib('Gamma',2,[0,Inf]);
+            self@ContinuousDistribution('Gamma',2,[0,Inf]);
             setParam(self, 1, 'alpha', shape);
             setParam(self, 2, 'beta', scale);
         end

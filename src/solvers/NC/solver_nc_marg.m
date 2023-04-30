@@ -113,8 +113,7 @@ end
 
 runtime = toc(Tstart);
 lPr(isnan(lPr))=0;
-if options.verbose
-    line_printf('\nNormalizing constant (NC) analysis completed. Runtime: %f seconds.\n',runtime);
-end
-return
+%if options.verbose
+%    line_printf('\nNormalizing constant (NC) analysis completed. Runtime: %f seconds.\n',runtime);
+%end
 end

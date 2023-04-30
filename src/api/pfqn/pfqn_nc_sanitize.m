@@ -1,12 +1,14 @@
 function [lambda,L,N,Z,lGremaind] = pfqn_nc_sanitize(lambda,L,N,Z,atol)
 % erase empty classes
+L(isnan(L)) = 0;
+Z(isnan(Z)) = 0;
 nnzclasses=find(N);
 L=L(:,nnzclasses);
 N=N(:,nnzclasses);
 Z=Z(:,nnzclasses);
 lambda=lambda(:,nnzclasses);
 % erase ill-defined classes
-zeroclasses=find((sum(L(:,nnzclasses),1)+sum(Z(:,nnzclasses),1))<atol);
+zeroclasses=find((sum(L,1)+sum(Z,1))<atol);
 L(:,zeroclasses)=[];
 N(:,zeroclasses)=[];
 Z(:,zeroclasses)=[];

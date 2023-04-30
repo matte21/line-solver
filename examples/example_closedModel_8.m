@@ -1,7 +1,7 @@
-clearvars -except exampleName;
+clear node jobclass solver;
 model = Network('model');
 
-node{1} = Queue(model, 'Queue0', SchedStrategy.PS); %Delay(model, 'Delay');
+node{1} = Delay(model, 'Delay');
 node{2} = Queue(model, 'Queue1', SchedStrategy.FCFS);
 node{2}.setNumServers(3);
 
@@ -23,7 +23,6 @@ model.link(myP);
 options = SolverQNS.defaultOptions;
 %options.verbose = false;
 
-solver = {};
 solver{1} = SolverCTMC(model);
 solver{end+1} =SolverQNS(model,'conway');
 solver{end+1} =SolverQNS(model,'reiser');

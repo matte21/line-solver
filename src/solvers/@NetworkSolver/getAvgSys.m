@@ -15,14 +15,14 @@ end
 
 if self.model.hasFork
     if self.model.hasOpenClasses
-        line_warning(mfilename,'System response time computation not yet supported with open classes in the presence of fork nodes.');
+        line_warning(mfilename,'System response time computation not yet supported with open classes in the presence of fork nodes.\n');
         RN = RN*NaN;
     end
 end
 
 if self.model.hasJoin
     if self.model.hasOpenClasses
-        line_warning(mfilename,'System response time computation not yet supported with open classes in the presence of join nodes.');
+        line_warning(mfilename,'System response time computation not yet supported with open classes in the presence of join nodes.\n');
         RN = RN*NaN;
     end
 end

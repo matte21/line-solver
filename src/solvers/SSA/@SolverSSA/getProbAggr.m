@@ -1,6 +1,11 @@
 function ProbAggr = getProbAggr(self, node, state)
 % PROBSTATEAGGR = GETPROBSTATEAGGR(NODE, STATE)
 
+if GlobalConstants.DummyMode
+    ProbAggr = NaN;
+    return
+end
+
 % we do not use probSysState as that is for joint states
 TranSysStateAggr = self.sampleSysAggr;
 sn = self.getStruct;
@@ -14,7 +19,7 @@ rows = findrows(TSS(:,2:end), state);
 if ~isempty(rows)
     ProbAggr = sum(TSS(rows,1))/sum(TSS(:,1));
 else
-    line_warning(mfilename,'The state was not seen during the simulation.');
+    line_warning(mfilename,'The state was not seen during the simulation.\n');
     ProbAggr = 0;
 end
 end

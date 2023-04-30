@@ -93,9 +93,7 @@ while ctr % for each population
     last_nnz = find(n>0, 1, 'last' );
     if sum(n(1:last_nnz-1)) == sum(N(1:last_nnz-1)) && sum(n((last_nnz+1):R))==0
         logX = log(XN(last_nnz));
-        if ~isempty(logX)
-            lGN = lGN - logX;
-        end
+        lGN = lGN - logX;
     end
     if s==0
         break;

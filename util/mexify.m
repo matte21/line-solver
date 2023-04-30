@@ -7,6 +7,12 @@ cfg = coder.config('mex','ecoder',false);
 cfg.GenerateReport = false;
 cfg.ReportPotentialDifferences = false;
 cfg.GenCodeOnly = false;
+%% 'matchrow'.
+ARGS = cell(1,1);
+ARGS{1} = cell(2,1);
+ARGS{1}{1} = coder.typeof(0,[Inf Inf],[1 1]); %A
+ARGS{1}{2} = coder.typeof(0,[1 Inf],[0 1]); %B
+codegen -config cfg matchrow -args ARGS{1}
 %% 'allbut'.
 ARGS = cell(1,1);
 ARGS{1} = cell(2,1);

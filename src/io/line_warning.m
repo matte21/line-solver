@@ -35,7 +35,7 @@ switch w(1).state
                     %line_printf(finalmsg);
                     %warning(finalmsg);
                     finalmsg = sprintf('Warning [%s.m]: %s',caller,errmsg);
-                    line_printf(sprintf('Warning [%s.m]: %s',caller,'Warning message casted more than once, repetitions will not be printed on screen for 60 seconds.'));
+                    line_printf(sprintf('Warning [%s.m]: %s',caller,'Warning message casted more than once, repetitions will not be printed on screen for 60 seconds.\n'));
                     %warning(sprintf('Warning [%s.m]: %s',caller,'Warning message casted more than once, repetitions will not be printed on screen for 60 seconds.'));
                     suppressedAnnouncement = true;
                     suppressedWarnings = true;

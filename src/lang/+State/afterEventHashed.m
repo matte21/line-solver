@@ -16,6 +16,7 @@ isf = sn.nodeToStateful(ind);
 
 inspace = sn.space{isf}(inhash,:);
 isSimulation = false;
+
 [outspace, outrate, outprob] =  State.afterEvent(sn, ind, inspace, event, class, isSimulation);
 if isempty(outspace)
     outhash = -1;

@@ -88,7 +88,7 @@ if it>1
         N = sum(self.ensemble{e}.getNumberOfJobs);
         if N>0
             try
-                IterErr = nanmax(abs(metric(:) - metric_1(:)))/N;
+                IterErr = max(abs(metric(:) - metric_1(:)))/N;
             catch
                 IterErr = 0;
             end
@@ -96,7 +96,7 @@ if it>1
         end
     end
     if self.options.verbose
-        line_printf(sprintf('\bQLen change: %f.',self.maxitererr(it)/E));
+        line_printf(sprintf('QLen change: %f.',self.maxitererr(it)/E));
     end
     if it==iter_min
         if self.options.verbose

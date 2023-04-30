@@ -1,3 +1,5 @@
+clear solver AvgTable
+
 model = LayeredNetwork('myLayeredModel');
 
 % definition of processors, tasks and entries

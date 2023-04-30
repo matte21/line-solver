@@ -13,13 +13,7 @@ classdef Erlang < MarkovianDistribution
             self@MarkovianDistribution('Erlang',2);
             setParam(self, 1, 'alpha', phaseRate); % rate in each state
             setParam(self, 2, 'r', round(nphases)); % number of phases
-            try
-                self.obj = jline.lang.distributions.Erlang(phaseRate, nphases);
-            catch
-                javaaddpath(which('linesolver.jar'));
-                import jline.*; %#ok<SIMPT>
-                self.obj = jline.lang.distributions.Erlang(phaseRate, nphases);
-            end
+            self.obj = jline.lang.distributions.Erlang(phaseRate, nphases);
         end
 
         function phases = getNumberOfPhases(self)
@@ -103,7 +97,7 @@ classdef Erlang < MarkovianDistribution
             % ER = FITRATE(RATE)
 
             % Fit distribution with given rate
-            line_warning(mfilename,'The Erlang distribution is underspecified by the rate, setting the number of phases to 2.');
+            line_warning(mfilename,'The Erlang distribution is underspecified by the rate, setting the number of phases to 2.\n');
             er = Erlang.fitMeanAndOrder(1/RATE, 2);
             er.immediate = 1/RATE < GlobalConstants.CoarseTol;
         end
@@ -112,7 +106,7 @@ classdef Erlang < MarkovianDistribution
             % ER = FITMEAN(MEAN)
 
             % Fit distribution with given mean
-            line_warning(mfilename,'The Erlang distribution is underspecified by the mean, setting the number of phases to 2.');
+            line_warning(mfilename,'The Erlang distribution is underspecified by the mean, setting the number of phases to 2.\n');
             er = Erlang.fitMeanAndOrder(MEAN, 2);
             er.immediate = MEAN < GlobalConstants.CoarseTol;
         end

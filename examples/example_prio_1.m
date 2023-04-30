@@ -1,4 +1,5 @@
-clearvars -except exampleName; 
+clear node jobclass solver AvgTable
+
 %% multiclass example with PS, SIRO, FCFS, HOL priority
 model = Network('MyNetwork');
 

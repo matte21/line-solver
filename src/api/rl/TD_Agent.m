@@ -64,7 +64,7 @@ classdef TD_Agent < handle
 
             while j < num_episodes
                 if mod(j, 1e3)==0
-                    fprintf('running episode #%d .\n',j);
+                    line_printf(mfilename,sprintf('running episode #%d .\n',j));
                 end
                 
                 % if mod(j, 100) == 0

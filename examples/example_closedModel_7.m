@@ -1,5 +1,5 @@
+clear node jobclass solver AvgTable;
 % comparison of product-form scheduling policies
-clearvars -except exampleName;
 c=1;
 psmodel = Network('PS scheduling model');
 

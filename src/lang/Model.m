@@ -21,7 +21,7 @@ classdef Model < Copyable
             %global LINEVersion
             %global GlobalConstants.Verbose 
             if isempty(GlobalConstants.Verbose)
-                line_warning(mfilename,'LINE must be initialized at MATLAB start using the lineStart command. Attempting to run it automatically.');
+                %line_warning(mfilename,'LINE must be initialized at MATLAB start using the lineStart command. Attempting to run it automatically.');
                 lineStart
             end
 

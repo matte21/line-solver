@@ -1,5 +1,4 @@
 function [G,lG,prob] = pfqn_comomrm_ld(L,N,Z,mu, options)
-% m: replication factor
 % S: number of servers at the queueing stations
 N = ceil(N);
 atol = options.tol;
@@ -30,6 +29,7 @@ if nargin<4
     m=1;
 end
 [~,L,N,Z,lG0] = pfqn_nc_sanitize(zeros(1,R),L,N,Z,atol);
+[M,R] = size(L);
 if isempty(Z)
     if isempty(L)
         lG=lG0;

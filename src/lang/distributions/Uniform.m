@@ -1,4 +1,4 @@
-classdef Uniform < ContinuousDistrib
+classdef Uniform < ContinuousDistribution
     % The uniform statistical distribution
     %
     % Copyright (c) 2012-2023, Imperial College London
@@ -10,7 +10,7 @@ classdef Uniform < ContinuousDistrib
             
             % Constructs an uniform distribution with specified minimum and
             % maximum values
-            self@ContinuousDistrib('Uniform',2,[minVal,maxVal]);
+            self@ContinuousDistribution('Uniform',2,[minVal,maxVal]);
             setParam(self, 1, 'min', minVal);
             setParam(self, 2, 'max', maxVal);
         end

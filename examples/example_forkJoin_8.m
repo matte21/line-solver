@@ -1,5 +1,5 @@
 % fork-join with multiple visits within the same chain
-clearvars -except exampleName;
+clear solver AvgTable
 model = Network('model');
 
 source = Source(model,'Source');
@@ -34,12 +34,10 @@ P{jobclass2,jobclass2}(join,sink) = 1.0;
 
 model.link(P);
 
-solver = {};
-solver{end+1} = SolverMVA(model);
+solver{1} = SolverMVA(model);
 solver{end+1} = SolverJMT(model,'seed',23000);
 
-AvgTable = {};
 for s=1:length(solver)
-    AvgTable{end+1} = solver{s}.getAvgTable;
+    AvgTable{s} = solver{s}.getAvgTable;
     AvgTable{s}
 end

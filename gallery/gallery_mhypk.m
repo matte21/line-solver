@@ -1,5 +1,8 @@
 function model = gallery_mhypk(k)
-model = Network('M/Hyper/k');
+if ~exist('k','var')
+    k = 2;
+end
+model = Network(['M/Hyper/',num2str(k)]);
 %% Block 1: nodes
 source = Source(model, 'mySource');
 queue = Queue(model, 'myQueue', SchedStrategy.FCFS);

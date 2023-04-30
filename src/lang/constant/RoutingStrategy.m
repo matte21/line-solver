@@ -49,7 +49,7 @@ classdef (Sealed) RoutingStrategy
                 case 'Disabled'
                     type = RoutingStrategy.DISABLED;
                 otherwise
-                    id = RoutingStrategy.ID_DISABLED;                    
+                    type = RoutingStrategy.ID_DISABLED;                    
             end
         end
 

@@ -1,4 +1,4 @@
-classdef Pareto < ContinuousDistrib
+classdef Pareto < ContinuousDistribution
     % The Pareto statistical distribution
     %
     % Copyright (c) 2012-2023, Imperial College London
@@ -10,7 +10,7 @@ classdef Pareto < ContinuousDistrib
             
             % Constructs a Pareto distribution with given shape and scale
             % parameters
-            self@ContinuousDistrib('Pareto',2,[0,Inf]);
+            self@ContinuousDistribution('Pareto',2,[0,Inf]);
             if shape < 2
                 line_error(mfilename,'shape parameter must be >= 2.0');
             end

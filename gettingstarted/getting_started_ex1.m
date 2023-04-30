@@ -1,3 +1,4 @@
+% https://github.com/imperial-qore/line-solver/wiki/Getting-started#example-1-a-mm1-queue
 model = Network('M/M/1');
 %% Block 1: nodes
 source = Source(model, 'mySource');

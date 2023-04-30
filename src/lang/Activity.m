@@ -82,7 +82,7 @@ classdef Activity < LayeredNetworkElement
                     obj.hostDemandMean = hostDemand;
                     obj.hostDemandSCV = 1.0;
                 end
-            elseif isa(hostDemand,'Distrib')
+            elseif isa(hostDemand,'Distribution')
                 obj.hostDemand = hostDemand;
                 obj.hostDemandMean = hostDemand.getMean();
                 obj.hostDemandSCV = hostDemand.getSCV();

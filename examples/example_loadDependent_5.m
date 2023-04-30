@@ -1,5 +1,6 @@
+clear node jobclass
+
 % class-dependende model
-clearvars -except exampleName;
 N = 16; % number of jobs
 c = 2;
 %%
@@ -19,5 +20,5 @@ P{1,1} = cdmodel.serialRouting(node);
 P{2,2} = cdmodel.serialRouting(node);
 cdmodel.link(P);
 
-cdAvgTableCTMC=SolverCTMC(cdmodel,'method','ctmc').getAvgTable
-cdAvgTableAMVACD=SolverMVA(cdmodel,'method','qd').getAvgTable
+cdAvgTableCTMC=SolverCTMC(cdmodel).getAvgTable
+cdAvgTableCD=SolverMVA(cdmodel,'method','qd').getAvgTable

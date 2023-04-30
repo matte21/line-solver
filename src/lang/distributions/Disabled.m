@@ -1,4 +1,4 @@
-classdef Disabled < ContinuousDistrib & DiscreteDistrib
+classdef Disabled < ContinuousDistribution & DiscreteDistribution
     % A distribution that is not configured
     %
     % Copyright (c) 2012-2023, Imperial College London
@@ -9,8 +9,8 @@ classdef Disabled < ContinuousDistrib & DiscreteDistrib
             % SELF = DISABLED()
             
             % Constructs a disabled distribution
-            self@ContinuousDistrib('Disabled',1,[NaN,NaN]);
-            self@DiscreteDistrib('Disabled',1,[NaN,NaN]);
+            self@ContinuousDistribution('Disabled',1,[NaN,NaN]);
+            self@DiscreteDistribution('Disabled',1,[NaN,NaN]);
             setParam(self, 1, 'value', NaN);
             % not implemented yet
             self.obj = jline.lang.distributions.Disabled();

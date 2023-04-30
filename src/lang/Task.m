@@ -45,7 +45,7 @@ classdef Task < LayeredNetworkElement
             switch scheduling
                 case SchedStrategy.INF
                 if isfinite(multiplicity)
-                    line_warning(mfilename,'Finite multiplicity is not allowed with INF scheduling. Setting it to INF.');
+                    line_warning(mfilename,'Finite multiplicity is not allowed with INF scheduling. Setting it to INF.\n');
                     self.multiplicity = Inf;
                 end
             end
@@ -89,7 +89,7 @@ classdef Task < LayeredNetworkElement
                     self.thinkTimeMean = thinkTime;
                     self.thinkTimeSCV = 1.0;
                 end
-            elseif isa(thinkTime,'Distrib')
+            elseif isa(thinkTime,'Distribution')
                 self.thinkTime = thinkTime;
                 self.thinkTimeMean = thinkTime.getMean();
                 self.thinkTimeSCV = thinkTime.getSCV();

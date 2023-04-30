@@ -1,4 +1,4 @@
-classdef Zipf < DiscreteDistrib
+classdef Zipf < DiscreteDistribution
     % A Zipf-like popularity distribution
     %
     % Copyright (c) 2018-2022, Imperial College London
@@ -13,7 +13,7 @@ classdef Zipf < DiscreteDistrib
             if nargin<2 %~exist('n','var')
                 n = GlobalConstants.Immediate;
             end
-            self@DiscreteDistrib('Zipf',4,[1,n]);
+            self@DiscreteDistribution('Zipf',4,[1,n]);
             p = 1./((1:n).^s)/Zipf.genHarmonic(s,n);
             x = 1:n;
             setParam(self, 1, 'p', p(:)');

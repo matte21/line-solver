@@ -33,7 +33,7 @@ for c=1:size(chains,1)
         end
     end
     Pchain = rt(cols,cols); % routing probability of the chain
-    visited = nansum(Pchain,2) > 0;
+    visited = sum(Pchain,2,"omitnan") > 0;
     
     %                Pchain(visited,visited)
     %                if ~dtmc_isfeasible(Pchain(visited,visited))

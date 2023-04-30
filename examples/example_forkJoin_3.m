@@ -1,4 +1,5 @@
-clearvars -except exampleName;
+clear solver AvgTable;
+
 model = Network('model');
 
 delay = Delay(model,'Delay');

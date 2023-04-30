@@ -5,6 +5,12 @@ end
 N = sn.njobs';
 sn.space = {};
 capacityc = zeros(sn.nnodes, sn.nclasses);
+% Draft SPN support
+% for n=1:sn.nnodes
+%     if isfield(sn.varsparam{n}, "capacityc")
+%         capacityc(n) = sn.varsparam{n}.capacityc;
+%     end
+% end
 for ind=1:sn.nnodes
     if sn.isstation(ind) % place jobs across stations
         ist = sn.nodeToStation(ind);
@@ -13,6 +19,9 @@ for ind=1:sn.nnodes
             c = find(sn.chains(:,r));
             if ~isempty(sn.visits{c}) && sn.visits{c}(ist,r) == 0
                 capacityc(ind,r) = 0;
+            % Draft SPN support
+            %elseif isfield(sn.varsparam{ind}, 'capacityc') 
+            %    capacityc(ind,r) =  min(cutoff(ist,r), sn.classcap(ist,r));                
             elseif ~isempty(sn.proc) && ~isempty(sn.proc{ist}{r}) && any(any(isnan(sn.proc{ist}{r}{1}))) % disabled
                 capacityc(ind,r) = 0;
             else

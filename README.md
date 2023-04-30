@@ -20,9 +20,9 @@ To begin using LINE, add all LINE folders to the path using the following comman
 ```
 lineStart
 ```
-The last command is required at the beginning of every MATLAB session. You can now use LINE. 
+The lineStart command will be required at the beginning of every MATLAB session. You can now use LINE. 
 
-For example, to solve a basic M/M/1 queue analytically, type:
+For example, to solve a basic M/M/1 queue, type:
 ```
 model = Network('M/M/1');
 source = Source(model, 'mySource');
@@ -31,13 +31,13 @@ sink = Sink(model, 'mySink');
 
 oclass = OpenClass(model, 'myClass');
 source.setArrival(oclass, Exp(1));
-queue.setService(oclass, Exp(2));
+queue.setService(oclass, Exp(1.25));
 
 model.link(Network.serialRouting(source,queue,sink));
 
 AvgTable = SolverMVA(model).getAvgTable
 ```
-This will provide the following output, showing for example a 50% utilization value:
+This will provide the following output, showing for example an 80% utilization:
 ```
 MVA analysis (method: default) completed. Runtime: 0.002546 seconds. Iterations: 1.
 AvgTable =
@@ -45,7 +45,7 @@ AvgTable =
     Station     JobClass    QLen    Util    RespT    ResidT    ArvR    Tput
     ________    ________    ____    ____    _____    ______    ____    ____
     mySource    myClass      0        0       0        0        0       1  
-    myQueue     myClass      1      0.5       1        1        1       1  
+    myQueue     myClass      4      0.8       4        4        1       1  
 ```    
 
 A [getting started](https://github.com/imperial-qore/line-solver/wiki/Getting-started) walkthrough, [examples](https://github.com/imperial-qore/line-solver/wiki/Examples) and detailed instructions on how to use LINE can be found in the [User Manual](https://github.com/imperial-qore/line-solver/blob/master/doc/LINE.pdf) and on the [Wiki](https://github.com/line-solver/line/wiki). A [model gallery](https://github.com/imperial-qore/line-solver/wiki/Getting-started#model-gallery) is also available.

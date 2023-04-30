@@ -2,6 +2,11 @@ function RD = getCdfRespT(self, R)
 % RD = GETCDFRESPT(R)
 %global GlobalConstantsGlobalConstants.FineTol
 
+if GlobalConstants.DummyMode
+    RD = cell(1,R);
+    return
+end
+
 if nargin<2 %~exist('R','var')
     R = getAvgRespTHandles(self);
 end

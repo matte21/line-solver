@@ -44,8 +44,12 @@ classdef OpenClass < JobClass
                         model.nodes{i}.setRequired(self,-1);
                     end
                     if ~isempty(model.nodes{i})
-                        %                    && (isa(model.nodes{i},'Queue') || isa(model.nodes{i},'Router'))
-                        model.nodes{i}.setRouting(self, 'Random');
+                        % this should be disabled, but it causes a problem with JMT
+                        %if ~isa(model.nodes{i},'Source')
+                        %    model.nodes{i}.setRouting(self, RoutingStrategy.DISABLED);
+                        %else
+                            model.nodes{i}.setRouting(self, RoutingStrategy.RAND);
+                        %end
                     end
                 end
             elseif isa(model,'JNetwork')

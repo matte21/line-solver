@@ -19,7 +19,7 @@ classdef MAP < MarkovModulated
             setParam(self, 2, 'D1', D1);
 
             if ~map_isfeasible(self.D)
-                line_warning(mfilename,'MAP is infeasible.');
+                line_warning(mfilename,'MAP is infeasible.\n');
             end
         end
 
@@ -98,7 +98,7 @@ classdef MAP < MarkovModulated
             % Return the exit vector of the underlying PH
             D = getProcess(self);
             phi = sum(D{2},2) ./ diag(-D{1}); % sum D1 rows / diag -D0
-        end        
+        end
 
         function acf = getACF(self, lags)
             % ACF = GETACF(self, lags)
@@ -154,7 +154,7 @@ classdef MAP < MarkovModulated
             MAP = {D0,D1};
         end
 
-     function bool = isImmmediate(self)
+        function bool = isImmmediate(self)
             % BOOL = ISIMMMEDIATE()
 
             bool = getMean(self) == 0;
@@ -187,6 +187,10 @@ classdef MAP < MarkovModulated
             newMAP = map_scale(self.D,MEAN);
             self.params{1}.paramValue = newMAP{1};
             self.params{2}.paramValue = newMAP{2};
+        end
+
+        function bool = isImmediate(self)
+            bool = self.getMean < GlobalConstants.FineTol;
         end
 
     end

@@ -33,7 +33,7 @@ Pnir = sum(pi(findrows(SSq,nvec)));
 
 runtime = toc(Tstart);
 
-if options.verbose
-    line_printf('\nCTMC analysis completed. Runtime: %f seconds.\n',runtime);
-end
+%if options.verbose
+%    line_printf('\nCTMC analysis completed. Runtime: %f seconds.\n',runtime);
+%end
 end

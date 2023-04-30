@@ -60,16 +60,16 @@ classdef SolverLN < LayeredNetworkSolver & EnsembleSolver
             self@EnsembleSolver(lqnmodel, mfilename);
 
             if nargin == 1 %case SolverLN(model)
-                solverFactory = @(m) ifthenelse(m.hasFork(), SolverMVA(m,'verbose',false), SolverNC(m,'verbose',false,'method','adaptive'));
+                solverFactory = @(m) SolverAuto(m,'verbose',false);
                 self.setOptions(SolverLN.defaultOptions);
             elseif nargin>1 && isstruct(solverFactory)
                 options = solverFactory;
                 self.setOptions(options);
-                solverFactory = @(m) ifthenelse(m.hasFork(), SolverMVA(m,'verbose',false), SolverNC(m,'verbose',false,'method','adaptive'));
+                solverFactory = @(m) SolverAuto(m,'verbose',false);
             elseif nargin>2 % case SolverLN(model,'opt1',...)
                 if ischar(solverFactory)
-                    inputvar = {solverFactory,varargin{:}};
-                    solverFactory = @(m) ifthenelse(m.hasFork(), SolverMVA(m,'verbose',false), SolverNC(m,'verbose',false,'method','adaptive'));
+                    inputvar = {solverFactory,varargin{:}}; %#ok<CCAT> 
+                    solverFactory = @(m) SolverAuto(m,'verbose',false);
                 else % case SolverLN(model, solverFactory, 'opt1',...)
                     inputvar = varargin;
                 end
@@ -147,18 +147,18 @@ classdef SolverLN < LayeredNetworkSolver & EnsembleSolver
         function [result, runtime] = analyze(self, it, e)
             % [RESULT, RUNTIME] = ANALYZE(IT, E)
             T0 = tic;
-            result = struct();            
-            %if it>2*length(self.model.ensemble)
-                [result.QN, result.UN, result.RN, result.TN, result.AN, result.WN] = self.solvers{e}.getAvg();
+            result = struct();
+            %it
+            %if it>1%2*length(self.model.ensemble)
+            [result.QN, result.UN, result.RN, result.TN, result.AN, result.WN] = self.solvers{e}.getAvg();
             %else
-            %    [result.QN, result.UN, result.RN, result.TN, result.AN, result.WN] = SolverMVA(self.model.ensemble{e},'sqni').getAvg();
-            %iveend
+            %    [result.QN, result.UN, result.RN, result.TN, result.AN, result.WN] = SolverMVA(self.model.ensemble{e},' ','verbose',self.solvers{e}.options.verbose).getAvg();
+            %end
             runtime = toc(T0);
         end
 
         function post(self, it) % operations after an iteration
             % POST(IT) % OPERATIONS AFTER AN ITERATION
-
             % convert the results of QNs into layer metrics
             self.updateMetrics(it);
 
@@ -187,12 +187,12 @@ classdef SolverLN < LayeredNetworkSolver & EnsembleSolver
                 switch self.solvers{e}.name
                     case {'SolverMVA', 'SolverNC'} %leaner than refreshService, no need to refresh phases
                         % note: this does not refresh the sn.proc field, only sn.rates and sn.scv
-            			switch self.options.method
-            				case 'default'
+                        switch self.options.method
+                            case 'default'
                                 refreshRates(self.ensemble{e});
-            				case 'moment3'
+                            case 'moment3'
                                 refreshService(self.ensemble{e});
-            			end
+                        end
                     otherwise
                         refreshService(self.ensemble{e});
                 end
@@ -287,7 +287,7 @@ classdef SolverLN < LayeredNetworkSolver & EnsembleSolver
         function [allMethods] = listValidMethods()
             % allMethods = LISTVALIDMETHODS()
             % List valid methods for this solver
-            allMethods = {'default','moment3','java','jline'};
+            allMethods = {'default','moment3'};
         end
 
         function [bool, featSupported] = supports(model)

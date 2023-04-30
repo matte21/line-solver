@@ -4,12 +4,18 @@ function [AvgTable,QT,UT,RT,WT,TT,AT] = getAvgTable(self,Q,U,R,T,A,W,keepDisable
 %
 % Copyright (c) 2012-2023, Imperial College London
 % All rights reserved.
-
+if GlobalConstants.DummyMode
+    AvgTable = Table();
+    QT = Table(); UT = Table();
+    RT = Table(); TT = Table();
+    WT = Table(); AT = Table();
+    return
+end
 if ~isempty(self.model.obj)
     sn = self.model.getStruct;
     M = sn.nstations;
     R = sn.nclasses;
-    V = cellsum(sn.visits);        
+    V = cellsum(sn.visits);
     [QN,UN,RN,TN,AN,WN] = self.getAvg([],[],[],[],[],[]);
     Qval = []; Uval = [];
     Rval = []; Tval = [];
@@ -45,16 +51,22 @@ if ~isempty(self.model.obj)
     Station = label(Station);
     JobClass = label(JobClass);
     QLen = Qval(:); % we need to save first in a variable named like the column
-    QT = Table(Station,JobClass,QLen);
     Util = Uval(:); % we need to save first in a variable named like the column
-    UT = Table(Station,JobClass,Util);
     RespT = Rval(:); % we need to save first in a variable named like the column
-    RT = Table(Station,JobClass,RespT);
     ResidT = Residval(:); % we need to save first in a variable named like the column
-    WT = Table(Station,JobClass,ResidT);
     Tput = Tval(:); % we need to save first in a variable named like the column
-    TT = Table(Station,JobClass,Tput);
     ArvR = Aval(:); % we need to save first in a variable named like the column
+    % QLen = num2str(QLen, ['%' sprintf('.%df', 5)]);
+    % Util = num2str(Util, ['%' sprintf('.%df', 5)]);
+    % RespT = num2str(RespT, ['%' sprintf('.%df', 5)]);
+    % ResidT = num2str(ResidT, ['%' sprintf('.%df', 5)]);
+    % ArvR = num2str(ArvR, ['%' sprintf('.%df', 5)]);
+    % Tput = num2str(Tput, ['%' sprintf('.%df', 5)]);
+    QT = Table(Station,JobClass,QLen);
+    UT = Table(Station,JobClass,Util);
+    RT = Table(Station,JobClass,RespT);
+    WT = Table(Station,JobClass,ResidT);
+    TT = Table(Station,JobClass,Tput);
     AT = Table(Station,JobClass,ArvR);
     %AvgTable = Table(Station,JobClass,QLen,Util,RespT,Tput);
     AvgTable = Table(Station, JobClass, QLen, Util, RespT, ResidT, ArvR, Tput);
@@ -162,17 +174,24 @@ elseif ~keepDisabled
     end
     Station = label(Station);
     JobClass = label(JobClass);
+
     QLen = Qval(:); % we need to save first in a variable named like the column
-    QT = Table(Station,JobClass,QLen);
     Util = Uval(:); % we need to save first in a variable named like the column
-    UT = Table(Station,JobClass,Util);
     RespT = Rval(:); % we need to save first in a variable named like the column
-    RT = Table(Station,JobClass,RespT);
     ResidT = Residval(:); % we need to save first in a variable named like the column
-    WT = Table(Station,JobClass,ResidT);
     Tput = Tval(:); % we need to save first in a variable named like the column
-    TT = Table(Station,JobClass,Tput);
     ArvR = Aval(:); % we need to save first in a variable named like the column
+    % QLen = num2str(QLen, ['%' sprintf('.%df', 5)]);
+    % Util = num2str(Util, ['%' sprintf('.%df', 5)]);
+    % RespT = num2str(RespT, ['%' sprintf('.%df', 5)]);
+    % ResidT = num2str(ResidT, ['%' sprintf('.%df', 5)]);
+    % ArvR = num2str(ArvR, ['%' sprintf('.%df', 5)]);
+    % Tput = num2str(Tput, ['%' sprintf('.%df', 5)]);
+    QT = Table(Station,JobClass,QLen);
+    UT = Table(Station,JobClass,Util);
+    RT = Table(Station,JobClass,RespT);
+    WT = Table(Station,JobClass,ResidT);
+    TT = Table(Station,JobClass,Tput);
     AT = Table(Station,JobClass,ArvR);
     %AvgTable = Table(Station,JobClass,QLen,Util,RespT,Tput);
     AvgTable = Table(Station, JobClass, QLen, Util, RespT, ResidT, ArvR, Tput);
@@ -220,18 +239,23 @@ else
     Station = label(Station);
     JobClass = label(JobClass);
     QLen = Qval(:); % we need to save first in a variable named like the column
-    QT = Table(Station,JobClass,QLen);
     Util = Uval(:); % we need to save first in a variable named like the column
-    UT = Table(Station,JobClass,Util);
     RespT = Rval(:); % we need to save first in a variable named like the column
-    RT = Table(Station,JobClass,RespT);
     ResidT = Residval(:); % we need to save first in a variable named like the column
-    WT = Table(Station,JobClass,ResidT);
     Tput = Tval(:); % we need to save first in a variable named like the column
-    TT = Table(Station,JobClass,Tput);
     ArvR = Aval(:); % we need to save first in a variable named like the column
+    % QLen = num2str(QLen, ['%' sprintf('.%df', 5)]);
+    % Util = num2str(Util, ['%' sprintf('.%df', 5)]);
+    % RespT = num2str(RespT, ['%' sprintf('.%df', 5)]);
+    % ResidT = num2str(ResidT, ['%' sprintf('.%df', 5)]);
+    % ArvR = num2str(ArvR, ['%' sprintf('.%df', 5)]);
+    % Tput = num2str(Tput, ['%' sprintf('.%df', 5)]);
+    QT = Table(Station,JobClass,QLen);
+    UT = Table(Station,JobClass,Util);
+    RT = Table(Station,JobClass,RespT);
+    WT = Table(Station,JobClass,ResidT);
+    TT = Table(Station,JobClass,Tput);
     AT = Table(Station,JobClass,ArvR);
-    %AvgTable = Table(Station,JobClass,QLen,Util,RespT,Tput);
-    AvgTable = Table(Station, JobClass, QLen, Util, RespT, ResidT, ArvR, Tput);
+    AvgTable = Table(Station, JobClass,  QLen, Util, RespT, ResidT, ArvR, Tput);
 end
 end

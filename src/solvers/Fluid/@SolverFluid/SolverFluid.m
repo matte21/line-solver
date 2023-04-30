@@ -25,6 +25,7 @@ classdef SolverFluid < NetworkSolver
             sn = self.model.getStruct(true);
         end
         
+        [QNt,UNt,TNt] = getTranAvg(self,Qt,Ut,Tt);
         
         % solve method is supplied by Solver superclass
         runtime = runAnalyzer(self, options);
@@ -34,9 +35,7 @@ classdef SolverFluid < NetworkSolver
         function [allMethods] = listValidMethods()
             % allMethods = LISTVALIDMETHODS()
             % List valid methods for this solver
-            allMethods = {'default','softmin','statedep',...
-                'closing','jline.fluid','jline.fluid.matrix',...
-                'jline.fluid.closing'};
+            allMethods = {'default','softmin','statedep','closing','matrix'};
         end
 
         function featSupported = getFeatureSet()

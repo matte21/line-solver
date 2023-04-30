@@ -1,4 +1,4 @@
-clearvars -except exampleName;
+clear node jobclass solver AvgTable
 
 model = Network('myModel');
 
@@ -21,6 +21,7 @@ model.addLinks([source, router;...
     router, queue2; ...
     queue1, sink; ...
     queue2, sink]);
+
 router.setRouting(oclass, RoutingStrategy.RROBIN);
 
 solver = {};

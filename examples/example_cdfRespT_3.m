@@ -1,3 +1,5 @@
+clear node jobclass;
+
 model = Network('myModel');
 
 %% Block 1: nodes

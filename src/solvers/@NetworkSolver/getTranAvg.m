@@ -23,31 +23,24 @@ UNclass_t={};
 TNclass_t={};
 
 options = self.options;
-switch options.method 
-    case 'default'
-        options.method = 'closing';
-    otherwise
-        line_warning(mfilename,'getTranAvg is not offered by the specified method. Setting the solution method to ''''closing''''.');        
-        options.method = 'closing';
-        self.resetResults;
-end
+
 sn = self.model.getStruct;
 minrate = min(sn.rates(isfinite(sn.rates)));
 if ~hasTranResults(self)
     if length(options.timespan)<2
-        line_error(mfilename,'Timespan option requires to specify a two-dimensional vector, e.g., [0,1e3].');
+        line_error(mfilename,'Timespan option requires to specify a two-dimensional vector, e.g., [0,1e3].\n');
     end
     if isinf(options.timespan(1)) && isinf(options.timespan(2))
         options.timespan = [0,30/minrate];
-        line_warning(mfilename,'Timespan of transient analysis unspecified, setting the timespan option to [0, %d]. Use %s(model,''timespan'',[0,T]) to customize.',options.timespan(2),class(self));
+        line_warning(mfilename,'Timespan of transient analysis unspecified, setting the timespan option to [0, %d]. Use %s(model,''timespan'',[0,T]) to customize.\n',options.timespan(2),class(self));
     end
     if isinf(options.timespan(1))
-            line_warning(mfilename,'Start time of transient analysis unspecified, setting the timespan option to [0,%d].',options.timespan(2));
+            line_warning(mfilename,'Start time of transient analysis unspecified, setting the timespan option to [0,%d].\n',options.timespan(2));
         options.timespan(1) = 0;
     end
     if isinf(options.timespan(2))
         options.timespan(2) = 30/minrate;
-        line_warning(mfilename,'End time of transient analysis unspecified, setting the timespan option to [%d,%d]. Use %s(model,''timespan'',[0,T]) to customize.',options.timespan(1),options.timespan(2),class(self));
+        line_warning(mfilename,'End time of transient analysis unspecified, setting the timespan option to [%d,%d]. Use %s(model,''timespan'',[0,T]) to customize.\n',options.timespan(1),options.timespan(2),class(self));
     end
     runAnalyzer(self, options);
 end

@@ -1,21 +1,21 @@
-function [QN,UN,RN,TN,CN,XN,lG,runtime,iter] = solver_mva_cache_analyzer(sn, options)
+function [Q,U,R,T,C,X,lG,runtime,iter] = solver_mva_cache_analyzer(sn, options)
 % [Q,U,R,T,C,X,LG,RUNTIME,ITER] = SOLVER_MVA_CACHE_ANALYZER(QN, OPTIONS)
 
 % Copyright (c) 2012-2023, Imperial College London
 % All rights reserved.
 
 T0=tic;
-QN = []; UN = [];
-RN = []; TN = [];
-CN = [];
-XN = zeros(1,sn.nclasses);
+Q = []; U = [];
+R = []; T = [];
+C = [];
+X = zeros(1,sn.nclasses);
 lG = NaN;
 iter = NaN;
 
 source_ist = sn.nodeToStation(sn.nodetype == NodeType.Source);
 sourceRate = sn.rates(source_ist,:);
 sourceRate(isnan(sourceRate)) = 0;
-TN(source_ist,:) = sourceRate;
+T(source_ist,:) = sourceRate;
 
 ch = sn.nodeparam{sn.nodetype == NodeType.Cache};
 
@@ -35,8 +35,8 @@ for v=1:u
     end
 end
 
-R = ch.accost;
-gamma = cache_gamma_lp(lambda,R);
+Rcost = ch.accost;
+gamma = cache_gamma_lp(lambda,Rcost);
 
 switch options.method
     case 'exact'
@@ -59,7 +59,7 @@ switch options.method
             missRate(v) = lambda(v,:,1)*pij(:,1);
         end          
     case 'ttl.tree'
-        pij = cache_ttl_tree(lambda, R, m);  % considering different graphs of different items
+        pij = cache_ttl_tree(lambda, Rcost, m);  % considering different graphs of different items
         missRate = zeros(1,u);
         for v=1:u
             missRate(v) = lambda(v,:,1)*pij(:,1);
@@ -74,8 +74,8 @@ end
 
 for r = 1:sn.nclasses
     if length(ch.hitclass)>=r && ch.missclass(r)>0 && ch.hitclass(r)>0
-        XN(ch.missclass(r)) = XN(ch.missclass(r)) + missRate(r);
-        XN(ch.hitclass(r)) = XN(ch.hitclass(r)) + (sourceRate(r) - missRate(r));
+        X(ch.missclass(r)) = X(ch.missclass(r)) + missRate(r);
+        X(ch.hitclass(r)) = X(ch.hitclass(r)) + (sourceRate(r) - missRate(r));
     end
 end
 runtime=toc(T0);

@@ -1,5 +1,5 @@
 function LQN2SCRIPT(lqnmodel, modelName, fid)
-% myLQN2SCRIPT(MODEL, MODELNAME, FID)
+% LQN2SCRIPT(MODEL, MODELNAME, FID)
 
 % Copyright (c) 2012-2023, Imperial College London
 % All rights reserved.
@@ -105,7 +105,7 @@ for h=1:sn.nhosts
             case 'Immediate'
                 fprintf(fid, 'P{%d}.setThinkTime(Immediate());\n', h);
             case 'Exponential'
-                fprintf(fid, 'P{%d}.setThinkTime(Exp.fitMean(%g,%g));\n', h, sn.think{h}.getMean);
+                fprintf(fid, 'P{%d}.setThinkTime(Exp.fitMean(%g));\n', h, sn.think{h}.getMean);
             case {'Erlang','HyperExp','Coxian','APH'}
                 fprintf(fid, 'P{%d}.setThinkTime(%s.fitMeanAndSCV(%g,%g));\n', h, sn.think{h}.name, sn.think{h}.getMean, sn.think{h}.getSCV);
             otherwise
@@ -122,7 +122,7 @@ for ai = 1:sn.nacts
     for bidx=find(sn.graph(aidx,:))
         if bidx > sn.ashift % ignore precedence between entries and activities
             % Serial pattern (SEQ)
-            if full(sn.actpretype(aidx)) == ActivityPrecedenceType.ID_PRE_SEQ & full(sn.actposttype(bidx)) == ActivityPrecedenceType.ID_POST_SEQ
+            if full(sn.actpretype(aidx)) == ActivityPrecedenceType.ID_PRE_SEQ && full(sn.actposttype(bidx)) == ActivityPrecedenceType.ID_POST_SEQ
                 fprintf(fid, 'T{%d}.addPrecedence(ActivityPrecedence.Serial(A{%d}, A{%d}));\n', tidx-sn.tshift, aidx-sn.ashift, bidx-sn.ashift);
             end
         end

@@ -52,16 +52,16 @@ switch class(this_model)
                         varargout{6} = r6;
                 end
                 if self.options.verbose
-                    line_printf('Successful method execution completed by %s.',proposedSolvers{s}.getName);
+                    line_printf('Successful method execution completed by %s.\n',proposedSolvers{s}.getName);
                 end
                 return
             catch ME
                 if ~isempty(strfind(ME.message,'Unrecognized method'))
                     if self.options.verbose
-                        line_printf('Method unsupported by %s.',proposedSolvers{s}.getName);
+                        line_printf('Method unsupported by %s.\n',proposedSolvers{s}.getName);
                     end
                 else
-                    line_warning(mfilename,ME.message);
+                    line_warning(mfilename,[ME.message,'\n']);
                 end
             end
         end
@@ -111,12 +111,12 @@ switch class(this_model)
                         varargout{6} = r6;
                 end
                 if self.options.verbose
-                    line_printf('Successful method execution completed by %s.',proposedSolvers{s}.getName);
+                    line_printf('Successful method execution completed by %s.\n',proposedSolvers{s}.getName);
                 end
                 return
             catch
                 if self.options.verbose
-                    line_printf('Switching %s.',proposedSolvers{s}.getName);
+                    line_printf('Switching %s.\n',proposedSolvers{s}.getName);
                 end
             end
         end

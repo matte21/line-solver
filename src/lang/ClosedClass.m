@@ -26,7 +26,7 @@ classdef ClosedClass < JobClass
                 self.type = JobClassType.CLOSED;
                 self.population = njobs;
                 if abs(njobs-round(njobs))>GlobalConstants.CoarseTol
-                    line_warning(mfilename,sprintf('The number of jobs in class %s should be an integer, some solvers might fail.', name));
+                    line_warning(mfilename,sprintf('The number of jobs in class %s should be an integer, some solvers might fail.\n', name));
                 end
                 self.priority = 0;
                 if nargin>=5 %exist('prio','var')
@@ -35,9 +35,9 @@ classdef ClosedClass < JobClass
                 model.addJobClass(self);
                 if ~isa(refstat, 'Station')
                     if isa(refstat, 'Node')
-                        line_error(mfilename,sprintf('The reference station of class %s needs to be a station, not a node.', name));
+                        line_error(mfilename,sprintf('The reference station of class %s needs to be a station, not a node.\n', name));
                     else
-                        line_error(mfilename,sprintf('The parameter for the reference station of class %s is not a valid object.', name));
+                        line_error(mfilename,sprintf('The parameter for the reference station of class %s is not a valid object.\n', name));
                     end
                 end
                 setReferenceStation(self, refstat);
@@ -49,7 +49,8 @@ classdef ClosedClass < JobClass
                     %end
                     %if ~isempty(model.nodes{i})
                     %                    && (isa(model.nodes{i},'Queue') || isa(model.nodes{i},'Router'))
-                    model.nodes{i}.setRouting(self, RoutingStrategy.DISABLED);
+                    %model.nodes{i}.setRouting(self, RoutingStrategy.DISABLED);
+                    model.nodes{i}.setRouting(self, RoutingStrategy.RAND);
                     if isa(model.nodes{i},'Join')
                         model.nodes{i}.setStrategy(self, JoinStrategy.STD);
                         model.nodes{i}.setRequired(self, -1);

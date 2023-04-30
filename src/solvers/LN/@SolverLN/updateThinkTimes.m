@@ -26,11 +26,11 @@ if size(lqn.iscaller,2) > 0 % ignore models without callers
                 % obtain total self.utilization of task t
                 self.util(tidx) = sum(results{end,idxhash(tidx)}.UN(self.ensemble{idxhash(tidx)}.attribute.serverIdx,:),2);
                 % key think time update formula for LQNs, this accounts for the fact that in LINE infinite server self.utilization is dimensionally a mean number of jobs
-                self.thinkt(tidx) = (njobs-self.util(tidx)) / self.tput(tidx) - tidx_thinktime;
+                self.thinkt(tidx) = max(GlobalConstants.Zero, (njobs-self.util(tidx)) / self.tput(tidx) - tidx_thinktime);
             else % otherwise we consider the case where t is a regular queueing station (other than an infinite server)
                 self.util(tidx) = sum(results{end,idxhash(tidx)}.UN(self.ensemble{idxhash(tidx)}.attribute.serverIdx,:),2); % self.utilization of t as a server
                 % key think time update formula for LQNs, this accounts that in LINE self.utilization is scaled in [0,1] for all queueing stations irrespectively of the number of servers
-                self.thinkt(tidx) = njobs*abs(1-self.util(tidx)) / self.tput(tidx) - tidx_thinktime;
+                self.thinkt(tidx) = max(GlobalConstants.Zero, njobs*abs(1-self.util(tidx)) / self.tput(tidx) - tidx_thinktime);
             end
             self.thinktproc{tidx} = Exp.fitMean(self.thinkt(tidx) + tidx_thinktime);
         else % set to zero if this is a ref task

@@ -1,3 +1,5 @@
+clear node jobclass solver
+
 model = Network('model');
 
 node{1} = Delay(model, 'Delay');
@@ -58,7 +60,6 @@ K = model.getNumberOfClasses();
 
 % This part illustrates the execution of different solvers
 fprintf(1,'This example illustrates the calculation of probabilities via normalizing constants.\n')
-
 
 solver={};
 options = Solver.defaultOptions;

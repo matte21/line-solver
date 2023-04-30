@@ -105,7 +105,9 @@ if isempty(self.sn)
                         [~,self.nodes{i}.schedStrategyPar] = sort(servTime);
                 end
             case 'Sink'
-                % no-op
+                for k=1:K
+                    self.getSink.setRouting(self.classes{k},RoutingStrategy.DISABLED);
+                end
             case 'Source'
                 for k=1:K
                     if k > length(self.nodes{i}.input.sourceClasses) || isempty(self.nodes{i}.input.sourceClasses{k})

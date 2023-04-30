@@ -15,8 +15,6 @@ function [p,p_1,Qperm,eps,pcourt]=ctmc_kms(Q,MS,numSteps)
 % * The initial approximate solutions is obtained by calling CTMC_COURTOIS(Q,MS)
 % * No convergence stop criterion is currently implented
 
-% The majority of the code is provided by Dr Giuliano Casale.
-
 %% INIT
 nMacroStates = size(MS,1); % Number of macro-states
 nStates=size(Q,1);

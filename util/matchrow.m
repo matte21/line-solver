@@ -5,6 +5,11 @@ function pos = matchrow(matrix, row)
 % Copyright (c) 2012-2022, Imperial College London
 % All rights reserved.
 
+if size(matrix,2) ~= size(row,2)
+    %Incompatible matrix and row sizes
+    pos = -2;
+    return
+end
 if all(matrix(end,:) == row)
     pos = size(matrix,1);
 else

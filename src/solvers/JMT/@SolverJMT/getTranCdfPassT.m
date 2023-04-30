@@ -1,6 +1,11 @@
 function RD = getTranCdfPassT(self, R)
 % RD = GETTRANCDFPASST(R)
 
+if GlobalConstants.DummyMode
+    RD = NaN;
+    return
+end
+
 if nargin<2 %~exist('R','var')
     R = getAvgRespTHandles(self);
 end

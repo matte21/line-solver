@@ -1,4 +1,5 @@
-clearvars -except exampleName;
+clear P T E A solver AvgTable
+
 fprintf(1,'This example illustrates a layered network with a loop.\n')
 
 model = LayeredNetwork('myLayeredModel');

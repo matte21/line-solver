@@ -41,8 +41,7 @@ Pr = exp(lPr - lG);
 G=exp(lG);
 runtime = toc(Tstart);
 
-if options.verbose
-    line_printf('\nNormalizing constant (NC) analysis completed. Runtime: %f seconds.\n',runtime);
-end
-return
+%if options.verbose
+%    line_printf('\nNormalizing constant (NC) analysis completed. Runtime: %f seconds.\n',runtime);
+%end
 end

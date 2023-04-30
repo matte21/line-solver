@@ -7,9 +7,9 @@ end
 options = struct();
 options.cache = true;
 options.cutoff = Inf;
-options.config = struct();
+options.config = struct(); % solver specific options
+options.lang = 'matlab';
 options.force = false;
-options.hide_immediate = true; % hide immediate transitions if possible
 options.init_sol = [];
 options.iter_max = 10;
 options.iter_tol = 1e-4; % convergence tolerance to stop iterations
@@ -36,6 +36,9 @@ options.verbose = 1;
 switch solverName
     case 'CTMC'
         options.timespan = [Inf,Inf];
+        options.config.hide_immediate = true; % hide immediate transitions if possible
+        %options.config.state_space_gen = 'reachable'; % still buggy
+        options.config.state_space_gen = 'full';
     case 'Ensemble' % Env
         options.method = 'default';
         options.init_sol = [];
@@ -74,6 +77,8 @@ switch solverName
         options.config.highvar = 'none';
         options.config.multiserver = 'default';
         options.config.np_priority = 'default';
+        options.iter_max = 10^3;
+        options.iter_tol = 10^-6;        
     case 'QNS'
         options.config.multiserver = 'default'; 
     case 'NC'        

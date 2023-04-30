@@ -4,9 +4,9 @@ function [stateSpace,stateSpaceAggr,stateSpaceHashed,nodeStateSpace,sn] = ctmc_s
 nodeStateSpace = qnc.space;
 sn.space = nodeStateSpace;
 
-if options.verbose
-    line_printf('\nCTMC state space size: %d states. ',size(stateSpace,1));
-end
+% if options.verbose
+%     line_printf('\nCTMC state space size: %d states. ',size(stateSpace,1));
+% end
 if ~isfield(options, 'hide_immediate')
     options.hide_immediate = true;
 end

@@ -12,13 +12,7 @@ classdef Exp < MarkovianDistribution
             self@MarkovianDistribution('Exponential', 1);
             setParam(self, 1, 'lambda', lambda);
             self.immediate = (1/lambda) < GlobalConstants.FineTol;
-            try
-                self.obj = jline.lang.distributions.Exp(lambda);
-            catch
-                javaaddpath(which('linesolver.jar'));
-                import jline.*; %#ok<SIMPT>
-                self.obj = jline.lang.distributions.Exp(lambda);
-            end
+            self.obj = jline.lang.distributions.Exp(lambda);
         end
 
         function X = sample(self, n)
@@ -73,10 +67,10 @@ classdef Exp < MarkovianDistribution
             SKEW = varargin{3};
             %            KURT = varargin{4};
             if abs(SCV-1) > GlobalConstants.CoarseTol
-                line_warning(mfilename,'Warning: the exponential distribution cannot fit squared coefficient of variation != 1, changing squared coefficient of variation to 1.');
+                line_warning(mfilename,'The exponential distribution cannot fit squared coefficient of variation != 1, changing squared coefficient of variation to 1.\n');
             end
             if abs(SKEW-2) > GlobalConstants.CoarseTol
-                line_warning(mfilename,'Warning: the exponential distribution cannot fit skewness != 2, changing skewness to 2.');
+                line_warning(mfilename,'The exponential distribution cannot fit skewness != 2, changing skewness to 2.\n');
             end
             %            if abs(KURT-9) > GlobalConstants.CoarseTol
             %                line_warning(mfilename,'Warning: the exponential distribution cannot fit kurtosis != 9, changing kurtosis to 9.');
@@ -104,7 +98,7 @@ classdef Exp < MarkovianDistribution
             % UPDATEMEANANDSCV(SELF,MEAN,SCV)
             % Update parameters to match the given mean and squared coefficient of variation (SCV=variance/mean^2)
             if abs(SCV-1) > GlobalConstants.CoarseTol
-                line_warning(mfilename,'Warning: the exponential distribution cannot fit SCV != 1, changing SCV to 1.');
+                line_warning(mfilename,'The exponential distribution cannot fit SCV != 1, changing SCV to 1.\n');
             end
             self.params{1}.paramValue = 1 / MEAN;
             self.mean = MEAN;
@@ -125,22 +119,34 @@ classdef Exp < MarkovianDistribution
         function ex = fitMean(MEAN)
             % EX = FITMEAN(MEAN)
             % Fit exponential distribution with given mean
-            ex = Exp(1/MEAN);
+            if MEAN>0
+                ex = Exp(1/MEAN);
+            else
+                ex = Immediate.getInstance();
+            end
         end
 
         function ex = fitRate(RATE)
             % EX = FITRATE(RATE)
-            % Fit exponential distribution with given rate
-            ex = Exp(RATE);
+            % Fit exponential distribution with given rate    
+            if RATE>0
+                ex = Exp(RATE);
+            else
+                ex = Disabled.getInstance();
+            end
         end
 
         function ex = fitMeanAndSCV(MEAN, SCV)
             % EX = FITMEANANDSCV(MEAN, SCV)
             % Fit exponential distribution with given mean and squared coefficient of variation (SCV=variance/mean^2)
             if abs(SCV-1) > GlobalConstants.CoarseTol
-                line_warning(mfilename,'Warning: the exponential distribution cannot fit SCV != 1, changing SCV to 1.');
+                line_warning(mfilename,'The exponential distribution cannot fit SCV != 1, changing SCV to 1.\n');
             end
-            ex = Exp(1/MEAN);
+             if MEAN>0
+                ex = Exp(1/MEAN);
+            else
+                ex = Exp(1/GlobalConstants.Zero);
+            end
         end
 
         function Qcell = fromMatrix(Lambda)

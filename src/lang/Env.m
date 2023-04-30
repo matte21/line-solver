@@ -24,12 +24,6 @@ classdef Env < Ensemble
             self.envGraph = digraph();
             self.envGraph.Nodes.Model = cell(0);
             self.envGraph.Nodes.Type = cell(0);
-            try
-                jline.lang.distributions.Immediate();
-            catch
-                javaaddpath(which('linesolver.jar'));
-                import jline.*;
-            end
         end
         
         function name = addStage(self, name, type, model)            
@@ -74,7 +68,7 @@ classdef Env < Ensemble
             for t=1:T
                 e = self.envGraph.findnode(self.envGraph.Edges.EndNodes{t,1});
                 h = self.envGraph.findnode(self.envGraph.Edges.EndNodes{t,2});
-                self.envGraph.Edges.Distrib{t} = self.env{e,h};
+                self.envGraph.Edges.Distribution{t} = self.env{e,h};
             end
             
             % analyse holding times

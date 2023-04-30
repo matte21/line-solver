@@ -76,6 +76,19 @@ classdef MMPP2 < MarkovModulated
             rate = 1 / getMean(self);
         end
 
+        function X = sample(self, n)
+            % X = SAMPLE(N)
+            if nargin<2 %~exist('n','var'),
+                n = 1;
+            end
+            MAP = self.getRepres;
+            if map_isfeasible(MAP)
+                X = map_sample(MAP,n);
+            else
+                line_error(mfilename,'This process is infeasible (negative rates).');
+            end
+        end
+
         % inter-arrival time properties
         function mean = getMean(self)
             % MEAN = GETMEAN()
@@ -243,7 +256,7 @@ classdef MMPP2 < MarkovModulated
                 mmpp2 = MMPP2(m{2}(1,1),m{2}(2,2),m{1}(1,2),m{1}(2,1));
             end
         end
-        
+
         function mmpp2 = fitRawMomentsAndACFLag1(m1, m2, m3, rho1)
             if m1 <= GlobalConstants.FineTol
                 mmpp2 = Exp(Inf);

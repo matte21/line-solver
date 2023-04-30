@@ -23,9 +23,8 @@ classdef NetworkSolver < Solver
                 self.setOptions(options);
             end
             self.result = [];
-            
-            if isempty(model.obj)
 
+            if isempty(model.obj) % not a Java object
                 [Q,U,R,T,A,W] = model.getAvgHandles;
                 self.setAvgHandles(Q,U,R,T,A,W);
 
@@ -35,6 +34,15 @@ classdef NetworkSolver < Solver
                 if ~model.hasStruct
                     self.model.refreshStruct(); % force model to refresh
                 end
+            end
+        end
+
+        function self = runAnalyzerChecks(self, options)
+            if self.enableChecks && ~self.supports(self.model)
+                line_error(mfilename,'This model contains features not supported by the solver.\n');
+            end
+            if self.enableChecks && ~any(cellfun(@(s) strcmp(s,options.method),self.listValidMethods))
+                line_error(mfilename,sprintf('The ''%s'' method is unsupported by this solver.\n',options.method));
             end
         end
 
@@ -127,7 +135,7 @@ classdef NetworkSolver < Solver
             % Return true if the solver has computed steady-state distribution metrics.
             bool = false;
             if self.hasResults
-                bool = isfield(self.result.Distrib,'C');
+                bool = isfield(self.result.Distribution,'C');
             end
         end
     end
@@ -205,23 +213,9 @@ classdef NetworkSolver < Solver
             sn = self.model.getStruct();
 
             % Compute average arrival rate at steady-state
-            M = sn.nstations;
-            K = sn.nclasses;
-            T = getAvgTputHandles(self);
-            [~,~,~,TN] = self.getAvg([],[],[],T,[],[]);
-            sn = self.model.getStruct;
-            if ~isempty(T)
-                AN = zeros(M,K);
-                for k=1:K
-                    for i=1:M
-                        for j=1:M
-                            for r=1:K
-                                AN(i,k) = AN(i,k) + TN(j,r)*sn.rt((j-1)*K+r, (i-1)*K+k);
-                            end
-                        end
-                    end
-                end
-            end
+            TH = getAvgTputHandles(self);
+            [~,~,~,TN] = self.getAvg([],[],[],TH,[],[]);
+            AN = getAvgArvRFromTput(sn, TN, TH);
         end
 
         % also accepts a cell array with the handlers in it
@@ -248,7 +242,7 @@ classdef NetworkSolver < Solver
         [CT,XT]             = getAvgSysTable(self,R,T);
         [RN]                = getAvgSysRespT(self,R);
         [TN]                = getAvgSysTput(self,T);
-        [QNt,UNt,TNt]       = getTranAvg(self,Qt,Ut,Tt);
+
 
         function self = setAvgResults(self,Q,U,R,T,A,W,C,X,runtime,method,iter)
             % SELF = SETAVGRESULTS(SELF,Q,U,R,T,A,W,C,X,RUNTIME,METHOD,ITER)
@@ -286,12 +280,11 @@ classdef NetworkSolver < Solver
                     solvername = self.result.solver(7:end);
                 end
                 if isnan(iter)
-                    line_printf('%s analysis (method: %s) completed. Runtime: %f seconds.',solvername,self.result.Avg.method,runtime);
-                    %fprintf('\n');
+                    line_printf('%s analysis (method: %s, lang: %s) completed. Runtime: %f seconds.',solvername,self.result.Avg.method,self.options.lang,runtime);
                 else
-                    line_printf('%s analysis (method: %s) completed. Runtime: %f seconds. Iterations: %d.',solvername,self.result.Avg.method,runtime,iter);
-                    fprintf('\n');
+                    line_printf('%s analysis (method: %s, lang: %s) completed. Runtime: %f seconds. Iterations: %d.',solvername,self.result.Avg.method,self.options.lang,runtime,iter);
                 end
+                line_printf('\n');
             end
         end
 
@@ -300,9 +293,9 @@ classdef NetworkSolver < Solver
 
             % Store distribution metrics at steady-state
             self.result.('solver') = getName(self);
-            self.result.Distrib.('method') = getOptions(self).method;
-            self.result.Distrib.C = Cd;
-            self.result.Distrib.runtime = runtime;
+            self.result.Distribution.('method') = getOptions(self).method;
+            self.result.Distribution.C = Cd;
+            self.result.Distribution.runtime = runtime;
         end
 
         function self = setTranProb(self,t,pi_t,SS,runtimet)
@@ -352,6 +345,7 @@ classdef NetworkSolver < Solver
             line_error(mfilename,sprintf('differentiate is not supported by %s',class(self)));
         end
 
+        [QNt,UNt,TNt] = getTranAvg(self,Qt,Ut,Tt);
 
         function [lNormConst] = getProbNormConstAggr(self)
             % [LNORMCONST] = GETPROBNORMCONST()

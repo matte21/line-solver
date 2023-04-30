@@ -1,5 +1,5 @@
-function [Q,U,R,T,C,X,lG,runtime,it] = solver_ncld(sn, options)
-% [Q,U,R,T,C,X,LG,RUNTIME,ITER] = SOLVER_NCLD(QN, OPTIONS)
+function [Q,U,R,T,C,X,lG,runtime,iter,method] = solver_ncld(sn, options)
+% [Q,U,R,T,C,X,LG,RUNTIME,ITER.METHOD] = SOLVER_NCLD(QN, OPTIONS)
 
 % Copyright (c) 2012-2023, Imperial College London
 % All rights reserved.
@@ -47,9 +47,9 @@ end
 eta_1 = zeros(1,M);
 eta = ones(1,M);
 if all(schedid~=SchedStrategy.ID_FCFS) options.iter_max=1; end
-it = 0;
-while max(abs(1-eta./eta_1)) > options.iter_tol & it < options.iter_max
-    it = it + 1;
+iter = 0;
+while max(abs(1-eta./eta_1)) > options.iter_tol & iter < options.iter_max
+    iter = iter + 1;
     eta_1 = eta;
     M = sn.nstations;    %number of stations
     K = sn.nclasses;    %number of classes
@@ -99,7 +99,7 @@ while max(abs(1-eta./eta_1)) > options.iter_tol & it < options.iter_max
         else
             if strcmpi(options.method,'exact') && nservers(i)>1
                 %options.method = 'default';
-                line_warning(mfilename,sprintf('%s does not support exact multiserver yet. Switching to approximate method.', 'SolverNC'));
+                line_warning(mfilename,sprintf('%s does not support exact multiserver yet. Switching to approximate method.\n', 'SolverNC'));
             end
             L(i,:) = Lchain(i,:);
             mu(i,1:Nt) = lldscaling(i,1:Nt);
@@ -107,7 +107,7 @@ while max(abs(1-eta./eta_1)) > options.iter_tol & it < options.iter_max
     end
     Qchain = zeros(M,C);
     % Solve original system
-    lG = pfqn_ncld(L, Nchain, 0*Nchain, mu, options);
+    [lG,~,method] = pfqn_ncld(L, Nchain, 0*Nchain, mu, options);
     lG = real(lG);
     Xchain=[];
     Qchain=[];
@@ -116,7 +116,7 @@ while max(abs(1-eta./eta_1)) > options.iter_tol & it < options.iter_max
     if isempty(Xchain)
         for r=1:C
             Nchain_r =oner(Nchain,r);
-            [lGr(r)] = pfqn_ncld(L,Nchain_r,0*Nchain,mu,options);
+            lGr(r) = pfqn_ncld(L,Nchain_r,0*Nchain,mu,options);
             lGr = real(lGr);
             Xchain(r) = exp(lGr(r) - lG);
             for i=1:M
@@ -172,7 +172,7 @@ while max(abs(1-eta./eta_1)) > options.iter_tol & it < options.iter_max
     end
 
     if isnan(Xchain)
-        line_warning(mfilename,'Normalizing constant computations produced a floating-point range exception. Model is likely too large.');
+        line_warning(mfilename,'Normalizing constant computations produced a floating-point range exception. Model is likely too large.\n');
     end
 
     Z = sum(Z(1:M,:),1);
@@ -242,7 +242,7 @@ for i=1:M
     else
         U(i,:) = U(i,:) / max(lldscaling(i,:));
         if sum(U(i,:)) > 1
-            U(i,:) = U(i,:) / nansum(U(i,:));
+            U(i,:) = U(i,:) / sum(U(i,:),"omitnan");
         end
     end
 end

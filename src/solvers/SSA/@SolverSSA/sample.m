@@ -1,6 +1,11 @@
 function sampleNodeState = sample(self, node, numSamples, markActivePassive)
 % TRANNODESTATE = SAMPLE(NODE)
 
+if GlobalConstants.DummyMode
+    sampleNodeState = NaN;
+    return
+end
+
 options = self.getOptions;
 
 if nargin<4

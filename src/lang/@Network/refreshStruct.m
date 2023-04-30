@@ -52,7 +52,12 @@ for ind=1:sn.nnodes
         end
     end
 end
-
+sn.isslc = false(sn.nclasses,1);
+for r=1:sn.nclasses
+    if isa(self.classes{r},'SelfLoopingClass')
+        sn.isslc(r) = true;
+    end
+end
 sn.nclosedjobs = sum(njobs(isfinite(njobs)));
 sn.nservers = numservers;
 sn.isstation = NodeType.isStation(nodetypes);

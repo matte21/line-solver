@@ -118,7 +118,7 @@ switch options.config.multiserver
                 for r=ccl
                     g = g + ((Nt-1)/Nt) * Nchain_in(r) * gamma(ccl,:,r);
                 end
-                msterm = pfqn_lldfun(1 + interpTotArvlQlen + mean(g, 1)', [], nservers); % if native qd then account for multiserver in the correciton terms
+                msterm = pfqn_lldfun(1 + interpTotArvlQlen + mean(g, 1)', [], nservers); % if native qd then account for multiserver in the correction terms
             otherwise
                 msterm = pfqn_lldfun(1 + interpTotArvlQlen + (Nt-1)*mean(gamma(ccl,:), 1)', [], nservers); % if native qd then account for multiserver in the correciton terms
         end
@@ -132,14 +132,14 @@ switch options.config.multiserver
                 for r=ccl
                     g = g + ((Nt-1)/Nt) * Nchain_in(r) * gamma(ccl,:,r);
                 end
-                msterm = pfqn_lldfun(1 + interpTotArvlQlen + mean(g,1)', [], nservers); % if native qd then account for multiserver in the correciton terms
+                msterm = pfqn_lldfun(1 + interpTotArvlQlen + mean(g,1)', [], nservers); % if native qd then account for multiserver in the correction terms
             otherwise
                 g = 0;
                 for r=ccl
                     g = g + (Nt-1)*gamma(r,:);
                 end
-                msterm = pfqn_lldfun(1 + interpTotArvlQlen + mean(g), [], nservers); % if native qd then account for multiserver in the correciton terms
-        end
+                msterm = pfqn_lldfun(1 + interpTotArvlQlen + mean(g), [], nservers); % if native qd then account for multiserver in the correction terms
+        end        
         fcfstypeset = find(sn.schedid==SchedStrategy.ID_FCFS | sn.schedid==SchedStrategy.ID_SIRO | sn.schedid==SchedStrategy.ID_LCFSPR);
         msterm(fcfstypeset) = 1 ./ nservers(fcfstypeset);
     otherwise

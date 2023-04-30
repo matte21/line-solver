@@ -34,7 +34,6 @@ model.link(P);
 [~,H] = model.getGraph();
 plot(H,'EdgeLabel',H.Edges.Weight,'Layout','Layered')
 
-
 %% heuristics performance
 
 % Prob
@@ -56,8 +55,6 @@ queue2.setRouting(oclass, RoutingStrategy.RROBIN);
 
 SolverSSA(model).getAvgTable()
 SolverSSA(model).getAvgSysTable()
-
-
 
 %% RL control
 
@@ -103,7 +100,6 @@ for i = 1:length(lrs)
     end
 end
 
-
 %% RL performance
 
 % tabular
@@ -115,8 +111,6 @@ queue2.setRouting(oclass, RoutingStrategy.RL, value_fn_control_best, {[1,3], 0})
 SolverSSA(model).getAvgTable
 SolverSSA(model).getAvgSysTable
 
-
-
 % quad
 coeff_best = quad_approx_coeff("13");
 model.reset();
@@ -125,7 +119,6 @@ queue2.setRouting(oclass, RoutingStrategy.RL, coeff_best.', {[1,3], truncation+1
 
 SolverSSA(model).getAvgTable
 SolverSSA(model).getAvgSysTable
-
 
 %% runtime analysis for RL-learning and control
 

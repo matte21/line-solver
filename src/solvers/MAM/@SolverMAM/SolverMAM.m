@@ -63,7 +63,7 @@ classdef SolverMAM < NetworkSolver
             
             solverName = mfilename;
             if isfield(options,'timespan')  && isfinite(options.timespan(2)) && options.verbose
-                line_warning(mfilename,sprintf('Finite timespan not supported in %s',solverName));
+                line_warning(mfilename,sprintf('Finite timespan not supported in %s.\n',solverName));
             end
         end
         

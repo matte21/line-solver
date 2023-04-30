@@ -15,8 +15,8 @@ switch options.method
     case {'para','parallel','para.hash','parallel.hash'}
         try
         [XN,UN,QN,RN,TN,CN,tranSysState,tranSync,sn] = solver_ssa_analyzer_spmd(sn, options);        
-        catch e
-            switch e.identifier
+        catch ME
+            switch ME.identifier
                 case 'MATLAB:spmd:NoPCT'
                     line_printf('The ssa.%s method requires the Parallel Computing Toolbox that is unavailable on this machine, switching to ssa.serial.',options.method);
                     [XN,UN,QN,RN,TN,CN,tranSysState,tranSync,sn] = solver_ssa_analyzer_serial(sn, options, true);                    

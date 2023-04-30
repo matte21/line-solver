@@ -1,4 +1,5 @@
-clearvars -except handleFig exampleName;
+clear node jobclass solver;
+
 model = Network('model');
 
 node{1} = Delay(model, 'Delay');
@@ -29,8 +30,7 @@ options.samples=1e4;
 options.stiff=true;
 options.timespan = [0,5];
 %% This part illustrates the execution of different solvers
-solver={};
-solver{end+1} = SolverCTMC(model,options);
+solver{1} = SolverCTMC(model,options);
 %solver{end+1} = SolverJMT(model,options);
 %solver{end+1} = SolverSSA(model,options);
 solver{end+1} = SolverFluid(model,options);

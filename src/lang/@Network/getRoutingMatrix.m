@@ -11,7 +11,7 @@ if self.hasStruct
     indexOpenClasses = find(isinf(sn.njobs));
     hasOpen = ~isempty(indexOpenClasses);
     if nargin<2
-        arvRates = sn.rates(sn.nodeToStation(idxSource),indexOpenClasses);
+        arvRates = sn.rates(sn.nodeToStation(idxSource),:);
     end
     nodes = self.nodes;
     conn = sn.connmatrix;
@@ -81,7 +81,7 @@ for ind=1:I
             end
         otherwise
             isSink_i = isa(node_i,'Sink');
-            for k=1:K
+            for k=1:K                
                 outputStrategy_k = outputStrategy{k};
                 switch sn.routing(ind,k)
                     case RoutingStrategy.ID_PROB
@@ -92,12 +92,16 @@ for ind=1:I
                             end
                         end
                     case RoutingStrategy.ID_DISABLED
-                        % we set this to be non-zero as otherwise the
-                        % classes that do not visit a class switch are
-                        % misconfigured in JMT
                         for jnd=1:I
                             if conn(ind,jnd)>0
-                                rtnodes((ind-1)*K+k,(jnd-1)*K+k) = 1/sum(conn(ind,:));
+                                if isa(self.classes{k},'SelfLoopingClass')
+                                    rtnodes((ind-1)*K+k,(jnd-1)*K+k) = 0;
+                                else
+                                    % we set this to be non-zero as otherwise the
+                                    % classes that do not visit a classswitch are
+                                    % misconfigured in JMT
+                                    rtnodes((ind-1)*K+k,(jnd-1)*K+k) = 1/sum(conn(ind,:));
+                                end
                             end
                         end
                     case {RoutingStrategy.ID_RAND, RoutingStrategy.ID_RROBIN, RoutingStrategy.ID_WRROBIN, RoutingStrategy.ID_JSQ}
@@ -219,7 +223,7 @@ end
 % to detect that C is in a chain with A and B and change this
 % part.
 
-csmask = self.csmatrix;
+csmask = self.csMatrix;
 if isempty(csmask) % models not built with link(P)
     [C,WCC]=weaklyconncomp(rtnodes+rtnodes');
     WCC(colsToIgnore) = 0;
@@ -294,6 +298,7 @@ end
 
 %% Hide the nodes that are not stateful
 rt = dtmc_stochcomp(rtnodes,statefulNodesClasses);
+
 % verify irreducibility
 % disabled as it casts warning in many models that are seemingly fine
 %try

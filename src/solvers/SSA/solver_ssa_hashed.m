@@ -9,7 +9,12 @@ function [pi,SSq,arvRates,depRates,sn]=solver_ssa_hashed(sn,options)
 if ~isfield(options,'seed')
     options.seed = 23000;
 end
-Solver.resetRandomGeneratorSeed(options.seed+labindex-1);
+if isMATLABReleaseOlderThan("R2022b")
+    labIndex = labindex;
+else
+    labIndex = spmdIndex;
+end
+Solver.resetRandomGeneratorSeed(options.seed+labIndex-1);
 
 %% generate local state spaces
 nstations = sn.nstations;

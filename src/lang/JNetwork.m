@@ -15,18 +15,7 @@ classdef JNetwork < Model
         function self = JNetwork(model)
             % SELF = NETWORK(MODELNAME)
             self@Model(model); % model is the model's name
-            try
-                import jline.*; %#ok<SIMPT>
-            catch
-                javaaddpath(which('linesolver.jar'));
-                import jline.*; %#ok<SIMPT>
-            end
-            try
-                self.obj = jline.lang.Network(model);
-            catch
-                javaaddpath(which('linesolver.jar'));
-                self.obj = jline.lang.Network(model);
-            end
+            self.obj = jline.lang.Network(model);
         end
 
         function sn = getStruct(self, wantInitialState) % get abritrary representation

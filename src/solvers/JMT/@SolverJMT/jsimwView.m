@@ -1,4 +1,4 @@
-function jsimwView(self, options)
+function jsimiew(self, options)
 % JSIMWVIEW(OPTIONS)
 
 % Copyright (c) 2012-2023, Imperial College London
@@ -21,6 +21,6 @@ sn = self.getStruct;
 writeJSIM(self, sn);
 %            if options.verbose
 fileName = [getFilePath(self),filesep, getFileName(self), '.jsim'];
-line_printf('\nJMT Model: %s',fileName);
+line_printf('JMT Model: %s\n',fileName);
 jsimwView(fileName);
 end

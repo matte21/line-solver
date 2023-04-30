@@ -1,6 +1,11 @@
 function Pn = getProbSys(self)
 % PN = GETPROBSYSSTATE()
 
+if GlobalConstants.DummyMode
+    Pn = NaN;
+    return
+end
+
 T0 = tic;
 sn = self.getStruct;
 % now compute marginal probability

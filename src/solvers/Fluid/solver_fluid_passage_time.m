@@ -105,8 +105,8 @@ for i = 1:sn.nstations
                     end
                     if iter > iter_max
                         line_printf('\n');
-                        line_warning(mfilename,'Maximum number of iterations reached when computing the response time distribution at station %d in class %d.',i,c);
-                        line_warning(mfilename,'Response time distributions may be inaccurate. Try increasing option.iter_max (currently at %s).',num2str(iter_max));
+                        line_warning(mfilename,'Maximum number of iterations reached when computing the response time distribution at station %d in class %d.\n',i,c);
+                        line_warning(mfilename,'Response time distributions may be inaccurate. Try increasing option.iter_max (currently at %s).\n',num2str(iter_max));
                     end
                 end
             end
@@ -120,7 +120,7 @@ for i=1:sn.nstations
         for c=1:sn.nclasses
             RTret{i,c} = [RT{i,c,2},RT{i,c,1}];            
             if ~isempty(RTret{i,c}) && RTret{i,c}(end,1) < 0.995
-                line_warning(mfilename,'CDF at station %d in class %d computed only %.3f percent of the total mass.',i,c,RTret{i,c}(end,1)*100);
+                line_warning(mfilename,'CDF at station %d in class %d computed only %.3f percent of the total mass.\n',i,c,RTret{i,c}(end,1)*100);
             end
         end
     end

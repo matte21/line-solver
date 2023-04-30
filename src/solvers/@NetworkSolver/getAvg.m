@@ -284,7 +284,7 @@ WNclass(WNclass < GlobalConstants.FineTol)=0;
 if ~isempty(UNclass)
     unstableQueues = find(sum(UNclass,2)>0.99 * sn.nservers);
     if any(unstableQueues) && any(isinf(sn.njobs))
-        line_warning(mfilename,'The model has unstable queues, performance metrics may grow unbounded.')
+        line_warning(mfilename,'The model has unstable queues, performance metrics may grow unbounded.\n')
     end
 end
 end

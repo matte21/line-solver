@@ -53,12 +53,6 @@ classdef LayeredNetwork < Model & Ensemble
             if nargin>=2 %exist('filename','var')
                 self = LayeredNetwork.parseXML(filename, false);
             end
-            try
-                jline.lang.distributions.Immediate();
-            catch
-                javaaddpath(which('linesolver.jar'));
-                import jline.*;
-            end
         end
 
 

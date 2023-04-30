@@ -1,6 +1,11 @@
 function Pnir = getProbAggr(self, ist)
 % PNIR = GETPROBSTATEAGGR(IST)
 
+if GlobalConstants.DummyMode
+    Pnir = NaN;
+    return
+end
+
 if ~isnumeric(ist) % station object
     ist = ist.index; 
 end

@@ -258,7 +258,7 @@ switch sn.nodetype(ind)
                 % IS
                 
                 % called to initial models with SJF and LJF
-                line_warning(mfilename,'The scheduling policy does not admit a discrete state space.');
+                line_warning(mfilename,'The scheduling policy does not admit a discrete state space.\n');
         end
     case NodeType.Cache
         switch sn.schedid(ist)
@@ -272,6 +272,10 @@ switch sn.nodetype(ind)
         end
     case NodeType.Join
         space = 0;
+    case NodeType.Transition
+        space = 0;
+    case NodeType.Place
+        space = 0;        
 end
 space = unique(space,'rows'); % do not comment, required to sort empty state as first
 space = space(end:-1:1,:); % this ensures that states where jobs start in phase 1 are first, which is used eg in SSA

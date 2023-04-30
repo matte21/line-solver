@@ -2,6 +2,11 @@ function tranSysState = sampleSysAggr(self, numSamples, markActivePassive)
 % TRANSYSSTATEAGGR = sampleSysAggr(NUMSAMPLES)
 options = self.getOptions;
 
+if GlobalConstants.DummyMode
+    tranSysState = NaN;
+    return
+end
+
 if nargin<2 %~exist('numSamples','var')
     numSamples = options.samples;
 end

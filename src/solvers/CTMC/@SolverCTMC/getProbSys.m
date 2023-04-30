@@ -1,6 +1,11 @@
 function Pn = getProbSys(self)
 % PN = GETPROBSYSSTATE()
 
+if GlobalConstants.DummyMode
+    Pn = NaN;
+    return
+end
+
 if ~isfield(self.options,'keep')
     self.options.keep = false;
 end

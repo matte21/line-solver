@@ -1,5 +1,5 @@
-function [lG,X,Q] = pfqn_nc(lambda,L,N,Z,varargin)
-% [LG,X,Q] = PFQN_NC(L,N,Z,VARARGIN)
+function [lG,X,Q,method] = pfqn_nc(lambda,L,N,Z,varargin)
+% [LG,X,Q,METHOD] = PFQN_NC(L,N,Z,VARARGIN)
 %
 % L: Service demand matrix
 % N: Population vector
@@ -9,9 +9,10 @@ function [lG,X,Q] = pfqn_nc(lambda,L,N,Z,varargin)
 % LG: Logarithm of normalizing constant
 % X: System throughputs
 % Q: Mean queue-lengths
+% METHOD: Solution method
 
 options = Solver.parseOptions(varargin, SolverNC.defaultOptions);
-
+method = options.method;
 % backup initial parameters
 Rin = length(N);
 
@@ -77,7 +78,7 @@ demStations = find((Lmax./Lsum)>GlobalConstants.FineTol);
 noDemStations = setdiff(1:size(L,1), demStations);
 L = L(demStations,:);
 if any(N((sum(L,1) + sum(Z,1)) == 0)>0) % if there is a class with jobs but L and Z all zero
-    line_warning(mfilename,'The model has no positive demands in any class.');
+    line_warning(mfilename,'The model has no positive demands in any class.\n');
     if isempty(Z) || sum(Z(:))<options.tol
         lG = 0;
     else
@@ -124,7 +125,7 @@ Zz = Z(:,zeroDemandClasses);
 Z = Z(:,nonzeroDemandClasses);
 scalevecz = scalevec(nonzeroDemandClasses);
 % compute G for classes No with non-zero demand
-[lGnzdem,Xnnzdem,Qnnzdem] = compute_norm_const(L, N, Z, options);
+[lGnzdem,Xnnzdem,Qnnzdem,method] = compute_norm_const(L, N, Z, options);
 
 if isempty(Xnnzdem) % the NC method as a by-product doesn't return metrics
     X = [];
@@ -149,12 +150,13 @@ end
 lG = lGopen + lGnzdem + lGzdem + N*log(scalevecz)';
 end
 
-function [lG,X,Q] = compute_norm_const(L,N,Z,options)
+function [lG,X,Q,method] = compute_norm_const(L,N,Z,options)
 % LG = COMPUTE_NORM_CONST(L,N,Z,OPTIONS)
 % Auxiliary script that computes LG after the initial filtering of L,N,Z
 
 [M,R] = size(L);
 X=[];Q=[];
+method = options.method;
 switch options.method
     case {'ca'}
         [~,lG] = pfqn_ca(L,N,sum(Z,1));
@@ -162,33 +164,42 @@ switch options.method
         if M>1
             if R==1 || (R <= 3 && sum(N)<50)
                 [~,lG] = pfqn_ca(L,N,sum(Z,1));
+                method = 'ca';
             else
                 if M>R
                     [~,lG] = pfqn_kt(L,N,sum(Z,1));
+                    method = 'kt';
                 else
                     [~,lG] = pfqn_le(L,N,sum(Z,1));
+                    method = 'le';
                 end
             end
         elseif sum(Z,1)==0 % single queue, no delay
             lG = -N*log(L)';
+            method = 'exact';
         else % repairman model
             if N<10000
                 %if max(abs(N-round(N))) < GlobalConstants.FineTol
                     %[lG] = pfqn_comomrm(L,N,Z,1,options.tol);
                 %else
                     [~,lG] = pfqn_mmint2_gausslegendre(L,N,sum(Z,1));
+                    method = 'gleint';
                 %end
             else
                 [~,lG] = pfqn_le(L,N,sum(Z,1));
+                method = 'le';
             end
         end
     case {'sampling'}
         if M==1
             [~,lG] = pfqn_mmsample2(L,N,sum(Z,1),options.samples);
+            method = 'sampling';
         elseif M>R
             [~,lG] = pfqn_mci(L,N,sum(Z,1),options.samples,'imci');
+            method = 'imci';
         else
             [~,lG] = pfqn_ls(L,N,sum(Z,1),options.samples);
+            method = 'ls';
         end
     case {'mmint2','gleint'}
         if size(L,1)>1
@@ -197,7 +208,7 @@ switch options.method
         [~,lG] = pfqn_mmint2_gausslegendre(L,N,sum(Z,1));
     case {'cub','gm'} % Grundmann-Mueller cubatures
         order = ceil((sum(N)-1)/2); % exact
-        [~,lG] = pfqn_cub(L,N,sum(Z,1),order,options.tol);
+        [~,lG] = pfqn_cub(L,N,sum(Z,1),order,GlobalConstants.FineTol);
     case 'kt'
         [~,lG] = pfqn_kt(L,N,sum(Z,1));
     case 'le'
@@ -224,8 +235,10 @@ switch options.method
     case {'exact'}
         if M>=R || sum(N)>10 || sum(Z)>0
            [~,lG] = pfqn_ca(L,N,sum(Z,1));
+           method = 'ca';
         else
            [~,lG] = pfqn_recal(L,N,sum(Z,1));% implemented with Z=0
+           method = 'recal';
         end
     case {'comom'}
         if R>1
@@ -246,22 +259,23 @@ switch options.method
             end
         else
             [~,lG] = pfqn_ca(L,N,sum(Z,1));
+            method = 'ca';
         end
     case {'pana','panacea','pnc'}
         [~,lG] = pfqn_panacea(L,N,sum(Z,1));
         if isnan(lG)
-            line_warning(mfilename,'Model is not in normal usage, panacea cannot continue.');
+            line_warning(mfilename,'Model is not in normal usage, panacea cannot continue.\n');
         end        
     case 'propfair'
         [~,lG] = pfqn_propfair(L,N,sum(Z,1));
     case {'recal'}
         if sum(Z)>0
-            line_error(mfilename,'RECAL is currently available only for models with non-zero think times.');
+            line_error(mfilename,'RECAL is currently available only for models with non-zero think times.\n');
         end
         [~,lG] = pfqn_recal(L,N,sum(Z,1));
     case 'rgf'
         if sum(Z)>0
-            line_error(mfilename,'RGF is defined only for models with non-zero think times.');
+            line_error(mfilename,'RGF is defined only for models with non-zero think times.\n');
         end
         [~,lG] = pfqn_rgf(L,N);
     otherwise

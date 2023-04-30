@@ -1,5 +1,4 @@
 %% This example is temporarily disabled
-clearvars -except exampleName;
 fprintf(1,'This example illustrates the initialization of SolverLN using the output of SolverLQNS.\n')
 
 cwd = fileparts(which(mfilename));

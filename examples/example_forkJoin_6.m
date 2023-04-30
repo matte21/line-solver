@@ -1,4 +1,4 @@
-clearvars -except exampleName;
+clear solver AvgTable;
 model = Network('model');
 
 source = Source(model,'Source');
@@ -35,12 +35,10 @@ P{jobclass1,jobclass1}(join2,sink) = 1.0;
 
 model.link(P);
 
-solver = {};
-solver{end+1} = SolverJMT(model,'seed',23000);
+solver{1} = SolverJMT(model,'seed',23000);
 solver{end+1} = SolverMVA(model);
 
-AvgTable = {};
 for s=1:length(solver)
-    AvgTable{end+1} = solver{s}.getAvgTable;
+    AvgTable{s} = solver{s}.getAvgTable;
     AvgTable{s}
 end

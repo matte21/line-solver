@@ -45,7 +45,7 @@ classdef SolverLQNS < LayeredNetworkSolver
                 if containsstr(ret,'Version 5') || containsstr(ret,'Version 4') ...
                         || containsstr(ret,'Version 3') || containsstr(ret,'Version 2') ...
                         || containsstr(ret,'Version 1')
-                    line_warning(mfilename,'Unsupported LQNS version. LINE requires Version 6.0 or greater.');
+                    line_warning(mfilename,'Unsupported LQNS version. LINE requires Version 6.0 or greater.\n');
                     bool = true;
                 end
             else % linux
@@ -56,7 +56,7 @@ classdef SolverLQNS < LayeredNetworkSolver
                 if containsstr(ret,'Version 5') || containsstr(ret,'Version 4') ...
                         || containsstr(ret,'Version 3') || containsstr(ret,'Version 2') ...
                         || containsstr(ret,'Version 1')
-                    line_warning(mfilename,'Unsupported LQNS version. LINE requires Version 6.0 or greater.');
+                    line_warning(mfilename,'Unsupported LQNS version. LINE requires Version 6.0 or greater.\n');
                     bool = true;
                 end
             end

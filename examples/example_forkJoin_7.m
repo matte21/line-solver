@@ -1,4 +1,4 @@
-clearvars -except exampleName;
+clear solver AvgTable
 model = Network('model');
 
 delay = Delay(model,'Delay');
@@ -35,12 +35,10 @@ P{jobclass2,jobclass1}(fork1,queue2) = 1.0;
 
 model.link(P);
 
-solver = {};
-solver{end+1} = SolverMVA(model);
+solver{1} = SolverMVA(model);
 %solver{end+1} = SolverJMT(model,'seed',23000); % JMT has a bug on this one
 
-AvgTable = {};
 for s=1:length(solver)
-    AvgTable{end+1} = solver{s}.getAvgTable;
+    AvgTable{s} = solver{s}.getAvgTable;
     AvgTable{s}
 end

@@ -18,8 +18,8 @@ for r=1:size(self.servt_classes_updmap,1)
         self.servt(aidx) = 0;
         self.tput(aidx) = 0;
         for w=1:(wnd_size-1)
-            self.servt(aidx) = self.servt(aidx) + self.results{end-w,self.idxhash(idx)}.WN(nodeidx,classidx)/wnd_size;
-            self.tput(aidx) = self.tput(aidx) + self.results{end-w,self.idxhash(idx)}.TN(nodeidx,classidx)/wnd_size;
+            self.servt(aidx) = self.servt(aidx) + self.results{end-w,self.idxhash(idx)}.WN(nodeidx,classidx) / wnd_size;
+            self.tput(aidx) = self.tput(aidx) + self.results{end-w,self.idxhash(idx)}.TN(nodeidx,classidx) / wnd_size;
         end
     else
         self.servt(aidx) = self.results{end,self.idxhash(idx)}.WN(nodeidx,classidx);
@@ -60,7 +60,7 @@ for eidx=(lqn.eshift+1):(lqn.eshift+lqn.nentries)
     eidxclass = ensemble{self.idxhash(hidx)}.attribute.entries(find(ensemble{self.idxhash(hidx)}.attribute.entries(:,2) == eidx),1);
     task_tput  = sum(self.results{end,self.idxhash(hidx)}.TN(ensemble{self.idxhash(hidx)}.attribute.clientIdx,tidxclass));
     entry_tput = sum(self.results{end,self.idxhash(hidx)}.TN(ensemble{self.idxhash(hidx)}.attribute.clientIdx,eidxclass));
-    self.servt(eidx) = entry_servt(eidx) * task_tput / entry_tput;
+    self.servt(eidx) = entry_servt(eidx) * task_tput / max(GlobalConstants.Zero, entry_tput);
 end
 %self.servt(lqn.eshift+1:lqn.eshift+lqn.nentries) = entry_servt(lqn.eshift+1:lqn.eshift+lqn.nentries);
 %entry_servt((lqn.ashift+1):end) = 0;
@@ -100,7 +100,7 @@ for t = 1:lqn.ntasks
             caller_idxclass = self.ensemble{self.idxhash(tidx)}.attribute.tasks(1+find(self.ensemble{self.idxhash(tidx)}.attribute.tasks(2:end,2) == caller_idx),1);
             caller_tput(caller_idx-lqn.tshift)  = sum(self.results{end,self.idxhash(tidx)}.TN(self.ensemble{self.idxhash(tidx)}.attribute.clientIdx,caller_idxclass));
         end
-        self.ptaskcallers(tidx,(lqn.tshift+1):(lqn.tshift+lqn.ntasks))=caller_tput/sum(caller_tput);
+        self.ptaskcallers(tidx,(lqn.tshift+1):(lqn.tshift+lqn.ntasks))= caller_tput / max(GlobalConstants.Zero, sum(caller_tput));
     end
 end
 
@@ -112,7 +112,7 @@ for hidx = 1:lqn.nhosts
         caller_idxclass = self.ensemble{self.idxhash(hidx)}.attribute.tasks(find(self.ensemble{self.idxhash(hidx)}.attribute.tasks(:,2) == caller_idx),1);
         caller_tput(caller_idx-lqn.tshift)  = caller_tput(caller_idx-lqn.tshift) + sum(self.results{end,self.idxhash(hidx)}.TN(self.ensemble{self.idxhash(hidx)}.attribute.clientIdx,caller_idxclass));
     end
-    self.ptaskcallers(hidx,(lqn.tshift+1):(lqn.tshift+lqn.ntasks)) = caller_tput/sum(caller_tput);
+    self.ptaskcallers(hidx,(lqn.tshift+1):(lqn.tshift+lqn.ntasks)) = caller_tput / max(GlobalConstants.Zero, sum(caller_tput));
 end
 
 % impute call probability using a DTMC random walk on the taskcaller graph

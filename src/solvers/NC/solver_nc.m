@@ -1,4 +1,4 @@
-function [Q,U,R,T,C,X,lG,STeff,it] = solver_nc(sn, options)
+function [Q,U,R,T,C,X,lG,STeff,it,method] = solver_nc(sn, options)
 M = sn.nstations;    %number of stations
 nservers = sn.nservers;
 NK = sn.njobs';  % initial population per class
@@ -69,7 +69,7 @@ while max(abs(1-eta./eta_1)) > options.iter_tol & it < options.iter_max
         else
             if strcmpi(options.method,'exact') && nservers(i)>1
                 %options.method = 'default';
-                line_warning(mfilename,sprintf('%s does not support exact multiserver yet. Switching to approximate method.', 'SolverNC'));
+                line_warning(mfilename,sprintf('%s does not support exact multiserver yet. Switching to approximate method.\n', 'SolverNC'));
             end
             % Seidmann's approximation
             Lms(i,:) = Lchain(i,:) / nservers(i);
@@ -79,7 +79,7 @@ while max(abs(1-eta./eta_1)) > options.iter_tol & it < options.iter_max
     end
 
     % step 1
-    [lG, Xchain, Qchain] = pfqn_nc(lambda,Lms,Nchain,sum(Z,1)+sum(Zms,1), options);
+    [lG, Xchain, Qchain, method] = pfqn_nc(lambda,Lms,Nchain,sum(Z,1)+sum(Zms,1), options);
 
     if sum(Zms,1) > GlobalConstants.FineTol
         % in this case, we need to use the iterative approximation below
@@ -126,7 +126,7 @@ while max(abs(1-eta./eta_1)) > options.iter_tol & it < options.iter_max
     end
 
     if isnan(Xchain)
-        line_warning(mfilename,'Normalizing constant computations produced a floating-point range exception. Model is likely too large.');
+        line_warning(mfilename,'Normalizing constant computations produced a floating-point range exception. Model is likely too large.\n');
     end
 
     Z = sum(Z(1:M,:),1);
@@ -134,6 +134,7 @@ while max(abs(1-eta./eta_1)) > options.iter_tol & it < options.iter_max
     Rchain = Qchain ./ repmat(Xchain,M,1) ./ Vchain;
     Rchain(infServers,:) = Lchain(infServers,:) ./ Vchain(infServers,:);
     Tchain = repmat(Xchain,M,1) .* Vchain;
+    
     %Uchain = Tchain .* Lchain;
     %Cchain = Nchain ./ Xchain - Z;
 

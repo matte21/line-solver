@@ -1,6 +1,11 @@
 function Pnir = getProbAggr(self, node, state_a)
 % PNIR = GETPROBAGGR(NODE, STATE_A)
 
+if GlobalConstants.DummyMode
+    Pnir = NaN;
+    return
+end
+
 T0 = tic;
 sn = self.getStruct;
 if nargin<3 %~exist('state_a','var')

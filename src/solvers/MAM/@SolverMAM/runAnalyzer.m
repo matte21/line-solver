@@ -9,10 +9,11 @@ end
 
 
 if self.enableChecks && ~self.supports(self.model)
-    line_warning(mfilename,'This model contains features not supported by the solver.');
-    line_error(mfilename,'This model contains features not supported by the solver.');
+    line_warning(mfilename,'This model contains features not supported by the solver.\n');
+    line_error(mfilename,'This model contains features not supported by the solver.\n');
 end
 
+self.runAnalyzerChecks(options);
 Solver.resetRandomGeneratorSeed(options.seed);
 
 sn = getStruct(self);

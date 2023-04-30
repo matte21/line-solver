@@ -109,6 +109,7 @@ newStateCell = cell(1,A);
 isSimulation = true; % allow state vector to grow, e.g. for FCFS buffers
 cur_time = 0;
 while samples_collected < options.samples && cur_time <= options.timespan(2)
+    try
     %samples_collected
     ctr = 1;
     enabled_sync = {}; % row is action label, col1=rate, col2=new state
@@ -122,16 +123,26 @@ while samples_collected < options.samples && cur_time <= options.timespan(2)
             [newStateCell{act}{sn.nodeToStateful(node_a{act})}, rate_a{act}, outprob_a{act}] =  State.afterEvent(sn, node_a{act}, stateCell{isf}, event_a{act}, class_a{act}, isSimulation);
         end
         
-        if isempty(newStateCell{act}{sn.nodeToStateful(node_a{act})}) || isempty(rate_a{act}) % state not found
+        if isempty(newStateCell{act}{sn.nodeToStateful(node_a{act})}) || isempty(rate_a{act})
             continue
         end
         
         for ia=1:size(newStateCell{act}{sn.nodeToStateful(node_a{act})},1) % for all possible new states
+            if isnan(rate_a{act}(ia)) || rate_a{act}(ia) == 0 % handles degenerate rate values                                
+                if isempty(GlobalConstants.Zero)
+                    % the GlobalConstants object does not seem to be accessible in SPMD mode
+                    rate_a{act}(ia) = 1e-14; 
+                else
+                    rate_a{act}(ia) = GlobalConstants.Zero;
+                end
+            end
+
             if newStateCell{act}{sn.nodeToStateful(node_a{act})}(ia,:) == -1 % hash not found
                 continue
             end
             %update_cond_p = ((node_p{act} == last_node_a || node_p{act} == last_node_p)) || isempty(outprob_p{act});
             update_cond = true; %update_cond_a || update_cond_p;
+            
             if rate_a{act}(ia)>0
                 if node_p{act} ~= local
                     if node_p{act} == node_a{act} %self-loop
@@ -185,6 +196,10 @@ while samples_collected < options.samples && cur_time <= options.timespan(2)
     tot_rate = sum(enabled_rates);
     cum_rate = cumsum(enabled_rates) / tot_rate;
     firing_ctr = 1 + max([0,find( rand > cum_rate )]); % select action
+    if isempty(enabled_sync)
+        keyboard
+        line_error(mfilename,'SSA simulation entered a deadlock before collecting all samples, no synchronization is enabled.');
+    end
     last_node_a = node_a{enabled_sync{firing_ctr}};
     last_node_p = node_p{enabled_sync{firing_ctr}};
 
@@ -230,16 +245,19 @@ while samples_collected < options.samples && cur_time <= options.timespan(2)
     stateCell = newStateCell{enabled_sync{firing_ctr}};
     if options.verbose
         if samples_collected == 1e2
-            line_printf(sprintf('\b\nSSA samples: %6d',samples_collected));
+            line_printf(sprintf('\b\nSSA samples: %6d\n',samples_collected));
         elseif options.verbose == 2
             if samples_collected == 0
-                line_printf(sprintf('\b\nSSA samples: %6d',samples_collected));
+                line_printf(sprintf('\b\nSSA samples: %6d\n',samples_collected));
             else
-                line_printf(sprintf('\b\b\b\b\b\b\b%6d',samples_collected));
+                line_printf(sprintf('\b\b\b\b\b\b\b%6d\n',samples_collected));
             end
         elseif mod(samples_collected,1e2)==0 || options.verbose == 2
-            line_printf(sprintf('\b\b\b\b\b\b\b%6d',samples_collected));
+            line_printf(sprintf('\b\b\b\b\b\b\b%6d\n',samples_collected));
         end
+    end
+    catch ME
+        ME.getReport
     end
 end
 

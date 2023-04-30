@@ -16,7 +16,7 @@ classdef Network < Model
     properties (Hidden)
         obj; % empty
         sn;
-        csmatrix;
+        csMatrix;
         hasStruct;
         allowReplace;
     end
@@ -107,12 +107,6 @@ classdef Network < Model
             self.setDoChecks(true);
             self.hasStruct = false;
             self.allowReplace = false;
-            try
-                jline.lang.distributions.Immediate();
-            catch
-                javaaddpath(which('linesolver.jar'));
-                import jline.*;
-            end
         end
 
         setInitialized(self, bool);
@@ -345,7 +339,7 @@ classdef Network < Model
                     end
                     P{c} = sortrows(P{c},'ascend');
                 else
-                    line_warning(mfilename,'Chain %d has no reference class set, skipping.',c);
+                    line_warning(mfilename,'Chain %d has no reference class set, skipping.\n',c);
                 end
             end
         end
@@ -411,7 +405,7 @@ classdef Network < Model
             % mu also returns max(S) elements after population |N| as this is
             % required by MVALDMX
 
-            [lambda,D,N,Z,mu,S]= snGetProductFormChainParameters(self.getStruct);
+            [lambda,D,N,Z,mu,S]=  snGetProductFormChainParams(self.getStruct);
         end
 
         function statefulnodes = getStatefulNodes(self)

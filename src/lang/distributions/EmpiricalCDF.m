@@ -1,4 +1,4 @@
-classdef EmpiricalCDF < Distrib
+classdef EmpiricalCDF < Distribution
     % Empirical Cdf for a distribution
     %
     % Copyright (c) 2012-2023, Imperial College London
@@ -12,7 +12,7 @@ classdef EmpiricalCDF < Distrib
         %Constructor
         function self = EmpiricalCDF(xdata,cdfdata)
             % SELF = EMPIRICAL(data)
-            self@Distrib('EmpiricalCdf',2,[-Inf,Inf]);
+            self@Distribution('EmpiricalCdf',2,[-Inf,Inf]);
             if nargin ==1
                 self.data = xdata;
             else

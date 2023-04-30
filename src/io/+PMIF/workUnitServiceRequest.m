@@ -36,8 +36,6 @@ classdef workUnitServiceRequest
                 obj.transits{end+1,1} = dest;
                 obj.transits{end,2} = prob;
             end
-        end
-        
-    end
-    
+        end        
+    end 
 end

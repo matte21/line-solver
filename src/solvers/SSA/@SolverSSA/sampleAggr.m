@@ -1,6 +1,11 @@
 function stationStateAggr = sampleAggr(self, node, numSamples, markActivePassive)
 % SAMPLE = SAMPLEAGGR(NODE, NUMSAMPLES)
 
+if GlobalConstants.DummyMode
+    stationStateAggr = NaN;
+    return
+end
+
 if nargin<2 %~exist('node','var')
     line_error(mfilename,'sampleAggr requires to specify a station.');
 end

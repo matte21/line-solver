@@ -279,7 +279,7 @@ classdef SolverEnv < EnsembleSolver
             end
 
             if nargout>2
-                line_warning(mfilename, 'Some of the requested output parameters are not implemented yet.');
+                line_warning(mfilename, 'Some of the requested output parameters are not implemented yet.\n');
             end
 
             renvEventFilt = cell(E,E);

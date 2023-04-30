@@ -1,3 +1,4 @@
+clear node jobclass solver; 
 model = Network('model');
 
 node{1} = ClassSwitch(model,'CS',[0,1;1,0]);

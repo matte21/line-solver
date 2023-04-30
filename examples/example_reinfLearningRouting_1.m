@@ -25,15 +25,11 @@ source.setProbRouting(oclass, queue2, 0.25);
 source.setProbRouting(oclass, queue3, 0.25);
 source.setProbRouting(oclass, queue4, 0.25);
 
-
 % Model View
 % model.jsimgView
 % model.printRoutingMatrix
 [~,H] = model.getGraph();
 plot(H,'EdgeLabel',H.Edges.Weight,'Layout','Layered')
-
-
-
 
 %% RL control
 

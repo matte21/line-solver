@@ -89,7 +89,7 @@ for k=1:K
             otherwise
                 if ~isempty(PH{i}{k})
                     ind = sn.stationToNode(i);
-                    line_warning(mfilename,'Transient utilization not support yet for station %s, returning an approximation.',sn.nodenames{ind});
+                    line_warning(mfilename,'Transient utilization not support yet for station %s, returning an approximation.\n',sn.nodenames{ind});
                     UNt{i,k} = occupancy_t*min(StateSpaceAggr(:,(i-1)*K+k),S(i))/S(i);
                 end
         end
@@ -97,7 +97,7 @@ for k=1:K
 end
 runtime = toc(Tstart);
 
-if options.verbose
-    line_printf('\nCTMC analysis completed. Runtime: %f seconds.\n',runtime);
-end
+%if options.verbose
+%    line_printf('\nCTMC analysis completed. Runtime: %f seconds.\n',runtime);
+%end
 end

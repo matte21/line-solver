@@ -33,9 +33,9 @@ if any(n>sn.classcap(ist,:))
     exceeded = n>sn.classcap(ist,:);
     for r=find(exceeded)
         if ~isempty(sn.proc) && ~isempty(sn.proc{ist}{r}) && any(any(isnan(sn.proc{ist}{r}{1})))
-            line_warning(mfilename,sprintf('State vector at station %d (n=%s) exceeds the class capacity (classcap=%s). Some service classes are disabled.',ist,mat2str(n),mat2str(sn.classcap(ist,:))));
+            line_warning(mfilename,sprintf('State vector at station %d (n=%s) exceeds the class capacity (classcap=%s). Some service classes are disabled.\n',ist,mat2str(n),mat2str(sn.classcap(ist,:))));
         else
-            line_warning(mfilename,sprintf('State vector at station %d (n=%s) exceeds the class capacity (classcap=%s).',ist,mat2str(n),mat2str(sn.classcap(ist,:))));
+            line_warning(mfilename,sprintf('State vector at station %d (n=%s) exceeds the class capacity (classcap=%s).\n',ist,mat2str(n),mat2str(sn.classcap(ist,:))));
         end
     end
     return
@@ -98,7 +98,7 @@ switch sn.nodetype(ind)
                 sizeEstimator = round(sizeEstimator/log(10));
                 if sizeEstimator > 2
                     if ~isfield(options,'force') || options.force == false
-                        line_warning(mfilename,sprintf('State space size is very large: 1e%d states. Stopping execution. Set options.force=true to bypass this control.',round(sizeEstimator/log(10))));
+                        line_warning(mfilename,sprintf('State space size is very large: 1e%d states. Stopping execution. Set options.force=true to bypass this control.\n',round(sizeEstimator/log(10))));
                     end
                 end
                 if sum(n) == 0
@@ -221,7 +221,7 @@ switch sn.nodetype(ind)
             case {SchedStrategy.ID_SJF, SchedStrategy.ID_LJF}
                 % in these policies the state space includes continuous
                 % random variables for the service times
-                line_warning(mfilename,'The scheduling policy does not admit a discrete state space.');
+                line_warning(mfilename,'The scheduling policy does not admit a discrete state space.\n');
         end
     case NodeType.Cache
         switch sn.schedid(ist)

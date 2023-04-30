@@ -1,4 +1,5 @@
-clearvars -except exampleName; 
+clear P T R solver AvgTable
+
 model = Network('model');
 
 %% Nodes

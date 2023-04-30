@@ -154,7 +154,7 @@ classdef SolverFeatureSet < handle
                         str = sprintf('%s, %s',str,unsupported{u});
                     end
                 end
-                str = sprintf('%s).',str);
+                str = sprintf('%s).\n',str);
                 line_warning(mfilename,str);
             end
         end

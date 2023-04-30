@@ -55,6 +55,9 @@ for i=statSet
                     case 'Place'
                         rates(i,r) = NaN;
                         scv(i,r) = NaN;
+                        %Draft SPN code:
+                        %rates(i,r) = 1;
+                        %scv(i,r) = 0;                        
                 end
             otherwise
                 if ~hasOpenClasses || i ~= self.getIndexSourceStation

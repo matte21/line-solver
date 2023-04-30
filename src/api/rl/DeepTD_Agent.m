@@ -69,7 +69,7 @@ classdef DeepTD_Agent < handle
 
             while j < num_episodes
                 if mod(j, 1e2)==0
-                    fprintf('running episode #%d .\n',j);
+                    line_printf(mfilename,sprintf('running episode #%d .\n',j));
                 end
             
                 eps = eps * obj.eps_decay;

@@ -22,19 +22,16 @@ Tstart = tic;
 PH = sn.proc;
 
 if any(sn.nodetype == NodeType.Cache)
-    options.hide_immediate = false;
+    options.config.hide_immediate = false;
 end
 
 [InfGen,StateSpace,StateSpaceAggr,EventFiltration,arvRates,depRates,sn] = solver_ctmc(sn, options); % sn is updated with the state space
 
-% if the initial state does not reflect the final state of the state
+% if the initial state does not reflect the final size of the state
 % vectors, attempt to correct it
 for isf=1:sn.nstateful
     if size(sn.state{isf},2) < size(sn.space{isf},2)
-        row = matchrow(sn.space{isf}(:,end-length(sn.state{isf})+1:end),sn.state{isf});
-        if row > 0
-            sn.state{isf} = sn.space{isf}(row,:);
-        end
+        sn.state{isf} = [zeros(1,size(sn.space{isf},2)-size(sn.state{isf},2)),sn.state{isf}];
     end
 end
 sncopy = sn;
@@ -42,8 +39,8 @@ sncopy = sn;
 if options.keep
     fname = lineTempName;
     save([fname,'.mat'],'InfGen','StateSpace','StateSpaceAggr','EventFiltration')
-    line_printf('\nCTMC infinitesimal generator and state space saved in: ');
-    line_printf([fname, '.mat'])
+    line_printf('CTMC infinitesimal generator and state space saved in: ');
+    line_printf(strrep(sprintf('%s.mat\n',fname),'\','\\'))
 else
     fname = '';
 end

@@ -9,19 +9,24 @@ if nargin<2
 end
 sn = getStruct(self); % this gets modified later on so pass by copy
 
+self.runAnalyzerChecks(options);
+Solver.resetRandomGeneratorSeed(options.seed);
+
 hasOpenClasses = any(sn.nodetype==NodeType.ID_SOURCE);
-switch options.method
-    case {'java','jline.fluid','jline.fluid.matrix','jline.fluid.closing'}
+switch options.lang
+    case {'java'}
         jmodel = LINE2JLINE(self.model);
         M = jmodel.getNumberOfStatefulNodes;
         R = jmodel.getNumberOfClasses;
         switch options.method
-            case 'jline.fluid.closing'
+            case {'default','closing'}
                 jsolver = JLINE.SolverFluid(jmodel,'closing');
-            case 'jline.fluid.matrix'
+            case {'matrix'}
                 jsolver = JLINE.SolverFluid(jmodel,'matrix');
             otherwise
-                jsolver = JLINE.SolverFluid(jmodel);
+                line_warning(mfilename,'This solver does not support the specified method. Setting to default.\n');
+                options.method  = 'default';
+
         end
         [QN,UN,RN,~,TN] = JLINE.arrayListToResults(jsolver.getAvgTable);
         runtime = toc(T0);
@@ -51,31 +56,34 @@ switch options.method
         else
             AN = [];
         end
-        self.setAvgResults(QN,UN,RN,TN,AN,[],CN,XN,runtime,'jline.fluid',lastiter);
+        self.setAvgResults(QN,UN,RN,TN,AN,[],CN,XN,runtime,options.method,lastiter);
         self.result.Prob.logNormConstAggr = lG;
         return
-    case {'matrix'}
-        if hasOpenClasses
-            line_error(mfilename,'The matrix solver does not support open arrivals. Use options.method=''closing'' instead.');
-            options.method = 'closing';
+    case 'matlab'
+        switch options.method
+            case {'matrix'}
+                if hasOpenClasses
+                    line_error(mfilename,'The matrix solver does not support open arrivals. Use options.method=''closing'' instead.');
+                elseif snHasDPS(sn)
+                    line_error(mfilename,'The matrix solver does not support DPS scheduling. Use options.method=''closing'' instead.');
+                end
+            case {'closing','default'}
+                if hasOpenClasses
+                    options.method = 'closing';
+                else
+                    options.method = 'closing';
+                    %options.method = 'matrix'; %% many cases where it fails with 'Incorrect dimensions for matrix multiplication'
+                end
+            case {'statedep','softmin'}
+                % do nothing
+            otherwise
+                line_error(mfilename,sprintf('The ''%s'' method is unsupported by this solver.',options.method));
         end
-    case {'default'}
-        if hasOpenClasses
-            options.method = 'closing';
-        else
-            options.method = 'closing';
-            %options.method = 'matrix'; %% many cases where it fails with 'Incorrect dimensions for matrix multiplication'
-        end
-    case {'closing','statedep','softmin'}
-        % do nothing
-    otherwise
-        line_warning(mfilename,'This solver does not support the specified method. Setting to default.');
-        options.method  = 'default';
 end
 
 if isinf(options.timespan(1))
     if options.verbose  == 2
-        line_warning(mfilename,'%s requires options.timespan(1) to be finite. Setting it to 0.',mfilename);
+        line_warning(mfilename,'%s requires options.timespan(1) to be finite. Setting it to 0.\n',mfilename);
     end
     options.timespan(1) = 0;
 end
@@ -192,21 +200,8 @@ end
 runtime = toc(T0);
 self.result.solverSpecific = lastSol;
 QN = Q; UN=U; RN=R; TN=T; CN=C; XN=X;
-M = sn.nstations;
-R = sn.nclasses;
-if ~isempty(getAvgTputHandles(self))
-    AN = zeros(M,R);
-    for i=1:M
-        for j=1:M
-            for k=1:R
-                for r=1:R
-                    AN(i,k) = AN(i,k) + T(j,r)*sn.rt((j-1)*R+r, (i-1)*R+k);
-                end
-            end
-        end
-    end
-end
 % Compute average arrival rate at steady-state
+AN = getAvgArvRFromTput(sn, TN, self.getAvgTputHandles());
 self.setAvgResults(QN,UN,RN,TN,AN,[],CN,XN,runtime,options.method,iter);
 Rt={}; Xt={}; Ct={};
 self.setTranAvgResults(Qt,Ut,Rt,Tt,Ct,Xt,runtime);

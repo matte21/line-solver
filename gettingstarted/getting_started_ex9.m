@@ -1,4 +1,5 @@
-[model,source,queue,sink,oclass]=gallery_merl1;
+% https://github.com/imperial-qore/line-solver/wiki/Getting-started#example-9-studying-a-departure-process
+[model,source,queue,sink,oclass] = gallery_merl1;
 %% Block 4: solution
 solver = SolverCTMC(model,'cutoff',150,'seed',23000);
 

@@ -10,7 +10,7 @@ switch options.method
     case {'exact','mva'}
         [Q,U,R,T,C,X,lG] = solver_mva(sn, options);
     case {'qna'}
-        line_warning(mfilename,'QNA implementation is still in beta version.')
+        line_warning(mfilename,'QNA implementation is still in beta version.\n')
         [Q,U,R,T,C,X] = solver_qna(sn, options);
         lG = NaN;
     case {'default'}

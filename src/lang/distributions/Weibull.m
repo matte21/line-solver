@@ -1,4 +1,4 @@
-classdef Weibull < ContinuousDistrib
+classdef Weibull < ContinuousDistribution
     % The Weibull statistical distribution
     %
     % Copyright (c) 2012-2023, Imperial College London
@@ -10,7 +10,7 @@ classdef Weibull < ContinuousDistrib
             
             % Constructs a Weibull distribution with given shape and scale
             % parameters
-            self@ContinuousDistrib('Weibull',2,[0,Inf]);
+            self@ContinuousDistribution('Weibull',2,[0,Inf]);
             if shape < 0
                 line_error(mfilename,'shape parameter must be >= 0.0');
             end
