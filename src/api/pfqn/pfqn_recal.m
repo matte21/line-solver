@@ -27,6 +27,8 @@ if nargin<3 || sum(Z)==0
             G_1=G;
         end
     end
+else
+    line_error('RECAL not yet available for models with think times.');
 end
 G = G(1);
 lG = log(G);

@@ -1,6 +1,6 @@
 clear node jobclass
 
-% class-dependende model
+% class-dependent model
 N = 16; % number of jobs
 c = 2;
 %%

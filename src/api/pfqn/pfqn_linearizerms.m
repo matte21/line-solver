@@ -141,6 +141,10 @@ PB = zeros(M,1);
 for i=1:M
     for r=1:R
         W(i,r) = L(i,r)/nservers(i);
+        if L(i,r) == 0
+            % 0 service demand at this station => this class does not visit the current node
+            continue;
+        end
         if type == SchedStrategy.ID_FCFS
             for s=1:R
                 W(i,r) = W(i,r) + (L(i,s)/nservers(i))*Q_1(i,s,1+r);

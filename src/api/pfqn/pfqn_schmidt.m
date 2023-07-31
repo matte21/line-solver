@@ -1,4 +1,4 @@
-function [XN,QN,UN,CN] = pfqn_schmidt(D,N,S,sched)
+function [XN,QN,UN,CN,T] = pfqn_schmidt(D,N,S,sched)
 % [XN,QN,UN,CN] = PFQN_SCHMIDT(D,N,S,SCHED)
 
 % utilization in general ld case does not work
@@ -8,6 +8,7 @@ XN = zeros(1,R);
 UN = zeros(M,R);
 CN = zeros(M,R);
 QN = zeros(M,R);
+
 C = length(closedClasses); % number of closed classes
 Dc = D(:,closedClasses);
 Nc = N(closedClasses);
@@ -25,19 +26,20 @@ for i=1:M
         case SchedStrategy.ID_INF
             L{i} = zeros(R, prod(1+Nc)); % mean queue-length
         case SchedStrategy.ID_PS
-            if S(i) == 1
+            if all(S(i,:) == 1)
                 L{i} = zeros(R, prod(1+Nc)); % mean queue-length
             else
                 Pc{i} = zeros(1 + sum(Nc), prod(1+Nc)); % Pr(j|N)
             end
         case SchedStrategy.ID_FCFS
-            if all(D(i,:)==D(i,1))
-                if S(i) == 1
+            if all(D(i,:)==D(i,1)) % class-independent
+                if all(S(i,:) == 1) % single server
                     L{i} = zeros(R, prod(1+Nc)); % mean queue-length
-                else
+                else % multi server
                     Pc{i} = zeros(1 + sum(Nc), prod(1+Nc)); % Pr(j|N)
                 end
-            else
+            else % all general product nodes
+                L{i} = zeros(R, prod(1+Nc));
                 Pc{i} = zeros(prod(1+Nc), prod(1+Nc)); % Pr(jvec|N)
             end
     end
@@ -45,12 +47,11 @@ end
 x = zeros(C,prod(1+Nc));
 w = zeros(M,C,prod(1+Nc));
 for i=1:M
-    Pc{i}(1 + 0, hashpop(kvec,Nc,C,prods)) = 1.0;
+    Pc{i}(1 + 0, hashpop(kvec,Nc,C,prods)) = 1.0; %Pj(0|0) = 1
 end
 u = zeros(M,C);
 % Population recursion
-while kvec>=0
-    hkvec = hashpop(kvec,Nc,C,prods);
+while all(kvec>=0) && all(kvec <= Nc)
     nc = sum(kvec);
     kprods = zeros(1,C); % needed for fast hashing
     for r=1:C
@@ -58,40 +59,57 @@ while kvec>=0
     end
     for i=1:M
         for c=1:C
+            hkvec = hashpop(kvec,Nc,C,prods);
             hkvec_c = hashpop(oner(kvec,c),Nc,C,prods);
-            % Compute mean residence times
-            for n=1:nc
+            if size(S(i,:)) == 1
+                ns = S(i);
+            else
+                ns = S(i,c);
+            end
+            if kvec(c) > 0
                 switch sched(i)
                     case SchedStrategy.ID_INF
                         w(i,c,hkvec) = D(i,c);
                     case SchedStrategy.ID_PS
-                        if S(i) == 1
-                            w(i,c,hkvec) = Dc(i,c) * (1 + L{i}(1 + n, hkvec_c));
+                        if ns == 1
+                            w(i,c,hkvec) = Dc(i,c) * (1 + L{i}(c, hkvec_c));
                         else
-                            w(i,c,hkvec) = (Dc(i,c) / S(i)) * (1 + L{i}(c,hkvec_c));
-                            for i=0:S(i)-2
-                                w(i,c,hkvec) = w(i,c,hkvec) + (S(i)-1-i)*Pc{i}(1+i, hkvec_c);
+                            w(i,c,hkvec) = (Dc(i,c) / ns) * (1 + L{i}(c,hkvec_c));
+                            for j=1:ns-1
+                                w(i,c,hkvec) = w(i,c,hkvec) + (ns-1-(j-1))*Pc{i}(j, hkvec_c) * (Dc(i,c) / ns);
                             end
                         end
                     case SchedStrategy.ID_FCFS
                         if all(D(i,:)==D(i,1)) % product-form case
-                            if S(i) == 1
-                                w(i,c,hkvec) = Dc(i,c) * (1 + L{i}(1 + n, hkvec_c));
+                            if ns == 1
+                                w(i,c,hkvec) = Dc(i,c) * (1 + L{i}(c, hkvec_c));
                             else
-                                w(i,c,hkvec) = (Dc(i,c) / S(i)) * (1 + L{i}(c,hkvec_c));
-                                for i=0:S(i)-2
-                                    w(i,c,hkvec) = w(i,c,hkvec) + (S(i)-1-i)*Pc{i}(1+i, hkvec_c);
+                                w(i,c,hkvec) = (Dc(i,c) / ns) * (1 + L{i}(c,hkvec_c));
+                                for j=1:ns-1
+                                    w(i,c,hkvec) = w(i,c,hkvec) + (ns-1-(j-1))*Pc{i}(j, hkvec_c) * (Dc(i,c) / ns);
                                 end
                             end
-                        else
-                            nvec = pprod(kvec);
-                            while nvec >= 0
-                                if sum(nvec) > 0
-                                    hnvec_c = hashpop(oner(nvec,c),kvec,C,kprods);
-                                    Bcn = D(i,c) + max(0,sum(nvec)-S(i))/(S(i)*(sum(nvec)-1)) * (nvec*D(i,:)' - D(i,c));
-                                    w(i,c,hnvec) = w(i,c,hnvec) + Bcn * Pc{i}(hnvec_c, hkvec_c);
+                        else 
+                            if ns == 1
+                                w(i,c,hkvec) = Dc(i,c) * (1 + L{i}(c, hkvec_c));
+                            else
+                                nvec = pprod(kvec);
+                                while nvec >= 0
+                                    if nvec(c) > 0
+                                        hnvec_c = hashpop(oner(nvec,c),kvec,C,kprods);
+                                        if ns == 1
+                                            Bcn = norm(nvec) * ns;
+                                        else 
+                                            if norm(nvec) <= ns
+                                                Bcn = D(i,c);
+                                            else
+                                                Bcn = D(i,c) + max(0,norm(nvec)-ns)/(ns*(norm(nvec)-1)) * (nvec*D(i,:)' - D(i,c));
+                                            end
+                                        end
+                                        w(i,c,hkvec) = w(i,c,hkvec) + Bcn * Pc{i}(hnvec_c, hkvec_c);
+                                    end
+                                    nvec = pprod(nvec, kvec);
                                 end
-                                nvec = pprod(nvec, kvec);
                             end
                         end
                 end
@@ -101,47 +119,64 @@ while kvec>=0
     % Compute tput
     for c=1:C
         x(c,hkvec) = kvec(c) / sum(w(1:M,c,hkvec));
+        x(isnan(x))=0; % avoid nan for base case
     end
     for i=1:M
         for c=1:C
-            L{i}(c) = x(c,hkvec) * w(i,c,hkvec);
+            L{i}(c,hkvec) = x(c,hkvec) * w(i,c,hkvec);
+        end
+        if size(S(i,:)) == 1
+            ns = S(i);
+        else
+            ns = S(i,c);
         end
         switch sched(i)
             case SchedStrategy.ID_PS
-                if S(i) > 1
+                if ns > 1
                     for n=1:min(S(i),sum(kvec))
                         for c=1:C
-                            hkvec_c = hashpop(oner(kvec,c),Nc,C,prods);
-                            Pc{i}(1 + n, hkvec) = Pc{i}(1 + n, hkvec) + Dc(i,c) * (1/n) * x(c,hkvec) * Pc{i}(1+(n-1), hkvec_c);
+                            if kvec(c) > 0
+                                hkvec_c = hashpop(oner(kvec,c),Nc,C,prods);
+                                Pc{i}(1 + n, hkvec) = Pc{i}(1 + n, hkvec) + Dc(i,c) * (1/n) * x(c,hkvec) * Pc{i}(1+(n-1), hkvec_c);
+                            end 
                         end
+                        Pc{i}(1 + 0, hkvec) = max(eps,1-sum(Pc{i}(1 + (1:min(S(i),sum(kvec))), hkvec)));
                     end
-                    Pc{i}(1 + 0, hkvec) = max(eps,1-sum(Pc(i, 1 + (1:min(S(i),sum(kvec))), hkvec)));
                 end
             case SchedStrategy.ID_FCFS
                 if all(D(i,:)==D(i,1))
-                    if S(i) > 1
-                        for n=1:min(S(i),sum(kvec))
+                    if ns > 1
+                        for n=1:(min(ns,sum(kvec))-1)
                             for c=1:C
-                                hkvec_c = hashpop(oner(kvec,c),Nc,C,prods);
-                                Pc{i}(1 + n, hkvec) = Pc{i}(1 + n, hkvec) + Dc(i,c) * (1/n) * x(c,hkvec) * Pc{i}(1+(n-1), hkvec_c);
+                                if kvec(c) > 0
+                                    hkvec_c = hashpop(oner(kvec,c),Nc,C,prods);
+                                    Pc{i}(1 + n, hkvec) = Pc{i}(1 + n, hkvec) + Dc(i,c) * (1/n) * x(c,hkvec) * Pc{i}(1+(n-1), hkvec_c);
+                                end 
                             end
-                        end
-                        if sum(kvec)>0
-                            Pc{i}(1 + 0, hkvec) = max(eps,1-sum(Pc(i, 1 + (1:min(S(i),sum(kvec))), hkvec)));
+                            Pc{i}(1 + 0, hkvec) = max(eps,1-sum(Pc{i}(1 + (1:min(ns,sum(kvec))), hkvec)));
                         end
                     end
                 else
                     nvec = pprod(kvec);
                     while nvec >= 0
                         hnvec = hashpop(nvec,kvec,C,kprods);
-                        if sum(nvec)>0
-                            for c=1:C
+                        for c=1:C
+                            if nvec(c)>0
                                 hnvec_c = hashpop(oner(nvec,c),kvec,C,kprods);
                                 hkvec_c = hashpop(oner(kvec,c),Nc,C,prods);
-                                Bcn = D(i,c) + max(0,sum(nvec)-S(i))/(S(i)*(sum(nvec)-1)) * (nvec*D(i,:)' - D(i,c));
-                                Pc{i}(hnvec, hkvec) = Pc{i}(hnvec, hkvec) + (1/nvec(c))*x(c,hkvec)*Bcn*Pc{i}(hnvec_c, hkvec_c);
+                                if ns == 1
+                                    Bcn = sum(nvec) * ns;
+                                else 
+                                    if sum(nvec) <= ns
+                                        Bcn = D(i,c);
+                                    else
+                                        Bcn = D(i,c) + max(0,sum(nvec)-ns)/(ns*(sum(nvec)-1)) * (nvec*D(i,:)' - D(i,c));
+                                    end
+                                end
+                                Pc{i}(hnvec, hkvec) = (1/nvec(c))*x(c,hkvec)*Bcn*Pc{i}(hnvec_c, hkvec_c);
                             end
                         end
+                        Pc{i}(1 + 0, hkvec) = max(eps,1-sum(Pc{i}(1 + (1:min(ns,sum(kvec))), hkvec)));
                         nvec = pprod(nvec, kvec);
                     end
                 end
@@ -149,4 +184,20 @@ while kvec>=0
     end
     kvec = pprod(kvec, Nc);
 end
+
+% Throughput
+XN(closedClasses) = x(1:C,hkvec);
+if M>1
+    XN = repmat(XN,M,1);
+end
+% Utilization
+UN(1:M,closedClasses) = u(1:M,1:C); % this will return 0 
+% Response time
+CN(1:M,closedClasses) = w(1:M,1:C,hkvec);
+for i=1:M
+    QN(i,closedClasses) = L{i}(closedClasses,hkvec);
+end
+
+T = table(XN,CN,QN,UN); % for display purposes
+
 end

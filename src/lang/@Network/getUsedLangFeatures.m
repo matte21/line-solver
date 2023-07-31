@@ -31,9 +31,10 @@ for i=1:getNumberOfNodes(self)
                 case 'Source'
                     self.setUsedFeatures(self.nodes{i}.input.sourceClasses{r}{3}.name);
                     self.setUsedFeatures('Source');
-                case 'CacheNode'
+                case 'Cache'
+                    self.setUsedFeatures('CacheServer');
+                    self.setUsedFeatures('CacheClassSwitcher');
                     self.setUsedFeatures('Cache');
-                    self.setUsedFeatures('CacheNode');
                 case 'ClassSwitch'
                     self.setUsedFeatures('StatelessClassSwitcher');
                     self.setUsedFeatures('ClassSwitch');

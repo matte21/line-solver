@@ -19,7 +19,6 @@ for i=1:M
     node{i}.setService(jobclass{2}, Exp(sqrt(i)));
 end
 
-%source.setArrival(jobclass{2}, Exp(0.3));
 source.setArrival(jobclass{2}, APH.fitMeanAndSCV(3,64));
 
 M = model.getNumberOfStations();
@@ -39,17 +38,17 @@ options.keep=false;
 options.verbose=1;
 options.cutoff = 3;
 options.seed = 23000;
-%options.samples=2e4;
+options.samples = 2e4;
 optionssa = options; optionssa.cutoff = Inf;
 
 disp('This example shows the execution of the solver on a 2-class mixed model with 4 single server nodes.')
 % This part illustrates the execution of different solvers
 solver={};
 %solver{end+1} = SolverCTMC(model,options); % CTMC is infinite on this model
-solver{end+1} = SolverJMT(model,'samples',1e5);
+solver{end+1} = SolverJMT(model,options);
 %solver{end+1} = SolverSSA(model,options);
 solver{end+1} = SolverFluid(model,options);
-solver{end+1} = SolverMVA(model);
+solver{end+1} = SolverMVA(model,'lin');
 solver{end+1} = SolverNC(model,options);
 solver{end+1} = SolverMAM(model,options);
 for s=1:length(solver)

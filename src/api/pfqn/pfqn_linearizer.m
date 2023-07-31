@@ -7,6 +7,7 @@ end
 if nargin<4
     tol = 1e-8;
 end
+
 [M,R]=size(L);
 if isempty(Z)
     Z = zeros(1,R);
@@ -66,7 +67,7 @@ end
 
 
 % Core(N)
-[Q,W,X,iter] = Core(L,M,R,N,Z,Q(:,:,1+0),Delta,type,tol,maxiter);
+[Q,W,X,iter] = Core(L,M,R,N,Z,Q(:,:,1+0),Delta,type,tol,maxiter-totiter);
 totiter = totiter + iter;
 % Compute performance metrics
 U = zeros(M,R);
@@ -89,7 +90,7 @@ while ~hasConverged
     Q_1 = Estimate(L,M,R,N_1,Z,Q,Delta,W);
     % Forward MVA
     [Q,W,T] = ForwardMVA(L,M,R,type,N_1,Z,Q_1);
-    if norm(Q-Qlast)<tol || iter > maxiter
+    if enorm(Q-Qlast)<tol || iter > maxiter
         hasConverged = true;
     end
     iter = iter + 1;
@@ -134,8 +135,10 @@ for i=1:M
     for r=1:R
         if type == SchedStrategy.ID_FCFS
             W(i,r) = L(i,r);
-            for s=1:R
-                W(i,r) = W(i,r) + L(i,s)*Q_1(i,s,1+r);
+            if L(i,r) ~= 0
+                for s=1:R
+                    W(i,r) = W(i,r) + L(i,s)*Q_1(i,s,1+r);
+                end
             end
         else
             W(i,r) = L(i,r)*(1+sum(Q_1(i,:,1+r)));

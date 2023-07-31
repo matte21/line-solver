@@ -6,17 +6,18 @@ if M==0
     return
 end
 
+if min(N)<0
+    Gn=0;
+    lGn=-Inf;
+    return;
+end
+
 if sum(N)==0
     Gn=1;
     lGn=0;
     return;
 end
 
-if min(N)<0
-    Gn=0;
-    lGn=-Inf;
-    return;
-end
 
 if nargin<3 || isempty(Z)
     Z=zeros(1,R);

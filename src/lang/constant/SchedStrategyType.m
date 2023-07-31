@@ -9,11 +9,15 @@ classdef (Sealed) SchedStrategyType
         ID_PR = 1;
         ID_PNR = 2;
         ID_NPPrio = 3;
+        ID_PRPrio = 4;
+        ID_PNRPrio = 5;
         
+        NP = 'NPR'; % non-preemptive
         PR = 'PR'; % preemptive resume
         PNR = 'PNR'; % preemptive non-resume
-        NP = 'NPR'; % non-preemptive
         NPPrio = 'NPPrio'; % non-preemptive priority
+        PRPrio = 'PRPrio'; % preemptive resume priority
+        PNRPrio = 'PNRPrio'; % preemptive non-resume priority
     end
     
     methods (Access = private)
@@ -45,12 +49,16 @@ classdef (Sealed) SchedStrategyType
             switch type
                 case SchedStrategyType.NP
                     text = 'NonPreemptive';
-                case SchedStrategyType.PNR
-                    text = 'PreemptiveNonResume';
                 case SchedStrategyType.PR
                     text = 'PreemptiveResume';
+                case SchedStrategyType.PNR
+                    text = 'PreemptiveNonResume';
                 case SchedStrategyType.NPPrio
                     text = 'NonPreemptivePriority';
+                case SchedStrategyType.PRPrio
+                    text = 'PreemptiveResumePriority';
+                case SchedStrategyType.PNRPrio
+                    text = 'PreemptiveNonResumePriority';
             end
         end
     end

@@ -145,7 +145,7 @@ classdef JLINE
             end
         end
 
-        function node_object = from_line_node(line_node, java_network, ~)
+        function node_object = from_line_node(line_node, java_network, ~, forkNode)
             if isa(line_node, 'Delay')
                 node_object = jline.lang.nodes.Delay(java_network, line_node.getName);
             elseif isa(line_node, 'Queue')
@@ -198,7 +198,7 @@ classdef JLINE
             elseif isa(line_node, 'Fork')
                 node_object = jline.lang.nodes.Fork(java_network);
             elseif isa(line_node, 'Join')
-                node_object = jline.lang.nodes.Join(java_network);
+                node_object = jline.lang.nodes.Join(java_network, line_node.name, forkNode);
             else
                 line_error(mfilename,'Node not supported by JLINE.');
             end
@@ -397,7 +397,11 @@ classdef JLINE
             java_classes = {};
 
             for n = 1 : length(network_nodes)
-                java_nodes{n} = JLINE.from_line_node(network_nodes{n}, network_object, job_classes);
+                if isa(network_nodes{n}, 'Join')
+                    java_nodes{n} = JLINE.from_line_node(network_nodes{n}, network_object, job_classes, java_nodes{network_nodes{n}.joinOf.index});
+                else
+                    java_nodes{n} = JLINE.from_line_node(network_nodes{n}, network_object, job_classes);
+                end
             end
 
             for n = 1 : length(job_classes)
@@ -438,10 +442,48 @@ classdef JLINE
             fluid = jline.solvers.fluid.SolverFluid(network_object, options);
         end
 
-        function [mva] = SolverMVA(network_object)
-            options = jline.solvers.SolverOptions(jline.lang.constant.SolverType.MVA);
-            options.verbose = options.verbose.SILENT;
-            mva = jline.solvers.mva.SolverMVA(network_object, options);
+        function [mva] = SolverMVA(network_object, options)
+            solverOptions = jline.solvers.SolverOptions(jline.lang.constant.SolverType.MVA);
+            fn = fieldnames(options);
+            fn2 = fieldnames(solverOptions);
+            for f = 1:length(fn)
+                found = 0;
+                for j = 1:length(fn2)
+                    if strcmp(fn{f}, fn2{j})
+                        found = 1;
+                        if strcmp(fn{f}, 'config')
+                            solverOptions.config.highVar = options.config.highvar;
+                            solverOptions.config.multiServer = options.config.multiserver;
+                            solverOptions.config.np_priority = options.config.np_priority;
+                            solverOptions.config.fork_join = options.config.fork_join;
+                        elseif strcmp(fn{f}, 'verbose')
+                            switch options.(fn{f})
+                                case 1
+                                    solverOptions.verbose = solverOptions.verbose.SILENT;
+                                case 2
+                                    solverOptions.verbose = solverOptions.verbose.STD;
+                                case 3
+                                    solverOptions.verbose = solverOptions.verbose.DEBUG;
+                            end
+                        elseif strcmp(fn{f}, 'method') && contains(options.(fn{f}), 'jline')
+                            % Either 'jline.gflin' or 'jline.egflin'. I added the 'jline' marker in order to denote that these methods are only available in
+                            % JLINE.
+                            actual_method = split(options.(fn{f}), 'jline.');
+                            options.(fn{f}) = actual_method{2};
+                            eval(['solverOptions.', fn{f}, ' = options.(fn{f});']);
+                        elseif strcmp(fn{f}, 'init_sol')
+                            eval(['solverOptions.', fn{f}, ' = JLINE.matrix_to_jlinematrix(options.init_sol);']);
+                        else
+                            eval(['solverOptions.', fn{f}, ' = options.(fn{f});']);
+                        end
+                        break;
+                    end
+                end
+                if ~found
+                    line_printf('Could not find option %s in the JLINE options.\n', fn{f});
+                end
+            end
+            mva = jline.solvers.mva.SolverMVA(network_object, solverOptions);
         end
 
         function line_network = jline_to_line(java_network)

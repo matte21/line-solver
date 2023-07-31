@@ -83,7 +83,7 @@ for ist=1:sn.nstations
                 end
                 ci = find(sivec);
                 if ~isempty(ci)
-                    lF_i = lF_i + log(nirvec(ci)) - log(sum(nirvec)) + pfqn_ncldld(ST(ist,:).*V(ist,:), nirvec, 0*nirvec, mu(ist,:), options);
+                    lF_i = lF_i + log(nirvec(ci)) - log(sum(nirvec)) + pfqn_ncld(ST(ist,:).*V(ist,:), nirvec, 0*nirvec, mu(ist,:), options);
                 else
                     lF_i = 0;
                 end
@@ -92,7 +92,7 @@ for ist=1:sn.nstations
                     PHr = sn.proc{ist}{r};
                     if ~isempty(PHr)
                         kir = kirvec(1,r,:); kir=kir(:)';
-                        Ar = map_pie(PHr)*inv(-PHr{1});
+                        Ar = -PHr{1}\ map_pie(PHr);
                         lF_i = lF_i + sum(kir.*log(V(ist,r)*Ar)) - sum(factln(kir));
                     end
                 end
@@ -102,7 +102,7 @@ for ist=1:sn.nstations
                     PHr = sn.proc{ist}{r};
                     if ~isempty(PHr)
                         kir = kirvec(1,r,:); kir=kir(:)';
-                        Ar = map_pie(PHr)*inv(-PHr{1});
+                        Ar = -PHr{1}\map_pie(PHr);
                         lF_i = lF_i + sum(kir.*log(V(ist,r)*Ar)) - sum(factln(kir));
                     end
                 end

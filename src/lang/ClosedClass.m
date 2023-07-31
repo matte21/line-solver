@@ -44,7 +44,7 @@ classdef ClosedClass < JobClass
 
                 % set default scheduling for this class at all nodes
                 for i=1:length(model.nodes)
-                    %if ~isempty(model.nodes{i})  %&& ~isa(model.nodes{i},'Join')&& ~isa(model.nodes{i},'CacheNode') %&& ~isa(model.nodes{i},'Source') && ~isa(model.nodes{i},'Sink')
+                    %if ~isempty(model.nodes{i})  %&& ~isa(model.nodes{i},'Join')&& ~isa(model.nodes{i},'Cache') %&& ~isa(model.nodes{i},'Source') && ~isa(model.nodes{i},'Sink')
                     %    model.nodes{i}.setScheduling(self,SchedStrategy.FCFS);
                     %end
                     %if ~isempty(model.nodes{i})

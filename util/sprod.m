@@ -6,7 +6,8 @@ function [out1,out2,out3,out4]=sprod(par1,par2,par3)
 % Example: 
 % [s,n,S,D]=sprod(2,5); % m=2 elements summing to N=5
 %
-% while s>0
+% while s>=0
+% ... 
 % [s,n]=sprod(s,S,D) % generate next state
 % end
 %

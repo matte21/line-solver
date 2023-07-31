@@ -171,9 +171,9 @@ classdef EnsembleSolver < Solver
                 Tsynch(it)=toc(T2);
                 if options.verbose
                     if it<=10
-                        line_printf('\nAnalyze time: %.3fs. Update time: %.3fs. Runtime: %.3fs. ',Tsolve(it),Tsynch(it),Ttot);
+                        line_printf('Analyze time: %.3fs. Update time: %.3fs. Runtime: %.3fs. ',Tsolve(it),Tsynch(it),Ttot);
                     else
-                        line_printf('\nAnalyze time: %.3fs. Update time: %.3fs. Runtime: %.3fs. ',Tsolve(it),Tsynch(it),Ttot);
+                        line_printf('Analyze time: %.3fs. Update time: %.3fs. Runtime: %.3fs. ',Tsolve(it),Tsynch(it),Ttot);
                     end
                 end
             end

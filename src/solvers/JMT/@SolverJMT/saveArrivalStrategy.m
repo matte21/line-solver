@@ -91,13 +91,13 @@ for r=1:numOfClasses
                 end
                 subParNodeT.appendChild(subParNodeTvec);
             end
-            
+
             subParNodeAlpha.appendChild(subParNodeAlphaVec);
             distrParNode.appendChild(subParNodeAlpha);
             distrParNode.appendChild(subParNodeT);
             serviceTimeStrategyNode.appendChild(distributionNode);
             serviceTimeStrategyNode.appendChild(distrParNode);
-            
+
         elseif sn.procid(i,r) == ProcessType.ID_MAP || sn.procid(i,r) == ProcessType.ID_MMPP2
             distributionNode = simDoc.createElement('subParameter');
             distributionNode.setAttribute('classPath', 'jmt.engine.random.MAPDistr');
@@ -105,9 +105,9 @@ for r=1:numOfClasses
             distrParNode = simDoc.createElement('subParameter');
             distrParNode.setAttribute('classPath', 'jmt.engine.random.MAPPar');
             distrParNode.setAttribute('name', 'distrPar');
-            
+
             MAP = sn.proc{i}{r};
-            
+
             subParNodeD0 = simDoc.createElement('subParameter');
             subParNodeD0.setAttribute('array', 'true');
             subParNodeD0.setAttribute('classPath', 'java.lang.Object');
@@ -130,7 +130,7 @@ for r=1:numOfClasses
                 subParNodeD0.appendChild(subParNodeD0vec);
             end
             distrParNode.appendChild(subParNodeD0);
-            
+
             subParNodeD1 = simDoc.createElement('subParameter');
             subParNodeD1.setAttribute('array', 'true');
             subParNodeD1.setAttribute('classPath', 'java.lang.Object');
@@ -207,11 +207,11 @@ for r=1:numOfClasses
                     distributionNode.setAttribute('name', ProcessType.toText(ProcessType.fromId(sn.procid(i,r))));
             end
             serviceTimeStrategyNode.appendChild(distributionNode);
-            
+
             distrParNode = simDoc.createElement('subParameter');
             distrParNode.setAttribute('classPath', javaParClass);
             distrParNode.setAttribute('name', 'distrPar');
-            
+
             switch sn.procid(i,r)
                 case ProcessType.ID_DET
                     subParNodeAlpha = simDoc.createElement('subParameter');

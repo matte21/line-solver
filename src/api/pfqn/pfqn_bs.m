@@ -29,6 +29,10 @@ for it=1:maxiter
     for r=1:R
         for i=1:M
             CN(i,r) = L(i,r);
+            if L(i,r) == 0
+                % 0 service demand at this station => this class does not visit the current node
+                continue;
+            end
             for s=1:R
                 if s~=r
                     if type(i) == SchedStrategy.ID_FCFS

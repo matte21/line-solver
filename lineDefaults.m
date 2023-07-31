@@ -77,6 +77,7 @@ switch solverName
         options.config.highvar = 'none';
         options.config.multiserver = 'default';
         options.config.np_priority = 'default';
+        options.config.fork_join = 'fjt';
         options.iter_max = 10^3;
         options.iter_tol = 10^-6;        
     case 'QNS'

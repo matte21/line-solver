@@ -30,7 +30,7 @@ for r=1:R
         if Nr==1
             [A,B,DA]=genmatrix(L,nvec,Z,r);
         else
-            A=A+DA;   
+            A=A+DA;
         end
         b = B*h*nvec(r)/(sum(nvec)+M-1);
         h = A\b;
@@ -62,7 +62,7 @@ lG=log(h(end-(R-1))) + factln(sum(N)+M-1) - sum(factln(N)) + N*log(Lmax)' + sum(
                 for k=0:M
                     row=row+1;
                     col = hash(N,N-Dn(d,:),k+1);
-                    A(row,col)=1;                    
+                    A(row,col)=1;
                     if sum(Dn(d,(r+1):R-1))>0
                         col = hash(N,N-Dn(d,:),k+1);
                         B(row,col)=1;
@@ -138,6 +138,41 @@ lG=log(h(end-(R-1))) + factln(sum(N)+M-1) - sum(factln(N)) + N*log(Lmax)' + sum(
             g(hash(N,N,i+1))=1;
         end
         g=g(:);
+    end
+
+    function I=sortbynnzpos(I)
+        % sorts a set of combinations with repetition according to the number of
+        % nonzeros
+        for i=1:size(I,1)-1
+            for j=i+1:size(I,1)
+                if nnzcmp(I(i,:),I(j,:))==1
+                    v=I(i,:);
+                    I(i,:)=I(j,:);
+                    I(j,:)=v;
+                end
+            end
+        end
+    end
+
+    function r=nnzcmp(i1,i2) % return 1 if i1<i2
+        nnz1=nnz(i1);
+        nnz2=nnz(i2);
+        if(nnz1>nnz2)
+            r=1; % i2 has more zeros and is thus greater
+        elseif(nnz1<nnz2)
+            r=0; % i1 has more zeros and is thus greater
+        else %nnz1==nnz2
+            for j=1:length(i1)
+                if i1(j)==0 & i2(j)>0
+                    r=1; % i2 has the left-most zero
+                    return
+                elseif i1(j)>0 & i2(j)==0
+                    r=0;
+                    return
+                end
+            end
+            r=0;
+        end
     end
 
 end

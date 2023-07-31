@@ -788,7 +788,7 @@ classdef Network < Model
         function bool = hasMultiClassHeterFCFS(self)
             % BOOL = HASMULTICLASSFCFS()
 
-            bool = snHasMultiClassFCFS(self.getStruct);
+            bool = snHasMultiClassHeterFCFS(self.getStruct);
         end
 
         function bool = hasMultiServer(self)

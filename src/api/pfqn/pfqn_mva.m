@@ -19,7 +19,7 @@ end
 if nargin<3 || isempty(Z)
     Z = zeros(1,R);
 end
-if (~any(N))
+if (~any(N>0))
     %line_warning(mfilename,'closed populations are empty');
     return
 end

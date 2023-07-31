@@ -1,7 +1,13 @@
 function [n]=pprod(n,N)
-% n=PPROD(N) - init
-% n=PPROD(n,N) - next state
+% n=PPROD(N) % init
+% n=PPROD(n,N) % next state
 % Return a sequence of non-negative vectors less than a given vector
+%
+% n=pprod(N);
+% while n>=0
+%   ...
+%   n=pprod(n,N);
+% end
 %
 % Copyright (c) 2012-2022, Imperial College London
 % All rights reserved.

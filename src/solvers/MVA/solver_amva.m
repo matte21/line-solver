@@ -38,7 +38,7 @@ switch options.method
     case 'amva.bs'
         options.method = 'bs';
     case 'default'
-        if sum(Nchain)<=2 || any(Nchain<1)
+        if (sum(Nchain)<=2 || any(Nchain<1))
             options.method = 'qd'; % changing to bs degrades accuracy
         else
             options.method = 'lin'; % seems way worse than aql in test_LQN_8.xml
@@ -52,16 +52,28 @@ if snHasHomogeneousScheduling(sn,SchedStrategy.INF)
     return
 end
 
-queueIdx = isfinite(sn.nservers);
-delayIdx = isinf(sn.nservers); % TODO: check correctness in models with more than a single delay station
+sourceIdx = sn.nodetype == NodeType.Source;
+queueIdx = sn.nodetype == NodeType.Queue;
+delayIdx = sn.nodetype == NodeType.Delay;
+
 %% run amva method
 M = sn.nstations;
 %K = sn.nclasses;
 C = sn.nchains;
+V = zeros(M,C);
+for i=sn.nodeToStation(sourceIdx)
+    for c=1:sn.nchains
+        inchain = find(sn.chains(c,:));
+        if nansum(sn.rates(sn.nodeToStation(sourceIdx),inchain)) > 0
+            V(i,c) = 1;
+        end
+    end
+end
 Q = zeros(M,C);
 U = zeros(M,C);
-if snHasProductFormExceptMultiClassHeterExpFCFS(sn) && ~snHasLoadDependence(sn) && ~snHasOpenClasses(sn)
-    [~,L0,N,Z0,~,nservers,V] = snGetProductFormChainParams(sn);
+
+if snHasProductFormExceptMultiClassHeterExpFCFS(sn) && ~snHasLoadDependence(sn) && (~snHasOpenClasses(sn) || (snHasMixedClasses(sn) && strcmpi(options.method,'lin')))
+    [lambda,L0,N,Z0,~,nservers,V(sn.nodeToStation(queueIdx|delayIdx),:)] = snGetProductFormChainParams(sn);
     L = L0;
     Z = Z0;
     switch options.config.multiserver
@@ -77,7 +89,7 @@ if snHasProductFormExceptMultiClassHeterExpFCFS(sn) && ~snHasLoadDependence(sn) 
         otherwise
             %no-op
     end
-    
+
     switch options.method
         case 'sqni' % square root non-iterative approximation
             if sn.nstations==2
@@ -93,35 +105,34 @@ if snHasProductFormExceptMultiClassHeterExpFCFS(sn) && ~snHasLoadDependence(sn) 
                     %if snHasMultiClassHeterExpFCFS(sn)
                     %    Br = Lr*sum(Br(setdiff(1:C,r)));
                     %else
-                        Br = Lr*sum(Br(setdiff(1:C,r)));
+                    Br = Lr*sum(Br(setdiff(1:C,r)));
                     %end
                     X(r) = (Zr - (Br^2 - 2*Br*Lr*Nt - 2*Br*Zr + Lr^2*Nt^2 + 2*Lr*Nt*Zr - 4*Nr*Lr*Zr + Zr^2)^(1/2) - Br + Lr*Nt)/(2*Lr*Zr);
-                    U(queueIdx,r) = X(r)*L(r);                    
+                    U(queueIdx,r) = X(r)*L(r);
                     Q(queueIdx,r) = N(r)-X(r)*Z(r);
                     totiter=1;
                 end
             end
         case 'bs'
-            [X,Q(queueIdx,:),U(queueIdx,:),~,totiter] = pfqn_bs(L,N,Z,options.tol,options.iter_max,[],sn.schedid(queueIdx));
+            [X,Q(sn.nodeToStation(queueIdx),:),U(sn.nodeToStation(queueIdx),:),~,totiter] = pfqn_bs(L,N,Z,options.tol,options.iter_max,[],sn.schedid(queueIdx));
         case 'aql'
             if snHasMultiClassHeterExpFCFS(sn)
                 line_error(mfilename,'AQL cannot handle multi-server stations. Try with the ''default'' or ''lin'' methods.');
             end
-            [X,Q(queueIdx,:),U(queueIdx,:),~,totiter] = pfqn_aql(L,N,Z,options.tol,options.iter_max);
+            [X,Q(sn.nodeToStation(queueIdx),:),U(sn.nodeToStation(queueIdx),:),~,totiter] = pfqn_aql(L,N,Z,options.tol,options.iter_max);
         case 'lin'
-            if snHasSingleChain(sn) || max(nservers)==1
-                [Q(queueIdx,:),U(queueIdx,:),~,~,X,totiter] = pfqn_linearizer(L,N,Z,sn.schedid(queueIdx),options.tol,options.iter_max);
+            if max(nservers)==1
+                % remove sources from L
+                [Q(sn.nodeToStation(queueIdx),:),U(sn.nodeToStation(queueIdx),:),~,~,X,totiter] = pfqn_linearizermx(lambda,L,N,Z,nservers,sn.schedid(sn.nodeToStation(queueIdx | delayIdx)),options.tol,options.iter_max);
             else
                 switch options.config.multiserver
-                    %case 'seidmann' % L,Z already scaled by nservers
-                    %[Q(queueIdx,:),U(queueIdx,:),~,~,X,totiter] = pfqn_linearizer(L,N,Z,sn.schedid(queueIdx),options.tol,options.iter_max);
                     case 'conway'
-                        [Q(queueIdx,:),U(queueIdx,:),~,~,X,totiter] = pfqn_conwayms(L,N,Z,nservers,sn.schedid(queueIdx),options.tol,options.iter_max);
+                        [Q(sn.nodeToStation(queueIdx),:),U(sn.nodeToStation(queueIdx),:),~,~,X,totiter] = pfqn_conwayms(L,N,Z,nservers,sn.schedid(queueIdx),options.tol,options.iter_max);
                     case 'erlang'
-                        [Q(queueIdx,:),U(queueIdx,:),~,~,X,totiter] = pfqn_conwayms_heur(L,N,Z,nservers,sn.schedid(queueIdx),options.tol,options.iter_max);
+                        [Q(sn.nodeToStation(queueIdx),:),U(sn.nodeToStation(queueIdx),:),~,~,X,totiter] = pfqn_conwayms_heur(L,N,Z,nservers,sn.schedid(queueIdx),options.tol,options.iter_max);
                     case 'krzesinski'
-                        [Q(queueIdx,:),U(queueIdx,:),~,~,X,totiter] = pfqn_linearizerms(L,N,Z,nservers,sn.schedid(queueIdx),options.tol,options.iter_max);
-                    case {'default', 'softmin', 'seidmann' }
+                        [Q(sn.nodeToStation(queueIdx),:),U(sn.nodeToStation(queueIdx),:),~,~,X,totiter] = pfqn_linearizermx(lambda,L,N,Z,nservers,sn.schedid(sn.nodeToStation(queueIdx | delayIdx)),options.tol,options.iter_max);
+                    case {'default', 'softmin', 'seidmann'}
                         [Q,U,R,T,C,X,lG,totiter] = solver_amvald(sn,Lchain,STchain,Vchain,alpha,Nchain,SCVchain,refstatchain,options);
                         return
                 end
@@ -137,14 +148,13 @@ if snHasProductFormExceptMultiClassHeterExpFCFS(sn) && ~snHasLoadDependence(sn) 
 
     % compute performance at delay, then unapply seidmann if needed
     for i=1:size(Z0,1)
-        id = find(delayIdx,i);
-        Q(id,:) = Z0(i,:) .* X;
-        U(id,:) = Z0(i,:) .* X;
+        Q(sn.nodeToStation(delayIdx),:) = repmat(X,sum(delayIdx),1) .* Z;
+        U(sn.nodeToStation(delayIdx),:) = Q(sn.nodeToStation(delayIdx),:);                     
         switch options.config.multiserver
             case {'default','seidmann'}
                 for j=1:size(L,1)
                     if i == 1 && nservers(j)>1
-                        % un-apply seidmann from first delay and move it to
+                        % un-apply seidmann from first delay    and move it to
                         % the origin queue
                         jq = find(queueIdx,j);
                         Q(jq,:) = Q(jq,:) + (L0(j,:) .* (repmat(nservers(j),1,C) - 1)./ repmat(nservers(j),1,C)) .* X;

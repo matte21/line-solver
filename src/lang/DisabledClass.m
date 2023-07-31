@@ -1,5 +1,5 @@
 classdef DisabledClass < JobClass
-    % A class of jobs that perpetually cycle inside the model.
+    % A class of jobs that is permanently disabled.
     %
     % Copyright (c) 2012-2023, Imperial College London
     % All rights reserved.

@@ -17,7 +17,7 @@ switch options.lang
         jmodel = LINE2JLINE(self.model);
         M = jmodel.getNumberOfStatefulNodes;
         R = jmodel.getNumberOfClasses;
-        jsolver = JLINE.SolverMVA(jmodel);
+        jsolver = JLINE.SolverMVA(jmodel, options);
         [QN,UN,RN,~,TN] = JLINE.arrayListToResults(jsolver.getAvgTable);
         runtime = toc(T0);
         CN = [];
@@ -63,16 +63,21 @@ switch options.lang
             if self.model.hasFork
                 forkIter = forkIter + 1;
                 if forkIter == 1
-                    [nonfjmodel, fjclassmap, fjforkmap, fanout] = self.model.approxForkJoins(forkLambda);
-                else
+                    switch options.config.fork_join 
+                        case {'heidelberger-trivedi', 'ht'}
+                            [nonfjmodel, fjclassmap, fjforkmap, fj_auxiliary_delays] = solver_mva_fj_network_transform(self.model);
+                        case {'fjt', 'default'}
+                            [nonfjmodel, fjclassmap, fjforkmap, fanout] = self.model.approxForkJoins(forkLambda);
+                    end
+                elseif ~strcmp(options.config.fork_join, 'heidelberger-trivedi') & ~strcmp(options.config.fork_join, 'ht')
                     %line_printf('Fork-join iteration %d\n',forkIter);
                     for r=1:length(fjclassmap) % r is the auxiliary class
                         s = fjclassmap(r);
                         if s>0
                             nonfjSource = nonfjmodel.getSource;
-                            if fanout(s)>0
+                            if fanout(r)>0
                                 if ~nonfjSource.arrivalProcess{r}.isDisabled
-                                    nonfjSource.arrivalProcess{r}.updateRate((fanout(s)-1)*forkLambda(r));
+                                    nonfjSource.arrivalProcess{r}.updateRate((fanout(r)-1)*forkLambda(r));
                                 end
                             end
                         end
@@ -86,7 +91,7 @@ switch options.lang
                     if self.model.hasOpenClasses
                         sourceIndex = self.model.getSource.index;
                         UNnosource = UN; UNnosource(sourceIndex,:) = 0;
-                        if max(sum(UNnosource,2))>0.99 & self.model.hasOpenClasses %#ok<AND2>
+                        if any(find(sum(UNnosource,2)>0.99 * sn.nservers))
                             line_warning(mfilename,'The model may be unstable: the utilization of station %i exceeds 99 percent.\n',maxpos(sum(UNnosource,2)));
                         end
                     end
@@ -165,37 +170,125 @@ switch options.lang
                 end
             end
             if self.model.hasFork
+                nonfjstruct = sn;
                 sn = self.getStruct;
                 for f=find(sn.nodetype == NodeType.ID_FORK)'
-                    TNfork = zeros(1,sn.nclasses);
-                    for c=1:sn.nchains
-                        inchain = find(sn.chains(c,:));
-                        for r=inchain(:)'
-                            TNfork(r) =  (sn.nodevisits{c}(f,r) / sum(sn.visits{c}(sn.stationToStateful(sn.refstat(r)),inchain))) * sum(TN(sn.refstat(r),inchain));
-                        end
-                    end
-                    forkauxclasses = find(fjforkmap==f);
-                    % for all forks, find the associated join
-                    for s=forkauxclasses(:)'
-                        r = fjclassmap(s); % original class associated to auxiliary class s
-                        forkLambda(s) = mean([forkLambda(s); TNfork(r)],1);
+                    switch options.config.fork_join
+                        case {'fjt', 'default'}
+                            TNfork = zeros(1,sn.nclasses);
+                            for c=1:sn.nchains
+                                inchain = find(sn.chains(c,:));
+                                for r=inchain(:)'
+                                    TNfork(r) =  (sn.nodevisits{c}(f,r) / sum(sn.visits{c}(sn.stationToStateful(sn.refstat(r)),inchain))) * sum(TN(sn.refstat(r),inchain));
+                                end
+                            end
+                            % find join associated to fork f
+                            joinIdx = find(sn.fj(f,:));
+                            forkauxclasses = find(fjforkmap==f);
+                            for s=forkauxclasses(:)'
+                                r = fjclassmap(s); % original class associated to auxiliary class s
+                                forkLambda(s) = mean([forkLambda(s); TNfork(r)],1);
+                                if isempty(joinIdx)
+                                    % No join nodes for this fork, no synchronisation delay
+                                    continue;
+                                end
+                                % Find the parallel paths coming out of the fork
+                                ri = mva_fj_find_paths(sn, nonfjmodel.getLinkedRoutingMatrix{r,r}, f, joinIdx, r, s, QN, TN, 0);
+                                lambdai = 1./ri;
+                                d0 = 0;
+                                parallel_branches = length(ri);
+                                for pow=0:(parallel_branches - 1)
+                                    current_sum = sum(1./sum(nchoosek(lambdai, pow + 1),2));
+                                    d0 = d0 + (-1)^pow * current_sum;
+                                end
+                                % Set the synchronisation delays
+                                nonfjmodel.nodes{joinIdx}.setService(nonfjmodel.classes{s}, Exp.fitMean(d0 - mean(ri)));
+                                nonfjmodel.nodes{joinIdx}.setService(nonfjmodel.classes{r}, Exp.fitMean(d0 - mean(ri)));
+                            end
+                        case {'heidelberger-trivedi', 'ht'}
+                            joinIdx = find(sn.fj(f,:));
+                            for c=1:sn.nchains
+                                inchain = find(sn.chains(c,:));
+                                for r=inchain(:)'
+                                    if sn.nodevisits{c}(f,r) == 0
+                                        continue;
+                                    end
+                                    % Obtain the response times on the parallel branches
+                                    ri = RN(:, find(fjclassmap == r));
+                                    ri(isnan(ri) | isinf(ri)) = 0;
+                                    ri = sum(ri, 1, "omitnan") - RN(nonfjstruct.nodeToStation(fj_auxiliary_delays{joinIdx}), find(fjclassmap == r)) - RN(nonfjstruct.nodeToStation(joinIdx), find(fjclassmap == r));
+                                    lambdai = 1./ri;
+                                    d0 = 0;
+                                    parallel_branches = length(self.model.nodes{f}.output.outputStrategy{r}{3});
+                                    for pow=0:(parallel_branches - 1)
+                                        current_sum = sum(1./sum(nchoosek(lambdai, pow + 1),2));
+                                        d0 = d0 + (-1)^pow * current_sum;
+                                    end
+                                    di = d0 - ri;
+                                    r0 = sum(RN(:, inchain), 2);
+                                    r0(isnan(r0) | isinf(r0)) = 0;
+                                    r0 = sum(r0, 1, "omitnan") - RN(nonfjstruct.nodeToStation(joinIdx), r);
+                                    % Update the delays at the join node and at the auxiliary delay
+                                    nonfjmodel.nodes{joinIdx}.setService(nonfjmodel.classes{r}, Exp.fitMean(d0));
+                                    idx = 1;
+                                    for s=find(fjclassmap == r)
+                                        nonfjmodel.nodes{joinIdx}.setService(nonfjmodel.classes{s}, Exp.fitMean(di(idx)));
+                                        idx = idx + 1;
+                                        nonfjmodel.nodes{fj_auxiliary_delays{joinIdx}}.setService(nonfjmodel.classes{s}, Exp.fitMean(r0));
+                                    end
+                                    
+                                end
+                            end
                     end
                 end
-                % merge back artificial classes into their original classes
-                for r=1:length(fjclassmap)
-                    s = fjclassmap(r);
-                    if s>0
-                        QN(:,s) = QN(:,s) + QN(:,r);
-                        UN(:,s) = UN(:,s) + UN(:,r);
-                        %TN(:,s) = TN(:,s) + TN(:,r);
-                        %RN(:,s) = RN(:,s) + RN(:,r);
-                        for i=find(snorig.nodetype == NodeType.ID_DELAY | snorig.nodetype == NodeType.ID_QUEUE)'
-                            TN(snorig.nodeToStation(i),s) = TN(snorig.nodeToStation(i),s) + TN(snorig.nodeToStation(i),r);
+                switch options.config.fork_join
+                    case {'heidelberger-trivedi', 'ht'}
+                        nonfjmodel.refreshStruct();
+                        % Delete the queue lengths, response times, throughputs and utilizations of the original classes at the join nodes
+                        QN(nonfjstruct.nodeToStation(find(sn.nodetype == NodeType.ID_JOIN)), nonzeros(fjclassmap)) = 0;
+                        RN(nonfjstruct.nodeToStation(find(sn.nodetype == NodeType.ID_JOIN)), nonzeros(fjclassmap)) = 0;
+                        % Save the throughputs of the original classes at the join node
+                        TN_orig = TN(nonfjstruct.nodeToStation(find(sn.nodetype == NodeType.ID_JOIN)), nonzeros(fjclassmap));
+                        TN(nonfjstruct.nodeToStation(find(sn.nodetype == NodeType.ID_JOIN)), nonzeros(fjclassmap)) = 0;
+                        UN(nonfjstruct.nodeToStation(find(sn.nodetype == NodeType.ID_JOIN)), nonzeros(fjclassmap)) = 0;
+
+                        % Remove the times at the auxiliary delay
+                        QN(nonfjstruct.nodeToStation(cell2mat(fj_auxiliary_delays)),:) = [];
+                        UN(nonfjstruct.nodeToStation(cell2mat(fj_auxiliary_delays)),:) = [];
+                        RN(nonfjstruct.nodeToStation(cell2mat(fj_auxiliary_delays)),:) = [];
+                        TN(nonfjstruct.nodeToStation(cell2mat(fj_auxiliary_delays)),:) = [];
+                        % merge back artificial classes into their original classes
+                        for r=1:length(fjclassmap)
+                            s = fjclassmap(r);
+                            if s>0
+                                QN(:,s) = QN(:,s) + QN(:,r);
+                                UN(:,s) = UN(:,s) + UN(:,r);
+                                % Add all throughputs of the auxiliary classes to facilitate the computation of the response times
+                                TN(:,s) = TN(:,s) + TN(:,r);
+                                RN(:,s) = QN(:,s) ./ TN(:,s);
+                            end
                         end
-                        RN(:,s) = QN(:,s) ./ TN(:,s);
-                        %CN(:,s) = CN(:,s) + CN(:,r);
-                        %XN(:,s) = XN(:,s) + XN(:,r);
-                    end
+                        % Re-set the throughputs for the original classes
+                        TN(nonfjstruct.nodeToStation(find(sn.nodetype == NodeType.ID_JOIN)), nonzeros(fjclassmap)) = TN_orig;
+                    case {'fjt', 'default'} 
+                        TN_orig = TN([nonfjstruct.nodeToStation(find(sn.nodetype == NodeType.ID_JOIN)), nonfjstruct.nodeToStation(find(sn.nodetype == NodeType.ID_SOURCE))], nonzeros(fjclassmap));
+                        % merge back artificial classes into their original classes
+                        for r=1:length(fjclassmap)
+                            s = fjclassmap(r);
+                            if s>0
+                                QN(:,s) = QN(:,s) + QN(:,r);
+                                UN(:,s) = UN(:,s) + UN(:,r);
+                                TN(:,s) = TN(:,s) + TN(:,r);
+                                %RN(:,s) = RN(:,s) + RN(:,r);
+                                % for i=find(snorig.nodetype == NodeType.ID_DELAY | snorig.nodetype == NodeType.ID_QUEUE)'
+                                %     TN(snorig.nodeToStation(i),s) = TN(snorig.nodeToStation(i),s) + TN(snorig.nodeToStation(i),r);
+                                % end
+                                RN(:,s) = QN(:,s) ./ TN(:,s);
+                                %CN(:,s) = CN(:,s) + CN(:,r);
+                                %XN(:,s) = XN(:,s) + XN(:,r);
+                            end
+                        end
+                        TN([nonfjstruct.nodeToStation(find(sn.nodetype == NodeType.ID_JOIN)), nonfjstruct.nodeToStation(find(sn.nodetype == NodeType.ID_SOURCE))], nonzeros(fjclassmap)) = TN_orig;
                 end
                 QN(:,fjclassmap>0) = [];
                 UN(:,fjclassmap>0) = [];

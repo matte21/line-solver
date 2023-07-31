@@ -1,5 +1,4 @@
 function [Wchain, STeff] = solver_amvald_forward(sn, gamma, tau, Qchain_in, Xchain_in, Uchain_in, STchain_in, Vchain_in, Nchain_in, SCVchain_in, options)
-
 M = sn.nstations;
 K = sn.nchains;
 nservers = sn.nservers;
